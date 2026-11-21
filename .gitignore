@@ -1,0 +1,47 @@
+# Raw and derived data are shared across worktrees through vf.paths and are not versioned.
+data/raw/*.csv
+data/raw/*.parquet
+data/external/*
+data/silver/*
+data/gold/*
+data/labels/*
+data/models/
+!data/**/.gitkeep
+!data/**/README.md
+!data/raw/MANIFEST.json
+
+# The hand-labeled gold set is small and worth versioning.
+!data/labels/gold_facts.csv
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Node (app)
+node_modules/
+app/dist/
+app/.vite/
+
+# LLM response caches and model artifacts
+.cache/
+*.ckpt
+*.safetensors
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+
+# Video exports are large; keep them out of git
+reports/*.mp4
+reports/*.mov

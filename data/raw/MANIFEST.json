@@ -1,0 +1,44 @@
+{
+  "exported_at_utc": "2026-11-21T18:38:00Z to 2026-11-21T18:40:00Z",
+  "exported_by": "Claude, from Hruday's Databricks workspace",
+  "export_method": "Databricks SQL editor: SELECT * FROM <table>, then Run menu > Run and download all rows > CSV",
+  "catalog_schema": "databricks_virtue_foundation_dataset_dais_2026.virtue_foundation_dataset",
+  "notes": [
+    "The data only exists as a Delta Sharing catalog in Databricks; there were no original CSV files on disk.",
+    "In the CSV export a SQL NULL and the literal string 'null' both appear as null, so they cannot be told apart.",
+    "facilities.csv contains 2 NUL bytes and 1 invalid UTF-8 byte; vf.io scrubs them on read."
+  ],
+  "files": {
+    "facilities.csv": {
+      "table": "facilities",
+      "bytes": 74623815,
+      "sha256": "47bb1aad11f84a68aed3025d2887665bb164bc38c535c39e59eddb436c556691",
+      "expect": {
+        "rows": 10088,
+        "columns": 51,
+        "ok_rows": 9970,
+        "truncated_rows": 30,
+        "junk_rows": 88
+      }
+    },
+    "india_post_pincode_directory.csv": {
+      "table": "india_post_pincode_directory",
+      "bytes": 21625751,
+      "sha256": "9ccc153e49195a47bfb6dd5cce5deec44daec417c04397f4aa7cf40c06b93a64",
+      "expect": {
+        "rows": 165627,
+        "columns": 11,
+        "distinct_pincodes": 19586
+      }
+    },
+    "nfhs5_district_health_indicators.csv": {
+      "table": "nfhs_5_district_health_indicators",
+      "bytes": 405523,
+      "sha256": "be354c9ead4de99d670a15e67ae027ff4967cc661f42145d90d544dfed7d45f4",
+      "expect": {
+        "rows": 706,
+        "columns": 109
+      }
+    }
+  }
+}

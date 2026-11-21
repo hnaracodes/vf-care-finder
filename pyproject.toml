@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vf-datathon"
+version = "0.1.0"
+description = "CMU Datathon Fall 2026: care deserts vs data deserts in the Virtue Foundation India dataset"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+    "numpy",
+    "pyarrow",
+    "scipy",
+    "scikit-learn",
+    "rapidfuzz",
+    "python-dotenv",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Install only what your work package needs, for example: pip install -e ".[dev,ml]"
+dev = ["pytest"]
+llm = ["anthropic"]
+ml = ["sentence-transformers", "torch", "lightgbm", "shap"]
+viz = ["matplotlib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
