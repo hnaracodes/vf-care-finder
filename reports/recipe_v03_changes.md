@@ -1,16 +1,16 @@
 # Recipe v0.3: what changed, record by record
 
-WP3, Nov 21, 23:30 ET. Recipe v0.3 (D048) is a rule-level regrade of the frozen tags. It changes 470 grades on four lines. I read every changed record except the cath lab demotions, where I read a random 30 of 271.
+WP3, Nov 21, 23:30 ET, revised after review the same night (see "Fix round"). Recipe v0.3 (D048) is a rule-level regrade of the frozen tags. It changes 489 grades on four lines. I read every changed record except the cath lab demotions, where I read a random 30 of 271 and all 15 that the fix round added.
 
 ## Bottom line
 
 - **Gate.** The grade 2+ gate (D048) moves on one line only. NICU falls from 706 to 694: the 12 records that name only an SNCU. On emoc, dialysis and cath lab, every record keeps its side of the gate.
 - **Corroborated.** Grade 3 is the label behind the 15-minute evidence allowance, and it moves a lot:
-  - cath lab 481 to 220
-  - NICU 178 to 118
+  - cath lab 481 to 205
+  - NICU 178 to 112
   - dialysis 480 to 456
   - emoc 41 to 54
-- **Read results.** I found no wrong change under the final rules. 13 are debatable or weak, all listed below. 8 are correct under the rule but sit on records whose underlying facts look wrong (eye hospitals with a NICU, and a diabetes clinic, IVF centre, cancer centre and liver lab with a level III NICU). Those are record problems that v0.3 neither creates nor fixes.
+- **Read results.** I found no wrong change under the final rules. 15 are debatable, all listed below (3 of them from the fix round). 8 are correct under the rule but sit on records whose underlying facts look wrong (eye hospitals with a NICU, and a diabetes clinic, IVF centre, cancer centre and liver lab with a level III NICU). Those are record problems that v0.3 neither creates nor fixes.
 - **One fix to the rule as specified.** The rule as given ("caesarean and blood") promoted 3 records on "Fetal Blood Transfusion" or "Intrauterine blood transfusion". Those are fetal procedures, not WHO signal function 9. v0.3 masks fetal, intrauterine, neonatal and exchange transfusion wording for emoc (`blood_maternal`). This removed those 3 promotions and demoted 2 v0.2 grade 3 records that rested on the same wording. Emoc grade 3 is therefore 54, not the prototype's 59.
 
 ## Inputs and reproducibility
@@ -18,7 +18,7 @@ WP3, Nov 21, 23:30 ET. Recipe v0.3 (D048) is a rule-level regrade of the frozen 
 - Tags: `gold/fact_tags.parquet`, sha256 `6fa461a5b77a57c262ec27957c55f2215d232c9078a9e3ae46e13f1af0a6b3bf`, method student (`student:s1-1b[ob_delivery,h24,icu,ventilator]+regex:v0.2[rest]`). Not rerun, not changed.
 - Regrading those tags under v0.2 reproduces `gold/capability_grades.parquet` (sha256 `07c52631...`) on all 119,868 rows and all 13 columns, with 0 differing cells. Every difference below therefore comes from the rule change alone.
 - Output: `gold/capability_grades_v03.parquet` (+ `.meta.json`, which records the input hashes and the full v0.3 rule text and qualifier regexes). The v0.2 file was not written.
-- Rerun: `.venv/bin/python scripts/wp3_regrade_v03.py` (add `--changes-csv <path>` to dump the changed records). Tests: `tests/test_recipes_v03.py` (23 pass).
+- Rerun: `.venv/bin/python scripts/wp3_regrade_v03.py` (add `--changes-csv <path>` to dump the changed records). Tests: `tests/test_recipes_v03.py` (43 pass; full suite 972 pass, 4 skipped, 1 xfailed).
 - Rules and citations, with the standards' own words: `docs/06_capability_recipes.md`, section "v0.3". All five documents were fetched again tonight and every quote was checked against the fetched text: WHO 2009 Table 4, FRU 2025 s2.2, FBNC 2025, PM-JAY empanelment criteria, PMNDP.
 
 ## Counts, v0.2 to v0.3 (facilities)
@@ -31,26 +31,27 @@ WP3, Nov 21, 23:30 ET. Recipe v0.3 (D048) is a rule-level regrade of the frozen 
 | emoc | 3 corroborated | 41 | 54 | +13 (15 up, 2 down) |
 | nicu | 0 none | 8,513 | 8,513 | 0 |
 | nicu | 1 claimed | 770 | 782 | +12 |
-| nicu | 2 supported | 528 | 576 | +48 |
-| nicu | 3 corroborated | 178 | 118 | -60 (98 down, 38 up) |
+| nicu | 2 supported | 528 | 582 | +54 |
+| nicu | 3 corroborated | 178 | 112 | -66 (104 down, 38 up) |
 | dialysis | 0 none | 7,631 | 7,631 | 0 |
 | dialysis | 1 claimed | 1,322 | 1,322 | 0 |
 | dialysis | 2 supported | 556 | 580 | +24 |
 | dialysis | 3 corroborated | 480 | 456 | -24 |
 | cath_lab | 0 none | 6,834 | 6,834 | 0 |
 | cath_lab | 1 claimed | 2,464 | 2,464 | 0 |
-| cath_lab | 2 supported | 210 | 471 | +261 |
-| cath_lab | 3 corroborated | 481 | 220 | -261 (271 down, 10 up) |
+| cath_lab | 2 supported | 210 | 486 | +276 |
+| cath_lab | 3 corroborated | 481 | 205 | -276 (285 down, 9 up) |
 
 The other eight lines are identical to v0.2, cell for cell. 14 emoc grade 3 records carry the FRU-level note (anaesthesia and a 24-hour service also named).
 
 Against the research prototype (`scripts/research/score_v1/f2_v03.log`), most counts match exactly:
 
-- NICU grade 2+ 694, SNCU-only 12, emoc FRU note 14, cath lab grade 3 220, dialysis grade 3 456, dialysis demotions 24.
+- NICU grade 2+ 694, SNCU-only 12, emoc FRU note 14, dialysis grade 3 456, dialysis demotions 24.
 
-Two counts differ:
+Three counts differ:
 
-- **NICU grade 3: 118, not 113.** The 5 extra records say "Level-3" with a hyphen (3), which the prototype regex missed, or "tertiary NICU" (2). FBNC places the NICU at "Level III", tertiary care, so all 5 are right.
+- **NICU grade 3: 112, not 113.** Before the fix round it was 118: 5 extra records say "Level-3" with a hyphen (3), which the prototype regex missed, or "tertiary NICU" (2), and FBNC places the NICU at "Level III", tertiary care. The fix round then removed 6 (CPAP alone, and ventilators in multi-unit lists).
+- **Cath lab grade 3: 205, not 220.** The fix round requires the ventilator to belong to an adult ICU (PM-JAY item 3) and removed 15.
 - **Emoc grade 3: 54, not 59.** This is the fetal transfusion fix above.
 
 ## Verdicts by change
@@ -60,11 +61,13 @@ Two counts differ:
 | dialysis 3 to 2 (nephrologist alone) | 24 | 24 | 24 | 0 | 0 |
 | nicu 2 to 1 (SNCU only) | 12 | 12 | 12 | 0 | 0 |
 | nicu 3 to 2 (generic ventilator) | 98 | 98 | 88 | 10 | 0 |
+| nicu 3 to 2 (fix round: CPAP alone, multi-unit list) | 6 | 6 | 6 | 0 | 0 |
 | nicu 2 to 3 (level III mention) | 38 | 38 | 38 | 0 | 0 |
 | emoc 2 to 3 (caesarean and blood) | 15 | 15 | 15 | 0 | 0 |
 | emoc 3 to 2 (fetal transfusion only) | 2 | 2 | 2 | 0 | 0 |
-| cath_lab 2 to 3 | 10 | 10 | 9 | 1 | 0 |
-| cath_lab 3 to 2 | 271 | 30 (sample) | 28 | 2 | 0 |
+| cath_lab 2 to 3 | 9 | 9 | 9 | 0 | 0 |
+| cath_lab 3 to 2 (no CCU, no ventilator) | 271 | 30 (sample) | 28 | 2 | 0 |
+| cath_lab 3 to 2 (fix round: ventilator not an adult ICU's) | 14 | 14 | 11 | 3 | 0 |
 | emoc promotions the spec rule would have made, removed by `blood_maternal` | 3 | 3 | n/a | n/a | 3 (prevented) |
 
 What the reading showed, line by line:
@@ -80,7 +83,47 @@ What the reading showed, line by line:
 - **Emoc.** All 15 promotions pair a caesarean fact with a blood bank, blood storage or blood transfusion fact. Anaesthesia and OT are no longer required, which matches WHO 2009 Table 4 (signal functions 8 and 9). Both demotions rest on "Fetal Blood Transfusion" alone.
 - **Cath lab.** The 271 demotions are records with a cath lab and a generic ICU, but no CCU and no ventilator. Several v0.2 corroborations rested on weak "ICU" wording: "NICU and PICU facilities", "Stroke ICU", department lists.
   - 2 of the 30 sampled are debatable: "ICC U", probably ICCU split by a space; and "Performs primary angioplasty 24x7 with door-to-balloon time under 60 minutes", strong evidence of a working STEMI service, though no CCU is named.
-  - Of the 10 promotions, 9 pair a cath lab with a CCU or ICCU, or with an ICU and ventilators. One (Techno India Dama) rests on "Ventilators visible in operating room", a photo caption.
+  - All 9 promotions pair a cath lab with a CCU or ICCU, or with an adult ICU and an ICU ventilator. Before the fix round there was a tenth, Techno India Dama, resting on "Ventilators visible in operating room", a photo caption. The fix round removed it.
+
+## Fix round (review, Nov 21 late)
+
+A review found that the cath lab ICU route let the ICU and the ventilator come from any fact, and that I had read only the changed records, so the grade 3 records kept from v0.2 were never examined. It also found two NICU corroborations that contradict FBNC. I agreed with all of it and changed the rules (decisions 3, 6, 7 and 9 below). Then I reran with `--no-write`, read every record that moved against the first v0.3 output, and wrote the file.
+
+- **Cath lab.** PM-JAY Cardiology/CTVS item 3 reads "ICU Facility with cardiac monitoring and ventilator support": the ventilator belongs to the ICU. The ICU route is now an adult ICU (`icu_adult`) plus a ventilator that is not a newborn, paediatric, ambulance, transport, theatre, anaesthesia or Covid ventilator (`ventilator_icu`), or the ICU and the ventilator named in one fact (`icu_with_ventilator`). Negated ICU wording ("excluding ICU and Emergency") no longer counts. Cath lab grade 3: 220 to 205 (CCU route 147, ICU route 73 to 58).
+- **NICU.** Breathing support corroborates only when it names mechanical ventilation, not CPAP alone. FBNC 2025 has a section "CPAP facilities at SNCU", so CPAP is level II care. A ventilator fact that lists adult units with the NICU ("Has ICU, CCU and NICU with ventilators") no longer corroborates. NICU grade 3: 118 to 112.
+- Several records the review named stay at grade 3, now on better evidence. For example, 83361eb2 now quotes "Has intensive care unit (ICU)" and "Ventilators" in place of "excluding ICU" and an anaesthesia machine. f37e3587 now quotes "Invasive ventilation with pulmonary graphic display" in place of "CPAP ventilation in neonates". 3477b64c, 3d2af64f, 60d478ce and 1d0b223b also keep grade 3 on a separate adult ICU fact and a generic "Ventilators" fact. Those two facts need not be the same fact, and a generic "Ventilators" fact is accepted.
+- Grade 2+ is unchanged on every line by the fix round.
+
+#### Every record the fix round moved (21 of 21 read; all were v0.3 grade 3, now grade 2)
+
+| # | Line | Facility | facility_id | Evidence that no longer counts | Verdict |
+|---|---|---|---|---|---|
+| 1 | cath_lab | Wadia Children Hospital Parel | f73e1e8e | "Has 81 critical care beds" + "Level 4 NICU with high-frequency ventilators" | right: every ventilator fact is neonatal |
+| 2 | cath_lab | United CIIGMA Hospital | 231f141f | "Intensive obstetric care (obstetric ICU)" + "Mechanical ventilators" | right: the only ICU is obstetric |
+| 3 | cath_lab | Ankur Hospital | 37e39295 | "pediatric intensive care consultants" + "ventilatory support for 18 hours" | right: the only ICU is paediatric |
+| 4 | cath_lab | Voluntary Health Services | 86239f9a | "Intensive Care Unit" + "Neonatal ambulance fully equipped with neonatal ventilator" | right |
+| 5 | cath_lab | Charak Hospital | 2b5d4240 | "Department of Critical Care & Anaesthesia" + "Ambulance with ventilator support" | right |
+| 6 | cath_lab | Anu Hospitals | 2e854012 | "cath lab and intensive care units" + "Neonatal ventilation" | right |
+| 7 | cath_lab | Godrej Memorial Hospital | 930faaa7 | "NICU and PICU" + "Fetal Heart Monitor Coddle Graph Ventilator" | right: an "Adult ICU" fact exists, but no ventilator fact is an ICU's |
+| 8 | cath_lab | Divine Heart & Multispeciality Hospital | e03a7d10 | "ICU available" + "Operating theatres equipped with anesthesia machines, ventilators" | debatable: a heart hospital with theatre ventilators probably has ICU ones, but the text does not say so |
+| 9 | cath_lab | Christian Medical College Ludhiana | 017a80f7 | "Shared Institutional ICU" + "NICU provides invasive and noninvasive ventilation" | debatable: a large teaching hospital, likely a data gap; the only ventilator facts are NICU |
+| 10 | cath_lab | Parmeshwari Medical Centre | 28c7548d | "24x7 ICU care" + "Ambulance Service equipped with ventilators" | right |
+| 11 | cath_lab | Aster RameshOngole | 45c3f249 | "Pulmonology and Critical Care" + "Neonatal ventilation equipment" | right |
+| 12 | cath_lab | Manipal Goa Cancer & General Hospital | 5a1403dd | "Contains ICU and NICU units" + "Neonatal ventilator" | right |
+| 13 | cath_lab | Sri Sathya Sai Institute of Higher Medical Sciences | c826aa92 | "2020 ... COVID hospital with five ICU beds and ventilators" | debatable: a real ICU with ventilators, but a Covid-era facility |
+| 14 | cath_lab | Shri Mahavir Hospital Ambikapur | 36556485 | "24 Hours ICU Care" + "NICU equipment including incubators, warmers, ventilators" | right |
+| 15 | cath_lab | Techno India Dama Healthcare | 9f25a38c | "Intensive care unit infrastructure" + "Ventilators visible in operating room" | right (v0.2 grade 2; the promotion is removed) |
+| 16 | nicu | Raj Eye Hospital, Gorakhpur | 3d9d4079 | "Fully modular ICUs including CCU, NICU and HDU with ventilators" | right: multi-unit list (and an eye hospital, a record problem) |
+| 17 | nicu | Kovai Medical Centre and Hospital | 3ef783e8 | "Bubble CPAP" | right: CPAP is level II (FBNC) |
+| 18 | nicu | Life Line Hospital Kanpur | 2bd17078 | "Has ICU, CCU and NICU with ventilators" | right: multi-unit list |
+| 19 | nicu | B. K. Memorial Hospital, Tezpur | 2f95dcea | "Advanced ICU and NICU with ventilator support" | right: multi-unit list |
+| 20 | nicu | Sachin Mamta Hospital | 466d16b1 | "ICU and NICU with advanced monitoring systems and ventilators" | right: multi-unit list |
+| 21 | nicu | Vatsalya Mother & Child Care Hospital | cdccce56 | "Bubble CPAP" | right: CPAP is level II; it also has a "Pediatric ventilator in PICU", like the 10 debatable children's hospitals |
+
+Not changed, and disclosed:
+
+- **Self-declared level III.** 42 of the 112 NICU grade 3 records rest only on a level III mention (`nicu_level3`). In 25 of them, every NICU fact is the level III fact itself, for example a4b9a04d, whose one fact is "Level III NICU". There "corroborated" means a self-declared level, not two pieces of evidence. The card now says "a self-declared level III NICU".
+- **Emoc blood.** WHO 2009 says transfusions "can be administered in other contexts" and that "the signal functions should have been performed in an obstetric context". Any blood bank counts for grade 3, for example e84b0206 on "Provides Path Lab, X-ray, Blood Bank, Pharmacy services". The card now says "blood bank or transfusion, not necessarily for obstetric patients".
 
 ## Decisions to log (for the orchestrator; I did not edit the decisions log)
 
@@ -88,7 +131,11 @@ What the reading showed, line by line:
    - Requirements that depend on a tagged fact's wording are qualifiers. They are not tags, and they never appear in `tags_present` or in evidence item tags.
    - The output keeps the capability_grades schema and adds `level_note` and `level_note_items`.
 2. `blood_maternal`: for emoc, fetal, intrauterine, neonatal and exchange transfusion wording does not count as blood (WHO signal function 9). This is not in the D048 text. It was added after reading the promotions, and it moves 5 records.
-3. `neonatal_resp_not_sncu`: the frozen `neonatal_resp` regex accepts "SNCU" as newborn context, so an SNCU-only breathing-support fact does not corroborate a NICU (FBNC). It moves 0 records on the frozen tags.
+3. `neonatal_resp_ventilation` (was `neonatal_resp_not_sncu`): a newborn breathing-support fact corroborates a NICU only when it names mechanical ventilation (`ventilat|\bhfov\b|oscillat|intubat|surfactant`), not CPAP alone, because FBNC 2025 has "CPAP facilities at SNCU". It still drops SNCU-only facts and multi-unit lists. Fix round, moves 2 records (Bubble CPAP alone).
+6. Cath lab ICU route (fix round): `icu_adult` and (`ventilator_icu` or `icu_with_ventilator`), per PM-JAY item 3 "ICU Facility with cardiac monitoring and ventilator support". Neonatal, paediatric, obstetric, Covid, mobile and negated ICU wording does not count as the ICU; newborn, paediatric (unless adult), ambulance, transport, theatre, anaesthesia and Covid ventilators do not count as ICU ventilator support. Moves 15 records (14 v0.3 grade 3 to 2, and 1 v0.2 grade 2 promotion removed).
+7. `ventilator_newborn` and `neonatal_resp_ventilation` (fix round): a ventilator fact that also names an adult ICU, CCU or HDU ("Has ICU, CCU and NICU with ventilators") is a multi-unit list and does not corroborate a NICU. Moves 4 records.
+8. Declared design choices for cath lab, not PM-JAY text: item 4 ("round the clock cardiologist services") is not required, so `h24` and `emergency` are no longer required; and the CCU route needs no ventilator, although item 3 asks for one.
+9. Card wording (fix round): emoc blood reads "blood bank or transfusion, not necessarily for obstetric patients" (WHO 2009: transfusion "can be administered in other contexts"); NICU level III reads "a self-declared level III NICU".
 4. Dialysis "haemodialysis" counts only inside a fact already tagged `dialysis_unit`, as in the prototype. A haemodialysis-only fact is still the procedure. The branch moves 0 records.
 5. Emoc FRU note: our `h24` tag is any round-the-clock wording, so the note says so, and it never changes a grade.
 
@@ -97,6 +144,10 @@ What the reading showed, line by line:
 - **Tag recall gap.** 21 records name a dialysis unit, beds, stations or a dialysis department in a fact the frozen `dialysis_unit` regex did not tag: "has 12 dialysis beds", "14 haemodialysis stations", "dialysis care unit". Some of these are department lists, and one is "under construction". A tag-level fix needs a new tag version, not v0.3.
 - **NICU generic-ventilator rule.** It is strict by design. The 10 debatable demotions are listed below if Hruday wants a looser "paediatric ventilator or HFOV at a facility with a named NICU" route.
 - **Record problems.** 8 records are correct under the rule but probably describe another organisation (listed below). They belong to WP11's flags.
+- **Not in my files, for the orchestrator.**
+  - `docs/07_data_contracts.md` has no entry for `gold/capability_grades_v03.parquet`. Proposed entry: the 13 `capability_grades` columns plus `level_note` (string, null except emoc grade 3 with anaesthesia and h24 facts; never changes a grade) and `level_note_items` (list of evidence items, empty when `level_note` is null), 15 columns, one row per facility per line (119,868), `recipe_version` `v0.3`, `.meta.json` with the input sha256s and the full rule and qualifier text.
+  - `docs/08_decisions_log.md` needs the decisions above (1 to 9). Decision 2 (`blood_maternal`) and decisions 3, 6 and 7 go beyond the D048 text.
+  - `dbapp/vf/recipes.py` is a stale partial copy of v0.3, taken at 23:23 before my final edits. It still uses the raw `neonatal_resp` tag and has none of the fix-round qualifiers, so two v0.3 definitions now share one label. Its grades now differ from `src/vf` (cath lab 205 here, 220 there). I wrote earlier that the dbapp copy "does not have v0.3". That was wrong. `dbapp/vf` is generated by `scripts/wp12_bundle.py` (WP12), and `wp12_bundle.py --check` exits 1 on this drift. Rerun the bundle script once v0.3 is final.
 - **Downstream.** Consumers of grade 3 (the evidence allowance, WP5 and WP8 copy) must read `capability_grades_v03.parquet`. Until they do, the app still shows v0.2 grade 3 labels.
 
 ## Every record read
@@ -328,7 +379,7 @@ Facility ids are the first 8 characters. Quotes are truncated.
 | 5 | Midas Multispeciality Hospital Pvt. Ltd, Nagpur, Maharash... | fc3b3e51 | Has a dedicated Critical Care Unit (ICU). + Prone ventilation | right |
 | 6 | Life Hospital | 4ab0c4b7 | Coronary Care Unit | right |
 | 7 | Ramakrishna Mission Seva Pratishthan | 871eab15 | Contains CCU (Coronary Care Unit) and HDU (High Dependency Unit) | right |
-| 8 | Techno India Dama Healthcare & Medical Research Centre | 9f25a38c | Intensive care unit infrastructure with monitoring equipment + Ventilators visible in operat... | weak: the ventilator fact is a photo caption |
+| 8 | Techno India Dama Healthcare & Medical Research Centre | 9f25a38c | Intensive care unit infrastructure with monitoring equipment + Ventilators visible in operat... | weak: the ventilator fact is a photo caption; removed in the fix round, stays grade 2 |
 | 9 | Care Multispeciality Hospital | e84b0206 | ICCU (Intensive Coronary Care Unit) | right |
 | 10 | Gaba Hospital | 5a8a6f87 | ICU with ventilators. + ICU with ventilators. | right |
 

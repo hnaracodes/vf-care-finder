@@ -194,6 +194,10 @@ The gazetteer for the location resolver. One row per place.
 | `post_offices.parquet` | `lat`, `lon`, `pin` for non-suspect geocoded offices, one per placeholder point; for the map context and the trip view |
 | `keyword_index/` | fitted TF-IDF vectoriser and matrix over distinct fact texts plus specialty names, and the fact id map, for the `search` fallback |
 
+### `gold/capability_grades_v03.parquet` (WP3, recipe v0.3, D048)
+
+Same columns as `capability_grades` plus `level_note` (str, nullable: the emoc FRU-level note, set at grade 3 when anaesthesia and round-the-clock facts also exist; it never changes a grade) and `level_note_items` (list[struct], like `evidence_items`). `recipe_version` = `v0.3`. A rule-level regrade of the frozen `gold/fact_tags.parquet` (sha256 recorded in the sidecar): tags are not recomputed, and `vf.recipes.RECIPE_VERSION` stays `v0.2` (v0.3 is `RULE_VERSION_V03`). Wording-dependent requirements (`nicu_named`, `nicu_level3`, `ventilator_newborn`, `neonatal_resp_not_sncu`, `blood_maternal`, `dialysis_unit_named`, `icu_adult`, `ventilator_icu`) are rule-internal qualifiers computed from a fact's own tags and text; they never appear in `tags_present` or item tags. This file is what the v1-final ranker gates on.
+
 ### `gold/post_office_access.parquet` (WP5, retired)
 
 One row per geocoded post office. Columns: `po_id`, `district_key`, `lat`, `lon`, then for each service line and each minimum grade 1 to 3: `dist_km_<line>_g<k>` and `nearest_facility_<line>_g<k>`, then `coord_suspect` (bool), then `coord_placeholder` (bool).

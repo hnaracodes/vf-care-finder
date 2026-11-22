@@ -82,7 +82,7 @@ def test_nicu_generic_ventilator_does_not_corroborate():
 
 @pytest.mark.parametrize("texts", [
     ("NICU", "Neonatal ventilators"),            # ventilator in a newborn fact
-    ("NICU", "Bubble CPAP"),                     # neonatal_resp
+    ("NICU", "HFOV for neonates"),               # neonatal_resp, mechanical ventilation
     ("Level III NICU",),                         # level III mention
     ("NICU Level-3",),
     ("Has a tertiary level NICU",),
@@ -97,11 +97,26 @@ def test_nicu_level_ii_is_not_level_iii():
     assert line(facts_of("Level II NICU"), "nicu").grade == 2
 
 
+def test_nicu_cpap_alone_is_not_level_iii():
+    """FBNC 2025 has "CPAP facilities at SNCU": CPAP is level II care."""
+    assert line(facts_of("NICU", "Bubble CPAP"), "nicu").grade == 2
+    assert line(facts_of("NICU", "Neonatal CPAP"), "nicu").grade == 2
+
+
+def test_nicu_multi_unit_ventilator_list_does_not_corroborate():
+    """A ventilator in a list that also names an adult ICU, CCU or HDU is not a newborn ventilator."""
+    for t in ("Has ICU, CCU and NICU with ventilators", "Fully modular ICUs including CCU, NICU and HDU with ventilators"):
+        assert line(facts_of(t), "nicu").grade == 2, t
+    assert line(facts_of("Neonatal ICU (NICU) with neonatal ventilators"), "nicu").grade == 3
+
+
 def test_emoc_caesarean_and_blood_is_corroborated():
     lg = line(facts_of("Caesarean section", "Blood bank on site"), "emoc", specialties=[OB])
     assert lg.grade == 3
     assert [i["tag"] for i in lg.evidence_items] == ["csection", "blood"]
     assert "WHO 2009 Table 4" in lg.evidence_items[0]["requirement"]
+    # WHO 2009: transfusion "can be administered in other contexts"; the card says so
+    assert "not necessarily for obstetric patients" in lg.evidence_items[1]["requirement"]
     assert lg.level_note is None and lg.level_note_items == []
 
 
@@ -135,6 +150,42 @@ def test_cath_lab_rules():
         recipes.GRADE_RULES_V03["cath_lab"].corroborated_names[1]]
 
 
+@pytest.mark.parametrize("icu, vent", [
+    ("ICU", "Neonatal ventilator"),
+    ("ICU", "CPAP ventilation in neonates"),
+    ("ICU", "Ambulance with ventilator support"),
+    ("ICU", "Ventilators visible in operating room"),
+    ("ICU", "Drager Fabius GS anaesthesia machines with ventilators"),
+    ("ICU", "Covid-19 centre with dedicated Covid beds, ventilators"),
+    ("ICU", "Fetal Heart Monitor Coddle Graph Ventilator"),
+    ("Neonatal Intensive Care Unit (NICU) and Paediatric Intensive Care Unit (PICU)", "Ventilators"),
+    ("Intensive obstetric care (obstetric ICU)", "Ventilators"),
+    ("Pediatric intensive care unit", "Ventilators"),
+    ("Facility established in 2017 (excluding ICU and Emergency)", "Ventilators"),
+    ("Mobile ICU", "Ventilators"),
+])
+def test_cath_lab_ventilator_belongs_to_an_adult_icu(icu, vent):
+    """PM-JAY Cardiology/CTVS item 3: "ICU Facility with cardiac monitoring and ventilator support"."""
+    assert line(facts_of("Cath lab", icu, vent), "cath_lab").grade == 2, (icu, vent)
+
+
+@pytest.mark.parametrize("texts", [
+    ("Cath lab", "ICU", "Ventilators"),
+    ("Cath lab", "Adult and Neonatal Intensive Care Units (ICU)", "Mechanical ventilators"),
+    ("Cath lab", "ICU", "Ventilator support available for adult and pediatric patients"),
+    ("Cath lab", "Has ICU, CCU and NICU with ventilators"),          # ICU and ventilator in one fact
+    ("Cath lab", "ICU", "Neonatal ventilator", "Ventilators"),       # a second, adult ventilator fact
+])
+def test_cath_lab_adult_icu_and_ventilator(texts):
+    assert line(facts_of(*texts), "cath_lab").grade == 3, texts
+
+
+def test_cath_lab_same_fact_route_vetoes():
+    assert line(facts_of("Cath lab", "Pediatric ventilator in ICU"), "cath_lab").grade == 2
+    assert line(facts_of("Cath lab", "Covid hospital with five ICU beds and ventilators"), "cath_lab").grade == 2
+    assert line(facts_of("Cath lab", "Isolation ICU with negative pressure ventilation"), "cath_lab").grade == 2
+
+
 def test_dialysis_needs_unit_not_nephrologist():
     assert line(facts_of("Dialysis services", "In-house nephrologist"), "dialysis").grade == 2
     assert line(facts_of("Dialysis services", "5-bed dialysis unit"), "dialysis").grade == 3
@@ -151,6 +202,15 @@ def test_qualifiers():
     assert "nicu_named" not in q("SNCU", ["nicu"])
     assert "ventilator_newborn" not in q("SNCU with ventilator", ["ventilator", "nicu"])
     assert "ventilator_newborn" in q("NICU and SNCU with ventilators", ["ventilator", "nicu"])
+    assert "ventilator_newborn" not in q("ICU and NICU with ventilators", ["ventilator", "nicu"])
+    assert "neonatal_resp_ventilation" not in q("Bubble CPAP", ["neonatal_resp"])
+    assert "neonatal_resp_ventilation" in q("Neonatal ventilation", ["neonatal_resp"])
+    assert "icu_adult" not in q("NICU and PICU", ["icu"]) and "icu_adult" in q("Adult ICU", ["icu"])
+    assert "icu_adult" not in q("established 2017 (excluding ICU and Emergency)", ["icu"])
+    assert "ventilator_icu" not in q("Neonatal ambulance with neonatal ventilator", ["ventilator"])
+    assert "ventilator_icu" in q("12 adult ventilators", ["ventilator"])
+    assert "icu_with_ventilator" in q("ICU with ventilators", ["icu"])
+    assert "icu_with_ventilator" not in q("ICU with ventilators", ["ventilator"])  # needs the icu tag
     assert q("anything", ["nicu"], "v0.2") == frozenset({"nicu"})
     assert "nicu_named" not in q("NICU", [])  # needs the base tag on the same fact
     assert recipes.base_tag("dialysis_unit_named") == "dialysis_unit" and recipes.base_tag("icu") == "icu"

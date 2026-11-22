@@ -292,7 +292,8 @@ def main(argv=None) -> int:
         },
         "changed_lines": list(lines),
         "v0_3_rules": {l: rules_text(VERSION)[l] for l in lines},
-        "v0_3_qualifiers": {n: {"base_tag": q.base, "pattern": q.pattern, "veto": q.veto, "meaning": q.meaning}
+        "v0_3_qualifiers": {n: {"base_tag": q.base, "pattern": q.pattern, "veto": q.veto,
+                                "mask": q.mask, "meaning": q.meaning}
                             for n, q in recipes.QUALIFIERS_V03.items()},
         "v0_2_rules_replaced": {l: rules_text("v0.2")[l] for l in lines},
         "citations": {
