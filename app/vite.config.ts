@@ -5,7 +5,8 @@ import { defineConfig } from 'vite';
 // base so the app works at the root of the Databricks App URL or under any
 // prefix. publicDir is off: app/public/data is the retired India map data
 // (D024) and must not be shipped. Dev requests to /api go to a local
-// uvicorn on port 8000, which must be running: there is no fixture or mock path.
+// uvicorn on port 8000 (or VF_API_PORT), which must be running. The only fixture path is
+// the dev-only ?fixtures=1 switch in src/api.ts; production builds carry none.
 export default defineConfig({
   base: './',
   publicDir: false,
@@ -17,9 +18,9 @@ export default defineConfig({
     assetsInlineLimit: 0,
   },
   server: {
-    port: 5173,
+    port: Number(process.env.VF_DEV_PORT ?? 5173),
     strictPort: true,
-    proxy: { '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true } },
+    proxy: { '/api': { target: `http://127.0.0.1:${process.env.VF_API_PORT ?? '8000'}`, changeOrigin: true } },
   },
   preview: { port: 4173, strictPort: true },
 });

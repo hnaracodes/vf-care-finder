@@ -7,66 +7,44 @@
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <a class="skip" href="#results">Skip to results</a>
+    <a class="skip" href="#note">Skip to the answer</a>
     <header class="top">
-      <div class="top-inner">
-        <div class="brand">
-          <span class="mark" aria-hidden="true"></span>
-          <div>
-            <div class="title">Find care you can trust</div>
-            <div class="subtitle">Health facilities in India, ranked by what their own records show</div>
-          </div>
-          
-        </div>
+      <a class="brand" href="./"><span class="mark" aria-hidden="true"></span>Find care you can trust</a>
+      <div id="qline" class="qline" role="search" hidden>
+        <span id="chips" class="chips"></span>
+        <button id="change" class="btn-change" type="button" aria-controls="ask" aria-expanded="false">Change</button>
+      </div>
+    </header>
 
-        <form id="query" class="query" autocomplete="off">
-          <label class="field field-service">
+    <main id="main" class="layout is-landing">
+      <section id="ask" class="a-ask" aria-label="Search">
+        <p id="intro" class="intro">Pick the care and the place. We show up to 3 facilities, quote their own records, and say when nothing reliable is near.</p>
+        <form id="query" class="qform" autocomplete="off">
+          <label class="field">
             <span class="field-label">What care is needed?</span>
             <select id="service" required></select>
           </label>
-          <label class="field field-other" id="other-wrap" hidden>
+          <label class="field" id="other-wrap" hidden>
             <span class="field-label">Describe the care</span>
             <input id="other" type="text" placeholder="for example, cataract surgery" />
           </label>
           <label class="field field-place">
             <span class="field-label">Where is the patient?</span>
-            <input id="place" type="text" required placeholder="PIN code, city, district, village, or coordinates" />
+            <input id="place" type="text" required placeholder="PIN, village or town" />
           </label>
-          <button id="go" class="go" type="submit">Find facilities</button>
+          <button id="go" class="btn-find" type="submit">Find care</button>
         </form>
-        <div class="examples" id="examples" aria-label="Example searches"></div>
-      </div>
-    </header>
-
-    <main class="page">
-      <div id="loc" class="loc-wrap"></div>
-      <div class="layout">
-        <section id="results" class="results" aria-live="polite" tabindex="-1"></section>
-        <aside id="mapcol" class="mapcol" aria-label="Map of the results">
-          <div class="mapbox">
-            <div id="map"></div>
-            <div id="map-empty" class="map-empty">The map shows the searched place and the results.</div>
-            <div id="scale" class="scale" aria-hidden="true"></div>
-          </div>
-          <div id="map-controls" class="map-controls" hidden>
-            <button type="button" class="tog" id="tog-trips" aria-pressed="false">Show trips</button>
-            <button type="button" class="tog" id="tog-claims" aria-pressed="false">If we trusted claims alone</button>
-            <button type="button" class="tog" id="tog-sim" aria-pressed="false" hidden>Simulate arrivals</button>
-            <button type="button" class="tog tog-quiet" id="replay" hidden>Replay</button>
-          </div>
-          <div id="trip-counter" class="trip-counter" aria-live="polite"></div>
-          <div id="sim-panel" class="sim-panel" hidden></div>
-          <ul class="legend" id="legend">
-            <li><span class="lg lg-result">1</span>Recommended, numbered like the cards</li>
-            <li><span class="lg lg-unv"></span>Nearby, not verified</li>
-            <li><span class="lg lg-here"></span>Searched place, with how precise it is</li>
-            <li><span class="lg lg-ring"></span>Search radius</li>
-            <li><span class="lg lg-po"></span>Post office areas, for context</li>
-            <li><span class="lg lg-other"></span>Other facilities with evidence (trip view)</li>
-            <li><span class="lg lg-unv lg-small"></span>Facility without reliable evidence: it only claims it, or a blocking warning holds it back (trip view, claims alone)</li>
-          </ul>
-        </aside>
-      </div>
+        <div id="examples" class="exs" role="group" aria-label="Example searches"></div>
+      </section>
+      <div id="origin" class="a-origin"></div>
+      <div id="note" class="a-note" aria-live="polite" tabindex="-1"></div>
+      <div id="backups" class="a-backups"></div>
+      <div id="folds" class="a-folds"></div>
+      <div id="planners" class="a-planners"></div>
+      <aside id="mapcol" class="a-map" aria-label="Map">
+        <div id="map" class="map-inline"></div>
+      </aside>
+      <footer id="footer" class="a-footer"></footer>
     </main>
 
     <script type="module" src="/src/main.ts"></script>

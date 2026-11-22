@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find the right care: compare design (mockup)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+  Static mockup for Direction "compare". No build step. Open index.html#lko, #jok, #jpr, #sim, #whatif, #india.
+  Every card number and quote is copied from the live API on port 8811 (Nov 22, 00:20 ET):
+  /api/answer and /api/trip for emoc at 226001, dialysis at Jokihat, dialysis at Jaipur.
+  Why-not strip, questions, masked call info and the public-list line come from src/vf/why_not.py,
+  src/vf/questions.py and src/vf/public_list.py run on the same answers (not yet in the API).
+  What-if counters come from the stated agent rule run on the /api/trip payload (design script sim.py),
+  the same rule the browser simulator would run. Maps: Natural Earth outline and states, bundle post offices,
+  India Post head offices and gazetteer district names. No tile service.
+-->
+
+<!-- ===================================================== LUCKNOW, PIN 226001, emergency C-section -->
+<section class="case" id="lko">
+  <header class="bar">
+    <span class="brand">Find the right care <small>India, 9,989 facility records</small></span>
+    <div class="query"><span class="pill"><b>Emergency C-section</b></span><span class="pill">PIN 226001, Lucknow</span><span class="pill ghost">Change</span></div>
+    <span class="mocknav">mockup states: <a href="#lko">Lucknow</a><a href="#jok">Jokihat</a><a href="#jpr">Jaipur</a><a href="#sim">Simulator</a><a href="#whatif">What-if</a><a href="#india">India</a></span>
+  </header>
+  <main class="page">
+    <div class="loc"><span class="dot"></span>Searching from <b>PIN 226001, Lucknow, Uttar Pradesh</b> (the middle of its post offices, good to about 2 km).</div>
+
+    <div class="answer">
+      <h1><span class="n">1</span>Go first to BNK Hospital, Lucknow: about 7 min drive (3.5 km).</h1>
+      <p>Its record names <b>a C-section, a blood bank and an operating theatre</b>. Strong evidence, no warnings.</p>
+      <div class="next"><span class="tag">Next step</span> Call and ask: "Can you do an emergency C-section right now?" <span class="call"><span class="ph">+91 xxxxxxxx77</span><span class="btn">Call</span></span></div>
+    </div>
+
+    <div class="cmp" style="--cols:3">
+      <!-- header row -->
+      <div class="rl h">Option<small>nearest first, within a 2-hour drive</small></div>
+      <div class="c h">
+        <div class="hd"><span class="num">1</span><div class="fname">BNK Hospital</div></div>
+        <div class="fmeta">Lucknow · private hospital</div>
+        <div class="conf high"><span class="bars"><i></i><i></i><i></i></span>Strong evidence</div>
+        <div class="why">Nearest with strong evidence.</div>
+        <div class="src">Found on 5 websites, including its own (bnkmedicare.com).</div>
+      </div>
+      <div class="c h">
+        <div class="hd"><span class="num approx">2</span><div class="fname">Nova Hospital</div></div>
+        <div class="fmeta">Lucknow · private hospital</div>
+        <div class="conf low"><span class="bars"><i></i><i></i><i></i></span>Low: location uncertain</div>
+        <div class="why">Next nearest. Its position is known only to within about 41 km.</div>
+        <div class="src">Found on 15 websites, including novahospital.co.in.</div>
+      </div>
+      <div class="c h">
+        <div class="hd"><span class="num approx">3</span><div class="fname">St. Joseph Hospital Lucknow</div></div>
+        <div class="fmeta">Lucknow · private hospital</div>
+        <div class="conf med"><span class="bars"><i></i><i></i><i></i></span>Medium: one warning</div>
+        <div class="why">A nearer record (about 6 min) names less. This one names all three, and is within the 15-minute allowance.</div>
+        <div class="src">Found on 5 websites. No official website in the record.</div>
+      </div>
+
+      <!-- time -->
+      <div class="rl">Time<small>drive estimate, free-flow</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>BNK Hospital</div><div class="big">about 7 min</div><div class="sub">3.5 km straight-line</div></div>
+      <div class="c"><div class="pn"><span class="num approx">2</span>Nova Hospital</div><div class="big">about 10 min</div><span class="approx-tag">position approximate</span></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>St. Joseph Hospital</div><div class="big">about 15 min</div><span class="approx-tag">position approximate</span></div>
+
+      <!-- evidence -->
+      <div class="rl">Evidence found<small>quoted from its own record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>BNK Hospital</div>
+        <q class="ev">Performs Lower Segment Caesarean Section (LSCS)</q><span class="fld">from its list of procedures</span>
+        <q class="ev">On-site Blood Bank</q><span class="fld">from its equipment list</span>
+        <q class="ev">Modular Operation Theatre</q><span class="fld">from its equipment list</span>
+      </div>
+      <div class="c"><div class="pn"><span class="num approx">2</span>Nova Hospital</div>
+        <q class="ev">Performs cesarean sections (LSCS) as part of obstetric care</q><span class="fld">from its list of procedures</span>
+        <q class="ev">Has departments including Anesthesiology, Blood Bank, Cardiology, ... (shortened)</q><span class="fld">from its services list; shows a blood bank and anaesthesia</span>
+      </div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>St. Joseph Hospital</div>
+        <q class="ev">Caesarean Section</q><span class="fld">from its list of procedures</span>
+        <q class="ev">Blood bank</q><span class="fld">from its equipment list</span>
+        <q class="ev">Five operating theatres</q><span class="fld">from its equipment list</span>
+      </div>
+
+      <!-- checked -->
+      <div class="rl">What we looked for<small>✓ named in the record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>BNK Hospital</div><div class="ticks"><span>C-section</span><span>Blood bank</span><span>Operating theatre</span></div></div>
+      <div class="c"><div class="pn"><span class="num approx">2</span>Nova Hospital</div><div class="ticks"><span>C-section</span><span>Blood bank</span><span>Operating theatre</span></div></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>St. Joseph Hospital</div><div class="ticks"><span>C-section</span><span>Blood bank</span><span>Operating theatre</span></div></div>
+
+      <!-- warnings -->
+      <div class="rl">Warnings<small>from this record only</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>BNK Hospital</div><div class="okline">None in its record.</div></div>
+      <div class="c"><div class="pn"><span class="num approx">2</span>Nova Hospital</div>
+        <div class="warn"><b>Location:</b> its map point was 227 km from its PIN area, so we show it at the PIN centre.</div>
+        <div class="warn"><b>May mix two places:</b> its text also says <q>Nova Hospital is located in Rampur</q>.</div>
+      </div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>St. Joseph Hospital</div>
+        <div class="warn"><b>May mix two places:</b> its text also says <q>Located in Nehru Nagar, Ghaziabad</q>.</div>
+      </div>
+
+      <!-- before you go -->
+      <div class="rl">Before you go, ask</div>
+      <div class="c q"><div class="pn"><span class="num">1</span>BNK Hospital</div>
+        <ol class="qs"><li>Can you do an emergency C-section right now?</li><li>Do you accept Ayushman Bharat (PM-JAY), and what will the patient have to pay?</li></ol>
+        <div class="call"><span class="ph">+91 xxxxxxxx77</span><span class="btn">Call</span><span class="small">from its record</span></div>
+      </div>
+      <div class="c q"><div class="pn"><span class="num approx">2</span>Nova Hospital</div>
+        <ol class="qs"><li>Can you do an emergency C-section right now?</li><li>Can you confirm your full address and a landmark near you?</li><li>Is the C-section service at this address, and not at another branch?</li></ol>
+        <div class="call"><span class="ph">+91 xxxxxxxx24</span><span class="btn">Call</span></div>
+      </div>
+      <div class="c q"><div class="pn"><span class="num approx">3</span>St. Joseph Hospital</div>
+        <ol class="qs"><li>Can you do an emergency C-section right now?</li><li>Is the C-section service at this address, and not at another branch?</li><li>Do you accept Ayushman Bharat (PM-JAY)?</li></ol>
+        <div class="call nophone">No phone number in the record (that does not mean it has none).</div>
+      </div>
+
+      <!-- fourth column -->
+      <div class="wn">
+        <h3>Why not the nearer ones?</h3>
+        <div class="lead">4 records closer than BNK Hospital list or claim this care, or are public hospitals, but were not recommended.</div>
+        <div class="it"><div class="nm"><span class="dia"><i>A</i></span>Dr Shyama Prasad Mukherjee Civil Chikitsalay</div><div class="d">public · 0.8 km</div>We found no fact naming caesarean section among its 6 facts. Public hospitals are often thinly described online: this silence is not evidence either way.</div>
+        <div class="it"><div class="nm"><span class="dia"><i>B</i></span>Balrampur Hospital</div><div class="d">public · 2.0 km</div>Lists obstetrics and gynaecology, but we found no fact naming caesarean section among its 62 facts. Ask the hospital.</div>
+        <div class="it"><div class="nm"><span class="dia"><i>C</i></span>Kamla Devi Hospital</div><div class="d">private · 2.3 km</div>Says <q>Provides obstetric and gynecology care including infertility treatment</q>, but no fact names caesarean section (60 facts).</div>
+        <div class="it"><div class="nm"><span class="dia"><i>D</i></span>Ujala Physiotherapy Clinic</div><div class="d">private · 2.7 km</div>Lists obstetrics and gynaecology only; no fact names caesarean section (23 facts).</div>
+        <div class="more">6 more have an approximate position whose map point is closer, such as Nishat Hospital.</div>
+        <div class="rule">Grey means our rule did not recommend it from its record. It does not mean the place cannot help.</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div>Drive times are free-flow estimates from straight-line distance; real trips take longer. Web pages can be stale: records say what pages claimed, not what is available today.</div>
+      <details open><summary>How we decided</summary>
+        <div class="funnel">
+          <div><b>9,989</b>records</div><div><b>9,671</b>with a usable location</div><div><b>469</b>list or claim C-section, within 6 h</div><div><b>47</b>a fact names it, no blocking warning</div><div><b>13</b>within a 2-hour drive</div><div class="last"><b>3</b>shown, nearest first</div>
+        </div>
+        Nearest first by estimated drive time. One declared allowance: a record that names the service and everything it needs can be listed before a nearer one that names less, if it is at most 15 minutes further. The 2-hour window is the Lancet Commission on Global Surgery access indicator. Nothing here is a probability. <a href="#">Technical detail</a>
+      </details>
+    </div>
+
+    <aside class="mapcol">
+      <div class="mapbox">
+        <img class="m" src="assets/panel_luck.svg" alt="Map of central Lucknow with the three options and the nearer records">
+        <a class="expand" href="#sim">⤢ Expand map</a>
+        <div class="ctl"><span>+</span><span>−</span></div>
+        <div class="inset"><img src="assets/inset_luck_panel.svg" alt="Where Lucknow is in India"></div>
+        <div class="hint">Scroll or pinch to zoom, drag to move</div>
+      </div>
+      <div class="legend">
+        <div><span class="sw place"></span>Searched place</div>
+        <div><span class="sw opt">1</span>Option with evidence</div>
+        <div><span class="sw nn"></span>Nearer, not recommended</div>
+        <div><span class="sw opt dash">2</span>Position approximate</div>
+      </div>
+      <div class="trip">
+        <h3>Where would nearby villages go?</h3>
+        <p>414 villages (post office areas) within 50 km. Watch them choose a facility under two rules, then try what-if changes.</p>
+        <div class="row"><a class="btn" href="#sim">▶ Play the comparison</a><a class="btn light" href="#whatif">What if…</a></div>
+      </div>
+    </aside>
+  </main>
+</section>
+
+<!-- ===================================================== JOKIHAT, dialysis, no reliable option -->
+<section class="case" id="jok">
+  <header class="bar">
+    <span class="brand">Find the right care <small>India, 9,989 facility records</small></span>
+    <div class="query"><span class="pill"><b>Dialysis</b></span><span class="pill">Jokihat, Araria, Bihar</span><span class="pill ghost">Change</span></div>
+    <span class="mocknav">mockup states: <a href="#lko">Lucknow</a><a href="#jok">Jokihat</a><a href="#jpr">Jaipur</a><a href="#sim">Simulator</a><a href="#whatif">What-if</a><a href="#india">India</a></span>
+  </header>
+  <main class="page">
+    <div class="loc"><span class="dot"></span>Searching from <b>Jokihat post office area (PIN 854329), Araria district, Bihar</b>, good to about 11 km.</div>
+
+    <div class="answer none">
+      <h1>No clear evidence of dialysis within a 1-hour drive of Jokihat in this dataset.</h1>
+      <p>Nearest with some evidence: <b>Raiganj Government Medical College and Hospital, in West Bengal, about 1 h 30 min drive (76 km)</b>. This is a gap in our data, not proof that no care exists: public hospitals are under-covered here.</p>
+      <div class="next"><span class="tag">Next step</span> Ask the district hospital or the ASHA supervisor about dialysis nearer to Jokihat. If the patient must travel, compare the three below.</div>
+    </div>
+
+    <div class="cmp" style="--cols:3">
+      <div class="rl h">Further away<small>beyond the 1-hour window, nearest first</small></div>
+      <div class="c h">
+        <div class="hd"><span class="num">1</span><div class="fname">Raiganj Government Medical College and Hospital</div></div>
+        <div class="fmeta">Raiganj, West Bengal · public hospital</div>
+        <div class="conf low"><span class="bars"><i></i><i></i><i></i></span>Low: one fact names it</div>
+        <div class="why">Nearest with any evidence.</div>
+        <div class="src">Found on 11 websites, including its own (raiganjgmch.org).</div>
+      </div>
+      <div class="c h">
+        <div class="hd"><span class="num">2</span><div class="fname">Jeevan Rekha Hospital</div></div>
+        <div class="fmeta">Raiganj, West Bengal · private hospital</div>
+        <div class="conf high"><span class="bars"><i></i><i></i><i></i></span>Strong evidence</div>
+        <div class="why">About 1 km further than #1, with stronger evidence.</div>
+        <div class="src">Found on 3 websites, including its own (jeevanrekhahospital.com).</div>
+      </div>
+      <div class="c h">
+        <div class="hd"><span class="num approx">3</span><div class="fname">Arogyam Healthcare</div></div>
+        <div class="fmeta">Siliguri, West Bengal · private hospital</div>
+        <div class="conf med"><span class="bars"><i></i><i></i><i></i></span>Medium: one warning</div>
+        <div class="why">Third nearest.</div>
+        <div class="src">Found on 2 websites, including arogyamhealthcare.in.</div>
+      </div>
+
+      <div class="rl">Time<small>drive estimate, free-flow</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Raiganj GMCH</div><div class="big">about 1 h 30 min</div><div class="sub">76 km straight-line · crosses into West Bengal</div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>Jeevan Rekha Hospital</div><div class="big">about 1 h 30 min</div><div class="sub">77 km straight-line</div></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>Arogyam Healthcare</div><div class="big">about 1 h 45 min</div><span class="approx-tag">position approximate</span></div>
+
+      <div class="rl">Evidence found<small>quoted from its own record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Raiganj GMCH</div><q class="ev">Specialized units: Critical Care Unit (CCU), ... Dialysis Unit, Blood Bank and Blood Component Separation Unit, ... (shortened)</q><span class="fld">from its services list; shows dialysis and a dialysis unit</span></div>
+      <div class="c"><div class="pn"><span class="num">2</span>Jeevan Rekha Hospital</div><q class="ev">ICU, HDU, NICU, NHDU, wards and dialysis units</q><span class="fld">from its services list</span></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>Arogyam Healthcare</div><q class="ev">State-of-the-art dialysis unit</q><span class="fld">from its equipment list</span></div>
+
+      <div class="rl">What we looked for<small>✓ named in the record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Raiganj GMCH</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div><div class="small">Both come from one sentence only.</div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>Jeevan Rekha Hospital</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>Arogyam Healthcare</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div></div>
+
+      <div class="rl">Warnings<small>from this record only</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Raiganj GMCH</div><div class="okline">None in its record. Support is thin: a single fact names dialysis.</div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>Jeevan Rekha Hospital</div><div class="okline">None in its record.</div></div>
+      <div class="c"><div class="pn"><span class="num approx">3</span>Arogyam Healthcare</div><div class="warn"><b>Location:</b> its map point was 422 km from its PIN area, so we show it at the PIN centre.</div></div>
+
+      <div class="rl">Before you go, ask</div>
+      <div class="c q"><div class="pn"><span class="num">1</span>Raiganj GMCH</div>
+        <ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Is this done every day by your own staff, or only on some days by a visiting doctor?</li><li>Will the patient have to pay for anything, such as medicines, blood or tests?</li></ol>
+        <div class="call"><span class="ph">+91 xxxxxxxx09</span><span class="btn">Call</span></div></div>
+      <div class="c q"><div class="pn"><span class="num">2</span>Jeevan Rekha Hospital</div>
+        <ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Do you accept Ayushman Bharat (PM-JAY), and what will the patient have to pay?</li></ol>
+        <div class="call"><span class="ph">+91 xxxxxxxx55</span><span class="btn">Call</span></div></div>
+      <div class="c q"><div class="pn"><span class="num approx">3</span>Arogyam Healthcare</div>
+        <ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Can you confirm your full address and a landmark near you?</li><li>Do you accept Ayushman Bharat (PM-JAY)?</li></ol>
+        <div class="call"><span class="ph">+91 xxxxxxxx33</span><span class="btn">Call</span></div></div>
+
+      <div class="wn">
+        <h3>Why not the nearer ones?</h3>
+        <div class="lead">No record closer than Raiganj Government Medical College lists or claims dialysis, and no public hospital record is closer.</div>
+        <div class="it">So there is no grey option here. The gap is in the data we have:</div>
+        <div class="it"><b>35</b> records list or claim dialysis within about 3 hours.<br><b>13</b> of them have a fact that names it.<br><b>0</b> are within a 1-hour drive of Jokihat.</div>
+        <div class="rule">Try the what-if simulator to see how many villages one verified or added unit near Jokihat would bring within an hour.</div>
+        <a class="btn purple" href="#whatif" style="display:inline-block;margin-top:6px;text-decoration:none">Open what-if</a>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div>Drive times are free-flow estimates from straight-line distance; real trips take longer. The 1-hour dialysis window is our design choice, informed by studies linking longer dialysis travel to worse outcomes. It is a planning threshold, not a clinical deadline.</div>
+    </div>
+
+    <aside class="mapcol">
+      <div class="mapbox">
+        <img class="m" src="assets/panel_jok.svg" alt="Map of Jokihat, the Bihar and West Bengal border, Raiganj and Siliguri">
+        <a class="expand" href="#whatif">⤢ Expand map</a>
+        <div class="ctl"><span>+</span><span>−</span></div>
+        <div class="inset"><img src="assets/inset_jok_panel.svg" alt="Where Jokihat is in India"></div>
+      </div>
+      <div class="legend">
+        <div><span class="sw place"></span>Searched place</div>
+        <div><span class="sw opt">1</span>Further-away option</div>
+        <div><span class="sw ring"></span>1-hour drive (about 47 km)</div>
+        <div><span class="sw opt dash">3</span>Position approximate</div>
+      </div>
+      <div class="trip">
+        <h3>Where would nearby villages go?</h3>
+        <p>175 villages (post office areas) within 50 km. Only 13 are within a 1-hour drive of a facility with evidence.</p>
+        <div class="row"><a class="btn" href="#sim">▶ Play</a><a class="btn purple" href="#whatif">What if a unit were added?</a></div>
+      </div>
+    </aside>
+  </main>
+</section>
+
+<!-- ===================================================== JAIPUR, dialysis -->
+<section class="case" id="jpr">
+  <header class="bar">
+    <span class="brand">Find the right care <small>India, 9,989 facility records</small></span>
+    <div class="query"><span class="pill"><b>Dialysis</b></span><span class="pill">Jaipur, Rajasthan</span><span class="pill ghost">Change</span></div>
+    <span class="mocknav">mockup states: <a href="#lko">Lucknow</a><a href="#jok">Jokihat</a><a href="#jpr">Jaipur</a><a href="#sim">Simulator</a><a href="#whatif">What-if</a><a href="#india">India</a></span>
+  </header>
+  <main class="page">
+    <div class="loc"><span class="dot"></span>Searching from <b>Jaipur city centre (head post office, PIN 302001)</b>. Jaipur is about 27 km across: for a closer answer, type the patient's PIN.</div>
+
+    <div class="answer">
+      <h1><span class="n">1</span>Go first to Soni Hospital, Jaipur: about 6 min drive from the city centre (3 km).</h1>
+      <p>Its record says <b>"Dialysis center performing over 400 dialysis cases per month"</b>. Strong evidence, no warnings.</p>
+      <div class="next"><span class="tag">Next step</span> Call and ask: "Can you give this patient a dialysis session, and when is the next free slot?" <span class="call"><span class="ph">+91 xxxxxxxx21</span><span class="btn">Call</span></span></div>
+    </div>
+
+    <div class="cmp" style="--cols:3">
+      <div class="rl h">Option<small>nearest first, within a 1-hour drive</small></div>
+      <div class="c h"><div class="hd"><span class="num">1</span><div class="fname">Soni Hospital</div></div><div class="fmeta">Jaipur · private hospital</div><div class="conf high"><span class="bars"><i></i><i></i><i></i></span>Strong evidence</div><div class="why">About the same drive as #2; a little nearer in a straight line.</div><div class="src">Found on 18 websites, including its own (sonihospital.org.in).</div></div>
+      <div class="c h"><div class="hd"><span class="num">2</span><div class="fname">NAV Imperial Hospital and Research Centre</div></div><div class="fmeta">Jaipur · private hospital</div><div class="conf high"><span class="bars"><i></i><i></i><i></i></span>Strong evidence</div><div class="why">Next nearest.</div><div class="src">Found on 15 websites, including its own (navimperialhospital.com).</div></div>
+      <div class="c h"><div class="hd"><span class="num">3</span><div class="fname">Monilek Hospital and Research Center</div></div><div class="fmeta">Jaipur · private hospital</div><div class="conf low"><span class="bars"><i></i><i></i><i></i></span>Low: one fact names it</div><div class="why">A nearer record names dialysis only; this one also names machines, within the 15-minute allowance.</div><div class="src">Found on 14 websites, including its own (monilekhospital.com).</div></div>
+
+      <div class="rl">Time<small>from the city centre; 1 to 45 min depending on where in Jaipur you start</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Soni Hospital</div><div class="big">about 6 min</div><div class="sub">3 km straight-line</div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>NAV Imperial</div><div class="big">about 6 min</div><div class="sub">3 km straight-line</div></div>
+      <div class="c"><div class="pn"><span class="num">3</span>Monilek Hospital</div><div class="big">about 9 min</div><div class="sub">4 km straight-line</div></div>
+
+      <div class="rl">Evidence found<small>quoted from its own record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Soni Hospital</div><q class="ev">Dialysis center performing over 400 dialysis cases per month</q><span class="fld">from its services list; shows dialysis and a dialysis unit</span></div>
+      <div class="c"><div class="pn"><span class="num">2</span>NAV Imperial</div><q class="ev">Dialysis machines using cutting-edge technology for renal failure treatment</q><span class="fld">from its equipment list</span></div>
+      <div class="c"><div class="pn"><span class="num">3</span>Monilek Hospital</div><q class="ev">12 Japanese Toray dialysis machines</q><span class="fld">from its equipment list</span></div>
+
+      <div class="rl">What we looked for<small>✓ named in the record</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Soni Hospital</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>NAV Imperial</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div></div>
+      <div class="c"><div class="pn"><span class="num">3</span>Monilek Hospital</div><div class="ticks"><span>Dialysis</span><span>Dialysis unit or machines</span></div><div class="small">Both from one sentence only.</div></div>
+
+      <div class="rl">Warnings<small>from this record only</small></div>
+      <div class="c"><div class="pn"><span class="num">1</span>Soni Hospital</div><div class="okline">None in its record.</div></div>
+      <div class="c"><div class="pn"><span class="num">2</span>NAV Imperial</div><div class="okline">None in its record.</div></div>
+      <div class="c"><div class="pn"><span class="num">3</span>Monilek Hospital</div><div class="okline">None in its record. Support is thin: a single fact names dialysis.</div></div>
+
+      <div class="rl">Before you go, ask</div>
+      <div class="c q"><div class="pn"><span class="num">1</span>Soni Hospital</div><ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Do you accept Ayushman Bharat (PM-JAY), and what will the patient have to pay?</li></ol><div class="call"><span class="ph">+91 xxxxxxxx21</span><span class="btn">Call</span></div></div>
+      <div class="c q"><div class="pn"><span class="num">2</span>NAV Imperial</div><ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Do you accept Ayushman Bharat (PM-JAY), and what will the patient have to pay?</li></ol><div class="call"><span class="ph">+91 xxxxxxxx00</span><span class="btn">Call</span></div></div>
+      <div class="c q"><div class="pn"><span class="num">3</span>Monilek Hospital</div><ol class="qs"><li>Can you give this patient a dialysis session, and when is the next free slot?</li><li>Is this done every day by your own staff, or only on some days by a visiting doctor?</li><li>Will the scheme the record names (CGHS) cover this, and do you accept PM-JAY?</li></ol><div class="call"><span class="ph">+91 xxxxxxxx67</span><span class="btn">Call</span></div></div>
+
+      <div class="wn">
+        <h3>Why not the nearer ones?</h3>
+        <div class="lead">2 records closer than Soni Hospital list or claim dialysis, or are public hospitals, but were not recommended.</div>
+        <div class="it"><div class="nm"><span class="dia"><i>A</i></span>Garg Child Hospital</div><div class="d">private · about 1 km</div>Says <q>Advanced Kidney Dialysis</q>, but no fact names a dialysis unit, machines or a kidney doctor. A record that names both comes first if it is at most 15 min further.</div>
+        <div class="it"><div class="nm"><span class="dia"><i>B</i></span>Surya Hospitals Jaipur</div><div class="d">private · about 2 km</div>Names paediatric nephrology, but no fact names a dialysis unit or machines.</div>
+        <div class="more">2 more have an approximate position whose map point is closer: SMS Hospital (public; lists nephrology, but we found no fact naming dialysis among its 85 facts, which is not evidence either way: ask the hospital) and Anand Hospital and Eye Centre.</div>
+        <div class="rule">Grey means our rule did not recommend it from its record. It does not mean the place cannot help.</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div>Drive times are free-flow estimates from straight-line distance; real trips take longer. Web pages can be stale.</div>
+    </div>
+
+    <aside class="mapcol">
+      <div class="mapbox">
+        <img class="m" src="assets/panel_jai.svg" alt="Map of central Jaipur with the three options">
+        <a class="expand" href="#sim">⤢ Expand map</a>
+        <div class="ctl"><span>+</span><span>−</span></div>
+        <div class="inset"><img src="assets/inset_jai_panel.svg" alt="Where Jaipur is in India"></div>
+      </div>
+      <div class="legend">
+        <div><span class="sw place"></span>Searched place</div>
+        <div><span class="sw opt">1</span>Option with evidence</div>
+        <div><span class="sw nn"></span>Nearer, not recommended</div>
+        <div><span class="sw ring" style="border-style:solid;border-color:#9db0d6;background:#e6ecf6"></span>Area the search point covers</div>
+      </div>
+      <div class="trip">
+        <h3>Where would nearby villages go?</h3>
+        <p>237 villages (post office areas) within 50 km.</p>
+        <div class="row"><a class="btn" href="#sim">▶ Play the comparison</a><a class="btn light" href="#whatif">What if…</a></div>
+      </div>
+    </aside>
+  </main>
+</section>
+
+<!-- ===================================================== EXPANDED MAP: agent simulator, Lucknow, claims mode end frame -->
+<section class="case" id="sim">
+  <div class="xmap">
+    <div class="xbar"><b>Expanded map</b><span>Emergency C-section · PIN 226001, Lucknow</span><span class="sp"></span><a class="btn" href="#india">Show all of India</a><a class="btn" href="#lko">Close (Esc)</a></div>
+    <div class="xbody">
+      <div class="xstage">
+        <img class="m" src="assets/map_luck_trip.svg" alt="Villages within 50 km of Lucknow and where they go first when trusting specialty claims alone">
+        <div class="caption"><span class="act">Rule 2 of 2 · Trust specialty claims alone</span><b>Each dot is a village (post office area) within 50 km.</b>It goes to the nearest facility that lists C-section care. If that record shows no evidence, the dashed line is the extra trip on to one that does, if that place cannot help.</div>
+        <div class="ctl"><a href="#">+</a><a href="#">−</a><a href="#lko">Back to results area</a></div>
+        <div class="inset"><img src="assets/inset_luck_trip.svg" alt="Where this view is in India"></div>
+        <div class="straight">Straight-line paths; times from the drive-time estimate, free-flow</div>
+      </div>
+      <aside class="rail">
+        <h2>Where would nearby villages go?</h2>
+        <div class="seg"><span>1 · Trust the record's evidence</span><span class="on">2 · Trust specialty claims alone</span></div>
+        <div class="rule"><b>This rule:</b> each village goes to the nearest facility that lists the specialty. On arrival, if its record shows no evidence of C-section, the village moves on to its next choice. <b>Rule 1:</b> nearest facility whose record shows evidence, within the 2-hour window, with the same 15-minute allowance the results use.</div>
+        <div class="player"><span class="btn">↻ Replay</span><div class="prog"><i style="width:100%"></i></div><span>12 s · same every time</span></div>
+        <div class="take"><b>357 of 414</b> nearby villages would go first to a place with no evidence of C-section in its record. If that place cannot help, the trip is <b>about 3.6 km longer</b> on average (straight line).</div>
+        <div>
+          <h4>On the map now</h4>
+          <div class="lg">
+            <div><span class="vdot"></span>Village (post office area), where it starts</div>
+            <div><span class="hring"></span>Lists the specialty, no evidence in its record (number = villages arriving)</div>
+            <div><span class="lseg dash" style="border-color:var(--amber)"></span>Extra trip if that place cannot help</div>
+            <div><span class="sw opt">1</span>Facility with evidence</div>
+          </div>
+        </div>
+        <div>
+          <h4>What if… <span class="small" style="text-transform:none;letter-spacing:0">(not real data)</span></h4>
+          <div class="wtools"><span>Verify a record</span><span>Add a facility</span><span>Close a facility</span></div>
+          <p class="small" style="margin:6px 0 0">Pick a tool, then click a facility or a spot on the map. The villages re-decide at once, including those already on their way.</p>
+        </div>
+        <table class="ba">
+          <tr><th></th><th>Now</th><th>What-if</th></tr>
+          <tr><td>Villages within 2 hours of a facility with evidence</td><td>414 of 414</td><td class="after">no edits</td></tr>
+          <tr><td>Average drive to one with evidence</td><td>27 min</td><td class="after">no edits</td></tr>
+          <tr><td>Villages whose first stop has no evidence (rule 2)</td><td>357</td><td class="after">no edits</td></tr>
+        </table>
+        <div class="prio">
+          <span class="btn light">Which record should be verified first?</span>
+          <p style="margin:6px 0 2px">Tested all 104 nearby records that list C-section care without evidence. All 414 villages are already within 2 hours, so no single check changes that count. Largest time saving:</p>
+          <ol>
+            <li><b>Prasad Institute of Medical Sciences</b>: average 27 → 25 min; first stops with no evidence 357 → 316</li>
+            <li>Mission Hospital: 27 → 26 min; 357 → 302</li>
+            <li>Charak Polyclinic: 27 → 26 min; 357 → 307</li>
+          </ol>
+          <p class="small" style="margin:4px 0 0">A verification priority for Virtue Foundation, not a claim that these places offer C-section.</p>
+        </div>
+        <div class="assume"><span class="tog"></span>Assume each facility handles a set number of patients per hour (assumption, not from data). Off.</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== WHAT-IF: Jokihat, a dialysis unit added at Araria -->
+<section class="case" id="whatif">
+  <div class="xmap">
+    <div class="xbar"><b>Expanded map</b><span>Dialysis · Jokihat, Araria, Bihar</span><span class="sp"></span><a class="btn" href="#india">Show all of India</a><a class="btn" href="#jok">Close (Esc)</a></div>
+    <div class="xbody">
+      <div class="xstage">
+        <img class="m" src="assets/map_jok_whatif.svg" alt="What-if: villages around Jokihat with an added dialysis unit at Araria">
+        <div class="whatif-banner">WHAT-IF VIEW · 1 edit · not real data <span class="btn">Undo</span><span class="btn">Reset to real data</span></div>
+        <div class="caption" style="top:46px"><span class="act" style="color:var(--purple)">Rule 1 · Trust the record's evidence</span><b>Each dot is a village (post office area) within 50 km.</b>It goes to the nearest facility with evidence of dialysis. Teal: within a 1-hour drive. Grey: further.</div>
+        <div class="ctl" style="top:46px"><a href="#">+</a><a href="#">−</a><a href="#jok">Back to results area</a></div>
+        <div class="inset"><img src="assets/inset_jok.svg" alt="Where this view is in India"></div>
+        <div class="straight">Straight-line paths; times from the drive-time estimate, free-flow</div>
+      </div>
+      <aside class="rail">
+        <h2>What if a dialysis unit were here?</h2>
+        <div class="seg"><span class="on">1 · Trust the record's evidence</span><span>2 · Trust specialty claims alone</span></div>
+        <div class="wtools"><span>Verify a record</span><span class="on">Add a facility</span><span>Close a facility</span></div>
+        <div class="edits">
+          <div class="e"><span><b>What-if 1:</b> dialysis with evidence added at Araria (map click)</span><a href="#">Undo</a></div>
+        </div>
+        <table class="ba">
+          <tr><th></th><th>Real data</th><th>What-if</th></tr>
+          <tr><td>Villages within 1 hour of a facility with evidence</td><td>13 of 175</td><td class="after">168 of 175</td></tr>
+          <tr><td>Average drive to one with evidence</td><td>94 min</td><td class="after">40 min</td></tr>
+          <tr><td>Villages whose first stop has no evidence (rule 2)</td><td>22</td><td class="after">0</td></tr>
+        </table>
+        <div class="take teal">One verified unit at Araria would bring <b>155 more villages</b> within a 1-hour drive of dialysis with evidence. This is a what-if, not a facility that exists in this dataset.</div>
+        <div class="prio">
+          <span class="btn light">Which record should be verified first?</span>
+          <p style="margin:6px 0 2px">Tested all 19 nearby records that list dialysis without evidence. None would bring a village within 1 hour: they are all far from Jokihat. Largest time saving: Healing Touch Superspeciality Hospital, average 94 → 93 min.</p>
+          <p class="small" style="margin:4px 0 0">So here the gap is coverage, not checking. A verification priority, never a claim that a place offers dialysis.</p>
+        </div>
+        <div class="player"><span class="btn">↻ Replay</span><div class="prog"><i style="width:100%;background:var(--purple)"></i></div><span>re-run after each edit</span></div>
+        <div class="assume"><span class="tog"></span>Assume each facility handles a set number of patients per hour (assumption, not from data). Off.</div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== ZOOMED OUT: all of India -->
+<section class="case" id="india">
+  <div class="xmap">
+    <div class="xbar"><b>Expanded map</b><span>Zoomed out to all of India</span><span class="sp"></span><a class="btn" href="#sim">Back to Lucknow</a><a class="btn" href="#lko">Close (Esc)</a></div>
+    <div class="xbody">
+      <div class="xstage" style="background:#dfe3e1">
+        <img class="m" src="assets/map_india.svg" style="object-fit:contain" alt="India drawn from post office points, with state borders and Lucknow marked">
+        <div class="caption"><b>Every dot is a post office.</b>Together they draw India. The red box is the area you were looking at around Lucknow.</div>
+      </div>
+      <aside class="rail">
+        <h2>Where in India</h2>
+        <p class="rule">Zoom out stops at the whole country. Below a city-level zoom, the numbered options fold into one labelled marker so they never pile up.</p>
+        <div class="lg">
+          <div><span class="vdot" style="border-color:#8a7a60;background:#a89c86"></span>Post office (draws India's shape)</div>
+          <div><span class="lseg dash" style="border-color:#7d756a"></span>State border</div>
+          <div><span class="sw place"></span>Searched place</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+</body>
+</html>

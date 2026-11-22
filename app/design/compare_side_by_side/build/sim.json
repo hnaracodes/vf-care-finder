@@ -1,0 +1,179 @@
+{
+ "lko": {
+  "window": 120.0,
+  "factor": 1.01,
+  "base": {
+   "n": 414,
+   "in_window": 414,
+   "mean_min": 27.327391735622943,
+   "first_no_evidence": 357,
+   "extra_min_mean": 7.120752678332555
+  },
+  "top": [
+   {
+    "i": 28,
+    "name": "Prasad Institute of Medical Sciences",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 25.32293291632636,
+    "saved": 2.004458819296584,
+    "first_no_evidence": 316
+   },
+   {
+    "i": 88,
+    "name": "Mission Hospital",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 25.50425273503733,
+    "saved": 1.8231390005856127,
+    "first_no_evidence": 302
+   },
+   {
+    "i": 74,
+    "name": "Charak Polyclinic",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 25.556186248316582,
+    "saved": 1.7712054873063607,
+    "first_no_evidence": 307
+   },
+   {
+    "i": 94,
+    "name": "Kalpana Nursing Home",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 26.54795945033916,
+    "saved": 0.7794322852837823,
+    "first_no_evidence": 353
+   },
+   {
+    "i": 11,
+    "name": "Charak Hospital And Research Centre",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 26.56091306472891,
+    "saved": 0.7664786708940312,
+    "first_no_evidence": 357
+   }
+  ],
+  "n_tested": 104
+ },
+ "jpr": {
+  "window": 60.0,
+  "factor": 1.09,
+  "base": {
+   "n": 237,
+   "in_window": 232,
+   "mean_min": 27.61527483809097,
+   "first_no_evidence": 112,
+   "extra_min_mean": 12.058791125159933
+  },
+  "top": [
+   {
+    "i": 17,
+    "name": "Jaipur",
+    "reason": "claim_only",
+    "gain": 4,
+    "mean_min": 25.893641233782677,
+    "saved": 1.7216336043082912,
+    "first_no_evidence": 93
+   },
+   {
+    "i": 36,
+    "name": "Rishab Multispeciality Hospital",
+    "reason": "claim_only",
+    "gain": 4,
+    "mean_min": 26.353046590840208,
+    "saved": 1.2622282472507607,
+    "first_no_evidence": 75
+   },
+   {
+    "i": 7,
+    "name": "Rungta Hospital",
+    "reason": "claim_only",
+    "gain": 1,
+    "mean_min": 27.425459314007934,
+    "saved": 0.18981552408303415,
+    "first_no_evidence": 110
+   },
+   {
+    "i": 27,
+    "name": "Agarwal Hospital",
+    "reason": "claim_only",
+    "gain": 1,
+    "mean_min": 27.47640448656458,
+    "saved": 0.13887035152638916,
+    "first_no_evidence": 110
+   },
+   {
+    "i": 9,
+    "name": "Mangalam Hospital",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 27.538078148098897,
+    "saved": 0.0771966899920713,
+    "first_no_evidence": 103
+   }
+  ],
+  "n_tested": 32
+ },
+ "jok": {
+  "window": 60.0,
+  "factor": 1.02,
+  "base": {
+   "n": 175,
+   "in_window": 13,
+   "mean_min": 93.91424902951441,
+   "first_no_evidence": 22,
+   "extra_min_mean": 122.2136134630426
+  },
+  "top": [
+   {
+    "i": 15,
+    "name": "Healing Touch Superspeciality Hospital",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 92.87882310247456,
+    "saved": 1.035425927039853,
+    "first_no_evidence": 0
+   },
+   {
+    "i": 2,
+    "name": "Desun Hospital",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 93.91424902951441,
+    "saved": 0.0,
+    "first_no_evidence": 22
+   },
+   {
+    "i": 3,
+    "name": "North Bengal Neuro Centre",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 93.91424902951441,
+    "saved": 0.0,
+    "first_no_evidence": 22
+   },
+   {
+    "i": 5,
+    "name": "Nivedita Nursing Home",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 93.91424902951441,
+    "saved": 0.0,
+    "first_no_evidence": 22
+   },
+   {
+    "i": 6,
+    "name": "Anandaloke Multi Speciality Hospital",
+    "reason": "claim_only",
+    "gain": 0,
+    "mean_min": 93.91424902951441,
+    "saved": 0.0,
+    "first_no_evidence": 22
+   }
+  ],
+  "n_tested": 19
+ }
+}

@@ -3,12 +3,14 @@
 //   text      the free-text service, only with service=other
 //   q         what the user typed in "Where is the patient?"
 //   place_id  optional, a candidate the user picked after an ambiguous place
+//   demo      optional, demo=1 asks the server to mask names and phones
 //
-// There is no fixture or mock path: every answer comes from the server, which
-// runs vf.rank and vf.locate on the bundle. If the server does not answer, the
-// screen says so.
+// Every answer comes from the server, which runs vf.rank and vf.locate on the bundle.
+// The one exception is a dev build opened with ?fixtures=1: then answers come from
+// app/src/fixtures/real/ (made from the real bundle by make_fixtures_v2.py, in the SPEC 3
+// contract shape) and the screen shows a FIXTURE badge. Production builds have no fixture path.
 
-import type { Answer, Query, Resolution, Service, Simulate, Trip } from './types';
+import type { Answer, Query, Resolution, Service, SimPayload, Simulate, Trip } from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly status = 0) {
@@ -22,7 +24,55 @@ function params(q: Partial<Query>): URLSearchParams {
   return p;
 }
 
+// ------------------------------------------------------------------ fixtures (dev only)
+
+const wantFixtures = import.meta.env.DEV && new URLSearchParams(location.search).has('fixtures');
+
+/** True when this page reads fixtures instead of the server (dev only, ?fixtures=1). */
+export function usingFixtures(): boolean {
+  return wantFixtures;
+}
+
+type Loader = () => Promise<unknown>;
+let fixtureFiles: Record<string, Loader> | null = null;
+
+async function fixture(path: string, p: URLSearchParams): Promise<unknown | null> {
+  if (!import.meta.env.DEV) return null;
+  if (!fixtureFiles) {
+    const raw = import.meta.glob('./fixtures/real/*.json', { import: 'default' }) as Record<string, Loader>;
+    fixtureFiles = {};
+    for (const [k, v] of Object.entries(raw)) fixtureFiles[k.replace(/^.*\//, '').replace(/\.json$/, '')] = v;
+  }
+  const files = fixtureFiles;
+  const load = async (name: string) => (files[name] ? await files[name]() : null);
+  if (path === 'services') return load('services');
+  const cases = ((await load('cases')) ?? {}) as Record<string, { service: string; q: string }>;
+  const norm = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
+  const q = norm(p.get('q') ?? '');
+  const service = p.get('service') ?? '';
+  if (path === 'resolve') {
+    if (q.startsWith('aurangabad')) return load('resolve_aurangabad');
+    const key = Object.keys(cases).find((k) => norm(cases[k].q) === q || norm(cases[k].q).split(',')[0] === q);
+    return key ? load(`resolve_${key}`) : { status: 'not_found', label: '', lat: null, lon: null, precision_km: null,
+      how: `No fixture for "${p.get('q')}". Fixtures: ${Object.values(cases).map((c) => `${c.service} near ${c.q}`).join('; ')}.` };
+  }
+  const key = Object.keys(cases).find((k) => cases[k].service === service
+    && (norm(cases[k].q) === q || norm(cases[k].q).split(',')[0] === q));
+  if (!key) {
+    if (path === 'sim') return { status: 'unavailable', reason: 'No fixture for this query.' };
+    throw new ApiError(`No fixture for ${service} near "${p.get('q')}". Fixtures: ${Object.values(cases).map((c) => `${c.service} near ${c.q}`).join('; ')}.`);
+  }
+  return load(`${path}_${key}`);
+}
+
+// ------------------------------------------------------------------ requests
+
 async function get<T>(path: string, p: URLSearchParams): Promise<T> {
+  if (wantFixtures) {
+    const f = await fixture(path, p);
+    if (f != null) return f as T;
+    throw new ApiError(`No fixture for /api/${path}.`, 404);
+  }
   const qs = p.toString();
   let res: Response;
   try {
@@ -51,7 +101,19 @@ export async function boot(): Promise<{ services: Service[]; simulateAvailable: 
 
 export const resolve = (q: string) => get<Resolution>('resolve', params({ q }));
 export const answer = (q: Query) => get<Answer>('answer', params(q));
+/** Retired by SPEC 3.2: the UI no longer calls it. Kept for the old map code until B's MapHost lands. */
 export const trip = (q: Query) => get<Trip>('trip', params(q));
+export const sim = (q: Query) => get<SimPayload>('sim', params(q));
+
+/** The world for the agent simulator, or null when it is unavailable. An error never blocks the answer. */
+export async function simOrNull(q: Query): Promise<SimPayload | null> {
+  try {
+    const s = await sim(q);
+    return s && s.status === 'ok' && Array.isArray(s.facilities) ? s : null;
+  } catch {
+    return null;
+  }
+}
 
 /** null when simulation is not available (no p_offers yet, or the endpoint is missing). */
 export async function simulate(q: Query): Promise<Simulate | null> {

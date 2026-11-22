@@ -1,0 +1,150 @@
+/* Agent simulator (SPEC 6). Colour tokens: one meaning each. */
+.sim-bar, .sim-takeaway, .sim-body, .sim-banner, .sim-pop {
+  --ink: #2b2620; --paper: #f5f0e6; --evidence: #17684f; --claim: #a95f00; --whatif: #6a3ea1;
+  --neutral: #8c8478; --line: #d8cfbf;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.sim-serif, .sim-takeaway, .sim-verdict { font-family: "Iowan Old Style", Palatino, Georgia, serif; }
+
+/* ---- sim bar, top centre of the map */
+.sim-bar {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: min(760px, calc(100% - 20px)); z-index: 6;
+  background: rgba(245, 240, 230, 0.92); border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 12px 6px; box-shadow: 0 2px 10px rgba(43, 38, 32, 0.12);
+}
+.sim-banner-on .sim-bar { top: 46px; }
+.sim-bar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.sim-title { font-size: 14px; }
+.sim-x { margin-left: auto; border: 0; background: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--ink); padding: 0 2px; }
+.sim-seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.sim-seg-btn { border: 0; background: transparent; padding: 4px 10px; font: inherit; cursor: pointer; color: var(--ink); }
+.sim-seg-btn.on { background: var(--ink); color: var(--paper); }
+.sim-player { display: inline-flex; align-items: center; gap: 8px; }
+.sim-btn {
+  font: inherit; border: 1px solid var(--ink); background: #fffdf8; color: var(--ink);
+  border-radius: 6px; padding: 3px 9px; cursor: pointer; white-space: nowrap;
+}
+.sim-btn:hover { background: #efe8da; }
+.sim-btn.on, .sim-tool.on { background: var(--whatif); border-color: var(--whatif); color: #fff; }
+.sim-progress { display: inline-block; width: 90px; height: 6px; background: #e3dccd; border-radius: 3px; overflow: hidden; }
+.sim-progress-fill { display: block; height: 100%; width: 0; background: var(--ink); }
+.sim-clock, .sim-speed { font-variant-numeric: tabular-nums; color: #5a5248; }
+.sim-rule { margin: 6px 0 2px; font-size: 13px; border-left: 3px solid var(--evidence); padding-left: 8px; }
+.sim-rule-claims { border-left-color: var(--claim); }
+.sim-caption { margin: 2px 0 0; font-size: 11.5px; color: #5a5248; }
+.sim-fixture {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; color: #fff; background: #5a5248;
+  border-radius: 4px; padding: 1px 6px; cursor: help;
+}
+
+/* ---- takeaway, bottom, clear of the India inset (bottom-left, 120 px wide); the map legend sits above it */
+.sim-takeaway {
+  position: absolute; bottom: 14px; left: 142px; z-index: 6;
+  width: min(720px, calc(100% - 152px)); background: rgba(245, 240, 230, 0.95); border: 1px solid var(--line);
+  border-radius: 10px; padding: 9px 14px; font-size: 16px; line-height: 1.35; box-shadow: 0 2px 10px rgba(43, 38, 32, 0.12);
+}
+.sim-num { font-weight: 700; font-variant-numeric: tabular-nums; }
+.sim-hot { color: var(--whatif); font-weight: 700; }
+
+/* ---- banner */
+.sim-banner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 7px 12px; color: #fff; font-weight: 700;
+  background: repeating-linear-gradient(-45deg, #6a3ea1 0 12px, #5b3490 12px 24px);
+}
+.sim-banner-text { letter-spacing: 0.04em; margin-right: auto; }
+.sim-btn-w { border-color: #fff; background: rgba(255, 255, 255, 0.12); color: #fff; }
+.sim-btn-w:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* ---- rail */
+.sim-body { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
+.sim-tally { margin: 0; font-variant-numeric: tabular-nums; }
+.sim-counters { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.sim-counters th, .sim-counters td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.sim-counters thead th { font-size: 11.5px; color: #5a5248; font-weight: 600; }
+.sim-counters tbody th { font-weight: 500; width: 52%; }
+.sim-counters td { white-space: nowrap; }
+.sim-note { margin: 4px 0 0; color: var(--claim); }
+.sim-whatif { position: relative; border: 2px dashed var(--whatif); border-radius: 10px; padding: 14px 10px 10px; }
+.sim-tag {
+  position: absolute; top: -10px; left: 10px; background: var(--whatif); color: #fff; font-weight: 700;
+  font-size: 11px; letter-spacing: 0.08em; padding: 1px 7px; border-radius: 4px;
+}
+.sim-whatif-intro { margin: 0 0 8px; color: #5a5248; }
+.sim-tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.sim-hint { margin: 6px 0 0; color: var(--whatif); }
+.sim-hint:empty { display: none; }
+.sim-sub-h { margin: 8px 0 4px; font-weight: 600; }
+.sim-vlist-ul, .sim-edit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.sim-vlist-ul li, .sim-edit-list li { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.sim-edit-list { margin-top: 8px; }
+.sim-edit-list li span { color: var(--whatif); font-weight: 600; }
+.sim-edit-actions { display: flex; gap: 6px; margin-top: 6px; }
+.sim-sub { color: #5a5248; font-size: 12px; }
+.sim-link { border: 0; background: none; color: var(--whatif); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+.sim-vf-wrap { display: flex; flex-direction: column; gap: 6px; }
+.sim-vf-btn { align-self: flex-start; }
+.sim-verdict { margin: 0; font-size: 15px; }
+.sim-vf-rows { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.sim-vf-rows li span { display: block; }
+.sim-try { margin-top: 3px; }
+.sim-foot { margin: 0; font-size: 12px; color: #5a5248; }
+.sim-cap { display: flex; flex-direction: column; gap: 3px; }
+.sim-cap-n { width: 50px; font: inherit; }
+.sim-assume { align-self: flex-start; font-size: 11px; font-weight: 700; color: #5a5248; border: 1px solid #5a5248; border-radius: 4px; padding: 0 5px; }
+.sim-seed { margin: 0; font-size: 11.5px; color: #5a5248; }
+
+/* ---- popover */
+.sim-pop {
+  position: absolute; z-index: 8; width: 260px; background: #fffdf8; border: 1px solid var(--ink); border-radius: 8px;
+  padding: 10px 12px; box-shadow: 0 4px 16px rgba(43, 38, 32, 0.2);
+}
+.sim-pop[hidden] { display: none; }
+.sim-pop p { margin: 0 0 6px; }
+.sim-pop .sim-pop-actions { display: flex; gap: 6px; }
+.sim-pop .sim-btn-primary { background: var(--whatif); border-color: var(--whatif); color: #fff; }
+
+/* ---- legend swatches (used by the dev host; B's legend may reuse them) */
+.sim-sw { display: inline-block; width: 14px; height: 14px; position: relative; flex: none; }
+.sim-sw-dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--c); }
+.sim-sw-pin::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px var(--c); }
+.sim-sw-ring::after { content: ""; position: absolute; inset: 1px; border-radius: 50%; border: 2px solid var(--c); }
+.sim-sw-dash::after { content: ""; position: absolute; left: 0; right: 0; top: 6px; border-top: 2px dashed var(--c); }
+.sim-sw-diamond::after { content: ""; position: absolute; inset: 3px; background: var(--c); transform: rotate(45deg); }
+.sim-sw-plus::before, .sim-sw-plus::after { content: ""; position: absolute; background: var(--c); }
+.sim-sw-plus::before { left: 6px; top: 1px; width: 2px; height: 12px; }
+.sim-sw-plus::after { top: 6px; left: 1px; height: 2px; width: 12px; }
+
+/* ---- phone sheet */
+.sim-bar-phone { padding: 6px 10px; }
+.sim-phone .sim-takeaway { position: static; transform: none; width: auto; font-size: 15px; box-shadow: none; }
+.sim-phone .sim-seg { align-self: flex-start; }
+.sim-phone .sim-player { flex-wrap: wrap; }
+.sim-sheet-title { font-size: 16px; margin: 0; display: flex; gap: 8px; align-items: center; }
+.sim-phone-line { display: flex; gap: 8px; align-items: baseline; }
+.sim-phone-line:empty { display: none; }
+.sim-bar-phone { width: auto; left: auto; right: 8px; transform: none; padding: 2px 6px; }
+.sim-bar-phone .sim-x { font-size: 13px; margin: 0; }
+
+/* while the simulator is open (laptop) the map's floating legend moves to the right edge, above
+   the takeaway, so it covers neither the takeaway nor the villages (the camera fits around it) */
+@media (min-width: 701px) {
+  .vfm-map.sim-open .vfm-legend-float { left: auto; right: 10px; bottom: calc(var(--sim-tk-h, 0px) + 22px);
+    max-width: 270px; max-height: calc(100% - var(--sim-tk-h, 0px) - 250px); font-size: 12px; }
+}
+
+/* laptop: the bar starts right of the map's zoom buttons and zoom ladder (left, 10 to 116 px) */
+@media (min-width: 701px) {
+  .sim-bar { left: 128px; transform: none; width: min(760px, calc(100% - 138px)); }
+}
+
+/* ---- fix round: what-if heading, phone sheet head, docked key */
+.sim-wi-h { margin: 0 0 4px; font-size: 14px; }
+.sim-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sim-jump { background: var(--whatif); border-color: var(--whatif); color: #fff; font-weight: 700; }
+.sim-body .sim-key { margin: 0; order: 0; }
+.sim-body .sim-key .vfm-legend { display: flex; }
+.sim-btn:focus-visible, .sim-seg-btn:focus-visible, .sim-link:focus-visible, .sim-x:focus-visible { outline: 2.5px solid var(--evidence); outline-offset: 2px; }

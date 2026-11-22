@@ -31,6 +31,9 @@ export interface Resolution {
   kind?: string | null;
   place_id?: string | null;
   candidates?: Candidate[];
+  state?: string | null;
+  district?: string | null;
+  query?: string | null;
 }
 
 export interface Penalty {
@@ -70,6 +73,7 @@ export interface EvidenceItem {
   quote: string;
   field: string;
   fact_id?: string | null;
+  requirements?: string[];
 }
 
 export interface Card {
@@ -102,6 +106,30 @@ export interface Card {
   could_be_wrong?: string | null;
   evidence_strength?: string | null;
   flags?: Flag[];
+  // v1 ranker fields already on the wire (src/vf/rank.py, D048)
+  minutes?: number | null;
+  minutes_low?: number | null;
+  minutes_high?: number | null;
+  minutes_label?: string | null;
+  distance_label?: string | null;
+  position_approximate?: boolean;
+  window_min?: number | null;
+  inside_window?: boolean;
+  level_note?: string | null;
+  // SPEC 3.1 enrichments (dbapp/server.py enrich_answer). All optional: the UI falls back when absent.
+  name_short?: string;
+  name_rest?: string | null;
+  time?: TimeText | null;
+  state_display?: string;
+  crosses_state?: boolean;
+  quotes?: Quote[];
+  missing_phrases?: string[];
+  questions?: Question[];
+  call?: CallInfo;
+  official_domain?: string | null;
+  public_list?: PublicLine | null;
+  outside_lines?: OutsideLine[];
+  sim_index?: number | null;
 }
 
 export interface Gate {
@@ -142,6 +170,18 @@ export interface Answer {
   beyond_radius?: Card | null;
   unverified_nearby?: Card[];
   how_we_decided?: HowWeDecided;
+  // v1 ranker and SPEC 3.1 additions (all optional)
+  further_away?: Card[];
+  window?: Window;
+  rank_version?: string;
+  origin?: Origin;
+  why_not?: WhyNot;
+  funnel?: { steps: FunnelStep[]; consistency?: unknown };
+  outside_nearby?: OutsideNearby[];
+  demo_masked?: boolean;
+  /** set only on dev fixtures (app/src/fixtures/make_fixtures_v2.py); the UI shows a FIXTURE badge */
+  fixture?: boolean;
+  timing_ms?: number;
 }
 
 export interface TripFacility {
@@ -209,4 +249,116 @@ export interface Query {
   text?: string;
   q: string;
   place_id?: string | null;
+  /** demo=1 asks the server to mask names and phones; it can only turn masking on */
+  demo?: string | null;
+  /** reveal=1 asks for tel: links on Call (the server never gives them in demo mode) */
+  reveal?: string | null;
 }
+
+// =====================================================================================
+// SPEC section 3.4 (app/design/SPEC.md), verbatim. C produces these, A, B and D consume.
+// =====================================================================================
+
+export interface TimeText { short: string; range: string; loose: boolean }
+export interface Quote { text: string; field: string; requirement_keys: string[]; marks: [number, number][] }
+export interface CallInfo { has_phone: boolean; phone?: string | null; tel?: string | null; note?: string | null }
+export interface Question { question: string; why?: string }
+export interface PublicLine { text: string; source?: string; validity?: string; current?: boolean; outside_data?: boolean }
+export interface OutsideLine { source_id: string; source_name: string; status: 'current' | 'lapsed' | 'undated'; text: string }
+// Card gains (all optional):
+//   name_short, name_rest, time: TimeText | null, state_display, crosses_state, quotes: Quote[],
+//   missing_phrases: string[], questions: Question[], call: CallInfo, official_domain: string | null,
+//   public_list: PublicLine | null, outside_lines: OutsideLine[], sim_index: number | null,
+//   minutes, minutes_low, minutes_high, minutes_label, distance_label, position_approximate,
+//   window_min, inside_window, level_note   (v1 ranker fields already on the wire)
+export interface WhyNotItem {
+  letter: string; facility_id: string; name: string; name_masked: boolean; operator?: string | null;
+  lat: number | null; lon: number | null; distance_km: number | null; distance_label: string;
+  position_approximate: boolean; reason_code: string; reason_plain: string; tone: string; in_sim?: boolean;
+  quote_or_absence?: { kind: 'quote' | 'absence'; text: string; field?: string; negated?: boolean } | null;
+  /** server.py: estimated drive from the searched place (the middle of it, for a loose place) */
+  minutes?: number | null; time_short?: string | null;
+}
+export interface WhyNot { items: WhyNotItem[]; n_nearer: number; n_approx_nearer: number; heading: string; masked: boolean }
+export interface FunnelStep { step: string; label: string; n: number }
+export interface Origin { short_name: string; label: string; precision_km: number | null; loose: boolean; too_coarse: boolean; state_display: string }
+export interface Window { minutes: number; allowance: number; hours_text?: string; reach_text?: string; km_equivalent?: number;
+  reach_km?: number; basis?: string; note?: string; origin_loose?: boolean; kind?: string;
+  /** A's addition, already on the wire from the v1 ranker */
+  reach_minutes?: number; factor?: number | null; state?: string | null }
+// Answer gains: origin?: Origin; window?: Window; why_not?: WhyNot; funnel?: { steps: FunnelStep[] };
+//   further_away?: Card[]; outside_nearby?: unknown[]; demo_masked?: boolean; rank_version?: string
+
+export type FacStatus = 'evidence' | 'claim_only' | 'held_back';
+export interface SimFacility { i: number; facility_id: string; name: string; lat: number; lon: number; status: FacStatus;
+  strong: boolean; grade: number; approximate: boolean; operator?: string | null; km_from_origin: number;
+  card_rank: number | null; why_not_letter: string | null; name_masked: boolean }
+export interface SimSummary { n_villages: number; within: number; avg_minutes: number | null; n_no_evidence_in_reach: number;
+  first_no_evidence: number; first_claim_only: number; first_held_back: number; extra_minutes_mean: number | null;
+  n_facilities: number; n_evidence: number; n_claim_only: number; n_held_back: number;
+  n_listing_records: number; n_merged_duplicates: number }
+export interface SimLabel { name: string; kind: 'district' | 'city' | 'post_office'; lat: number; lon: number; prio: number }
+export interface SimPayload {
+  status: 'ok' | 'unavailable'; reason?: string; version: string;
+  service: string; service_label: string; service_phrase: string;
+  origin: { lat: number; lon: number; short_name: string; label: string; precision_km: number | null; state_display: string; factor: number };
+  window: { minutes: number; allowance: number; hours_text: string; km_equivalent: number; reach_km: number; reach_minutes: number; basis_short?: string };
+  travel: { a: number; b: number; text: string };
+  villages: { n: number; radius_km: number; lon: number[]; lat: number[]; pin: string[]; factor: number[] };
+  facilities: SimFacility[]; summary: SimSummary; context: { labels: SimLabel[] }; notes: string[];
+}
+
+// =====================================================================================
+// A's additions to the contract (not in SPEC 3.4). Ask A before changing them.
+// =====================================================================================
+
+/** An entry of answer.outside_nearby (vf.public_list.annotate_answer, v2, D055). Read defensively. */
+export interface OutsideNearby {
+  source_id?: string; source_name?: string; name?: string; district?: string | null; state?: string | null;
+  lat?: number | null; lon?: number | null; position_precision_km?: number | null; position_note?: string | null;
+  minutes_label?: string | null; km?: number | null; what?: string | null; citation?: string | null; text: string;
+}
+
+/** The three counters of SPEC 6 / 7.3, as D's rules compute them (same names as SimSummary). */
+export interface SimCounters {
+  /** villages (D's Counters name it n) */
+  n?: number; within: number; avg_minutes: number | null; first_no_evidence: number;
+  extra_minutes_mean?: number | null; n_no_evidence_in_reach?: number;
+}
+
+export type SimMode = 'evidence' | 'claims';
+export type SimEdit =
+  | { type: 'verify'; facility_id: string }
+  | { type: 'close'; facility_id: string }
+  | { type: 'add'; lon: number; lat: number };
+export interface SimOpenOptions { mode?: SimMode; autoplay?: boolean; tool?: 'verify' | 'add' | 'close'; edit?: SimEdit }
+
+/**
+ * D's Simulator (app/src/sim/index.ts, SPEC 7 and 9), as main.ts calls it:
+ *   const sim = new Simulator(map); sim.load(payload, answer); sim.open({...}); sim.previewAdd({lat, lon}); sim.close();
+ * previewAdd returns the counters before and after a what-if unit at {lat, lon}, without changing the world.
+ * open() autoplays unless autoplay is false.
+ */
+export interface SimulatorLike {
+  load(payload: SimPayload, answer: Answer): void;
+  open(opts?: SimOpenOptions): void;
+  close(): void;
+  previewAdd(at: { lat: number; lon: number }): { before: SimCounters; after: SimCounters } | null;
+}
+export type SimulatorCtor = new (map: MapHostLike) => SimulatorLike;
+
+export interface MapExample { label: string; lat: number; lon: number }
+
+/** B's MapHost (app/src/map/index.ts, SPEC 5.4): the part of its public API that A calls. */
+export interface MapHostLike {
+  showLanding(examples: MapExample[], onPick: (i: number) => void): void;
+  showCandidates(c: Candidate[], onPick: (i: number) => void): void;
+  showAnswer(a: Answer, sim: SimPayload | null): void;
+  highlight(kind: 'result' | 'whynot', key: number | string | null): void;
+  focus(kind: 'result' | 'further', idx: number): void;
+  expand(opts?: { rail?: boolean }): unknown;
+  collapse(): void;
+  isExpanded(): boolean;
+  onPick: (kind: 'result' | 'whynot' | 'further', key: number | string) => void;
+}
+export type MapHostCtor = new (inlineEl: HTMLElement) => MapHostLike;

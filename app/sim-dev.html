@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulator dev page (not shipped)</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html, body { margin: 0; height: 100%; background: #f5f0e6; color: #2b2620; font-family: system-ui, sans-serif; }
+      #app { height: 100%; }
+      .dev-root { display: grid; grid-template-columns: 1fr 400px; height: 100%; }
+      .dev-root.dev-phone { grid-template-columns: 1fr; grid-template-rows: 46vh 1fr; }
+      .dev-mapwrap { position: relative; display: flex; flex-direction: column; min-height: 0; }
+      .dev-topbar { display: flex; gap: 10px; align-items: center; padding: 6px 10px; border-bottom: 1px solid #d8cfbf; font-size: 13px; flex-wrap: wrap; }
+      .dev-tag { font-size: 11px; font-weight: 700; background: #2b2620; color: #f5f0e6; padding: 1px 6px; border-radius: 4px; }
+      .dev-place { color: #5a5248; }
+      .dev-map { position: relative; flex: 1; min-height: 0; background: #f5f0e6; overflow: hidden; }
+      .dev-canvas { position: absolute; inset: 0; }
+      .dev-legend { position: absolute; left: 10px; bottom: 90px; z-index: 5; background: rgba(245,240,230,.94); border: 1px solid #d8cfbf; border-radius: 8px; padding: 6px 9px; font-size: 12px; display: flex; flex-direction: column; gap: 3px; max-width: 300px; }
+      .dev-leg-row { display: flex; gap: 6px; align-items: center; }
+      .dev-rail { overflow: auto; border-left: 1px solid #d8cfbf; background: #fbf8f1; }
+      .dev-sheet { overflow: auto; background: #fbf8f1; border-top: 1px solid #d8cfbf; }
+      .dev-phone .dev-legend { bottom: 8px; font-size: 11px; }
+      .dev-err { padding: 20px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/sim/dev.ts"></script>
+  </body>
+</html>

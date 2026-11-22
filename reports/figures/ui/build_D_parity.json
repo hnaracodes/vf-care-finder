@@ -1,0 +1,126 @@
+[
+  {
+    "case": "emoc 226001",
+    "source": "live /api/sim on port 8824",
+    "browser": {
+      "n": 402,
+      "within": 402,
+      "avg_minutes": 27.3,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 344,
+      "first_claim_only": 344,
+      "first_held_back": 0,
+      "extra_minutes_mean": 7.3
+    },
+    "server": {
+      "n_villages": 402,
+      "within": 402,
+      "avg_minutes": 27.3,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 344,
+      "first_claim_only": 344,
+      "first_held_back": 0,
+      "extra_minutes_mean": 7.3,
+      "n_facilities": 463,
+      "n_evidence": 47,
+      "n_claim_only": 415,
+      "n_held_back": 1,
+      "n_listing_records": 469,
+      "n_merged_duplicates": 6
+    },
+    "parity": "equal"
+  },
+  {
+    "case": "dialysis Jokihat",
+    "source": "live /api/sim on port 8824",
+    "browser": {
+      "n": 170,
+      "within": 11,
+      "avg_minutes": 94.1,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 23,
+      "first_claim_only": 23,
+      "first_held_back": 0,
+      "extra_minutes_mean": 95.7
+    },
+    "server": {
+      "n_villages": 170,
+      "within": 11,
+      "avg_minutes": 94.1,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 23,
+      "first_claim_only": 23,
+      "first_held_back": 0,
+      "extra_minutes_mean": 95.7,
+      "n_facilities": 35,
+      "n_evidence": 13,
+      "n_claim_only": 22,
+      "n_held_back": 0,
+      "n_listing_records": 35,
+      "n_merged_duplicates": 0
+    },
+    "parity": "equal"
+  },
+  {
+    "case": "dialysis Jaipur",
+    "source": "live /api/sim on port 8824",
+    "browser": {
+      "n": 233,
+      "within": 228,
+      "avg_minutes": 27.5,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 110,
+      "first_claim_only": 110,
+      "first_held_back": 0,
+      "extra_minutes_mean": 11.6
+    },
+    "server": {
+      "n_villages": 233,
+      "within": 228,
+      "avg_minutes": 27.5,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 110,
+      "first_claim_only": 110,
+      "first_held_back": 0,
+      "extra_minutes_mean": 11.6,
+      "n_facilities": 53,
+      "n_evidence": 21,
+      "n_claim_only": 32,
+      "n_held_back": 0,
+      "n_listing_records": 53,
+      "n_merged_duplicates": 0
+    },
+    "parity": "equal"
+  },
+  {
+    "case": "trauma Kotputli",
+    "source": "live /api/sim on port 8824",
+    "browser": {
+      "n": 321,
+      "within": 321,
+      "avg_minutes": 37.2,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 130,
+      "first_claim_only": 120,
+      "first_held_back": 10,
+      "extra_minutes_mean": 18.1
+    },
+    "server": {
+      "n_villages": 321,
+      "within": 321,
+      "avg_minutes": 37.2,
+      "n_no_evidence_in_reach": 0,
+      "first_no_evidence": 130,
+      "first_claim_only": 120,
+      "first_held_back": 10,
+      "extra_minutes_mean": 18.1,
+      "n_facilities": 1022,
+      "n_evidence": 226,
+      "n_claim_only": 790,
+      "n_held_back": 6,
+      "n_listing_records": 1030,
+      "n_merged_duplicates": 8
+    },
+    "parity": "equal"
+  }
+]

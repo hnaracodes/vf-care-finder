@@ -102,3 +102,21 @@ export const MAP = {
   tripLine: [215, 221, 228, 38] as RGBA,
   tripDeadEnd: [201, 133, 0, 70] as RGBA,
 };
+
+// ---------------------------------------------------------------- v3 tokens (app/design/SPEC.md section 1)
+// One meaning each. Hex strings for CSS; rgb() turns them into deck.gl colours.
+
+export const INK = '#2b2620';       // text
+export const PAPER = '#f5f0e6';     // page and India land
+export const SURROUND = '#d9d4ca';  // sea and neighbouring countries on the map
+export const EVIDENCE = '#17684f';  // the record shows the service
+export const CLAIM = '#a95f00';     // lists or claims it, but its record shows no evidence
+export const WHATIF = '#6a3ea1';    // what-if only, never real data
+export const NEUTRAL = '#8c8478';   // nearer records not recommended (grey diamonds)
+export const ORIGIN = '#c0392b';    // the searched place only
+export const BORDER = '#9a7b55';    // state borders
+
+/** A hex token as a deck.gl colour, with alpha 0..1. */
+export function rgb(h: string, alpha = 1): RGBA {
+  return hex(h, Math.round(alpha * 255));
+}

@@ -8,7 +8,9 @@ and every other endpoint answers 503.
     GET /api/health                              what is loaded, from where
     GET /api/services                            the service lines (vf.services)
     GET /api/resolve?q=&state=&place_id=         place text to a vf.locate Resolution
-    GET /api/answer?service=&q=&state=&text=     vf.rank.rank, or vf.rank.search for service=other + text
+    GET /api/answer?service=&q=&state=&text=     vf.rank.rank, or vf.rank.search for service=other + text,
+                       &demo=&reveal=            plus the answer extras of app/design/SPEC.md 3.1 (enrich_answer)
+    GET /api/sim?service=&q=&state=&demo=        the agent simulator's world and baseline counters (SPEC 3.2)
     GET /api/trip?service=&q=&state=             nearby post offices and their two trip targets (D032)
     GET /api/simulate?service=&q=&state=         vf.rank.simulate (D038); 404 until a probability table exists
     /                                            the prebuilt front end in dbapp/static/
@@ -30,6 +32,7 @@ import json
 import logging
 import math
 import os
+import re
 import sys
 import threading
 import time
@@ -62,6 +65,30 @@ from vf import services as S  # noqa: E402
 from vf.geo import haversine_km  # noqa: E402
 
 log = logging.getLogger("vf.server")
+
+# The answer extras (SPEC 3.1) and the sim payload (SPEC 3.2) use these. Each is optional: a module
+# that fails to import leaves its fields out and says why in /api/health extras_errors.
+_IMPORT_ERRORS: dict[str, str] = {}
+try:
+    from vf import travel as T  # noqa: E402
+except Exception as _e:  # pragma: no cover - depends on the deployed copy
+    T = None
+    _IMPORT_ERRORS["travel"] = f"{type(_e).__name__}: {_e}"
+try:
+    from vf import questions as Q  # noqa: E402
+except Exception as _e:  # pragma: no cover
+    Q = None
+    _IMPORT_ERRORS["questions"] = f"{type(_e).__name__}: {_e}"
+try:
+    from vf import why_not as WN  # noqa: E402
+except Exception as _e:  # pragma: no cover
+    WN = None
+    _IMPORT_ERRORS["why_not"] = f"{type(_e).__name__}: {_e}"
+try:
+    from vf import public_list as PL  # noqa: E402
+except Exception as _e:  # pragma: no cover
+    PL = None
+    _IMPORT_ERRORS["public_list"] = f"{type(_e).__name__}: {_e}"
 
 STATIC_DIR = APP_DIR / "static"
 MAX_TRIP_POINTS = 3000
@@ -151,9 +178,57 @@ class State:
             else:
                 self.po_lat = self.po_lon = np.array([], dtype=float)
                 self.po_pin = np.array([], dtype=object)
+            self.load_extras()
             self.load_ms = (time.perf_counter() - t0) * 1000
             self.loaded = True
             log.info("loaded in %.0f ms: mode=%s vf=%s", self.load_ms, self.mode, _VF_FROM)
+
+    def load_extras(self) -> None:
+        """The record info, phone book and outside lists, once (SPEC 8). A failure is kept in
+        extras_errors and only the fields that need it are left out of answers."""
+        self.extras_errors: dict[str, str] = dict(_IMPORT_ERRORS)
+        self.infos: Optional[dict] = None
+        self.book = None
+        self.public = None
+        self.outside = None
+        self.extras_ms: dict[str, float] = {}
+
+        def attempt(name: str, fn):
+            t = time.perf_counter()
+            try:
+                out = fn()
+            except Exception as e:
+                self.extras_errors[name] = f"{type(e).__name__}: {e}"
+                log.warning("extras %s failed: %s", name, self.extras_errors[name])
+                out = None
+            self.extras_ms[name] = round((time.perf_counter() - t) * 1000, 1)
+            return out
+
+        src = self.bundle if self.mode == "bundle" else None
+        if Q is not None:
+            self.infos = attempt("record_info", lambda: Q.load_record_info(src))
+            # Phone numbers come from the raw file only (never shipped in the bundle).
+            self.book = attempt("phone_book", Q.load_phone_book)
+        if PL is not None:
+            self.public = attempt("public_list", lambda: PL.load(src))
+            if hasattr(PL, "load_outside"):
+                def _outside():
+                    if src is not None and (src / getattr(PL, "CARD_FACTS_FILE", "-")).exists():
+                        return PL.load_outside(src)
+                    return PL.load_outside()
+                self.outside = attempt("outside_lists", _outside)
+        self.cache = _LRU(CACHE_SIZE)
+        attempt("sim_world", lambda: _sim_world(self))  # the village points, built once
+        if WN is not None and hasattr(WN, "_lookups"):
+            attempt("why_not_lookups", lambda: WN._lookups(self.index))  # warm, so the first query is not slow
+
+    def note_error(self, name: str, e: BaseException) -> None:
+        """A per-request extras failure: logged and shown in /api/health, never a 500."""
+        errs = getattr(self, "extras_errors", None)
+        if errs is None:
+            self.extras_errors = errs = {}
+        errs[name] = f"{type(e).__name__}: {e}"
+        log.warning("extras %s failed: %s", name, errs[name], exc_info=e)
 
     # ---- helpers -------------------------------------------------------------------------
 
@@ -319,7 +394,873 @@ def build_trip(s: State, service: str, res: Any, ans: dict) -> dict:
     return out
 
 
-SIM_LABELS = {"nearest_claim": "Nearest facility that claims it", "nearest_evidence": "Nearest with evidence",
+# --------------------------------------------------------------------------------------------
+# Shared per-query core: the answer, the gates, the sim facility set, the why-not strip
+# --------------------------------------------------------------------------------------------
+
+CACHE_SIZE = 64
+SIM_VERSION = "sim_v1"
+SIM_VILLAGE_KM = 50.0
+SIM_MAX_VILLAGES = 3000
+SIM_MAX_FACILITIES = 2500
+#: An exact latitude shared by this many post office rows or more is an artefact (15.59, 15.5934).
+ARTEFACT_LAT_MIN_ROWS = 100
+LABEL_KM = 250.0
+LABEL_PO_KM = 60.0
+LABEL_PO_CELL_KM = 6.0
+LABEL_MAX = 120
+#: The browser's sim uses this radius (SPEC 7.2); the server's counters use it too, so both agree.
+SIM_EARTH_R = 6371.0088
+SHORTENER_HOSTS = ("goo.gl", "maps.app.goo.gl", "bit.ly", "tinyurl.com", "tinyurl", "g.co", "t.co")
+STATUS_RANK = {"evidence": 0, "held_back": 1, "claim_only": 2}
+
+
+class _LRU:
+    """A small thread-safe LRU for per-query results."""
+
+    def __init__(self, n: int):
+        from collections import OrderedDict
+        self.n, self.d, self.lock = n, OrderedDict(), threading.Lock()
+
+    def get(self, key):
+        with self.lock:
+            if key in self.d:
+                self.d.move_to_end(key)
+                return self.d[key]
+        return None
+
+    def put(self, key, value) -> None:
+        with self.lock:
+            self.d[key] = value
+            self.d.move_to_end(key)
+            while len(self.d) > self.n:
+                self.d.popitem(last=False)
+
+
+def demo_on(param: Optional[str]) -> bool:
+    """Masking: VF_DEMO_MODE=1 (env) or demo=1 (request). The request can only turn it on."""
+    env = os.environ.get("VF_DEMO_MODE", "").strip().lower() in ("1", "true", "yes", "on")
+    return env or (param or "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _flag(param: Optional[str]) -> bool:
+    return (param or "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _res_key(res: Any) -> tuple:
+    return tuple(getattr(res, k, None) for k in ("status", "place_id", "lat", "lon", "precision_km", "state",
+                                                  "district", "label", "kind"))
+
+
+def nice_name(s: Optional[str]) -> str:
+    """'UTTAR PRADESH' -> 'Uttar Pradesh', 'JAMMU AND KASHMIR' -> 'Jammu and Kashmir'."""
+    if not s:
+        return ""
+    try:
+        return locate.nice(s)
+    except Exception:
+        small = {"and", "of", "the", "in"}
+        words = str(s).strip().title().split()
+        return " ".join(w.lower() if (i and w.lower() in small) else w for i, w in enumerate(words))
+
+
+def _hav(lat1, lon1, lat2, lon2, r: float = SIM_EARTH_R):
+    """Haversine km (broadcasting), with the radius the browser uses (SPEC 7.2)."""
+    p1, p2 = np.radians(lat1), np.radians(lat2)
+    dphi = p2 - p1
+    dl = np.radians(lon2) - np.radians(lon1)
+    a = np.sin(dphi / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(dl / 2) ** 2
+    return 2 * r * np.arcsin(np.sqrt(np.minimum(a, 1.0)))
+
+
+def _window_of(s: State, service: str, ans: dict, res: Any) -> Optional[dict]:
+    """The query's window: the answer's (v1), else the line's window from vf.services (v0)."""
+    w = dict(ans.get("window") or {})
+    if w.get("minutes") is not None:
+        return w
+    if service not in getattr(S, "WINDOWS", {}):
+        return None
+    sw = S.WINDOWS[service]
+    out = dict(sw.as_dict())
+    f = None
+    if T is not None:
+        try:
+            f = T.origin_factor(rank._location_dict(res), s.index.state_at).value
+        except Exception:
+            f = None
+    W = float(sw.minutes)
+    out.update(minutes=W, allowance=float(sw.allowance), factor=f, origin_loose=False,
+               reach_minutes=float(getattr(S, "REACH_FACTOR_V1", 3.0)) * W, v0_fallback=True)
+    if f is not None and T is not None:
+        out["km_equivalent"] = round(float(T.window_km(W, factor=f)), 1)
+        out["reach_km"] = round(float(T.window_km(out["reach_minutes"], factor=f)), 1)
+    return out
+
+
+def _card_positions(s: State, ans: dict) -> list[tuple[int, int]]:
+    """(position, card_rank) for the cards: results 1..k, or beyond_radius as 1 when there are none."""
+    out = []
+    for r, c in enumerate(ans.get("results") or [], start=1):
+        p = s.index.id_to_pos.get(c.get("facility_id"))
+        if p is not None:
+            out.append((int(p), r))
+    if not out and ans.get("beyond_radius"):
+        p = s.index.id_to_pos.get(ans["beyond_radius"].get("facility_id"))
+        if p is not None:
+            out.append((int(p), 1))
+    return out
+
+
+def _sim_set(s: State, service: str, res: Any, ans: dict) -> dict:
+    """The sim's facilities (SPEC 3.2): rank.gate_masks in_reach (the funnel's claim_within_reach),
+    one record per duplicate group, nearest first, at most SIM_MAX_FACILITIES.
+
+    Duplicate groups keep one record: a card if one is in the group, else the record with the best
+    status (evidence, held back, claim only), then the group's preferred record (not in idx.dup_drop),
+    then the nearest. This is "minus idx.dup_drop" whenever the preferred record is in the set, and it
+    never drops a place's only listing with evidence."""
+    idx = s.index
+    lat, lon = float(res.lat), float(res.lon)
+    d = rank._distances(idx, lat, lon)
+    g = rank.gate_masks(idx, service, d, res)
+    ld = idx.lines[service]
+    grade = np.asarray(ld.grade, int)
+    blocked = np.asarray(ld.blocked, bool)
+    rec_mask = np.asarray(g["rec_mask"], bool)
+    cand = np.flatnonzero(np.asarray(g["in_reach"], bool))
+    cand = cand[np.argsort(d[cand], kind="stable")]
+    status = np.where(rec_mask, "evidence", np.where((grade >= 2) & blocked, "held_back", "claim_only"))
+    cards = dict(_card_positions(s, ans))
+    dup_drop = getattr(idx, "dup_drop", set()) or set()
+    canon = getattr(idx, "dup_canon", {}) or {}
+    groups: dict[int, list[int]] = {}
+    for p in cand:
+        p = int(p)
+        groups.setdefault(canon.get(p, -1 - p), []).append(p)
+    keep_set = set()
+    for gkey, members in groups.items():
+        if len(members) == 1:
+            keep_set.add(members[0])
+            continue
+        best = min(members, key=lambda p: (0 if p in cards else 1, STATUS_RANK[str(status[p])],
+                                           1 if p in dup_drop else 0, float(d[p]), p))
+        keep_set.add(best)
+    keep = [int(p) for p in cand if int(p) in keep_set]
+    n_listing = int(len(cand))
+    n_merged = n_listing - len(keep)
+    merged_rec = int(rec_mask[cand].sum()) - int(rec_mask[np.asarray(keep, dtype=np.int64)].sum())
+    n_capped = max(0, len(keep) - SIM_MAX_FACILITIES)
+    if n_capped:
+        extra = [p for p in keep[SIM_MAX_FACILITIES:] if p in cards]
+        keep = keep[: SIM_MAX_FACILITIES - len(extra)] + extra
+    return {"d": d, "g": g, "pos": np.asarray(keep, dtype=np.int64), "status": status, "grade": grade,
+            "cards": cards, "n_listing": n_listing, "n_merged": n_merged, "n_merged_evidence": merged_rec,
+            "n_capped": n_capped}
+
+
+def _core(s: State, service: str, res: Any, text: Optional[str], demo: bool) -> dict:
+    """One query's shared work, cached: the raw answer, the window, the sim facility set and the
+    why-not strip with letters. /api/answer and /api/sim both read it, so their cards, letters and
+    sets agree."""
+    key = ("core", service, (text or "").strip().lower() if service == FALLBACK_ID else None, _res_key(res), demo)
+    cache = getattr(s, "cache", None)
+    if cache is None:
+        cache = s.cache = _LRU(CACHE_SIZE)
+    if getattr(res, "status", None) != "ok":  # ambiguous, not found, outside India: cheap, never cached
+        return _core_build(s, service, res, text, demo)
+    hit = cache.get(key)
+    if hit is not None:
+        return hit
+    with _key_lock(key):  # /api/answer and /api/sim arrive together: compute once
+        hit = cache.get(key)
+        if hit is not None:
+            return hit
+        core = _core_build(s, service, res, text, demo)
+        cache.put(key, core)
+        return core
+
+
+_KEY_LOCKS: dict = {}
+_KEY_LOCKS_GUARD = threading.Lock()
+
+
+def _key_lock(key) -> threading.Lock:
+    with _KEY_LOCKS_GUARD:
+        if len(_KEY_LOCKS) > 4 * CACHE_SIZE:
+            for k in [k for k, v in _KEY_LOCKS.items() if not v.locked()]:
+                _KEY_LOCKS.pop(k, None)
+        return _KEY_LOCKS.setdefault(key, threading.Lock())
+
+
+def _core_build(s: State, service: str, res: Any, text: Optional[str], demo: bool) -> dict:
+    ans = do_answer(s, service, res, text)
+    core: dict[str, Any] = {"ans": ans, "service": service, "window": None, "set": None, "strip": None,
+                            "funnel": None}
+    graded = service != FALLBACK_ID and service in s.index.lines
+    located = getattr(res, "status", None) == "ok" and res.lat is not None and res.lon is not None
+    if graded and located:
+        try:
+            core["window"] = _window_of(s, service, ans, res)
+        except Exception as e:
+            s.note_error("answer.window", e)
+        try:
+            core["set"] = _sim_set(s, service, res, ans)
+        except Exception as e:
+            s.note_error("sim.facilities", e)
+        if WN is not None:
+            try:
+                strip = WN.why_not_strip(s.index, service, res, ans, mask_names=demo)
+                for i, it in enumerate(strip.get("items") or []):
+                    it["letter"] = _letter(i)
+                core["strip"] = strip
+            except Exception as e:
+                s.note_error("answer.why_not", e)
+            try:
+                f = WN.funnel(s.index, service, res, answer_dict=ans, max_ids=0, detail_steps=(), mask_names=demo)
+                core["funnel"] = {"steps": [{k: st[k] for k in ("step", "label", "n", "n_distinct") if k in st}
+                                            for st in f.get("steps") or []],
+                                  "consistency": f.get("consistency")}
+            except Exception as e:
+                s.note_error("answer.funnel", e)
+    return to_jsonable_keep(core)
+
+
+def to_jsonable_keep(core: dict) -> dict:
+    """JSON-safe copy of the parts that go on the wire; numpy arrays in the sim set stay arrays."""
+    out = dict(core)
+    for k in ("ans", "strip", "funnel", "window"):
+        if out.get(k) is not None:
+            out[k] = to_jsonable(out[k])
+    return out
+
+
+def _letter(i: int) -> str:
+    s = ""
+    i += 1
+    while i:
+        i, r = divmod(i - 1, 26)
+        s = chr(65 + r) + s
+    return s
+
+
+# --------------------------------------------------------------------------------------------
+# /api/answer extras (SPEC 3.1)
+# --------------------------------------------------------------------------------------------
+
+def _official_domain(url: Optional[str]) -> Optional[str]:
+    """The host of the record's official website without "www.", or None for link shorteners and maps."""
+    from urllib.parse import urlsplit
+
+    if not url or not isinstance(url, str) or not url.strip():
+        return None
+    u = url.strip()
+    if "://" not in u:
+        u = "http://" + u
+    try:
+        parts = urlsplit(u)
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower().rstrip(".")
+    if host.startswith("www."):
+        host = host[4:]
+    if not host or "." not in host:
+        return None
+    path = (parts.path or "").lower()
+    if host in SHORTENER_HOSTS or host.endswith(".goo.gl") or host.startswith("maps.google."):
+        return None
+    if (host.startswith("google.") or ".google." in host) and path.startswith("/maps"):
+        return None
+    return host
+
+
+def _requirement_names(line: Optional[str]) -> list[str]:
+    """Plain requirement names to key quotes by: questions.REQUIREMENT_PHRASE keys and the line's recipe names."""
+    names = set(getattr(Q, "REQUIREMENT_PHRASE", {}) or {}) if Q is not None else set()
+    try:
+        from vf import recipes
+        rule = recipes.GRADE_RULES.get(line) if line else None
+        if rule is not None:
+            names.update(getattr(rule, "supported_names", ()) or ())
+            names.update(getattr(rule, "corroborated_names", ()) or ())
+    except Exception:
+        pass
+    return sorted(names, key=len, reverse=True)
+
+
+def _req_key(req: Optional[str], names: list[str]) -> Optional[str]:
+    """The plain name a recipe requirement string starts with: "caesarean section (WHO 2009 ...)" gives
+    "caesarean section". The name sharing the longest prefix wins: a whole name ending at a word boundary,
+    or a common prefix of at least 15 characters ("dialysis unit, machines or haemodialysis named ..."
+    gives "dialysis unit, machines or nephrologist", not "dialysis")."""
+    if not req:
+        return None
+    r = str(req).strip()
+    rl = r.lower()
+    best, best_n = None, 0
+    for n in names:
+        nl = n.lower()
+        if rl.startswith(nl) and (len(rl) == len(nl) or not rl[len(nl)].isalnum()):
+            score = len(nl) + 0.5
+        else:
+            k = 0
+            for a, b in zip(rl, nl):
+                if a != b:
+                    break
+                k += 1
+            score = k if k >= 15 else 0
+        if score > best_n:
+            best, best_n = n, score
+    if best is not None:
+        return best
+    base = re.split(r"\s*[(;]", r)[0].strip(" ,")
+    return base or None
+
+
+def _marks(text: str, rx) -> list[list[int]]:
+    if rx is None or not text:
+        return []
+    low = text.lower()
+    hay = low if len(low) == len(text) else text
+    flags = 0 if hay is low else re.IGNORECASE
+    pat = rx if not flags else re.compile(rx.pattern, flags)
+    return [[m.start(), m.end()] for m in pat.finditer(hay) if m.end() > m.start()]
+
+
+def _quotes(card: dict, line: Optional[str], names: list[str], rx) -> list[dict]:
+    """card.evidence merged by normalised quote text: the first item's order, the union of keys."""
+    out: list[dict] = []
+    by_norm: dict[str, dict] = {}
+    for e in card.get("evidence") or []:
+        q = e.get("quote")
+        if not q:
+            continue
+        text = " ".join(str(Q.mask_numbers(q) if Q is not None and hasattr(Q, "mask_numbers") else q).split())
+        norm = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+        reqs = [x for x in (e.get("requirements") or [e.get("requirement")]) if x]
+        keys = [k for k in (_req_key(x, names) for x in reqs) if k]
+        if norm in by_norm:
+            row = by_norm[norm]
+            for k in keys:
+                if k not in row["requirement_keys"]:
+                    row["requirement_keys"].append(k)
+            continue
+        row = {"text": text, "field": e.get("field"), "requirement_keys": list(dict.fromkeys(keys)),
+               "marks": _marks(text, rx)}
+        by_norm[norm] = row
+        out.append(row)
+    return out
+
+
+def _missing_phrases(card: dict, names: list[str]) -> list[str]:
+    phrase = getattr(Q, "REQUIREMENT_PHRASE", {}) if Q is not None else {}
+    try:
+        raw = Q._missing_requirements(card) if Q is not None else list(card.get("missing") or [])
+    except Exception:
+        raw = list(card.get("missing") or [])
+    out = []
+    for m in raw:
+        k = _req_key(m, names) or m
+        p = phrase.get(k, k)
+        if p and p not in out:
+            out.append(p)
+    return out
+
+
+def _time(card: dict, loose: bool) -> Optional[dict]:
+    m = card.get("minutes")
+    if m is None or T is None:
+        return None
+    lo, hi = card.get("minutes_low"), card.get("minutes_high")
+    rng = f"{T.fmt_minutes(lo)} to {T.fmt_minutes(hi)}" if lo is not None and hi is not None else None
+    short = rng if (loose and rng) else "about " + T.fmt_minutes(m)
+    return {"short": short, "range": rng or short, "loose": bool(loose)}
+
+
+def _call(s: State, fid: str, reveal: bool, demo: bool) -> Optional[dict]:
+    """The Call button: the number always masked; tel only when reveal=1 is asked and demo is off."""
+    if Q is None or s.book is None:
+        return None
+    masked = Q.call_info(fid, s.book, reveal=False)
+    tel = None
+    if reveal and not demo and masked.get("has_phone"):
+        tel = Q.call_info(fid, s.book, reveal=True).get("tel")
+    return {"has_phone": bool(masked.get("has_phone")), "phone": masked.get("phone"), "tel": tel,
+            "note": masked.get("note")}
+
+
+def _enrich_card(s: State, c: dict, *, service: str, line: Optional[str], text: Optional[str], origin_state: str,
+                 loose: bool, demo: bool, reveal: bool, names: list[str], rx, sim_index: dict) -> None:
+    fid = c.get("facility_id")
+
+    def put(field: str, fn) -> None:
+        try:
+            c[field] = fn()
+        except Exception as e:
+            c.pop(field, None)
+            s.note_error(f"card.{field}", e)
+
+    name = str(c.get("name") or "")
+    head, _, rest = name.partition(",")
+    c["name_short"] = head.strip() or name
+    c["name_rest"] = rest.strip() or None
+    put("time", lambda: _time(c, loose))
+
+    def state_disp():
+        st = None
+        if c.get("lat") is not None and c.get("lon") is not None:
+            st = s.index.state_at(float(c["lat"]), float(c["lon"]))
+        return nice_name(st or c.get("state")) or None
+    put("state_display", state_disp)
+    if c.get("state_display") and origin_state:
+        c["crosses_state"] = c["state_display"] != origin_state
+    else:
+        c["crosses_state"] = False
+    put("quotes", lambda: _quotes(c, line, names, rx))
+    put("missing_phrases", lambda: _missing_phrases(c, names))
+    if Q is not None:
+        def qs():
+            rec = s.infos.get(fid) if s.infos else None
+            if service == FALLBACK_ID:
+                got = Q.questions_for(c, "search", rec, service_text=text, max_questions=3)
+            else:
+                got = Q.questions_for(c, service, rec, max_questions=3)
+            return [{"question": x.get("question"), "why": x.get("why")} for x in got][:3]
+        put("questions", qs)
+        if s.book is not None:
+            put("call", lambda: _call(s, fid, reveal, demo))
+    put("official_domain", lambda: _official_domain((c.get("sources") or {}).get("official_website")))
+    if s.public is not None:
+        put("public_list", lambda: to_jsonable(s.public.line(fid)) if service == "emoc" else None)
+    elif "public_list" in c:
+        c["public_list"] = None if service != "emoc" else c["public_list"]
+    c["sim_index"] = sim_index.get(fid)
+
+
+def _why_not_minutes(s: State, ans: dict) -> None:
+    """Why-not rows get the same estimated drive the cards use (minutes from straight-line km and the
+    origin's terrain factor), so the strip speaks in minutes like the cards. Rows with an approximate
+    position (no km) get none. For a loose origin the minutes are from the middle of the place, as the
+    cards' point minutes are."""
+    if T is None:
+        return
+    try:
+        f = (ans.get("window") or {}).get("factor")
+        if f is None:
+            return
+        for it in (ans.get("why_not") or {}).get("items") or []:
+            km = it.get("distance_km")
+            if km is None:
+                continue
+            m = T.travel_minutes(float(km), factor=float(f))
+            if m is not None:
+                it["minutes"] = round(float(m), 1)
+                it["time_short"] = "about " + T.fmt_minutes(m)
+    except Exception as e:
+        s.note_error("answer.why_not_minutes", e)
+
+
+def _mask_unverified(s: State, ans: dict) -> None:
+    """Demo mode: unverified_nearby names are masked like the why-not strip (the UI does not show them,
+    but the payload must not carry them either)."""
+    lst = ans.get("unverified_nearby") or []
+    if not lst:
+        return
+    try:
+        fids = s.index.fac["facility_id"].astype(str).to_numpy()
+        pos_of = getattr(s, "_fid_pos", None)
+        if pos_of is None or len(pos_of) != len(fids):
+            pos_of = {f: i for i, f in enumerate(fids)}
+            s._fid_pos = pos_of
+        for c in lst:
+            if not isinstance(c, dict):
+                continue
+            p = pos_of.get(str(c.get("facility_id")))
+            masked = WN.masked_name(s.index, p) if (WN is not None and p is not None) else "Facility (name hidden)"
+            old = str(c.get("name") or "")
+            c["name"] = masked
+            c["name_masked"] = True
+            for k in ("name_short", "name_rest"):
+                c.pop(k, None)
+            if old and len(old) >= 3:
+                rx = re.compile(re.escape(old), re.I)
+
+                def scrub(o):
+                    if isinstance(o, str):
+                        return rx.sub(masked, o)
+                    if isinstance(o, list):
+                        return [scrub(x) for x in o]
+                    if isinstance(o, dict):
+                        return {k: (v if k == "facility_id" else scrub(v)) for k, v in o.items()}
+                    return o
+                c.update(scrub({k: v for k, v in c.items() if k != "name"}))
+    except Exception as e:
+        s.note_error("answer.mask_unverified", e)
+        for c in lst:
+            if isinstance(c, dict):
+                c["name"] = "Facility (name hidden)"
+                c["name_masked"] = True
+
+
+def enrich_answer(s: State, service: str, res: Any, core: dict, *, text: Optional[str] = None,
+                  demo: bool = False, reveal: bool = False) -> dict:
+    """/api/answer = do_answer plus the SPEC 3.1 fields. Everything already there keeps its name and value
+    (further_away loses the beyond_radius card, which is shown once). A failing part leaves its own fields
+    out and is listed in /api/health extras_errors; this never raises."""
+    import copy
+
+    ans = copy.deepcopy(core["ans"])
+    ans["demo_masked"] = bool(demo)
+    try:
+        loc = ans.get("location") or {}
+        if ans.get("status") not in ("ok", "no_reliable_option") or loc.get("lat") is None:
+            return ans
+        win = core.get("window")
+        line = service if service != FALLBACK_ID else None
+        # window texts
+        if win is not None:
+            w = dict(ans.get("window") or {}) or dict(win)
+            try:
+                if T is not None:
+                    w["hours_text"] = T.fmt_hours(w["minutes"])
+                    if w.get("reach_minutes") is not None:
+                        w["reach_text"] = T.fmt_minutes(w["reach_minutes"])
+            except Exception as e:
+                s.note_error("answer.window_text", e)
+            ans["window"] = w
+        loose = bool((ans.get("window") or {}).get("origin_loose", False))
+        # origin
+        origin_state = ""
+        try:
+            origin_state = nice_name(loc.get("state")) or nice_name(s.index.state_at(float(loc["lat"]), float(loc["lon"])))
+            prec = loc.get("precision_km")
+            kme = (ans.get("window") or {}).get("km_equivalent")
+            ans["origin"] = {"short_name": rank._place_name(loc), "label": loc.get("label"), "precision_km": prec,
+                             "loose": loose,
+                             "too_coarse": bool(prec is not None and kme is not None and float(prec) > float(kme)),
+                             "state_display": origin_state}
+        except Exception as e:
+            s.note_error("answer.origin", e)
+        # further away: the beyond_radius card is listed once
+        br = ans.get("beyond_radius")
+        if br and isinstance(ans.get("further_away"), list):
+            ans["further_away"] = [c for c in ans["further_away"] if c.get("facility_id") != br.get("facility_id")]
+        # why not, funnel
+        sim_status: dict[str, str] = {}
+        sim_index: dict[str, int] = {}
+        st = core.get("set")
+        if st is not None:
+            fids = s.index.fac["facility_id"].to_numpy()
+            for i, p in enumerate(st["pos"]):
+                sim_index[str(fids[p])] = i
+                sim_status[str(fids[p])] = str(st["status"][p])
+        if core.get("strip") is not None:
+            strip = copy.deepcopy(core["strip"])
+            for it in strip.get("items") or []:
+                it["in_sim"] = sim_status.get(str(it.get("facility_id"))) in ("claim_only", "held_back")
+            ans["why_not"] = strip
+            _why_not_minutes(s, ans)
+        if demo:
+            _mask_unverified(s, ans)
+        if core.get("funnel") is not None:
+            ans["funnel"] = copy.deepcopy(core["funnel"])
+        # outside lists (public_list v2), then the per-card fields
+        if PL is not None and hasattr(PL, "annotate_answer") and s.outside is not None:
+            try:
+                PL.annotate_answer(ans, service, loc.get("lat"), loc.get("lon"), loc.get("state"), outside=s.outside)
+                ans = to_jsonable(ans)
+            except Exception as e:
+                s.note_error("answer.outside_lists", e)
+        names = _requirement_names(line)
+        rx = None
+        if WN is not None and line is not None:
+            try:
+                rx = WN.literal_pattern(line)
+            except Exception as e:
+                s.note_error("answer.marks", e)
+        br = ans.get("beyond_radius")
+        cards = list(ans.get("results") or []) + ([br] if br else []) + list(ans.get("further_away") or [])
+        for c in cards:
+            if isinstance(c, dict) and c.get("facility_id"):
+                _enrich_card(s, c, service=service, line=line, text=text, origin_state=origin_state, loose=loose,
+                             demo=demo, reveal=reveal, names=names, rx=rx, sim_index=sim_index)
+    except Exception as e:  # never a 500 because of an extra
+        s.note_error("answer.enrich", e)
+    return ans
+
+
+# --------------------------------------------------------------------------------------------
+# /api/sim (SPEC 3.2, 3.3, 7.3)
+# --------------------------------------------------------------------------------------------
+
+def _sim_world(s: State) -> dict:
+    """Village points for every query, built once: post offices without placeholders and artefact
+    latitudes, with usable coordinates, one per (lat, lon), each with its state's terrain factor."""
+    w = getattr(s, "_sim_world_cache", None)
+    if w is not None:
+        return w
+    po = s.index.post_offices
+    if po is None or not len(po):
+        w = {"lat": np.array([]), "lon": np.array([]), "pin": np.array([], dtype=object),
+             "factor": np.array([]), "n_artefact": 0, "n_placeholder": 0}
+        s._sim_world_cache = w
+        return w
+    po = po.dropna(subset=["lat", "lon"])
+    n_ph = 0
+    if "placeholder" in po:
+        ph = po["placeholder"].fillna(False).astype(bool)
+        n_ph = int(ph.sum())
+        po = po[~ph]
+    vc = po["lat"].value_counts()
+    bad = vc[vc >= ARTEFACT_LAT_MIN_ROWS].index
+    art = po["lat"].isin(bad)
+    n_art = int(art.sum())
+    # 5 decimals (about 1 m) is what the payload carries, so points are deduplicated at that precision
+    po = po[~art].assign(lat=po["lat"].round(5), lon=po["lon"].round(5)).drop_duplicates(subset=["lat", "lon"])
+    lat = po["lat"].to_numpy(float)
+    lon = po["lon"].to_numpy(float)
+    pin = po["pin"].astype(str).to_numpy() if "pin" in po else np.full(len(po), "", object)
+    factor = np.full(len(po), np.nan)
+    if T is not None and len(po):
+        states = _states_at(s, lat, lon)
+        fac_of: dict = {}
+        for i, st in enumerate(states):
+            if st not in fac_of:
+                v = T.state_factor(st).value
+                fac_of[st] = np.nan if v is None else float(v)
+            factor[i] = fac_of[st]
+    w = {"lat": lat, "lon": lon, "pin": pin, "factor": factor, "n_artefact": n_art, "n_placeholder": n_ph,
+         "artefact_lats": [float(x) for x in bad]}
+    s._sim_world_cache = w
+    return w
+
+
+def _states_at(s: State, lat: np.ndarray, lon: np.ndarray) -> list:
+    """idx.state_at for many points at once: the state of the nearest PIN point (a k-d tree on unit
+    vectors gives the same nearest point as the haversine argmin)."""
+    idx = s.index
+    if idx.pin_lat is None or not len(idx.pin_lat):
+        return [None] * len(lat)
+    plat, plon = np.asarray(idx.pin_lat, float), np.asarray(idx.pin_lon, float)
+    ok = np.isfinite(plat) & np.isfinite(plon)
+    pst = np.asarray(idx.pin_state)[ok]
+
+    def xyz(a, b):
+        a, b = np.radians(a), np.radians(b)
+        return np.c_[np.cos(a) * np.cos(b), np.cos(a) * np.sin(b), np.sin(a)]
+    try:
+        from scipy.spatial import cKDTree
+        _, j = cKDTree(xyz(plat[ok], plon[ok])).query(xyz(lat, lon))
+        return [str(pst[k]) for k in j]
+    except ImportError:  # pragma: no cover
+        return [idx.state_at(float(a), float(b)) for a, b in zip(lat, lon)]
+
+
+def sim_summary(v_lat, v_lon, v_fac, f_lat, f_lon, status, W: float, a: float, b: float) -> dict:
+    """The SPEC 7.3 counters on the payload's own numbers (the browser runs the same rules).
+
+    MIN[v][j] = factor[v] * a * KM[v][j]^b, KM haversine with R 6371.0088.
+    within: nearestEv(v) <= W. avg_minutes: mean finite nearestEv, 1 decimal. first(v): argmin KM over
+    all facilities (ties to the lower i). first_no_evidence: first(v) has no evidence. extra_minutes_mean:
+    over those with a finite nearestEv, MIN[v][first] + factor[v]*a*km(first, j*)^b - nearestEv(v), where
+    j* is the evidence facility nearest to first(v), 1 decimal."""
+    v_lat, v_lon, v_fac = (np.asarray(x, float) for x in (v_lat, v_lon, v_fac))
+    f_lat, f_lon = np.asarray(f_lat, float), np.asarray(f_lon, float)
+    status = np.asarray(status, dtype=object)
+    V, F = len(v_lat), len(f_lat)
+    ev = status == "evidence"
+    out = {"n_villages": int(V), "within": 0, "avg_minutes": None, "n_no_evidence_in_reach": int(V),
+           "first_no_evidence": 0, "first_claim_only": 0, "first_held_back": 0, "extra_minutes_mean": None}
+    if V == 0 or F == 0:
+        return out
+    near_ev = np.full(V, np.inf)
+    first = np.zeros(V, dtype=np.int64)
+    first_km = np.zeros(V)
+    ev_idx = np.flatnonzero(ev)
+    step = max(1, 2_000_000 // max(F, 1))
+    for s0 in range(0, V, step):
+        sl = slice(s0, min(V, s0 + step))
+        km = _hav(v_lat[sl, None], v_lon[sl, None], f_lat[None, :], f_lon[None, :])
+        first[sl] = np.argmin(km, axis=1)
+        first_km[sl] = km[np.arange(km.shape[0]), first[sl]]
+        if len(ev_idx):
+            mins = v_fac[sl, None] * a * np.power(km[:, ev_idx], b)
+            near_ev[sl] = mins.min(axis=1)
+    fin = np.isfinite(near_ev)
+    out["within"] = int((near_ev <= W).sum())
+    out["n_no_evidence_in_reach"] = int((~fin).sum())
+    if fin.any():
+        out["avg_minutes"] = round(float(near_ev[fin].mean()), 1)
+    no_ev = ~ev[first]
+    out["first_no_evidence"] = int(no_ev.sum())
+    out["first_claim_only"] = int((no_ev & (status[first] == "claim_only")).sum())
+    out["first_held_back"] = int((no_ev & (status[first] == "held_back")).sum())
+    sel = np.flatnonzero(no_ev & fin)
+    if len(sel) and len(ev_idx):
+        uf = np.unique(first[sel])
+        kmf = _hav(f_lat[uf, None], f_lon[uf, None], f_lat[None, ev_idx], f_lon[None, ev_idx])
+        jstar_km = dict(zip(uf.tolist(), kmf[np.arange(len(uf)), np.argmin(kmf, axis=1)].tolist()))
+        leg2 = np.array([jstar_km[int(first[v])] for v in sel])
+        m_first = v_fac[sel] * a * np.power(first_km[sel], b)
+        extra = m_first + v_fac[sel] * a * np.power(leg2, b) - near_ev[sel]
+        out["extra_minutes_mean"] = round(float(extra.mean()), 1)
+    return out
+
+
+def _context_labels(s: State, res: Any) -> list[dict]:
+    """Map labels near the origin from the gazetteer: districts and cities within LABEL_KM (prio 1 for
+    the origin's district, 2 otherwise), and post offices within LABEL_PO_KM thinned to one per
+    LABEL_PO_CELL_KM grid cell by the most offices (prio 3). At most LABEL_MAX, by prio then distance."""
+    p = s.resolver.places
+    lat0, lon0 = float(res.lat), float(res.lon)
+    kind = p["kind"].to_numpy()
+    plat, plon = p["lat"].to_numpy(float), p["lon"].to_numpy(float)
+    m = np.isin(kind, ("district", "city", "post_office")) & np.isfinite(plat) & np.isfinite(plon)
+    m &= np.abs(plat - lat0) < LABEL_KM / 100.0
+    pos = np.flatnonzero(m)
+    dk = haversine_km(lat0, lon0, plat[pos], plon[pos])
+    dist_o = (getattr(res, "district", None) or "").strip().upper()
+    names = p["name"].to_numpy()
+    dists = p["district"].to_numpy() if "district" in p else np.full(len(p), "", object)
+    nof = p["n_offices"].to_numpy() if "n_offices" in p else np.zeros(len(p))
+    out = []
+    big = pos[(dk <= LABEL_KM) & np.isin(kind[pos], ("district", "city"))]
+    dbig = dk[(dk <= LABEL_KM) & np.isin(kind[pos], ("district", "city"))]
+    for q, dd in zip(big, dbig):
+        k = str(kind[q])
+        prio = 1 if (k == "district" and dist_o and str(dists[q]).strip().upper() == dist_o) else 2
+        out.append({"name": nice_name(str(names[q])), "kind": k, "lat": round(float(plat[q]), 5),
+                    "lon": round(float(plon[q]), 5), "prio": prio, "_d": float(dd)})
+    pom = (dk <= LABEL_PO_KM) & (kind[pos] == "post_office")
+    po_pos, po_d = pos[pom], dk[pom]
+    if len(po_pos):
+        cy = np.floor((plat[po_pos] - lat0) * 111.2 / LABEL_PO_CELL_KM).astype(int)
+        cx = np.floor((plon[po_pos] - lon0) * 111.2 * math.cos(math.radians(lat0)) / LABEL_PO_CELL_KM).astype(int)
+        best: dict = {}
+        for q, dd, a, b in zip(po_pos, po_d, cy, cx):
+            cur = best.get((a, b))
+            key = (-float(nof[q]), float(dd))
+            if cur is None or key < cur[0]:
+                best[(a, b)] = (key, q, dd)
+        for _, q, dd in best.values():
+            out.append({"name": nice_name(str(names[q])), "kind": "post_office", "lat": round(float(plat[q]), 5),
+                        "lon": round(float(plon[q]), 5), "prio": 3, "_d": float(dd)})
+    out.sort(key=lambda r: (r["prio"], r["_d"], r["name"]))
+    seen, labels = set(), []
+    for r in out:
+        k = (r["name"].lower(), r["kind"])
+        if k in seen:
+            continue
+        seen.add(k)
+        r.pop("_d")
+        labels.append(r)
+        if len(labels) >= LABEL_MAX:
+            break
+    return labels
+
+
+def _sim_unavailable(service: str, reason: str, **extra: Any) -> dict:
+    label = S.SERVICES[service].label if service in S.SERVICES else None
+    return {"status": "unavailable", "version": SIM_VERSION, "service": service, "service_label": label,
+            "reason": reason, **extra}
+
+
+def build_sim(s: State, service: str, res: Any, core: dict, demo: bool) -> dict:
+    """The /api/sim payload (SPEC 3.3): villages, facilities with their evidence status, the window,
+    the drive-time model, the counters by the SPEC 7.3 rules, and map labels."""
+    idx = s.index
+    if T is None:
+        return _sim_unavailable(service, "The drive-time model is not loaded.")
+    win = core.get("window")
+    st = core.get("set")
+    if win is None or st is None:
+        return _sim_unavailable(service, "The trip view could not be built for this place.")
+    origin_factor = win.get("factor")
+    if origin_factor is None or win.get("sea_travel_not_modelled"):
+        return _sim_unavailable(service, "Drive times are not modelled for island origins.")
+    ans = core["ans"]
+    loc = ans.get("location") or rank._location_dict(res)
+    lat0, lon0 = float(res.lat), float(res.lon)
+    W, A = float(win["minutes"]), float(win.get("allowance") or 0.0)
+    a, b = float(T.A_MIN), float(T.B_EXP)
+
+    # villages
+    world = _sim_world(s)
+    dv = haversine_km(lat0, lon0, world["lat"], world["lon"]) if len(world["lat"]) else np.array([])
+    vsel = np.flatnonzero(dv <= SIM_VILLAGE_KM)
+    vsel = vsel[np.argsort(dv[vsel], kind="stable")][:SIM_MAX_VILLAGES]
+    v_lat = np.round(world["lat"][vsel], 5)
+    v_lon = np.round(world["lon"][vsel], 5)
+    v_fac = world["factor"][vsel].copy()
+    v_fac[~np.isfinite(v_fac)] = float(origin_factor)
+    v_fac = np.round(v_fac, 4)
+
+    # facilities
+    fac = idx.fac
+    pos = st["pos"]
+    d = st["d"]
+    status = st["status"]
+    grade = st["grade"]
+    approx = np.asarray(idx.approx, bool) if getattr(idx, "approx", None) is not None else np.zeros(len(fac), bool)
+    cards = st["cards"]
+    letters = {str(it.get("facility_id")): it.get("letter") for it in ((core.get("strip") or {}).get("items") or [])}
+    fids = fac["facility_id"].to_numpy()
+    names = fac["name"].to_numpy()
+    ops = fac["operator_type"].to_numpy() if "operator_type" in fac else np.full(len(fac), None, object)
+    facilities = []
+    for i, p in enumerate(pos):
+        p = int(p)
+        fid = str(fids[p])
+        masked = bool(demo and p not in cards and WN is not None)
+        nm = WN.masked_name(idx, p) if masked else rank._str_or_none(names[p]) or "(no name)"
+        op = rank._str_or_none(ops[p])
+        facilities.append({
+            "i": i, "facility_id": fid, "name": nm,
+            "lat": round(float(idx.lat[p]), 5), "lon": round(float(idx.lon[p]), 5),
+            "status": str(status[p]), "strong": bool(status[p] == "evidence" and grade[p] >= 3),
+            "grade": int(grade[p]), "approximate": bool(approx[p]), "operator": op,
+            "km_from_origin": round(float(d[p]), 1), "card_rank": cards.get(p),
+            "why_not_letter": letters.get(fid), "name_masked": masked})
+    f_lat = np.array([f["lat"] for f in facilities], float)
+    f_lon = np.array([f["lon"] for f in facilities], float)
+    f_status = np.array([f["status"] for f in facilities], dtype=object)
+    summary = sim_summary(v_lat, v_lon, v_fac, f_lat, f_lon, f_status, W, a, b)
+    summary.update({"n_facilities": len(facilities), "n_evidence": int((f_status == "evidence").sum()),
+                    "n_claim_only": int((f_status == "claim_only").sum()),
+                    "n_held_back": int((f_status == "held_back").sum()),
+                    "n_listing_records": int(st["n_listing"]), "n_merged_duplicates": int(st["n_merged"])})
+    basis = str(win.get("basis") or "")
+    mm = re.match(r"^(.*?[.!?])(\s|$)", basis)
+    km_eq = win.get("km_equivalent")
+    reach_m = win.get("reach_minutes") or float(getattr(S, "REACH_FACTOR_V1", 3.0)) * W
+    out = {
+        "status": "ok", "version": SIM_VERSION, "service": service, "service_label": S.SERVICES[service].label,
+        "service_phrase": rank._label_lc(service),
+        "origin": {"lat": lat0, "lon": lon0, "short_name": rank._place_name(loc), "label": loc.get("label"),
+                   "precision_km": loc.get("precision_km"),
+                   "state_display": nice_name(loc.get("state")) or nice_name(idx.state_at(lat0, lon0)),
+                   "factor": float(origin_factor)},
+        "window": {"minutes": W, "allowance": A, "hours_text": T.fmt_hours(W),
+                   "km_equivalent": km_eq if km_eq is not None else round(float(T.window_km(W, factor=origin_factor)), 1),
+                   "reach_km": win.get("reach_km") if win.get("reach_km") is not None
+                   else round(float(T.window_km(reach_m, factor=origin_factor)), 1),
+                   "reach_minutes": float(reach_m), "basis_short": (mm.group(1) if mm else basis) or None},
+        "travel": {"a": a, "b": b, "text": T.MODEL_TEXT},
+        "villages": {"n": int(len(vsel)), "radius_km": SIM_VILLAGE_KM, "lon": v_lon.tolist(), "lat": v_lat.tolist(),
+                     "pin": [str(x) for x in world["pin"][vsel]], "factor": v_fac.tolist()},
+        "facilities": facilities,
+        "summary": summary,
+        "context": {"labels": []},
+        "notes": ["Straight-line paths; times from the drive-time estimate, free-flow.",
+                  "Each village is a post office area; offices sharing one point are one village."],
+    }
+    try:
+        out["context"]["labels"] = _context_labels(s, res)
+    except Exception as e:
+        s.note_error("sim.labels", e)
+    return out
+
+
+SIM_LABELS = {"nearest_claim":"Nearest facility that claims it", "nearest_evidence": "Nearest with evidence",
               "ranked": "Our ranking"}
 
 
@@ -377,6 +1318,14 @@ def api_health() -> JSONResponse:
         "probability_lines": [l for l in idx.lines if idx.is_probability(l)],
         "simulate_available": simulate_available(s), "search_available": True,
         "static": STATIC_DIR.exists(), "load_ms": round(s.load_ms, 1), "manifest": s.manifest,
+        "extras": {"record_info": getattr(s, "infos", None) is not None,
+                   "phone_book": getattr(s, "book", None) is not None,
+                   "public_list": getattr(s, "public", None) is not None,
+                   "outside_lists": getattr(s, "outside", None) is not None,
+                   "why_not": WN is not None, "travel": T is not None,
+                   "load_ms": getattr(s, "extras_ms", {})},
+        "extras_errors": dict(getattr(s, "extras_errors", {}) or {}),
+        "sim_version": SIM_VERSION,
     }))
 
 
@@ -404,7 +1353,10 @@ def api_resolve(q: str = Query("", description="PIN, city, district, village or 
 def api_answer(service: str = Query(""), q: str = Query(""),
                state_: Optional[str] = Query(None, alias="state"),
                text: Optional[str] = Query(None, description="free text for 'Something else'"),
-               place_id: Optional[str] = Query(None)) -> JSONResponse:
+               place_id: Optional[str] = Query(None),
+               demo: Optional[str] = Query(None, description="1 masks names and phone links (can only turn masking on)"),
+               reveal: Optional[str] = Query(None, description="1 adds a tel: link to Call (never in demo mode)")
+               ) -> JSONResponse:
     t0 = time.perf_counter()
     s = state()
     if not service and not text:
@@ -413,7 +1365,45 @@ def api_answer(service: str = Query(""), q: str = Query(""),
     if service != FALLBACK_ID:
         s.service(service)
     res = _resolve_or_400(s, q, state_, place_id)
-    return _timed(do_answer(s, service, res, text), t0)
+    if service == FALLBACK_ID and (not text or not text.strip()):
+        raise ApiError(400, "For 'Something else', type the care needed.")
+    dm = demo_on(demo)
+    core = _core(s, service, res, text, dm)
+    return _timed(enrich_answer(s, service, res, core, text=text, demo=dm, reveal=_flag(reveal)), t0)
+
+
+@app.get("/api/sim")
+def api_sim(service: str = Query(...), q: str = Query(""),
+            state_: Optional[str] = Query(None, alias="state"),
+            place_id: Optional[str] = Query(None),
+            demo: Optional[str] = Query(None)) -> JSONResponse:
+    """The agent simulator's world for one query (SPEC 3.2): villages, facilities with their evidence
+    status, the window, the drive-time model, the baseline counters and map labels."""
+    t0 = time.perf_counter()
+    s = state()
+    if service == FALLBACK_ID:
+        return _timed(_sim_unavailable(service, "The trip view needs one of the listed services."), t0)
+    s.service(service)
+    res = _resolve_or_400(s, q, state_, place_id)
+    if res.status != "ok" or res.lat is None or res.lon is None:
+        return _timed(_sim_unavailable(service, "Pick a single place first.", location=to_jsonable(res)), t0)
+    if service not in s.index.lines:
+        return _timed(_sim_unavailable(service, "This service has no grades loaded."), t0)
+    dm = demo_on(demo)
+    key = ("sim", service, _res_key(res), dm)
+    hit = s.cache.get(key)
+    if hit is None:
+        try:
+            core = _core(s, service, res, None, dm)
+            hit = build_sim(s, service, res, core, dm)
+        except ApiError:
+            raise
+        except Exception as e:
+            s.note_error("sim.build", e)
+            return _timed(_sim_unavailable(service, "The trip view could not be built for this place."), t0)
+        hit = to_jsonable(hit)
+        s.cache.put(key, hit)
+    return _timed(dict(hit), t0)
 
 
 @app.get("/api/trip")
