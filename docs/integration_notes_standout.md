@@ -176,3 +176,12 @@ Open issues:
 - laqshya.* is still null: no hand-labeled link file exists at the candidate paths, and reports/laqshya_links.md belongs to another workflow. The LaQshya ratio must stay off screen until Hruday spot-checks the 13 (D044).
 - The bundle was rebuilt by another workflow during this round (now built 04:22:17Z). Rerun the build after the 04:00 freeze bundle is final.
 - The ratio miss is reported as one unknown entry, but it subtracts both numbers from found, so the CLI counts can read '13 numbers, 11 in findings, 1 not'. This is cosmetic.
+
+## public_list v2: outside lists (D055, coming before the 04:00 freeze)
+
+`vf.public_list` will gain multi-source outside lists (LaQshya plus up to 5 more: AERB radiotherapy licences, MoHFW trauma care facilities, the NHP blood bank directory, NABI burn-care providers, National Cancer Grid). UI and server code should render these fields whenever present and ignore them when absent. They are ADDED to the answer; nothing existing is renamed or removed.
+
+- `vf.public_list.annotate_answer(answer: dict, service_line: str, lat: float, lon: float, state: str | None) -> dict` returns the same answer with two added fields. The server calls it once per `/api/answer`, after the ranker.
+- Per card: `outside_lines`: list of `{source_id, source_name, publisher, list_date, what, status, citation, text}`. `status` is `current`, `lapsed` or `undated`. `text` is the full display sentence and always ends with "Outside data, not from this record." Show it under the card's evidence, styled as outside data (different from quotes).
+- Per answer: `outside_nearby`: up to 3 `{source_id, source_name, name, district, state, pin, lat, lon, position_precision_km, position_note, minutes_label, km, what, citation, text}`. These are facilities on an outside list for this service, within the service window, that are NOT in our dataset. Render them as a separate, clearly labeled lane: "Also on government or registry lists nearby (not in this dataset)". Show it on results and, prominently, on the abstention screen as a next step. Never mix these with recommended cards, never number them like results, and show "position approximate (PIN area)" when `position_note` says so.
+- Only links whose agent-checked precision has a one-sided 95% lower bound of at least 0.90 produce `outside_lines`. A blood bank listing appears only as a card fact (for emoc, cardiac_surgery, trauma), never in the nearby lane.
