@@ -1,8 +1,8 @@
-# Capability recipes (v0)
+# Capability recipes (v0.1)
 
 How facts become evidence tags, and how tags become a facility grade. This is a starting spec. WP3 owns it: change it when the data says so, bump the version, and log the change in `08_decisions_log.md`.
 
-Recipe version: `v0` (Nov 21, 2026).
+Recipe version: `v0.1` (Nov 21, 2026). v0.1 changes four things in the v0 tagger, listed under "Changes in v0.1" below. The grade rules are unchanged.
 
 ## Two layers
 
@@ -16,14 +16,14 @@ Evidence tags:
 | Tag | Meaning | Starter regex (lowercased text) |
 | --- | --- | --- |
 | `ob_delivery` | Conducts deliveries or has a maternity or labour ward | `maternity\|labou?r (room\|ward)\|normal delivery\|childbirth\|obstetric` |
-| `csection` | Performs caesarean sections | `c[- ]?section\|caesarean\|cesarean\|\blscs\b` |
+| `csection` | Performs caesarean sections | `\bc[- ]?section\|caesarean\|cesarean\|\blscs\b` |
 | `blood` | Blood bank, blood storage, or transfusion | `blood bank\|blood storage\|blood transfusion` |
 | `anesthesia` | Anesthesia service or anesthetist | `an(a)?esthe` |
 | `ot` | Operating theatre | `operation theat\|operating theat\|operating room` |
 | `h24` | Round-the-clock service | `24/7\|24x7\|24 ?hours\|24 ?hrs\|24-hour\|round the clock` |
 | `nicu` | Neonatal intensive or special care | `\bnicu\b\|\bsncu\b\|neonatal intensive` |
 | `dialysis` | Provides dialysis | `dialysis` |
-| `dialysis_unit` | Named unit, machines, or nephrologist | `dialysis (unit\|machine\|centre\|center)\|h(a)?emodialysis\|nephrologist` |
+| `dialysis_unit` | Named unit, machines, or nephrologist | `dialysis (unit\|machine\|centre\|center)\|nephrologist` |
 | `icu` | Intensive care unit | `\bicu\b\|intensive care\|critical care unit` |
 | `ventilator` | Mechanical ventilation | `ventilator` |
 | `emergency` | Emergency or trauma care | `emergency\|trauma\|casualty` |
@@ -43,7 +43,22 @@ Noise tags (so the model learns what to ignore, and for the gold table):
 | `web_presence` | About the web page itself | "Maintains an unofficial Facebook page" |
 | `other_clinical` | A real clinical fact outside the three service lines | "Digital EEG/Video EEG testing" |
 
-The regexes are a baseline and a way to pick which facts to send to the teacher. They are known to be crude: `ot` and `delivery` style patterns match unrelated text, and negations ("no ICU") are not handled. Measuring how crude is part of WP3.
+The regexes are a baseline and a way to pick which facts to send to the teacher. They are known to be crude: `ot` and `delivery` style patterns match unrelated text, and bare "obstetric" fires `ob_delivery`. Measuring how crude is part of WP3.
+
+### Changes in v0.1
+
+Each of these changed facility grades in v0, so the WP5 distances and WP6 lists were built on wrong grades. Found in WP3 part 1 and confirmed in the pipeline audit of Nov 21.
+
+1. `csection` needs a word boundary before `c section` (`\bc[- ]?section`). v0 matched it inside other words: "paediatric section", "economic sections of society", "IPC sections 312, 316". Five facilities had EmOC grade 2 from such text alone. A sixth had it from "caesarean section facility not available on-site" (change 4).
+2. VBAC wording is removed before `csection` runs: `vaginal birth after (a )?(c(a)?esarean|c[- ]?section)( section)?|\bvbac\b`. A vaginal birth after a past caesarean is not a caesarean.
+3. `dialysis_unit` no longer has the `h(a)?emodialysis` branch. "Haemodialysis" alone is dialysis, not a named unit (the gold labeling rule), and in v0 one such fact gave grade 3 dialysis. "Haemodialysis unit" and "hemodialysis machines" still match through `dialysis (unit|machine|...)`.
+4. A fact with a negation or absence cue gets no evidence tag at all. The cue pattern is narrow on purpose:
+
+   `\bnot (be |been |yet )?(available|offered|provided|present|performed|done|operational|functional)\b`, `\bnot (explicitly |specifically |clearly )?(specified|mentioned|listed|stated|detailed|confirmed)\b`, `\b(does|do|did) not\b`, `\b(doesn't|don't|didn't)\b`, `\bunavailable\b`, `\bnon[- ]?(functional|operational|availability)\b`, `^no\b.*\b(listed|mentioned|specified|available|provided|offered)\b`, `\bno (specific|explicit)\b`, `\bthere (is|are) no (?!other\b)`, `\b(lack|lacks|lacking|absence) of\b`
+
+   Bare "no" and "non" are not cues: "non-invasive ventilation in ICU", "ICU no. 1" and "dialysis at no cost" keep their tags. Referral wording is not a cue either ("initiates referral to a senior doctor"). The pattern was written by reading every v0-tagged fact text in `silver/facts.parquet` that it or a broader draft matched, not by looking at gold-set scores. It removes the tags of 34 of the 23,768 distinct v0-tagged texts; one of them ("alleged absence of fire-fighting equipment ... during the icu fire") is a known false negation.
+
+v0 stays reproducible as `vf.recipes.tag_fact(text, version="v0")`. The gold-set design used v0 to draw its strata.
 
 ## Facility grades
 
@@ -56,7 +71,7 @@ Grades are per service line.
 | 2 | supported | The defining procedure or unit is named in the facts |
 | 3 | corroborated | Supported, and the enabling pieces are named too |
 
-Rules, v0:
+Rules (unchanged in v0.1):
 
 ### Emergency obstetric care (`emoc`)
 

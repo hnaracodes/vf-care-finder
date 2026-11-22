@@ -1,0 +1,1082 @@
+{
+  "f01": {
+    "n_raw_rows": 10088,
+    "n_junk": 88,
+    "n_farmacy": 10,
+    "n_real_rows": 10000,
+    "n_dup_rows": 11,
+    "n": 9989,
+    "n_truncated": 30,
+    "ops": {
+      "private": 8835,
+      "public": 467,
+      "unknown": 687
+    },
+    "ops_pct": {
+      "private": 88.4,
+      "public": 4.7,
+      "unknown": 6.9
+    },
+    "types": {
+      "hospital": 5626,
+      "clinic": 3782,
+      "dentist": 490,
+      "other": 34,
+      "unknown": 57
+    },
+    "public_by_type": {
+      "hospital": 440,
+      "clinic": 26,
+      "dentist": 0,
+      "other": 1,
+      "unknown": 0
+    },
+    "public_hospital_share_of_public": 94.2,
+    "public_share_of_hospitals": 7.8,
+    "public_share_of_clinics": 0.7,
+    "n_government_raw": 2
+  },
+  "f02": {
+    "n_po_total": 165627,
+    "n_po_valid": 151010,
+    "n_po_na": 12007,
+    "n_po_numeric": 153614,
+    "n_fac_coord_ok": 9953,
+    "n_fac": 9989,
+    "n_public_coord_ok": 467,
+    "n_csection_coord_ok": 443,
+    "any": {
+      "median_km": 18.1,
+      "p90_km": 45.5,
+      "pct_over_30km": 26.1,
+      "pct_over_60km": 4.0
+    },
+    "public": {
+      "median_km": 43.7,
+      "p90_km": 108.2,
+      "pct_over_30km": 66.6,
+      "pct_over_60km": 34.1
+    },
+    "csection": {
+      "median_km": 54.0,
+      "p90_km": 128.4,
+      "pct_over_30km": 75.9,
+      "pct_over_60km": 44.5
+    },
+    "n_po_far_from_state_8deg": 1085,
+    "max_po_same_coord": 348,
+    "top_lat_value": "15.5934000",
+    "top_lat_n": 695,
+    "top_lat_n_states": 5,
+    "top_lat_n_districts": 20
+  },
+  "f03": {
+    "n_pin6_nostrip": 9762,
+    "n_matched_nostrip": 9559,
+    "n_zero_nostrip": 202,
+    "n_fac": 9989,
+    "n_pin6": 9915,
+    "n_distinct_pin": 3021,
+    "n_pins_dir": 19586,
+    "n_pins_ambiguous": 1478,
+    "n_matched": 9704,
+    "n_pin_not_in_dir": 211,
+    "n_districts": 755,
+    "n_zero": 201,
+    "n_covered": 554,
+    "median_covered": 5.0,
+    "n_le2_covered": 181,
+    "n_ge50": 49,
+    "top20_sum": 3689,
+    "top20_pct": 38.0,
+    "n_districts_half": 35,
+    "bins": {
+      "0": 201,
+      "1": 101,
+      "2": 80,
+      "3-5": 119,
+      "6-10": 84,
+      "11-20": 62,
+      "21-50": 60,
+      "51+": 48
+    },
+    "top20": [
+      {
+        "state": "MAHARASHTRA",
+        "district": "PUNE",
+        "n": 328
+      },
+      {
+        "state": "GUJARAT",
+        "district": "AHMADABAD",
+        "n": 324
+      },
+      {
+        "state": "KARNATAKA",
+        "district": "BENGALURU URBAN",
+        "n": 294
+      },
+      {
+        "state": "TAMIL NADU",
+        "district": "CHENNAI",
+        "n": 285
+      },
+      {
+        "state": "MAHARASHTRA",
+        "district": "MUMBAI SUBURBAN",
+        "n": 274
+      },
+      {
+        "state": "MAHARASHTRA",
+        "district": "THANE",
+        "n": 224
+      },
+      {
+        "state": "TELANGANA",
+        "district": "HYDERABAD",
+        "n": 222
+      },
+      {
+        "state": "RAJASTHAN",
+        "district": "JAIPUR",
+        "n": 188
+      },
+      {
+        "state": "WEST BENGAL",
+        "district": "KOLKATA",
+        "n": 185
+      },
+      {
+        "state": "GUJARAT",
+        "district": "SURAT",
+        "n": 162
+      },
+      {
+        "state": "UTTAR PRADESH",
+        "district": "LUCKNOW",
+        "n": 148
+      },
+      {
+        "state": "BIHAR",
+        "district": "PATNA",
+        "n": 145
+      },
+      {
+        "state": "HARYANA",
+        "district": "GURUGRAM",
+        "n": 141
+      },
+      {
+        "state": "GUJARAT",
+        "district": "VADODARA",
+        "n": 124
+      },
+      {
+        "state": "MAHARASHTRA",
+        "district": "NAGPUR",
+        "n": 123
+      },
+      {
+        "state": "MAHARASHTRA",
+        "district": "MUMBAI",
+        "n": 114
+      },
+      {
+        "state": "KERALA",
+        "district": "ERNAKULAM",
+        "n": 109
+      },
+      {
+        "state": "PUNJAB",
+        "district": "LUDHIANA",
+        "n": 105
+      },
+      {
+        "state": "MAHARASHTRA",
+        "district": "NASHIK",
+        "n": 101
+      },
+      {
+        "state": "TELANGANA",
+        "district": "MEDCHAL MALKAJGIRI",
+        "n": 93
+      }
+    ],
+    "zero_by_state_top": {
+      "ARUNACHAL PRADESH": 22,
+      "MADHYA PRADESH": 19,
+      "CHHATTISGARH": 14,
+      "TELANGANA": 14,
+      "MANIPUR": 13,
+      "ODISHA": 12
+    }
+  },
+  "f04": {
+    "n_ok": 9959,
+    "emoc_claim_before_dedupe": 4585,
+    "emoc": {
+      "claim": 4577,
+      "evidence": 444,
+      "corroborated": 43,
+      "claim_and_evidence": 429,
+      "evidence_without_claim": 15,
+      "pct_claimers_with_evidence": 9.4
+    },
+    "dialysis": {
+      "claim": 2153,
+      "evidence": 1036,
+      "corroborated": 587,
+      "claim_and_evidence": 831,
+      "evidence_without_claim": 205,
+      "pct_claimers_with_evidence": 38.6
+    },
+    "icu": {
+      "claim": 1673,
+      "evidence": 2052,
+      "corroborated": 375,
+      "claim_and_evidence": 988,
+      "evidence_without_claim": 1064,
+      "pct_claimers_with_evidence": 59.1
+    },
+    "spec_per_fac_median": 10.0,
+    "spec_per_fac_hospital_median": 14.0,
+    "ob_claim_by_type": {
+      "hospital": 3606,
+      "clinic": 937,
+      "dentist": 14,
+      "other": 12,
+      "unknown": 8
+    }
+  },
+  "f05": {
+    "n_facts": 451110,
+    "n_ok": 9959,
+    "by_field": {
+      "capability": 231465,
+      "procedure": 163647,
+      "equipment": 55998
+    },
+    "n_distinct_text": 275097,
+    "facts_median": 35.0,
+    "facts_p90": 101.0,
+    "facts_max": 150,
+    "n_ok_zero_facts": 30,
+    "n_fac_any_field_at_50": 1788,
+    "max_per_field": 50,
+    "pct_overall": {
+      "clinical": 80.6,
+      "reputation": 6.6,
+      "photo": 1.7,
+      "staff": 4.6,
+      "web": 0.8,
+      "location": 5.6
+    },
+    "pct_by_field": {
+      "capability": {
+        "clinical": 66.4,
+        "reputation": 12.4,
+        "photo": 0.9,
+        "staff": 8.1,
+        "web": 1.4,
+        "location": 10.7
+      },
+      "procedure": {
+        "clinical": 98.0,
+        "reputation": 0.5,
+        "photo": 0.1,
+        "staff": 1.0,
+        "web": 0.1,
+        "location": 0.3
+      },
+      "equipment": {
+        "clinical": 88.1,
+        "reputation": 0.6,
+        "photo": 10.3,
+        "staff": 0.7,
+        "web": 0.1,
+        "location": 0.3
+      }
+    },
+    "pct_noise_overall": 19.4,
+    "pct_noise_capability": 33.6
+  },
+  "f06": {
+    "n": 9989,
+    "analyst": {
+      "Coordinates inside India": {
+        "n": 9953,
+        "pct": 99.6
+      },
+      "Facility type": {
+        "n": 9932,
+        "pct": 99.4
+      },
+      "Specialties (at least one)": {
+        "n": 9959,
+        "pct": 99.7
+      },
+      "6-digit PIN code": {
+        "n": 9915,
+        "pct": 99.3
+      },
+      "Operator (private or public)": {
+        "n": 9302,
+        "pct": 93.1
+      },
+      "Year established": {
+        "n": 4775,
+        "pct": 47.8
+      },
+      "Doctor count": {
+        "n": 3628,
+        "pct": 36.3
+      },
+      "Bed count": {
+        "n": 2510,
+        "pct": 25.1
+      },
+      "Affiliation (e.g. government)": {
+        "n": 1235,
+        "pct": 12.4
+      },
+      "Floor area": {
+        "n": 125,
+        "pct": 1.3
+      },
+      "Accepts volunteers": {
+        "n": 21,
+        "pct": 0.2
+      }
+    },
+    "web": {
+      "Social platform count": {
+        "n": 9954,
+        "pct": 99.6
+      },
+      "Staff named on page (flag)": {
+        "n": 9946,
+        "pct": 99.6
+      },
+      "Facebook link": {
+        "n": 9871,
+        "pct": 98.8
+      },
+      "Custom logo (flag)": {
+        "n": 9598,
+        "pct": 96.1
+      },
+      "Phone number": {
+        "n": 9492,
+        "pct": 95.0
+      },
+      "Follower count": {
+        "n": 8873,
+        "pct": 88.8
+      },
+      "Email": {
+        "n": 8538,
+        "pct": 85.5
+      },
+      "Official website": {
+        "n": 8385,
+        "pct": 83.9
+      },
+      "Last social post date": {
+        "n": 4925,
+        "pct": 49.3
+      },
+      "Page update date": {
+        "n": 3537,
+        "pct": 35.4
+      }
+    },
+    "beds_median": 100.0,
+    "beds_max": 200000.0,
+    "beds_implausible": 14,
+    "doctors_median": 2.0,
+    "doctors_max": 15000.0,
+    "doctors_implausible": 15,
+    "year_min": 0.0,
+    "year_implausible": 7
+  },
+  "f07": {
+    "n_ok": 9959,
+    "urls_median": 8.0,
+    "urls_max": 50,
+    "n_urls": 158444,
+    "n_url_unparsed": 0,
+    "domains_median": 5.0,
+    "domains_dist": {
+      "1": 192,
+      "2": 1241,
+      "3": 1525,
+      "4": 1366,
+      "5": 1062,
+      "6": 829,
+      "7": 676,
+      "8": 457,
+      "9": 400,
+      "10": 357,
+      "11": 289,
+      "12": 259,
+      "13": 193,
+      "14": 160,
+      "15": 157,
+      "16": 152,
+      "17": 98,
+      "18": 85,
+      "19": 92,
+      "20": 55,
+      "21+": 314
+    },
+    "n_one_domain": 192,
+    "n_ge6": 4573,
+    "top20": [
+      {
+        "domain": "facebook.com",
+        "n": 8840,
+        "kind": "social"
+      },
+      {
+        "domain": "justdial.com",
+        "n": 5425,
+        "kind": "directory"
+      },
+      {
+        "domain": "practo.com",
+        "n": 2705,
+        "kind": "directory"
+      },
+      {
+        "domain": "mappls.com",
+        "n": 1678,
+        "kind": "other"
+      },
+      {
+        "domain": "medindia.net",
+        "n": 1543,
+        "kind": "directory"
+      },
+      {
+        "domain": "onefivenine.com",
+        "n": 1464,
+        "kind": "directory"
+      },
+      {
+        "domain": "proptiger.com",
+        "n": 1141,
+        "kind": "other"
+      },
+      {
+        "domain": "in.linkedin.com",
+        "n": 1093,
+        "kind": "social"
+      },
+      {
+        "domain": "policyx.com",
+        "n": 1031,
+        "kind": "other"
+      },
+      {
+        "domain": "lybrate.com",
+        "n": 935,
+        "kind": "directory"
+      },
+      {
+        "domain": "indiamart.com",
+        "n": 865,
+        "kind": "other"
+      },
+      {
+        "domain": "docindia.org",
+        "n": 835,
+        "kind": "directory"
+      },
+      {
+        "domain": "hexahealth.com",
+        "n": 705,
+        "kind": "directory"
+      },
+      {
+        "domain": "medicineindia.org",
+        "n": 574,
+        "kind": "directory"
+      },
+      {
+        "domain": "scribd.com",
+        "n": 560,
+        "kind": "other"
+      },
+      {
+        "domain": "latlong.net",
+        "n": 518,
+        "kind": "other"
+      },
+      {
+        "domain": "instagram.com",
+        "n": 516,
+        "kind": "social"
+      },
+      {
+        "domain": "bajajfinservhealth.in",
+        "n": 507,
+        "kind": "directory"
+      },
+      {
+        "domain": "healthfrog.in",
+        "n": 501,
+        "kind": "directory"
+      },
+      {
+        "domain": "chotu.com",
+        "n": 477,
+        "kind": "directory"
+      }
+    ],
+    "n_with_official_site": 8355,
+    "n_official_in_sources": 4734,
+    "pct_official_in_sources": 56.7,
+    "n_other_top20": 6,
+    "n_any_other_site": 3895,
+    "pct_any_other_site": 39.1,
+    "n_distinct_domains": 12144
+  },
+  "f08": {
+    "n_districts": 706,
+    "n_states": 36,
+    "median": 92.2,
+    "mean": 88.7,
+    "min": 21.4,
+    "max": 100.0,
+    "n_below_80": 125,
+    "n_ge_95": 274,
+    "min_district": "Mon, Nagaland",
+    "pct_between_states": 63.8,
+    "pct_within_states": 36.2,
+    "lowest_states": {
+      "Nagaland": 38.7,
+      "Meghalaya": 61.5,
+      "Manipur": 72.9,
+      "Jharkhand": 75.55000000000001,
+      "Bihar": 78.35
+    },
+    "highest_states": {
+      "Lakshadweep": 99.6,
+      "Goa": 99.8,
+      "Puducherry": 99.8,
+      "Kerala": 100.0,
+      "Tamil Nadu": 100.0
+    },
+    "widest_states": {
+      "Nagaland": 52.3,
+      "Manipur": 51.1,
+      "Meghalaya": 47.9
+    },
+    "flags": {
+      "ok": 706
+    }
+  },
+  "f09": {
+    "corr": {
+      "women_age_15_49_with_10_or_more_years_of_schooling_pct": {
+        "label": "Women with 10+ years of school",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.42,
+        "spearman": 0.52
+      },
+      "hh_electricity_pct": {
+        "label": "Households with electricity",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.4,
+        "spearman": 0.53
+      },
+      "hh_member_covered_health_insurance_pct": {
+        "label": "Households with an insured member",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.18,
+        "spearman": 0.25
+      },
+      "women_age_15_49_who_are_literate_pct": {
+        "label": "Women who are literate",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.28,
+        "spearman": 0.4
+      },
+      "female_population_age_6_years_and_above_ever_schooled_pct": {
+        "label": "Females 6+ ever schooled",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.16,
+        "spearman": 0.29
+      },
+      "households_using_clean_fuel_for_cooking_pct": {
+        "label": "Clean cooking fuel",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.53,
+        "spearman": 0.59
+      },
+      "hh_use_improved_sanitation_pct": {
+        "label": "Improved sanitation",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.19,
+        "spearman": 0.32
+      },
+      "hh_improved_water_pct": {
+        "label": "Improved drinking water",
+        "kind": "dev",
+        "n": 706,
+        "pearson": 0.32,
+        "spearman": 0.18
+      },
+      "w20_24_married_before_age_18_years_pct": {
+        "label": "Women 20-24 married before 18",
+        "kind": "dev",
+        "n": 706,
+        "pearson": -0.19,
+        "spearman": -0.28
+      },
+      "population_below_age_15_years_pct": {
+        "label": "Population under 15",
+        "kind": "dev",
+        "n": 706,
+        "pearson": -0.62,
+        "spearman": -0.72
+      },
+      "mothers_who_had_at_least_4_anc_visits_lb5y_pct": {
+        "label": "Mothers with 4+ antenatal visits",
+        "kind": "care",
+        "n": 706,
+        "pearson": 0.6,
+        "spearman": 0.65
+      },
+      "births_attended_by_skilled_hp_5y_10_pct": {
+        "label": "Births with a skilled attendant",
+        "kind": "care",
+        "n": 706,
+        "pearson": 0.95,
+        "spearman": 0.9
+      }
+    },
+    "n": 706,
+    "electricity_median": 98.7,
+    "n_electricity_ge90": 656,
+    "best_dev": "population_below_age_15_years_pct"
+  },
+  "f10": {
+    "n": 9989,
+    "n_public": 467,
+    "pct_public": 4.7,
+    "pct_public_of_known": 5.0,
+    "pct_public_hospitals": 7.8,
+    "nfhs_inst_weighted": 88.5,
+    "nfhs_pub_all_weighted": 65.0,
+    "nfhs_pub_of_inst": 73.5,
+    "nfhs_pub_of_inst_unweighted": 73.2,
+    "hh_surveyed_median": 908.0,
+    "hh_surveyed_min": 213.0,
+    "hh_surveyed_max": 990.0,
+    "nfhs_states_not_in_pin_dir": [],
+    "nfhs_states_without_facilities": [
+      "LADAKH",
+      "LAKSHADWEEP"
+    ],
+    "min_n_state": 30,
+    "n_states_plotted": 24,
+    "states_dropped_small": 10,
+    "state_rows": {
+      "Andhra Pradesh": {
+        "n": 307,
+        "fac_pub_pct": 2.9,
+        "nfhs_pub_of_inst": 51.7
+      },
+      "Assam": {
+        "n": 111,
+        "fac_pub_pct": 17.1,
+        "nfhs_pub_of_inst": 88.1
+      },
+      "Bihar": {
+        "n": 260,
+        "fac_pub_pct": 7.3,
+        "nfhs_pub_of_inst": 74.7
+      },
+      "Chandigarh": {
+        "n": 38,
+        "fac_pub_pct": 5.3,
+        "nfhs_pub_of_inst": 85.9
+      },
+      "Chhattisgarh": {
+        "n": 136,
+        "fac_pub_pct": 3.7,
+        "nfhs_pub_of_inst": 84.7
+      },
+      "NCT of Delhi": {
+        "n": 339,
+        "fac_pub_pct": 6.5,
+        "nfhs_pub_of_inst": 68.5
+      },
+      "Goa": {
+        "n": 34,
+        "fac_pub_pct": 5.9,
+        "nfhs_pub_of_inst": 55.4
+      },
+      "Gujarat": {
+        "n": 955,
+        "fac_pub_pct": 1.6,
+        "nfhs_pub_of_inst": 48.6
+      },
+      "Haryana": {
+        "n": 460,
+        "fac_pub_pct": 2.6,
+        "nfhs_pub_of_inst": 61.2
+      },
+      "Himachal Pradesh": {
+        "n": 38,
+        "fac_pub_pct": 23.7,
+        "nfhs_pub_of_inst": 81.3
+      },
+      "Jammu & Kashmir": {
+        "n": 70,
+        "fac_pub_pct": 18.6,
+        "nfhs_pub_of_inst": 94.7
+      },
+      "Jharkhand": {
+        "n": 154,
+        "fac_pub_pct": 3.9,
+        "nfhs_pub_of_inst": 77.9
+      },
+      "Karnataka": {
+        "n": 516,
+        "fac_pub_pct": 4.7,
+        "nfhs_pub_of_inst": 69.1
+      },
+      "Kerala": {
+        "n": 510,
+        "fac_pub_pct": 6.5,
+        "nfhs_pub_of_inst": 36.5
+      },
+      "Madhya Pradesh": {
+        "n": 308,
+        "fac_pub_pct": 5.5,
+        "nfhs_pub_of_inst": 89.7
+      },
+      "Maharastra": {
+        "n": 1590,
+        "fac_pub_pct": 3.3,
+        "nfhs_pub_of_inst": 65.0
+      },
+      "Odisha": {
+        "n": 118,
+        "fac_pub_pct": 9.3,
+        "nfhs_pub_of_inst": 85.8
+      },
+      "Punjab": {
+        "n": 475,
+        "fac_pub_pct": 3.2,
+        "nfhs_pub_of_inst": 58.3
+      },
+      "Rajasthan": {
+        "n": 399,
+        "fac_pub_pct": 4.5,
+        "nfhs_pub_of_inst": 82.9
+      },
+      "Tamil Nadu": {
+        "n": 805,
+        "fac_pub_pct": 4.3,
+        "nfhs_pub_of_inst": 66.8
+      },
+      "Telangana": {
+        "n": 458,
+        "fac_pub_pct": 3.5,
+        "nfhs_pub_of_inst": 51.2
+      },
+      "Uttar Pradesh": {
+        "n": 944,
+        "fac_pub_pct": 3.5,
+        "nfhs_pub_of_inst": 71.0
+      },
+      "Uttarakhand": {
+        "n": 127,
+        "fac_pub_pct": 4.7,
+        "nfhs_pub_of_inst": 76.7
+      },
+      "West Bengal": {
+        "n": 481,
+        "fac_pub_pct": 10.8,
+        "nfhs_pub_of_inst": 79.0
+      }
+    },
+    "n_states_nfhs_above_fac": 24,
+    "max_fac_pub_state": "Himachal Pradesh",
+    "min_gap_points": 30.0,
+    "min_gap_state": "Kerala",
+    "min_nfhs_state": "Kerala",
+    "max_fac_pub_pct": 23.7,
+    "labeled_states": [
+      "Maharastra",
+      "Gujarat",
+      "Uttar Pradesh",
+      "Himachal Pradesh",
+      "Kerala",
+      "Jammu & Kashmir"
+    ]
+  },
+  "f11": {
+    "n_indicators": 104,
+    "n_cells": 73424,
+    "cells": {
+      "ok": 64231,
+      "low_sample": 5068,
+      "suppressed": 4125
+    },
+    "groups": {
+      "Population and household": {
+        "n_cols": 12,
+        "ok": 8442,
+        "low_sample": 29,
+        "suppressed": 1,
+        "pct_flagged": 0.4
+      },
+      "Schooling, marriage, fertility": {
+        "n_cols": 7,
+        "ok": 4781,
+        "low_sample": 157,
+        "suppressed": 4,
+        "pct_flagged": 3.3
+      },
+      "Family planning": {
+        "n_cols": 12,
+        "ok": 8404,
+        "low_sample": 66,
+        "suppressed": 2,
+        "pct_flagged": 0.8
+      },
+      "Maternal care": {
+        "n_cols": 10,
+        "ok": 6474,
+        "low_sample": 163,
+        "suppressed": 423,
+        "pct_flagged": 8.3
+      },
+      "Delivery care": {
+        "n_cols": 7,
+        "ok": 4664,
+        "low_sample": 128,
+        "suppressed": 150,
+        "pct_flagged": 5.6
+      },
+      "Child vaccination": {
+        "n_cols": 12,
+        "ok": 5625,
+        "low_sample": 2688,
+        "suppressed": 159,
+        "pct_flagged": 33.6
+      },
+      "Child illness and treatment": {
+        "n_cols": 6,
+        "ok": 1786,
+        "low_sample": 750,
+        "suppressed": 1700,
+        "pct_flagged": 57.8
+      },
+      "Child feeding": {
+        "n_cols": 6,
+        "ok": 2028,
+        "low_sample": 656,
+        "suppressed": 1552,
+        "pct_flagged": 52.1
+      },
+      "Nutrition status": {
+        "n_cols": 8,
+        "ok": 5643,
+        "low_sample": 5,
+        "suppressed": 0,
+        "pct_flagged": 0.1
+      },
+      "Anaemia": {
+        "n_cols": 5,
+        "ok": 2970,
+        "low_sample": 426,
+        "suppressed": 134,
+        "pct_flagged": 15.9
+      },
+      "Blood sugar": {
+        "n_cols": 6,
+        "ok": 4236,
+        "low_sample": 0,
+        "suppressed": 0,
+        "pct_flagged": 0.0
+      },
+      "Blood pressure": {
+        "n_cols": 6,
+        "ok": 4236,
+        "low_sample": 0,
+        "suppressed": 0,
+        "pct_flagged": 0.0
+      },
+      "Cancer screening": {
+        "n_cols": 3,
+        "ok": 2118,
+        "low_sample": 0,
+        "suppressed": 0,
+        "pct_flagged": 0.0
+      },
+      "Tobacco and alcohol": {
+        "n_cols": 4,
+        "ok": 2824,
+        "low_sample": 0,
+        "suppressed": 0,
+        "pct_flagged": 0.0
+      }
+    },
+    "plan": {
+      "Institutional births": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "Births in a public facility": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "C-section births": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "C-section rate, private facilities": {
+        "ok": 434,
+        "low_sample": 122,
+        "suppressed": 150
+      },
+      "C-section rate, public facilities": {
+        "ok": 700,
+        "low_sample": 6,
+        "suppressed": 0
+      },
+      "Skilled birth attendance": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "4+ antenatal visits": {
+        "ok": 705,
+        "low_sample": 1,
+        "suppressed": 0
+      },
+      "Cost per delivery, public": {
+        "ok": 691,
+        "low_sample": 14,
+        "suppressed": 1
+      },
+      "Health insurance": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "Women with 10+ years of school": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "High blood sugar, women": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      },
+      "High blood pressure, women": {
+        "ok": 706,
+        "low_sample": 0,
+        "suppressed": 0
+      }
+    },
+    "n_cols_majority_flagged": 9
+  },
+  "f12": {
+    "n_private": 8835,
+    "n_public": 467,
+    "followers_median": {
+      "private": 285.0,
+      "public": 36.5
+    },
+    "pct_no_follower_count": {
+      "private": 11.7,
+      "public": 10.9
+    },
+    "pct_10k_plus": {
+      "private": 2.8,
+      "public": 3.2
+    },
+    "pct_post_2025_26": {
+      "private": 6.2,
+      "public": 7.7
+    },
+    "pct_no_post_date": {
+      "private": 51.4,
+      "public": 52.5
+    },
+    "pct_no_update_date": {
+      "private": 66.6,
+      "public": 14.8
+    },
+    "latest_post": "2026-01-22",
+    "n_update_present": 3537,
+    "n_update_unparsed": 11,
+    "update_unparsed_examples": [
+      "1 month ago",
+      "2 months ago",
+      "2024",
+      "2025",
+      "3 weeks ago"
+    ],
+    "n_update_future": 1,
+    "scrape_cutoff": "2026-01-22",
+    "max_update": "2027-07-20",
+    "latest_valid_update": "2026-01-19",
+    "pct_update_2025_of_parsed": 63.4,
+    "pct_update_2025": {
+      "private": 20.2,
+      "public": 74.9
+    }
+  },
+  "_meta": {
+    "script": "scripts/eda_raw_figures.py",
+    "created": "2026-11-21T20:07:08+00:00",
+    "git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+    "inputs": {
+      "facilities": "raw/facilities.csv",
+      "pincodes": "raw/india_post_pincode_directory.csv",
+      "nfhs": "raw/nfhs5_district_health_indicators.csv"
+    },
+    "rows": {
+      "facilities_raw": 10088,
+      "facilities": 9989,
+      "facts": 451110,
+      "post_offices": 165627,
+      "nfhs_districts": 706
+    },
+    "recipe_version": "v0",
+    "runtime_s": 10.7,
+    "n_state_leading_space": 1,
+    "figures": [
+      "eda_01_facility_types.png",
+      "eda_02_facilities_vs_people.png",
+      "eda_03_facilities_per_district.png",
+      "eda_04_claims_vs_evidence.png",
+      "eda_05_fact_noise.png",
+      "eda_06_column_completeness.png",
+      "eda_07_fact_sources.png",
+      "eda_08_nfhs_institutional_births.png",
+      "eda_09_nfhs_development_proxies.png",
+      "eda_10_public_blind_spot.png",
+      "eda_11_nfhs_reliability.png",
+      "eda_12_web_footprint.png"
+    ]
+  }
+}

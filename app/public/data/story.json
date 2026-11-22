@@ -1,0 +1,185 @@
+{
+  "mock": true,
+  "note": "Draft beats from docs/09_presentation.md. Every [bracketed] value must be replaced with a real one before recording.",
+  "defaults": {
+    "line": "emoc",
+    "radius_km": 30,
+    "transition_s": 2.5
+  },
+  "beats": [
+    {
+      "id": 1,
+      "time": "0:00",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 85.51824,
+        "latitude": 23.6901,
+        "zoom": 7.6
+      },
+      "view": "distance",
+      "grade": 1,
+      "pulse": {
+        "lon": 85.51824,
+        "lat": 23.6901
+      },
+      "caption": "A woman in [district] goes into labor and starts bleeding. Where does she go?"
+    },
+    {
+      "id": 2,
+      "time": "0:15",
+      "duration_s": 20,
+      "camera": {
+        "longitude": 85.51824,
+        "latitude": 23.6901,
+        "zoom": 7.6
+      },
+      "view": "distance",
+      "grade": 1,
+      "patient": {
+        "lon": 85.51824,
+        "lat": 23.6901
+      },
+      "caption": "[N] maternity facilities listed within [X] km. The nearest with evidence of a C-section is [Y] km away."
+    },
+    {
+      "id": 3,
+      "time": "0:35",
+      "duration_s": 20,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "distance",
+      "grade": 0,
+      "sweep": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "caption": "Across India: [4,585] claim obstetrics, [443] show evidence of a C-section."
+    },
+    {
+      "id": 4,
+      "time": "0:55",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "distance",
+      "grade": 2,
+      "show_counter_change": {
+        "from_grade": 1,
+        "to_grade": 2
+      },
+      "caption": "Post offices within [R] km of care: [A]% on claims, [B]% on evidence."
+    },
+    {
+      "id": 5,
+      "time": "1:10",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "quadrant",
+      "grade": 2,
+      "caption": "Care gap or data gap? This dataset is [88]% private clinics with websites."
+    },
+    {
+      "id": 6,
+      "time": "1:25",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 79.5304,
+        "latitude": 15.6062,
+        "zoom": 5.4
+      },
+      "view": "quadrant",
+      "grade": 2,
+      "highlight": "data_desert",
+      "caption": "Data deserts: [P]% of births still happen in institutions. Care exists; the data cannot see it."
+    },
+    {
+      "id": 7,
+      "time": "1:40",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "quadrant",
+      "grade": 2,
+      "highlight": "care_desert",
+      "caption": "Care deserts: poor access and poor outcomes. These are the real gaps."
+    },
+    {
+      "id": 8,
+      "time": "1:55",
+      "duration_s": 20,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "quadrant",
+      "grade": 2,
+      "panel": "drawer",
+      "caption": "How we know: fact tagger F1 [F1] against hand labels; outcome model improves by [delta] with access."
+    },
+    {
+      "id": 9,
+      "time": "2:15",
+      "duration_s": 25,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "swarm",
+      "grade": 2,
+      "radius_km": 60,
+      "scenario": {
+        "plans": [
+          "naive",
+          "desert_aware"
+        ],
+        "steps": 10
+      },
+      "caption": "The next ten upgrades: the naive plan wastes [k] on data deserts. The desert-aware plan does not."
+    },
+    {
+      "id": 10,
+      "time": "2:40",
+      "duration_s": 15,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "quadrant",
+      "grade": 2,
+      "panel": "lists",
+      "caption": "Three lists to act on: send care, send data collectors, fix cost."
+    },
+    {
+      "id": 11,
+      "time": "2:55",
+      "duration_s": 10,
+      "camera": {
+        "longitude": 80.5,
+        "latitude": 22.6,
+        "zoom": 4.1
+      },
+      "view": "distance",
+      "grade": 2,
+      "panel": "limits",
+      "caption": "What this cannot tell you, and where to try it: [repo link] [map link]"
+    }
+  ]
+}

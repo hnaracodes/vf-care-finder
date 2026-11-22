@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure guide: care or data desert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a clear lab notebook: the finding first, then how to read the chart, then the caveat.
+   IDEA: a field guide to the project's charts, each one pinned next to its reading notes.
+   PICTURE: the four-quadrant split of India's districts, the project in one grid.
+   COLOUR and TYPE: black and white plus one mint field; Space Grotesk headings, Inter text.
+   LAYOUT: mint goal band with the quadrant grid, a short "what changed" list, then one figure card per chart. */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0d0f0e);--ink:light-dark(#111312,#eef2ef);--mute:light-dark(#5b615d,#a7b0aa);--line:light-dark(#e3e6e4,#262a28);--mint:#b8f5d0;--mintink:light-dark(#0d3b22,#b8f5d0);--card:light-dark(#f6f7f6,#151816)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Space Grotesk",Inter,sans-serif;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,4.6vw,50px);font-weight:700}
+h2{font-size:clamp(24px,3vw,32px);font-weight:700;margin-bottom:8px}
+h3{font-size:21px;font-weight:700;margin-bottom:14px}
+p{margin:0 0 12px}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(28px,4vw,60px) max(5vw,16px)}
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:0;border-bottom:1px solid var(--line)}
+.goal{background:var(--mint);color:#0b2417;padding:clamp(28px,4vw,56px) max(4vw,16px)}
+.goal .k{font-size:14px;font-weight:600;margin-bottom:14px}
+.goal h1{margin-bottom:18px}
+.goal p{font-size:17px;max-width:62ch}
+.snap{font-size:13px;opacity:.8;margin-top:18px}
+.quad{padding:clamp(28px,4vw,56px) max(4vw,16px);display:flex;flex-direction:column;justify-content:center}
+.axes{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px}
+.ylab{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;color:var(--mute);text-align:center}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.cell{border-radius:10px;padding:16px;min-height:132px;background:var(--card);border:1px solid var(--line)}
+.cell b{display:block;font-family:"Space Grotesk",sans-serif;font-size:clamp(30px,4vw,44px);line-height:1}
+.cell .n{font-weight:600;margin:6px 0 4px}
+.cell .a{font-size:14px;color:var(--mute)}
+.cell.dd{background:var(--mint);color:#0b2417;border-color:transparent}.cell.dd .a{color:#1d4a31}
+.cell.cd{background:var(--ink);color:var(--bg);border-color:transparent}.cell.cd .a{color:var(--bg);opacity:.75}
+.xlab{font-size:13px;color:var(--mute);text-align:center;margin:8px 0 0 36px}
+.qnote{font-size:13px;color:var(--mute);margin-top:12px}
+.changes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px 36px;margin-top:20px}
+.changes div{border-top:2px solid var(--ink);padding-top:10px}
+.changes h3{font-size:18px;margin-bottom:6px}
+.changes p{font-size:15px;color:var(--mute);margin:0}
+nav{display:flex;gap:18px;padding:12px max(5vw,16px);border-block:1px solid var(--line);background:var(--bg);font-size:15px}
+nav a{color:var(--ink);text-decoration:none;font-weight:600;white-space:nowrap}nav a:hover{text-decoration:underline}
+@media(min-width:900px){nav{position:sticky;top:0;z-index:2}}
+.part{padding-top:clamp(28px,4vw,48px)}
+.part>.wrap>p{color:var(--mute);max-width:75ch}
+.fig{margin:34px 0 0;border-top:1px solid var(--line);padding-top:28px}
+.fig .num{font-size:13px;color:var(--mute);font-weight:600;margin-bottom:6px}
+.pic{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;margin:14px 0 18px}
+.pic img{display:block;width:100%;height:auto;border-radius:6px}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px 28px}
+.notes div p{font-size:15px;margin:0}
+.notes h4{font:600 13px/1.3 Inter,sans-serif;margin:0 0 4px;color:var(--mute)}
+.notes .so{background:var(--card);border-radius:10px;padding:12px 14px}
+.notes .so h4{color:var(--mintink)}
+.tip{font-size:14px;border-left:3px solid var(--mint);padding:8px 12px;margin:0 0 16px;background:var(--card);border-radius:0 8px 8px 0}
+.scroll{overflow-x:auto}
+footer{color:var(--mute);font-size:14px}
+@media(max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:520px){.cell{min-height:110px;padding:12px}.notes{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="goal">
+    <div class="k">CMU Datathon, Fall 2026 · what the cleaned data lets us claim</div>
+    <h1>For emergency obstetric care, find the districts that look cut off in this data, then use the survey to tell a real gap from a blind spot.</h1>
+    <p>We started with a broad plan: three services, and models meant to prove that access drives outcomes. The data narrowed it. The facility table is a sample of facilities that have websites: 88% private, 4.7% public, while public hospitals deliver about 74% of facility births. So distance "in the data" can only tell us where the data sees little. The government survey (NFHS-5) is the reality check. In a district that looks far from care, are babies still born in facilities? If they are, care exists that the data cannot see: <strong>send data collectors</strong>. If they are not, the gap is real: <strong>send care</strong>.</p>
+    <p class="snap">Snapshot 16:15 ET, Nov 21, corrected 16:45. Grades come from the regex baseline (recipe v0.1). Neither model is built yet; anything said about them is a plan. An independent audit is on its second round, so numbers can still move.</p>
+  </div>
+  <div class="quad" aria-label="Four quadrants of districts">
+    <div class="axes">
+      <div class="ylab">Births in a facility (NFHS) · higher is better ↑</div>
+      <div class="grid">
+        <div class="cell"><b>335</b><div class="n">Served</div><div class="a">Near evidenced care, most births in facilities. No action.</div></div>
+        <div class="cell dd"><b>137</b><div class="n">Data desert</div><div class="a">Far in the data, yet most births happen in facilities. Send data collectors.</div></div>
+        <div class="cell"><b>135</b><div class="n">Near care, fewer births</div><div class="a">Near listed care, but fewer facility births. Cause not tested yet.</div></div>
+        <div class="cell cd"><b>98</b><div class="n">Care desert</div><div class="a">Far in the data and few facility births. Send care.</div></div>
+      </div>
+    </div>
+    <div class="xlab">Distance to a facility with C-section evidence → farther</div>
+    <p class="qnote">705 districts, rule-based split at thirds (far = 90.2 km or more, low = below 87.3%). Relative cuts overclaim: see figure 16 for the proposed absolute cuts.</p>
+  </div>
+</header>
+
+<section class="band">
+  <div class="wrap">
+    <h2>How the goal narrowed after cleaning</h2>
+    <div class="changes">
+      <div><h3>One service carries the story</h3><p>Only obstetrics has a survey outcome to check against. Dialysis becomes a need-versus-distance map. ICU drops out of the split.</p></div>
+      <div><h3>The evidence bar is grade 2</h3><p>4,577 facilities claim obstetrics, 444 name a C-section, 43 also name blood and anaesthesia. Grade 3 is too thin to map; grade 1 is only a tag.</p></div>
+      <div><h3>"Far in the data" is about the data</h3><p>The table is a web-visibility sample, and facilities with more scraped text show more evidence. Distance is never proof that care is absent.</p></div>
+      <div><h3>Model B is a plan, not a result</h3><p>Visible access barely tracks facility births (rank correlation about −0.2). A design agent's quick, unreviewed preview found that adding access does not improve the model's predictions. If that holds once the model is built, Model B only sets an expected birth rate from development, and we say plainly that access added nothing.</p></div>
+      <div><h3>Only stable districts go on screen</h3><p>69 of 137 data deserts and 46 of 98 care deserts keep their label under all 16 reasonable threshold choices. The video features those.</p></div>
+      <div><h3>Data quality is a finding too</h3><p>Misplaced facilities, post offices stacked on placeholder points, and chain-wide bed counts go back to Virtue Foundation and Databricks as results.</p></div>
+    </div>
+  </div>
+</section>
+
+<nav class="scroll" aria-label="Sections">
+  <a href="#explore">1. Exploring the raw data</a>
+  <a href="#grade">2. Grading and distance</a>
+  <a href="#split">3. The split</a>
+</nav>
+
+<section class="band part" id="explore">
+  <div class="wrap">
+    <h2>1. Exploring the raw data</h2>
+    <p>Exploration comes before any model: what does one row mean, how full is each column, where will a join or a number mislead us. Each chart answers one question. Every number was computed by <code>scripts/eda_raw_figures.py</code>.</p>
+
+    <article class="fig">
+      <div class="num">Figure 1 · eda_01</div>
+      <h3>Who is in the facility table: 88% private</h3>
+      <div class="pic"><img src="figures/eda_01_facility_types.png" alt="Bar chart of facilities by operator and type" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Top bar: the whole table split by who runs each facility. Lower bars: one per facility type, coloured the same way. Numbers are facility counts.</p></div>
+        <div><h4>What we did</h4><p>Dropped 88 junk rows and 11 exact duplicates, turned the text "null" into a real missing value, merged "government" into public, then counted type by operator.</p></div>
+        <div><h4>What it shows</h4><p>8,835 private, 467 public, 687 unknown. 440 of the 467 public facilities are hospitals; only 26 clinics are public.</p></div>
+        <div class="so"><h4>So what</h4><p>Public primary care is almost invisible here, so any access number built on this table understates public care. That is the data-desert half of the project.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 2 · eda_02</div>
+      <h3>Facilities sit in cities; C-section evidence is far from most villages</h3>
+      <div class="pic"><img src="figures/eda_02_facilities_vs_people.png" alt="Map of post offices and facilities, and cumulative distance curves" loading="lazy"></div>
+      <p class="tip">New chart type: a <strong>cumulative curve</strong>. Pick a distance on the bottom axis; the height of a line there is the share of post offices that have that kind of facility within that distance. A line further right means care is farther away. The dot is the median: half the post offices are closer, half farther.</p>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: grey dots are 151,010 post offices, our stand-in for where people live. Blue dots are facilities. Right: one curve per kind of facility.</p></div>
+        <div><h4>What we did</h4><p>For every post office, found the nearest facility by straight-line (great-circle) distance with a nearest-neighbour search, three times: any facility, a public one, one whose facts mention a C-section.</p></div>
+        <div><h4>What it shows</h4><p>Median distance: 18 km to any facility, 44 km to a public one, 54 km to one that mentions a C-section.</p></div>
+        <div class="so"><h4>Careful</h4><p>The flat grey streak across the south is 695 post offices sharing one fake latitude (15.5934). Distances are straight lines, and post offices are not weighted by population.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 3 · eda_03</div>
+      <h3>201 of 755 districts have no facility in the data</h3>
+      <div class="pic"><img src="figures/eda_03_facilities_per_district.png" alt="Histogram of facilities per district and top 20 districts" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: how many districts have 0, 1, 2 and so on facilities. Right: the 20 districts with the most.</p></div>
+        <div><h4>What we did</h4><p>One PIN code can cover several districts, so a plain join would count a facility twice. We gave each PIN its most common district first, then counted, keeping empty districts as zeros.</p></div>
+        <div><h4>What it shows</h4><p>201 districts at zero, 101 with exactly one. The top 20 (big cities like Pune and Ahmedabad) hold 38% of all facilities.</p></div>
+        <div class="so"><h4>So what</h4><p>A count per district measures web presence, not care. This is why the project uses distance from every post office instead of counts.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 4 · eda_04</div>
+      <h3>Claims outnumber evidence about ten to one for obstetrics</h3>
+      <div class="pic"><img src="figures/eda_04_claims_vs_evidence.png" alt="Claimed, supported and corroborated counts per service" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Three groups, one per service. Light bar: lists the specialty (a claim). Middle: the facts name the procedure. Dark: the procedure plus the pieces it needs.</p></div>
+        <div><h4>What we did</h4><p>Read each facility's specialty list, then searched its facts with the keyword patterns in the recipe doc ("caesarean", "blood bank", and so on).</p></div>
+        <div><h4>What it shows</h4><p>Obstetrics 4,577 claim, 444 name a C-section, 43 corroborated. Dialysis 2,153, 1,036, 587. ICU is the odd one: more facilities mention an ICU than list the specialty.</p></div>
+        <div class="so"><h4>So what</h4><p>The map uses the grade, not the specialty tag. With 43 corroborated facilities, grade 2 is the working bar for obstetrics.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 5 · eda_05</div>
+      <h3>A third of "capability" facts are not about care</h3>
+      <div class="pic"><img src="figures/eda_05_fact_noise.png" alt="Facts per facility and rough noise split by field" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: how many facts each facility has. Right: each bar is one fact field, split into rough categories.</p></div>
+        <div><h4>What we did</h4><p>Counted facts per facility, then put each fact in the first keyword group it matched (ratings, photos, staff, web, location), else "mostly clinical".</p></div>
+        <div><h4>What it shows</h4><p>Median 35 facts. 34% of capability facts are noise like "Rated 4.3 on JustDial". Procedure facts are 98% clinical. The spike at 150 is a hard cap of 50 facts per field.</p></div>
+        <div class="so"><h4>So what</h4><p>The fact tagger (Model A) must learn to ignore noise. Facilities at the cap may have lost evidence.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 6 · eda_06</div>
+      <h3>Location is complete; size is mostly missing</h3>
+      <div class="pic"><img src="figures/eda_06_column_completeness.png" alt="Share of facilities with a value per column" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Each bar is the share of facilities with any value in that column. Blue are fields an analyst needs; grey are web fields.</p></div>
+        <div><h4>What we did</h4><p>Counted values that are not the text "null" (pandas thinks "null" is a real value, so the usual check would say 100% everywhere).</p></div>
+        <div><h4>What it shows</h4><p>Coordinates, type and PIN are about 99% full. Beds 25%, doctors 36%.</p></div>
+        <div class="so"><h4>Careful</h4><p>Present is not plausible: bed counts reach 200,000. That is why the patient swarm does not model hospital capacity.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 7 · eda_07</div>
+      <h3>Facts come from Facebook and listing sites, some unrelated</h3>
+      <div class="pic"><img src="figures/eda_07_fact_sources.png" alt="Top source domains and domains per facility" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: websites cited by the most facilities, coloured by kind. Right: how many different websites each facility's facts draw on.</p></div>
+        <div><h4>What we did</h4><p>Pulled the website name out of every source URL and counted each site once per facility.</p></div>
+        <div><h4>What it shows</h4><p>Facebook 8,840, JustDial 5,425. Real estate, insurance and map sites appear for 39% of facilities. Only 57% of facilities with an official site cite it.</p></div>
+        <div class="so"><h4>So what</h4><p>"Many sources" is weak corroboration. A later check found facilities with 8 or more sites are the most likely to be placed in the wrong spot (26% sit over 50 km from their PIN).</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 8 · eda_08</div>
+      <h3>Most districts deliver over 90% of births in facilities; state matters most</h3>
+      <div class="pic"><img src="figures/eda_08_nfhs_institutional_births.png" alt="Distribution of institutional births and by state" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: districts by their facility-birth rate, plus a bar showing how much of the variation is between states versus within them. Right: one row per state, dots are its districts, the black tick is the state median.</p></div>
+        <div><h4>What we did</h4><p>Parsed every survey cell (flagging "*" as missing and bracketed values as low-sample), then split the variation into a between-state and a within-state part.</p></div>
+        <div><h4>What it shows</h4><p>Median 92.2%, piled up near 100%. 64% of the variation is between states. Nagaland is lowest (median 39%).</p></div>
+        <div class="so"><h4>So what</h4><p>The outcome has a ceiling and is driven by state. Models are tested by holding out whole states, so they cannot just memorise them.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 9 · eda_09</div>
+      <h3>Development predicts facility births; care-use columns would cheat</h3>
+      <div class="pic"><img src="figures/eda_09_nfhs_development_proxies.png" alt="Scatter plots and rank correlations with institutional births" loading="lazy"></div>
+      <p class="tip">New idea: a <strong>rank correlation</strong> (Spearman) runs from −1 to +1. +1 means districts higher on one measure are always higher on the other; 0 means no link; negative means one goes up as the other goes down. It uses ranks, so the pile-up near 100% does not distort it.</p>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Top: each dot is a district; the black line is the middle value within each tenth of the x axis. Bottom: each candidate feature's correlation with facility births.</p></div>
+        <div><h4>What it shows</h4><p>Clean cooking fuel +0.59, electricity +0.53, women with 10+ years of school +0.52, share of population under 15 −0.72. These are correlations across districts, not causes.</p></div>
+        <div><h4>Why so many measures about women?</h4><p>NFHS is mainly a survey of women aged 15 to 49, so its schooling and marriage questions are asked of women. Here they only stand in for how developed a district is. The model makes no claim about why any woman does or does not give birth in a facility.</p></div>
+        <div><h4>Grey bars</h4><p>Skilled birth attendance (+0.90) and antenatal visits measure the same pregnancies as the target. Using them would "predict" births from a near-copy of births. That is called leakage.</p></div>
+        <div class="so"><h4>Not every blue bar is used</h4><p>The current plan, not yet built, uses 9 development measures (electricity, water, sanitation, clean fuel, women's literacy, women with 10+ years of school, marriage before 18, population under 15, child stunting) plus 2 for rurality and district size. Insurance and "females ever schooled" are left out: insurance mostly identifies the state. The grey ones are excluded on purpose.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 10 · eda_10</div>
+      <h3>The blind spot: 4.7% of the data is public, 74% of facility births are</h3>
+      <div class="pic"><img src="figures/eda_10_public_blind_spot.png" alt="Public share of facilities versus public share of births" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: three shares side by side. Right: each dot is a state. Across: public share of facilities in our data. Up: public share of facility births in the survey. On the thin diagonal line they would be equal; every state sits far above it.</p></div>
+        <div><h4>What we did</h4><p>Divided public-facility births by all facility births in the survey, averaged over districts, and compared with the public share of rows in the facility table.</p></div>
+        <div><h4>What it shows</h4><p>Nationally 4.7% versus 73.5%. Even Kerala, the most private state in the survey, is 36.5% versus 6.5%.</p></div>
+        <div class="so"><h4>So what</h4><p>The strongest single argument that many "gaps" in this data are blind spots, not missing care.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 11 · eda_11</div>
+      <h3>The survey columns we need are clean</h3>
+      <div class="pic"><img src="figures/eda_11_nfhs_reliability.png" alt="Share of plain, low-sample and suppressed survey cells" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Left: for each group of survey indicators, the share of cells that are plain numbers, low-sample estimates (in brackets), or suppressed (*). Right: the columns this project uses.</p></div>
+        <div><h4>What it shows</h4><p>Child-health columns are often suppressed. The plan's columns are clean except the private-facility C-section rate (122 low-sample, 150 suppressed).</p></div>
+        <div class="so"><h4>So what</h4><p>Facility births is a safe target. A "*" is always treated as missing, never as zero.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 12 · eda_12</div>
+      <h3>Public facilities are much less visible online</h3>
+      <div class="pic"><img src="figures/eda_12_web_footprint.png" alt="Followers, last post year and page update year by operator" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Three charts, private (blue) next to public (orange). Bars are shares within each group, so the small public group can be compared fairly.</p></div>
+        <div><h4>What it shows</h4><p>Median followers: 285 private, 36 public. Most public pages carry a 2025 update date, likely government portals.</p></div>
+        <div class="so"><h4>So what</h4><p>Web popularity would push public facilities down, so followers stay out of any trust score.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="band part" id="grade">
+  <div class="wrap">
+    <h2>2. Grading facilities and measuring distance</h2>
+    <p>Each fact gets tags, the tags give each facility a grade from 0 to 3, and then we measure how far every post office is from the nearest facility at each grade.</p>
+
+    <article class="fig">
+      <div class="num">Figure 13 · wp3_regex_gold_scores</div>
+      <h3>C-section and blood tags hold up; "ob_delivery" is wrong two times in three on real data</h3>
+      <div class="pic"><img src="figures/wp3_regex_gold_scores.png" alt="Precision and recall per tag" loading="lazy"></div>
+      <p class="tip">New idea: <strong>precision</strong> asks "when the tagger says yes, how often is it right?" <strong>Recall</strong> asks "of the facts that truly have this tag, how many did it catch?" <strong>F1</strong> combines the two into one score from 0 to 1.</p>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>One row per tag, worst at the top. Blue dot is precision, orange is recall; the grey line is the gap between them. These are scores on the labelled sample, which flatters the tagger (next note).</p></div>
+        <div><h4>What we did</h4><p>An AI agent, not a person, labelled 429 distinct facts one at a time. The sample was built so every tag has at least 25 true examples, so 93% of its rows carry a tag, against about 9% of real facts.</p></div>
+        <div><h4>What it shows</h4><p>On the sample, average F1 0.90. Re-weighted to how often each kind of fact really occurs, C-section, blood and operating theatre still score 0.97 to 1.00. But "ob_delivery" precision falls from 0.63 to 0.33 (the bare word "obstetric" triggers it), and ventilator recall falls from 0.77 to 0.59.</p></div>
+        <div class="so"><h4>Careful</h4><p>No human has checked these labels, and the same kind of model wrote the tagging rules, so they are not ground truth. Next: Hruday labels 100 facts without seeing the agent's tags, and we report how often the two agree.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 14 · wp5_01</div>
+      <h3>Raising the evidence bar moves obstetric care from 24 km to 166 km away</h3>
+      <div class="pic"><img src="figures/wp5_01_access_curves_regex.png" alt="Cumulative distance curves per grade and service" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>The same cumulative curves as figure 2, one panel per service, one line per evidence grade. Lighter is "claims it", darker is "proven".</p></div>
+        <div><h4>What we did</h4><p>For 145,715 post offices (dropping 5,874 placed over 200 km from their own district), found the nearest facility at each grade or better.</p></div>
+        <div><h4>What it shows</h4><p>Obstetrics medians 24, 60 and 166 km. For dialysis and ICU the lines sit close together: evidence changes less there.</p></div>
+        <div class="so"><h4>So what</h4><p>For obstetrics, evidence is the story. That is why it is the flagship service.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 15 · wp5_02</div>
+      <h3>Half of post offices are over 60 km from evidenced obstetric care</h3>
+      <div class="pic"><img src="figures/wp5_02_access_maps_g2_regex.png" alt="Maps of distance to grade 2 care per service" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Each dot is a post office, coloured by distance to the nearest grade 2 facility: grey within 60 km, light blue 60 to 120, dark over 120. The grey blobs are the areas around evidenced facilities.</p></div>
+        <div><h4>What it shows</h4><p>Obstetrics: 50% of post offices beyond 60 km, with dark patches across central and eastern India and the Northeast. Dialysis 32%, ICU 20%.</p></div>
+        <div class="so"><h4>So what</h4><p>This is a still preview of the interactive map. Dark means "no evidence nearby in this data", not "no care".</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="band part" id="split">
+  <div class="wrap">
+    <h2>3. The split: care desert or data desert</h2>
+    <p>Each district gets an access reading (median distance from its post offices to grade 2 obstetric care) and an outcome reading (survey facility births). Crossing the two gives the four groups at the top of this page.</p>
+
+    <article class="fig">
+      <div class="num">Figure 16 · wp6_01</div>
+      <h3>137 districts look far but still deliver most births in facilities</h3>
+      <div class="pic"><img src="figures/wp6_01_quadrants_emoc.png" alt="Scatter of districts by distance and institutional births with quadrants" loading="lazy"></div>
+      <p class="tip">New chart type: a <strong>log scale</strong> on the bottom axis. Each step is a multiple (2, 5, 10, 20, 50 km) rather than an equal amount, so districts at 3 km and at 300 km both fit and stay readable.</p>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Each dot is a district. Right means farther from evidenced care; up means more facility births. The vertical line is the farthest third (90.2 km); the horizontal line is the lowest third (87.3%). Circles mark C-section rates under 5%, a sign of no surgical access.</p></div>
+        <div><h4>What we did</h4><p>Split both axes at thirds and labelled each corner.</p></div>
+        <div><h4>What it shows</h4><p>Served 335, data desert 137 (blue, top right), cost or quality 135, care desert 98 (bottom right). Most circled districts are care deserts.</p></div>
+        <div class="so"><h4>Careful</h4><p>The cuts are relative, so the labels overclaim. "Poor" means the bottom third, below 87.3% facility births: 40 of the 98 "care deserts" still deliver 80 to 87% of births in facilities. "Cost or quality" is a guess, since no cost data went into the rule. Absolute cuts are proposed (under 80% care desert, 90% or more data desert, 80 to 90% left unlabelled), and the next chart shows how much the choice matters.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 17 · wp6_02</div>
+      <h3>About half of each desert label survives any reasonable cut</h3>
+      <div class="pic"><img src="figures/wp6_02_threshold_sensitivity.png" alt="Quadrant counts as each threshold moves" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Across: where the cut goes (the share of districts called "poor"). Coloured lines: districts in each group at that cut. Black line: districts whose label differs from our chosen split (the vertical line at a third).</p></div>
+        <div><h4>What we did</h4><p>Moved one cut at a time, and also tried 16 combinations (median, third, quarter, or fixed 60 km and 80%).</p></div>
+        <div><h4>What it shows</h4><p>Counts swing a lot. 69 of 137 data deserts and 46 of 98 care deserts keep their label under all 16.</p></div>
+        <div class="so"><h4>So what</h4><p>The video should name only those stable districts. This is a robustness check: a finding that flips with a small choice is not a finding.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 18 · wp6_03</div>
+      <h3>Data deserts deliver more births in public facilities</h3>
+      <div class="pic"><img src="figures/wp6_03_public_share_by_quadrant.png" alt="Public facility births by quadrant with medians and intervals" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Each dot is a district, grouped by label. The black cross is the group median with a 95% range from resampling whole states.</p></div>
+        <div><h4>What we did</h4><p>Tested the data-desert idea with a column we did not use to make the split: the share of births in public facilities.</p></div>
+        <div><h4>What it shows</h4><p>Data deserts 77% of all births in public facilities, served districts 67%. Within the same state the gap is smaller (+3.3 points) but unlikely to be chance (p = 0.006). In care deserts, 91% of the few facility births are public: private care is simply absent.</p></div>
+        <div class="so"><h4>Careful</h4><p>Public share also rises in rural areas, so this is consistent with hidden public care, not proof of it.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 19 · wp6_04</div>
+      <h3>Deserts cluster by state</h3>
+      <div class="pic"><img src="figures/wp6_04_quadrants_by_state.png" alt="Quadrant counts per state" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>One bar per state, split into its districts' labels.</p></div>
+        <div><h4>What it shows</h4><p>Data deserts: Odisha 17, Madhya Pradesh 15, Telangana 14, Karnataka and Rajasthan 13. Cost or quality dominates Uttar Pradesh (43) and Bihar (30): listed private care nearby, but fewer facility births. All 11 Nagaland districts are care deserts.</p></div>
+        <div class="so"><h4>Careful</h4><p>Cuts are national, so a state with few web-listed facilities looks far everywhere. Model B compares districts within their state to correct for this.</p></div>
+      </div>
+    </article>
+
+    <article class="fig">
+      <div class="num">Figure 20 · wp6_05</div>
+      <h3>Dialysis: 59 districts with high need and far from evidenced care</h3>
+      <div class="pic"><img src="figures/wp6_05_dialysis_need_vs_access.png" alt="Dialysis need versus distance by district" loading="lazy"></div>
+      <div class="notes">
+        <div><h4>How to read it</h4><p>Each dot is a district. Right is farther from grade 2 dialysis; up is more diabetes and high blood pressure. Purple dots are in the top third of both.</p></div>
+        <div><h4>What it shows</h4><p>59 such districts. The far-right dots are island districts over 1,000 km from the mainland.</p></div>
+        <div class="so"><h4>Careful</h4><p>Need is not an outcome, so this cannot tell a care gap from a data gap. Dialysis stays a secondary story.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<footer class="band">
+  <div class="wrap">
+    <p>Sources: Virtue Foundation facility table (web-scraped, via Databricks), India Post PIN directory and NFHS-5 district fact sheets (data.gov.in). Distances are straight-line km from post offices, which stand in for settlements and are not people. No evidence of a service is not evidence that it is absent. Analysis figures (distance maps by grade, quadrant map) are still being drawn and will be added.</p>
+  </div>
+</footer>
+
+</body>
+</html>

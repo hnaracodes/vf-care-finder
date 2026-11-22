@@ -32,7 +32,7 @@ Agents: do not block on these. Use the stated default, and log it in `08_decisio
 | Video length limit | Plan for 3 minutes, with a 90-second cut ready |
 | Judging rubric | Assume insight, rigor, and communication count about equally |
 | What else is submitted besides the video (repo, slides, link) | Prepare a public repo link and a hosted link to the map |
-| Are external datasets allowed | Assume yes for boundaries and census population, since the dataset notes recommend external boundary files. Flag each one used |
+| Are external datasets allowed | **Answered Nov 21 (D015): yes, organizers encourage outside data and scraping.** Flag each one used |
 | Are paid LLM APIs allowed, and what is the budget | Assume yes, with a hard cap of 30 USD total. Track spend |
 | Teammates | Assume solo |
 

@@ -1,0 +1,706 @@
+district_key,state,district,high_blood_sugar_women_pct,high_blood_sugar_men_pct,high_bp_women_pct,high_bp_men_pct,dialysis_g2_dist_km_p50,dialysis_g2_share_within_60km,dialysis_g2_facilities_in_district,n_post_offices,crosswalk_method,need_index_pct,need_high,access_poor,cell
+Sikkim|North  District,Sikkim,North  District,11.6,16.0,39.0,47.7,86.69,0.0,0,27,exact,28.58,True,True,high_need_poor_access
+Andhra Pradesh|Prakasam,Andhra Pradesh,Prakasam,23.2,30.2,27.8,33.0,119.81,0.002728512960436562,0,733,exact,28.55,True,True,high_need_poor_access
+Andaman & Nicobar Islands|Nicobars,Andaman & Nicobar Islands,Nicobars,13.1,15.4,35.4,47.0,1535.5,0.0,0,4,exact,27.72,True,True,high_need_poor_access
+Arunachal Pradesh|Anjaw,Arunachal Pradesh,Anjaw,13.0,18.3,31.1,42.6,158.47,0.018867924528301886,0,53,exact,26.25,True,True,high_need_poor_access
+Telangana|Rajanna Sircilla,Telangana,Rajanna Sircilla,13.2,20.3,30.2,36.0,77.23,0.04918032786885246,0,122,exact,24.92,True,True,high_need_poor_access
+Maharastra|Ratnagiri,Maharastra,Ratnagiri,16.9,16.5,32.4,33.9,72.97,0.2650793650793651,0,657,exact,24.92,True,True,high_need_poor_access
+Arunachal Pradesh|Dibang Valley,Arunachal Pradesh,Dibang Valley,9.4,12.2,32.2,45.4,112.98,0.05405405405405406,0,74,exact,24.8,True,True,high_need_poor_access
+Sikkim|West District,Sikkim,West District,7.4,13.6,32.7,45.1,60.08,0.5,0,51,exact+parent_district,24.7,True,True,high_need_poor_access
+Telangana|Siddipet,Telangana,Siddipet,14.7,20.0,26.6,36.9,72.68,0.25877192982456143,0,228,exact,24.55,True,True,high_need_poor_access
+Karnataka|Tumkur,Karnataka,Tumkur,15.4,19.9,27.4,34.0,64.7,0.37453183520599254,0,557,fuzzy,24.17,True,True,high_need_poor_access
+Telangana|Karimnagar,Telangana,Karimnagar,16.8,20.0,25.0,34.7,115.49,0.0,0,180,exact,24.12,True,True,high_need_poor_access
+Telangana|Bhadradri Kothagudem,Telangana,Bhadradri Kothagudem,18.3,18.4,29.6,30.1,123.9,0.003003003003003003,0,333,exact,24.1,True,True,high_need_poor_access
+Sikkim|East District,Sikkim,East District,14.6,15.8,31.6,34.2,62.47,0.42028985507246375,0,83,exact+parent_district,24.05,True,True,high_need_poor_access
+Andaman & Nicobar Islands|North & Middle Andaman,Andaman & Nicobar Islands,North & Middle Andaman,16.7,18.3,27.4,32.2,1141.78,0.0,0,8,exact,23.65,True,True,high_need_poor_access
+Arunachal Pradesh|West Siang,Arunachal Pradesh,West Siang,9.1,11.2,32.7,41.1,79.26,0.3523809523809524,0,105,exact+parent_district,23.52,True,True,high_need_poor_access
+Telangana|Suryapet,Telangana,Suryapet,17.7,23.9,25.2,27.3,103.79,0.0,0,218,exact,23.52,True,True,high_need_poor_access
+Puducherry|Puducherry,Puducherry,Puducherry,19.1,21.0,22.7,31.1,61.16,0.41935483870967744,0,62,fuzzy,23.48,True,True,high_need_poor_access
+Telangana|Khammam,Telangana,Khammam,17.7,17.7,27.6,30.8,86.84,0.1,0,410,exact,23.45,True,True,high_need_poor_access
+Telangana|Warangal Urban,Telangana,Warangal Urban,17.1,19.0,24.5,32.7,119.47,0.0,0,176,manual,23.33,True,True,high_need_poor_access
+Telangana|Peddapalli,Telangana,Peddapalli,13.7,16.8,27.7,34.7,120.86,0.0,0,148,exact,23.22,True,True,high_need_poor_access
+Telangana|Jagitial,Telangana,Jagitial,15.5,19.5,25.5,31.3,84.4,0.11917098445595854,0,193,exact,22.95,True,True,high_need_poor_access
+Andhra Pradesh|Y.S.R.,Andhra Pradesh,Y.S.R.,18.4,22.3,23.2,27.3,93.47,0.2108345534407028,1,683,exact+parent_district,22.8,True,True,high_need_poor_access
+Andhra Pradesh|Sri Potti Sriramulu Nello,Andhra Pradesh,Sri Potti Sriramulu Nello,21.8,21.1,23.0,25.1,111.58,0.030821917808219176,0,584,manual,22.75,True,True,high_need_poor_access
+Telangana|Jayashankar Bhupalapally,Telangana,Jayashankar Bhupalapally,13.5,17.4,28.4,31.5,158.96,0.0,0,281,exact+parent_district,22.7,True,True,high_need_poor_access
+Odisha|Ganjam,Odisha,Ganjam,15.3,21.8,23.4,29.7,134.29,0.0,0,703,exact,22.55,True,True,high_need_poor_access
+Telangana|Mancherial,Telangana,Mancherial,14.2,16.1,27.9,32.0,85.08,0.04054054054054054,0,148,exact,22.55,True,True,high_need_poor_access
+Arunachal Pradesh|East Siang,Arunachal Pradesh,East Siang,9.5,12.7,29.7,38.1,77.62,0.2765957446808511,0,47,exact,22.5,True,True,high_need_poor_access
+Lakshadweep|Lakshadweep,Lakshadweep,Lakshadweep,19.5,20.7,24.8,24.7,274.25,0.0,0,8,fuzzy,22.42,True,True,high_need_poor_access
+Telangana|Warangal Rural,Telangana,Warangal Rural,15.6,18.1,26.3,29.4,139.33,0.0,0,123,manual,22.35,True,True,high_need_poor_access
+Karnataka|Chikmagalur,Karnataka,Chikmagalur,15.6,15.7,29.2,28.7,63.37,0.40066225165562913,0,302,fuzzy,22.3,True,True,high_need_poor_access
+Karnataka|Shimoga,Karnataka,Shimoga,15.3,16.7,27.2,28.7,72.84,0.15249266862170088,0,354,fuzzy,21.98,True,True,high_need_poor_access
+Telangana|Jangoan,Telangana,Jangoan,14.4,18.3,26.1,29.0,88.3,0.09482758620689655,0,116,exact,21.95,True,True,high_need_poor_access
+Madhya Pradesh|Mandsaur,Madhya Pradesh,Mandsaur,10.2,11.6,29.6,36.2,122.96,0.037914691943127965,0,211,exact,21.9,True,True,high_need_poor_access
+Andaman & Nicobar Islands|South Andaman,Andaman & Nicobar Islands,South Andaman,18.4,18.1,23.0,26.9,1207.85,0.0,0,13,fuzzy,21.6,True,True,high_need_poor_access
+Arunachal Pradesh|Lower Dibang Valley,Arunachal Pradesh,Lower Dibang Valley,8.9,13.2,25.6,38.1,112.71,0.05555555555555555,0,18,exact,21.45,True,True,high_need_poor_access
+Arunachal Pradesh|Lower Subansiri,Arunachal Pradesh,Lower Subansiri,9.1,14.2,25.7,36.6,61.48,0.4074074074074074,0,54,exact+parent_district,21.4,True,True,high_need_poor_access
+Odisha|Nayagarh,Odisha,Nayagarh,20.7,24.0,22.0,18.8,58.62,0.5327868852459017,0,132,exact,21.38,True,True,high_need_poor_access
+Madhya Pradesh|Agar Malwa,Madhya Pradesh,Agar Malwa,19.5,18.9,21.2,25.2,107.35,0.12244897959183673,0,49,exact,21.2,True,True,high_need_poor_access
+Chhattisgarh|Koriya,Chhattisgarh,Koriya,13.4,14.6,25.7,30.9,78.01,0.21348314606741572,0,89,manual,21.15,True,True,high_need_poor_access
+Odisha|Kendrapara,Odisha,Kendrapara,15.7,21.6,21.9,24.8,62.77,0.4581818181818182,0,275,exact,21.0,True,True,high_need_poor_access
+Telangana|Vikarabad,Telangana,Vikarabad,10.8,14.3,27.0,30.3,72.04,0.25595238095238093,0,168,exact,20.6,True,True,high_need_poor_access
+Nagaland|Phek,Nagaland,Phek,9.0,13.4,25.9,33.8,65.67,0.28205128205128205,0,39,exact,20.52,True,True,high_need_poor_access
+Gujarat|Junagadh,Gujarat,Junagadh,18.5,19.3,23.3,20.8,67.92,0.3642611683848797,0,291,exact,20.47,True,True,high_need_poor_access
+Madhya Pradesh|Mandla,Madhya Pradesh,Mandla,11.9,14.6,24.9,30.4,99.4,0.22613065326633167,0,199,exact,20.45,True,True,high_need_poor_access
+Chhattisgarh|Jashpur,Chhattisgarh,Jashpur,8.3,10.4,28.5,34.4,80.44,0.15591397849462366,0,186,exact,20.4,True,True,high_need_poor_access
+Odisha|Jharsuguda,Odisha,Jharsuguda,16.6,19.0,20.4,25.3,63.59,0.391304347826087,0,92,exact,20.32,True,True,high_need_poor_access
+Telangana|Mahabubabad,Telangana,Mahabubabad,14.1,16.5,21.9,28.8,130.73,0.0,0,175,exact,20.32,True,True,high_need_poor_access
+Arunachal Pradesh|Upper Subansiri,Arunachal Pradesh,Upper Subansiri,6.6,10.6,25.4,37.5,109.28,0.07236842105263158,0,152,exact,20.02,True,True,high_need_poor_access
+Andhra Pradesh|Srikakulam,Andhra Pradesh,Srikakulam,17.4,17.6,22.1,22.9,109.85,0.018115942028985508,0,565,exact,20.0,True,True,high_need_poor_access
+Tripura|Unakoti,Tripura,Unakoti,16.9,19.9,21.0,22.1,78.91,0.0,0,12,exact,19.98,True,True,high_need_poor_access
+Arunachal Pradesh|Tawang,Arunachal Pradesh,Tawang,4.5,8.5,30.3,36.4,115.48,0.0,0,26,exact,19.92,True,True,high_need_poor_access
+Chhattisgarh|Raigarh,Chhattisgarh,Raigarh,8.1,13.4,26.1,31.9,71.02,0.27241379310344827,0,290,exact,19.88,True,True,high_need_poor_access
+Tripura|North Tripura,Tripura,North Tripura,18.3,22.9,18.8,19.3,67.39,0.4444444444444444,0,12,exact,19.82,True,True,high_need_poor_access
+Andhra Pradesh|Vizianagaram,Andhra Pradesh,Vizianagaram,14.3,14.5,25.2,25.1,83.04,0.3089080459770115,0,696,exact+parent_district,19.77,True,True,high_need_poor_access
+Bihar|Purnia,Bihar,Purnia,16.5,21.4,18.7,22.5,70.69,0.175,0,175,exact,19.77,True,True,high_need_poor_access
+Uttarakhand|Garhwal,Uttarakhand,Garhwal,10.6,12.1,22.1,34.3,61.72,0.4891041162227603,0,413,fuzzy,19.77,True,True,high_need_poor_access
+Odisha|Bhadrak,Odisha,Bhadrak,13.7,17.5,21.7,26.1,64.5,0.2819672131147541,0,305,exact,19.75,True,True,high_need_poor_access
+Telangana|Nagarkurnool,Telangana,Nagarkurnool,12.5,14.5,24.6,27.3,73.75,0.23809523809523808,0,21,exact,19.73,True,True,high_need_poor_access
+Odisha|Kalahandi,Odisha,Kalahandi,11.7,14.4,26.4,26.2,160.77,0.0,0,267,exact,19.68,True,True,high_need_poor_access
+Kerala|Pathanamthitta,Kerala,Pathanamthitta,32.1,34.7,42.1,41.9,9.91,0.996551724137931,2,290,exact,37.7,True,False,high_need_good_access
+Kerala|Kottayam,Kerala,Kottayam,28.7,29.4,34.2,38.8,14.42,1.0,4,329,exact,32.78,True,False,high_need_good_access
+Kerala|Thrissur,Kerala,Thrissur,28.3,31.7,31.4,36.8,8.54,1.0,6,300,exact,32.05,True,False,high_need_good_access
+Puducherry|Mahe,Puducherry,Mahe,27.1,28.6,33.3,37.7,40.68,1.0,0,4,exact,31.68,True,False,high_need_good_access
+Kerala|Thiruvananthapuram,Kerala,Thiruvananthapuram,26.1,36.2,31.4,32.1,12.99,1.0,7,413,exact,31.45,True,False,high_need_good_access
+Kerala|Kollam,Kerala,Kollam,26.2,30.2,32.4,35.3,12.8,1.0,2,367,exact,31.02,True,False,high_need_good_access
+Sikkim|South District,Sikkim,South District,12.5,17.6,41.0,49.6,47.62,0.8,0,51,exact,30.17,True,False,high_need_good_access
+Telangana|Hyderabad,Telangana,Hyderabad,21.2,26.8,30.2,41.7,1.87,0.9888888888888889,16,90,exact,29.98,True,False,high_need_good_access
+Kerala|Alappuzha,Kerala,Alappuzha,25.2,25.4,32.1,36.2,12.27,1.0,2,282,exact,29.72,True,False,high_need_good_access
+Kerala|Palakkad,Kerala,Palakkad,24.6,26.3,32.4,35.3,16.74,0.9813953488372092,2,307,exact,29.65,True,False,high_need_good_access
+Maharastra|Sindhudurg,Maharastra,Sindhudurg,20.6,23.4,36.6,37.9,54.52,0.6203966005665722,0,353,exact,29.62,True,False,high_need_good_access
+Tamil Nadu|Thanjavur,Tamil Nadu,Thanjavur,23.3,29.0,28.8,34.6,16.71,0.9979838709677419,5,513,exact,28.92,True,False,high_need_good_access
+Kerala|Kannur,Kerala,Kannur,23.8,25.0,31.0,34.8,52.67,0.773851590106007,0,379,exact,28.65,True,False,high_need_good_access
+Kerala|Idukki,Kerala,Idukki,22.8,23.9,34.8,31.8,11.89,1.0,4,296,exact,28.32,True,False,high_need_good_access
+Puducherry|Yanam,Puducherry,Yanam,22.0,24.7,32.2,33.3,45.16,1.0,0,1,exact,28.05,True,False,high_need_good_access
+Tamil Nadu|Chennai,Tamil Nadu,Chennai,27.2,22.1,28.8,33.2,1.72,0.96,29,152,exact,27.82,True,False,high_need_good_access
+Kerala|Ernakulam,Kerala,Ernakulam,25.8,25.5,29.6,30.2,9.7,1.0,14,386,exact,27.78,True,False,high_need_good_access
+Andhra Pradesh|East Godavari,Andhra Pradesh,East Godavari,21.7,27.6,29.0,32.2,34.7,0.900355871886121,1,562,exact+parent_district,27.62,True,False,high_need_good_access
+Tamil Nadu|Theni,Tamil Nadu,Theni,22.9,23.1,28.7,35.6,17.9,1.0,1,159,exact,27.58,True,False,high_need_good_access
+Tamil Nadu|Kanniyakumari,Tamil Nadu,Kanniyakumari,29.0,25.2,24.4,30.2,7.04,1.0,4,262,exact,27.2,True,False,high_need_good_access
+Tamil Nadu|Thiruvarur,Tamil Nadu,Thiruvarur,26.5,25.9,23.8,31.0,33.23,0.9444444444444444,0,355,exact,26.8,True,False,high_need_good_access
+Tamil Nadu|Dindigul,Tamil Nadu,Dindigul,22.1,25.1,25.7,34.2,44.16,0.972972972972973,0,457,exact,26.78,True,False,high_need_good_access
+Punjab|Shahid Bhagat Singh Nagar,Punjab,Shahid Bhagat Singh Nagar,15.1,15.8,32.7,42.8,12.28,1.0,1,172,exact,26.6,True,False,high_need_good_access
+Punjab|Bathinda,Punjab,Bathinda,14.0,14.5,32.2,45.1,17.29,0.9934640522875817,3,153,exact,26.45,True,False,high_need_good_access
+Andhra Pradesh|Guntur,Andhra Pradesh,Guntur,22.7,25.9,25.8,31.3,47.06,0.6538461538461539,4,858,exact+parent_district,26.42,True,False,high_need_good_access
+Punjab|Hoshiarpur,Punjab,Hoshiarpur,12.9,13.8,35.9,43.0,17.18,0.9826086956521739,4,345,exact,26.4,True,False,high_need_good_access
+Tamil Nadu|Karur,Tamil Nadu,Karur,23.4,28.9,24.1,29.1,22.18,1.0,1,242,exact,26.38,True,False,high_need_good_access
+Punjab|Amritsar,Punjab,Amritsar,13.5,13.0,35.9,43.0,19.04,0.9932203389830508,6,295,exact,26.35,True,False,high_need_good_access
+Karnataka|Bangalore,Karnataka,Bangalore,19.4,21.3,30.7,33.5,3.35,0.9963768115942029,31,276,manual,26.22,True,False,high_need_good_access
+Punjab|Gurdaspur,Punjab,Gurdaspur,15.1,13.8,36.8,39.2,36.56,1.0,0,206,exact,26.22,True,False,high_need_good_access
+Tamil Nadu|Thiruvallur,Tamil Nadu,Thiruvallur,22.5,23.4,26.4,32.4,25.03,0.9971428571428571,4,350,exact,26.17,True,False,high_need_good_access
+Kerala|Kozhikode,Kerala,Kozhikode,22.5,23.9,29.6,28.4,11.63,1.0,8,410,exact,26.1,True,False,high_need_good_access
+Manipur|Imphal West,Manipur,Imphal West,16.6,21.8,27.5,38.4,7.48,0.9866666666666667,2,75,exact,26.08,True,False,high_need_good_access
+Himachal Pradesh|Hamirpur,Himachal Pradesh,Hamirpur,19.2,21.2,28.1,35.2,35.6,0.995049504950495,0,224,exact,25.92,True,False,high_need_good_access
+Tamil Nadu|Kancheepuram,Tamil Nadu,Kancheepuram,22.9,24.3,24.3,32.0,17.55,0.9852579852579852,6,428,fuzzy+parent_district,25.88,True,False,high_need_good_access
+Andhra Pradesh|West Godavari,Andhra Pradesh,West Godavari,23.8,18.9,28.8,31.4,36.08,0.8359030837004405,1,908,exact+parent_district,25.72,True,False,high_need_good_access
+Punjab|Jalandhar,Punjab,Jalandhar,17.8,14.8,32.5,37.5,11.62,1.0,7,348,exact,25.65,True,False,high_need_good_access
+Karnataka|Kodagu,Karnataka,Kodagu,17.4,19.3,31.5,33.3,51.59,0.7710280373831776,0,214,exact,25.38,True,False,high_need_good_access
+Tamil Nadu|Salem,Tamil Nadu,Salem,18.0,22.7,26.6,34.0,22.85,0.958,7,500,exact,25.33,True,False,high_need_good_access
+Tamil Nadu|Madurai,Tamil Nadu,Madurai,21.2,22.7,25.6,31.8,20.41,0.9947368421052631,6,380,exact,25.32,True,False,high_need_good_access
+Goa|North Goa,Goa,North Goa,20.6,24.9,27.3,28.3,8.6,0.9552238805970149,2,67,exact,25.28,True,False,high_need_good_access
+Punjab|Barnala,Punjab,Barnala,14.5,13.8,32.8,40.0,44.48,0.8571428571428571,0,56,exact,25.28,True,False,high_need_good_access
+Tamil Nadu|Namakkal,Tamil Nadu,Namakkal,19.7,24.0,25.6,31.5,18.57,1.0,1,352,exact,25.2,True,False,high_need_good_access
+Punjab|Kapurthala,Punjab,Kapurthala,15.8,15.9,32.3,36.2,17.52,1.0,1,125,exact,25.05,True,False,high_need_good_access
+Punjab|Fatehgarh Sahib,Punjab,Fatehgarh Sahib,17.2,16.1,31.8,35.1,15.21,1.0,1,85,exact,25.05,True,False,high_need_good_access
+Tamil Nadu|Thoothukkudi,Tamil Nadu,Thoothukkudi,22.0,25.4,24.5,28.2,23.52,0.9716312056737588,1,423,manual,25.02,True,False,high_need_good_access
+Tamil Nadu|Coimbatore,Tamil Nadu,Coimbatore,19.1,18.3,29.2,33.3,9.04,1.0,12,321,exact,24.98,True,False,high_need_good_access
+Tamil Nadu|Tiruchirappalli,Tamil Nadu,Tiruchirappalli,22.7,26.5,21.4,28.9,24.78,1.0,3,486,exact,24.88,True,False,high_need_good_access
+Punjab|Rupnagar,Punjab,Rupnagar,19.5,20.7,27.2,31.9,14.53,1.0,2,106,exact,24.83,True,False,high_need_good_access
+Punjab|Sangrur,Punjab,Sangrur,11.2,12.6,32.9,41.8,45.5,0.7971014492753623,0,138,exact+parent_district,24.62,True,False,high_need_good_access
+Telangana|Ranga Reddy,Telangana,Ranga Reddy,15.3,19.6,28.5,35.0,19.22,0.9835164835164835,8,182,exact,24.6,True,False,high_need_good_access
+Tamil Nadu|Erode,Tamil Nadu,Erode,16.6,16.1,29.5,36.1,16.73,1.0,4,342,exact,24.58,True,False,high_need_good_access
+Andhra Pradesh|Krishna,Andhra Pradesh,Krishna,23.3,22.5,24.0,28.5,31.93,0.9089026915113871,6,483,exact+parent_district,24.58,True,False,high_need_good_access
+Kerala|Malappuram,Kerala,Malappuram,21.4,24.0,25.4,27.4,17.39,1.0,3,428,exact,24.55,True,False,high_need_good_access
+Karnataka|Udupi,Karnataka,Udupi,16.7,17.7,31.2,32.5,24.18,0.9908814589665653,2,329,exact,24.52,True,False,high_need_good_access
+Goa|South Goa,Goa,South Goa,21.1,23.2,27.7,25.0,10.92,1.0,2,80,exact,24.25,True,False,high_need_good_access
+Punjab|Sahibzada Ajit Singh Nagar,Punjab,Sahibzada Ajit Singh Nagar,17.1,18.1,27.7,34.0,5.16,1.0,3,101,manual,24.22,True,False,high_need_good_access
+Tamil Nadu|Sivaganga,Tamil Nadu,Sivaganga,22.7,26.2,22.0,26.0,27.62,1.0,1,314,exact,24.22,True,False,high_need_good_access
+Telangana|Medchal-Malkajgiri,Telangana,Medchal-Malkajgiri,16.5,18.6,26.5,34.8,8.91,0.978021978021978,10,91,exact,24.1,True,False,high_need_good_access
+Punjab|Patiala,Punjab,Patiala,18.5,14.8,28.7,34.3,12.88,0.9830508474576272,3,177,exact,24.08,True,False,high_need_good_access
+Karnataka|Ramanagara,Karnataka,Ramanagara,18.2,19.6,28.2,29.9,36.14,1.0,0,182,exact,23.98,True,False,high_need_good_access
+Tamil Nadu|Nagapattinam,Tamil Nadu,Nagapattinam,19.4,19.9,24.5,32.1,34.26,0.8487394957983193,1,386,exact+parent_district,23.98,True,False,high_need_good_access
+Tamil Nadu|The Nilgiris,Tamil Nadu,The Nilgiris,13.6,15.0,34.2,32.9,13.38,1.0,1,180,exact,23.92,True,False,high_need_good_access
+NCT of Delhi|Central,NCT of Delhi,Central,11.7,15.8,26.5,41.5,8.17,1.0,0,31,exact,23.88,True,False,high_need_good_access
+Nagaland|Zunheboto,Nagaland,Zunheboto,11.1,9.9,33.2,41.2,36.22,0.9761904761904762,0,42,exact,23.85,True,False,high_need_good_access
+Maharastra|Mumbai Suburban,Maharastra,Mumbai Suburban,19.7,21.0,26.6,28.0,1.34,1.0,25,118,exact,23.83,True,False,high_need_good_access
+Maharastra|Sangli,Maharastra,Sangli,15.2,18.0,30.1,32.0,25.53,0.8709677419354839,3,386,exact,23.83,True,False,high_need_good_access
+Maharastra|Kolhapur,Maharastra,Kolhapur,14.2,16.5,31.0,33.2,14.84,1.0,4,102,exact,23.72,True,False,high_need_good_access
+Punjab|Mansa,Punjab,Mansa,11.6,10.9,30.2,42.2,31.22,0.9690721649484536,0,97,exact,23.72,True,False,high_need_good_access
+Kerala|Kasaragod,Kerala,Kasaragod,20.4,22.3,26.1,26.0,17.02,1.0,1,234,exact,23.7,True,False,high_need_good_access
+Tamil Nadu|Ariyalur,Tamil Nadu,Ariyalur,22.0,24.7,20.6,27.5,31.26,1.0,0,219,exact,23.7,True,False,high_need_good_access
+Himachal Pradesh|Una,Himachal Pradesh,Una,20.1,20.4,27.1,27.2,31.71,1.0,0,186,exact,23.7,True,False,high_need_good_access
+Odisha|Jagatsinghapur,Odisha,Jagatsinghapur,16.9,21.4,26.2,30.2,43.97,0.8620689655172413,0,203,exact,23.68,True,False,high_need_good_access
+Tamil Nadu|Pudukkottai,Tamil Nadu,Pudukkottai,18.5,23.0,23.0,30.2,36.1,1.0,0,339,exact,23.68,True,False,high_need_good_access
+Andhra Pradesh|Kurnool,Andhra Pradesh,Kurnool,15.1,20.6,27.0,31.8,47.4,0.6842105263157895,3,114,exact+parent_district,23.62,True,False,high_need_good_access
+Karnataka|Mandya,Karnataka,Mandya,16.1,18.2,30.1,29.8,36.89,0.9285714285714286,0,56,exact,23.55,True,False,high_need_good_access
+Punjab|Moga,Punjab,Moga,14.9,12.8,31.2,35.3,14.74,1.0,4,172,exact,23.55,True,False,high_need_good_access
+West Bengal|Kolkata,West Bengal,Kolkata,21.6,24.3,23.9,23.8,1.27,1.0,27,214,exact,23.4,True,False,high_need_good_access
+Kerala|Wayanad,Kerala,Wayanad,18.3,17.9,28.8,28.3,17.85,1.0,1,162,exact,23.32,True,False,high_need_good_access
+Tamil Nadu|Vellore,Tamil Nadu,Vellore,20.4,21.4,25.9,25.6,20.52,1.0,5,645,exact+parent_district,23.32,True,False,high_need_good_access
+Punjab|Faridkot,Punjab,Faridkot,15.1,16.5,26.1,35.4,25.41,1.0,0,65,exact,23.28,True,False,high_need_good_access
+West Bengal|Hugli,West Bengal,Hugli,19.7,22.3,24.1,26.7,17.63,0.9971910112359551,2,490,manual,23.2,True,False,high_need_good_access
+Karnataka|Hassan,Karnataka,Hassan,16.3,18.7,28.1,29.5,32.57,0.9927360774818402,1,413,exact,23.15,True,False,high_need_good_access
+Tamil Nadu|Tiruppur,Tamil Nadu,Tiruppur,18.3,18.6,26.8,28.9,25.6,1.0,2,285,exact,23.15,True,False,high_need_good_access
+Odisha|Khordha,Odisha,Khordha,22.1,25.0,20.2,25.1,20.27,0.8473520249221184,8,321,exact,23.1,True,False,high_need_good_access
+Manipur|Imphal East,Manipur,Imphal East,15.9,18.5,21.9,36.0,26.63,0.9150943396226415,0,106,exact+parent_district,23.08,True,False,high_need_good_access
+NCT of Delhi|North East,NCT of Delhi,North East,12.9,14.5,27.2,37.0,3.07,1.0,0,20,exact,22.9,True,False,high_need_good_access
+Punjab|Fazilka,Punjab,Fazilka,13.3,14.0,27.9,36.2,13.85,1.0,1,143,exact,22.85,True,False,high_need_good_access
+Chandigarh|Chandigarh,Chandigarh,Chandigarh,19.0,16.6,25.0,30.6,2.45,1.0,3,53,exact,22.8,True,False,high_need_good_access
+Nagaland|Wokha,Nagaland,Wokha,12.2,18.8,24.3,35.7,37.09,1.0,0,29,exact,22.75,True,False,high_need_good_access
+Tamil Nadu|Tirunelveli,Tamil Nadu,Tirunelveli,21.0,22.3,22.1,25.5,28.19,1.0,4,540,exact+parent_district,22.72,True,False,high_need_good_access
+Punjab|Pathankot,Punjab,Pathankot,15.1,10.1,33.0,32.5,12.92,1.0,1,70,exact,22.68,True,False,high_need_good_access
+Gujarat|Mahesana,Gujarat,Mahesana,19.4,21.6,22.6,27.0,24.68,0.9964539007092199,1,282,exact,22.65,True,False,high_need_good_access
+Gujarat|Gandhinagar,Gujarat,Gandhinagar,18.5,18.7,23.9,29.3,17.76,0.9521276595744681,0,188,exact,22.6,True,False,high_need_good_access
+Karnataka|Dakshina Kannada,Karnataka,Dakshina Kannada,15.4,14.8,30.1,29.9,21.44,0.9957173447537473,6,467,exact,22.55,True,False,high_need_good_access
+Puducherry|Karaikal,Puducherry,Karaikal,22.4,22.8,20.5,24.4,34.42,1.0,0,27,exact,22.52,True,False,high_need_good_access
+Tamil Nadu|Perambalur,Tamil Nadu,Perambalur,21.0,23.2,19.8,26.1,51.89,0.7536231884057971,0,138,exact,22.52,True,False,high_need_good_access
+Tamil Nadu|Dharmapuri,Tamil Nadu,Dharmapuri,15.4,18.1,25.8,30.8,24.61,1.0,1,255,exact,22.52,True,False,high_need_good_access
+Karnataka|Chitradurga,Karnataka,Chitradurga,15.1,14.4,29.7,30.6,37.13,0.8880597014925373,1,298,exact,22.45,True,False,high_need_good_access
+Punjab|Tarn Taran,Punjab,Tarn Taran,12.2,10.3,31.1,36.1,25.5,1.0,0,177,exact,22.42,True,False,high_need_good_access
+Telangana|Yadadri Bhuvanagiri,Telangana,Yadadri Bhuvanagiri,14.6,18.0,24.8,32.3,47.55,0.7087912087912088,0,182,exact,22.42,True,False,high_need_good_access
+Mizoram|Aizawl,Mizoram,Aizawl,15.2,17.3,23.4,33.6,42.56,0.6620689655172414,1,157,exact+parent_district,22.38,True,False,high_need_good_access
+Punjab|Firozpur,Punjab,Firozpur,13.2,12.7,29.7,33.9,20.94,1.0,1,122,fuzzy,22.38,True,False,high_need_good_access
+Andhra Pradesh|Chittoor,Andhra Pradesh,Chittoor,17.2,22.4,22.7,27.1,33.21,0.8003355704697986,2,596,exact+parent_district,22.35,True,False,high_need_good_access
+Haryana|Kurukshetra,Haryana,Kurukshetra,12.5,12.1,30.4,34.4,19.32,1.0,2,112,exact,22.35,True,False,high_need_good_access
+Punjab|Ludhiana,Punjab,Ludhiana,15.3,15.5,26.3,32.2,15.21,0.9938080495356038,15,323,exact,22.33,True,False,high_need_good_access
+Telangana|Medak,Telangana,Medak,14.0,19.5,26.7,28.9,57.99,0.554140127388535,0,157,exact,22.28,True,False,high_need_good_access
+Tripura|West Tripura,Tripura,West Tripura,18.7,18.1,25.1,27.1,5.06,1.0,1,20,exact,22.25,True,False,high_need_good_access
+Tamil Nadu|Ramanathapuram,Tamil Nadu,Ramanathapuram,17.2,20.2,23.3,28.2,27.91,0.9967105263157895,1,304,exact,22.22,True,False,high_need_good_access
+Karnataka|Bangalore Rural,Karnataka,Bangalore Rural,13.6,17.7,26.7,30.8,21.28,1.0,1,131,fuzzy,22.2,True,False,high_need_good_access
+Odisha|Cuttack,Odisha,Cuttack,17.8,21.1,22.7,27.1,22.32,0.9846153846153847,2,390,exact,22.18,True,False,high_need_good_access
+West Bengal|Darjiling,West Bengal,Darjiling,13.2,16.5,29.2,29.5,31.4,0.9894736842105263,7,211,fuzzy+parent_district,22.1,True,False,high_need_good_access
+Tamil Nadu|Cuddalore,Tamil Nadu,Cuddalore,20.5,20.7,20.1,27.0,50.19,0.8177966101694916,0,472,exact,22.08,True,False,high_need_good_access
+Andhra Pradesh|Visakhapatnam,Andhra Pradesh,Visakhapatnam,17.0,18.2,23.9,29.2,57.81,0.5318471337579618,4,942,fuzzy+parent_district,22.08,True,False,high_need_good_access
+West Bengal|Haora,West Bengal,Haora,16.9,20.3,24.0,26.8,10.64,0.993103448275862,0,303,manual,22.0,True,False,high_need_good_access
+Karnataka|Davanagere,Karnataka,Davanagere,16.1,17.5,24.8,29.5,32.33,0.9478672985781991,1,229,fuzzy,21.98,True,False,high_need_good_access
+Odisha|Puri,Odisha,Puri,20.7,23.1,20.8,23.3,37.49,0.9522184300341296,0,293,exact,21.98,True,False,high_need_good_access
+Karnataka|Chamarajanagar,Karnataka,Chamarajanagar,14.1,14.8,28.8,29.9,47.41,0.7916666666666666,0,24,fuzzy,21.9,True,False,high_need_good_access
+Chhattisgarh|Surguja,Chhattisgarh,Surguja,9.0,12.5,28.5,37.5,31.85,0.9166666666666666,3,72,exact,21.88,True,False,high_need_good_access
+Telangana|Nizamabad,Telangana,Nizamabad,13.5,15.6,27.1,31.2,24.32,0.9887640449438202,1,267,exact,21.85,True,False,high_need_good_access
+Gujarat|Tapi,Gujarat,Tapi,15.8,18.2,25.2,28.0,45.85,0.6318681318681318,0,182,exact,21.8,True,False,high_need_good_access
+Telangana|Kamareddy,Telangana,Kamareddy,12.9,17.5,27.7,29.1,49.89,0.84375,0,192,exact,21.8,True,False,high_need_good_access
+Uttarakhand|Dehradun,Uttarakhand,Dehradun,13.8,17.8,23.7,31.9,12.65,0.9676113360323887,8,247,exact,21.8,True,False,high_need_good_access
+Gujarat|Bharuch,Gujarat,Bharuch,18.0,20.5,23.7,24.9,20.05,1.0,2,378,exact,21.78,True,False,high_need_good_access
+Haryana|Yamunanagar,Haryana,Yamunanagar,14.6,14.9,28.7,28.8,11.01,1.0,2,113,exact,21.75,True,False,high_need_good_access
+Assam|Jorhat,Assam,Jorhat,15.3,19.0,25.9,26.3,28.2,1.0,0,172,exact,21.62,True,False,high_need_good_access
+Haryana|Panchkula,Haryana,Panchkula,17.4,18.1,24.3,26.2,6.96,1.0,0,49,exact,21.5,True,False,high_need_good_access
+NCT of Delhi|Shahdara,NCT of Delhi,Shahdara,12.3,12.5,26.1,35.0,1.78,1.0,2,28,exact,21.48,True,False,high_need_good_access
+Telangana|Sangareddy,Telangana,Sangareddy,11.3,16.3,25.7,32.6,58.01,0.5384615384615384,1,247,exact,21.48,True,False,high_need_good_access
+Haryana|Sirsa,Haryana,Sirsa,15.4,23.6,19.9,26.8,19.89,1.0,4,15,exact,21.42,True,False,high_need_good_access
+Assam|Nalbari,Assam,Nalbari,17.4,20.9,22.5,24.9,30.54,1.0,1,139,exact,21.42,True,False,high_need_good_access
+Gujarat|Anand,Gujarat,Anand,16.6,15.5,26.6,26.9,24.18,0.9956331877729258,0,265,exact,21.4,True,False,high_need_good_access
+Tamil Nadu|Tiruvannamalai,Tamil Nadu,Tiruvannamalai,18.8,21.8,19.2,25.8,26.0,0.9770114942528736,2,480,exact,21.4,True,False,high_need_good_access
+NCT of Delhi|West,NCT of Delhi,West,12.9,14.4,23.8,34.1,3.76,1.0,4,87,exact,21.3,True,False,high_need_good_access
+Tripura|South Tripura,Tripura,South Tripura,18.2,20.4,22.4,24.2,40.88,0.5555555555555556,0,9,exact,21.3,True,False,high_need_good_access
+Karnataka|Chikkaballapura,Karnataka,Chikkaballapura,11.9,16.5,24.1,32.5,46.14,0.9441624365482234,0,197,exact,21.25,True,False,high_need_good_access
+Haryana|Ambala,Haryana,Ambala,11.7,13.0,28.8,31.2,6.62,1.0,6,136,exact,21.18,True,False,high_need_good_access
+West Bengal|Purba Medinipur,West Bengal,Purba Medinipur,21.3,24.0,18.1,21.3,47.64,0.6679389312977099,1,564,manual,21.18,True,False,high_need_good_access
+Uttarakhand|Udham Singh Nagar,Uttarakhand,Udham Singh Nagar,14.2,18.0,22.2,30.2,19.28,0.990909090909091,2,110,fuzzy,21.15,True,False,high_need_good_access
+Odisha|Jajapur,Odisha,Jajapur,15.2,17.5,23.8,28.0,55.99,0.6298932384341637,0,297,exact,21.12,True,False,high_need_good_access
+NCT of Delhi|New Delhi,NCT of Delhi,New Delhi,12.0,12.7,25.8,33.8,5.63,1.0,0,83,exact,21.08,True,False,high_need_good_access
+NCT of Delhi|East,NCT of Delhi,East,11.7,12.9,25.8,33.8,2.99,1.0,0,23,exact,21.05,True,False,high_need_good_access
+Manipur|Bishnupur,Manipur,Bishnupur,13.4,15.8,23.6,31.3,38.19,0.9166666666666666,0,36,exact,21.02,True,False,high_need_good_access
+Tamil Nadu|Virudhunagar,Tamil Nadu,Virudhunagar,19.2,21.6,20.2,22.9,19.77,1.0,3,279,exact,20.98,True,False,high_need_good_access
+Gujarat|Valsad,Gujarat,Valsad,13.6,17.2,23.8,29.3,26.74,1.0,0,272,exact,20.98,True,False,high_need_good_access
+Maharastra|Thane,Maharastra,Thane,15.7,13.9,24.5,29.7,6.64,1.0,12,211,exact,20.95,True,False,high_need_good_access
+Himachal Pradesh|Kangra,Himachal Pradesh,Kangra,16.4,15.7,24.9,26.6,17.93,0.9983471074380166,2,622,exact,20.9,True,False,high_need_good_access
+NCT of Delhi|North West,NCT of Delhi,North West,14.4,14.7,24.1,29.9,5.69,1.0,1,54,exact,20.78,True,False,high_need_good_access
+Odisha|Dhenkanal,Odisha,Dhenkanal,14.7,17.0,25.3,26.0,32.33,1.0,0,246,exact,20.75,True,False,high_need_good_access
+Gujarat|Kheda,Gujarat,Kheda,16.0,18.2,24.0,24.5,24.64,0.9939024390243902,1,180,exact,20.68,True,False,high_need_good_access
+Tamil Nadu|Viluppuram,Tamil Nadu,Viluppuram,17.7,19.9,19.0,26.1,35.45,0.9570063694267515,1,639,fuzzy+parent_district,20.67,True,False,high_need_good_access
+Punjab|Muktsar,Punjab,Muktsar,13.5,12.6,24.4,32.0,23.48,1.0,2,135,fuzzy,20.62,True,False,high_need_good_access
+Uttarakhand|Hardwar,Uttarakhand,Hardwar,9.9,12.3,26.2,33.9,8.44,0.9830508474576272,5,118,fuzzy,20.58,True,False,high_need_good_access
+Maharastra|Satara,Maharastra,Satara,12.0,12.9,27.2,29.8,30.39,1.0,2,673,exact,20.47,True,False,high_need_good_access
+Uttar Pradesh|Ghaziabad,Uttar Pradesh,Ghaziabad,17.9,20.2,19.3,24.5,5.72,1.0,8,117,exact,20.47,True,False,high_need_good_access
+Uttarakhand|Almora,Uttarakhand,Almora,9.5,14.0,24.6,33.2,50.61,0.6822742474916388,0,325,exact,20.33,True,False,high_need_good_access
+West Bengal|Bankura,West Bengal,Bankura,16.2,23.8,21.0,20.3,24.17,0.985655737704918,2,488,exact,20.32,True,False,high_need_good_access
+Andhra Pradesh|Anantapur,Andhra Pradesh,Anantapur,14.2,16.8,23.4,26.7,56.17,0.5487077534791253,2,503,exact+parent_district,20.27,True,False,high_need_good_access
+Telangana|Nirmal,Telangana,Nirmal,11.7,15.8,25.1,28.5,53.53,0.6923076923076923,0,130,exact,20.27,True,False,high_need_good_access
+Karnataka|Mysore,Karnataka,Mysore,13.8,14.0,25.5,27.4,5.59,0.9662921348314607,3,89,manual,20.17,True,False,high_need_good_access
+NCT of Delhi|South,NCT of Delhi,South,12.1,15.9,22.3,30.4,1.87,1.0,6,71,exact,20.17,True,False,high_need_good_access
+Assam|Sivasagar,Assam,Sivasagar,15.3,17.2,22.0,26.0,33.22,0.9482758620689655,0,137,exact,20.12,True,False,high_need_good_access
+Uttarakhand|Nainital,Uttarakhand,Nainital,11.5,14.6,24.0,30.4,22.06,0.9573170731707317,3,164,exact,20.12,True,False,high_need_good_access
+Gujarat|Sabar Kantha,Gujarat,Sabar Kantha,13.7,16.6,24.0,26.1,50.59,0.7066666666666667,0,300,exact,20.1,True,False,high_need_good_access
+Himachal Pradesh|Bilaspur,Himachal Pradesh,Bilaspur,17.9,19.9,22.1,20.3,31.1,1.0,0,144,exact,20.05,True,False,high_need_good_access
+Manipur|Thoubal,Manipur,Thoubal,10.6,12.9,23.2,33.4,25.85,0.945054945054945,0,91,exact+parent_district,20.02,True,False,high_need_good_access
+Maharastra|Mumbai,Maharastra,Mumbai,17.5,18.2,21.0,23.3,1.55,0.990990990990991,8,111,exact,20.0,True,False,high_need_good_access
+Karnataka|Kolar,Karnataka,Kolar,12.5,15.1,24.3,27.9,39.37,1.0,0,222,exact,19.95,True,False,high_need_good_access
+Gujarat|Vadodara,Gujarat,Vadodara,16.6,15.1,24.3,23.8,17.68,0.9847328244274809,14,164,exact,19.95,True,False,high_need_good_access
+Tripura|Sepahijala,Tripura,Sepahijala,18.2,22.2,19.3,19.9,36.83,1.0,0,6,exact,19.9,True,False,high_need_good_access
+Uttar Pradesh|Azamgarh,Uttar Pradesh,Azamgarh,14.2,17.1,19.4,28.7,52.96,0.6333333333333333,0,135,exact,19.85,True,False,high_need_good_access
+Assam|Hailakandi,Assam,Hailakandi,14.2,18.9,21.8,24.4,28.65,0.8777777777777778,0,90,exact,19.82,True,False,high_need_good_access
+Assam|Kamrup,Assam,Kamrup,18.1,19.6,22.2,19.2,21.4,0.9555555555555556,0,200,exact,19.78,True,False,high_need_good_access
+Gujarat|Panch Mahals,Gujarat,Panch Mahals,13.8,15.2,22.5,27.6,43.85,0.8099547511312217,0,221,exact,19.77,True,False,high_need_good_access
+Assam|Baksa,Assam,Baksa,13.4,16.1,24.5,25.0,25.34,1.0,0,128,exact,19.75,True,False,high_need_good_access
+Meghalaya|West Garo Hills,Meghalaya,West Garo Hills,12.1,24.6,17.4,24.7,28.55,0.8490566037735849,1,114,exact,19.7,True,False,high_need_good_access
+Chhattisgarh|Mungeli,Chhattisgarh,Mungeli,11.4,11.9,26.2,29.2,50.77,0.7317073170731707,0,82,exact,19.68,True,False,high_need_good_access
+Karnataka|Uttara Kannada,Karnataka,Uttara Kannada,12.7,13.8,26.9,25.1,86.87,0.17870722433460076,0,263,exact,19.62,False,True,lower_need_poor_access
+Telangana|Wanaparthy,Telangana,Wanaparthy,13.9,16.5,22.5,25.5,61.12,0.4827586206896552,0,29,exact,19.6,False,True,lower_need_poor_access
+West Bengal|Paschim Medinipur,West Bengal,Paschim Medinipur,17.9,21.7,19.3,19.0,68.91,0.33515731874145005,0,780,manual+parent_district,19.47,False,True,lower_need_poor_access
+Manipur|Chandel,Manipur,Chandel,13.4,14.5,21.7,28.2,62.22,0.48,0,100,exact+parent_district,19.45,False,True,lower_need_poor_access
+Uttarakhand|Rudraprayag,Uttarakhand,Rudraprayag,10.4,16.3,18.7,31.7,95.88,0.0,0,128,fuzzy,19.28,False,True,lower_need_poor_access
+Arunachal Pradesh|Longding,Arunachal Pradesh,Longding,10.5,14.5,20.5,31.1,66.81,0.3235294117647059,0,34,exact,19.15,False,True,lower_need_poor_access
+Arunachal Pradesh|Namsai,Arunachal Pradesh,Namsai,9.2,12.0,27.1,28.1,99.12,0.1388888888888889,0,36,exact,19.1,False,True,lower_need_poor_access
+Chhattisgarh|Korba,Chhattisgarh,Korba,9.6,10.2,23.9,32.7,61.2,0.4418604651162791,0,129,exact,19.1,False,True,lower_need_poor_access
+Odisha|Kendujhar,Odisha,Kendujhar,11.3,15.8,24.1,25.1,93.76,0.04072398190045249,0,442,exact,19.08,False,True,lower_need_poor_access
+Meghalaya|North Garo Hills,Meghalaya,North Garo Hills,12.2,18.7,20.0,25.4,60.68,0.4782608695652174,0,23,exact,19.08,False,True,lower_need_poor_access
+Telangana|Nalgonda,Telangana,Nalgonda,13.8,17.0,19.6,25.7,85.46,0.09206349206349207,0,315,exact,19.03,False,True,lower_need_poor_access
+Arunachal Pradesh|Tirap,Arunachal Pradesh,Tirap,8.4,10.9,25.2,31.6,73.32,0.2903225806451613,0,31,exact,19.02,False,True,lower_need_poor_access
+Telangana|Mahabubnagar,Telangana,Mahabubnagar,10.8,14.2,24.2,26.5,81.56,0.10504201680672269,0,238,exact+parent_district,18.92,False,True,lower_need_poor_access
+Arunachal Pradesh|Papum Pare,Arunachal Pradesh,Papum Pare,9.5,12.8,20.6,32.7,68.05,0.4473684210526316,0,76,exact,18.9,False,True,lower_need_poor_access
+Arunachal Pradesh|Upper Siang,Arunachal Pradesh,Upper Siang,7.5,10.3,26.1,31.7,117.45,0.0,0,44,exact,18.9,False,True,lower_need_poor_access
+Chhattisgarh|Balrampur,Chhattisgarh,Balrampur,7.9,11.2,25.2,31.2,69.03,0.39416058394160586,0,137,exact,18.88,False,True,lower_need_poor_access
+Maharastra|Dhule,Maharastra,Dhule,13.4,15.3,21.4,25.1,92.31,0.007326007326007326,0,273,exact,18.8,False,True,lower_need_poor_access
+Odisha|Debagarh,Odisha,Debagarh,10.7,16.9,20.1,27.5,83.69,0.07792207792207792,0,77,fuzzy,18.8,False,True,lower_need_poor_access
+Madhya Pradesh|Seoni,Madhya Pradesh,Seoni,11.1,17.2,21.1,25.7,97.67,0.07142857142857142,0,15,exact,18.77,False,True,lower_need_poor_access
+Odisha|Sambalpur,Odisha,Sambalpur,11.7,16.6,22.2,24.5,68.07,0.4511627906976744,0,215,exact,18.75,False,True,lower_need_poor_access
+Uttarakhand|Bageshwar,Uttarakhand,Bageshwar,7.9,12.0,20.2,34.9,73.93,0.09933774834437085,0,151,exact,18.75,False,True,lower_need_poor_access
+Madhya Pradesh|Neemuch,Madhya Pradesh,Neemuch,9.8,10.0,26.0,28.5,100.16,0.03007518796992481,0,133,exact,18.58,False,True,lower_need_poor_access
+Maharastra|Bid,Maharastra,Bid,10.5,12.9,26.4,24.1,67.29,0.31378299120234604,0,341,manual,18.48,False,True,lower_need_poor_access
+Chhattisgarh|Uttar Bastar Kanker,Chhattisgarh,Uttar Bastar Kanker,7.4,8.8,27.0,30.2,130.33,0.008771929824561403,0,229,fuzzy,18.35,False,True,lower_need_poor_access
+Odisha|Rayagada,Odisha,Rayagada,12.8,16.0,19.5,25.1,174.46,0.0,0,177,exact,18.35,False,True,lower_need_poor_access
+Uttarakhand|Pithoragarh,Uttarakhand,Pithoragarh,6.5,10.6,23.3,32.9,83.43,0.06542056074766354,0,321,exact,18.33,False,True,lower_need_poor_access
+Arunachal Pradesh|Siang,Arunachal Pradesh,Siang,8.0,9.4,24.4,31.5,92.86,0.0,0,8,exact,18.32,False,True,lower_need_poor_access
+Madhya Pradesh|Jabalpur,Madhya Pradesh,Jabalpur,11.3,19.1,22.7,20.1,145.14,0.017045454545454544,0,186,exact,18.3,False,True,lower_need_poor_access
+Telangana|Adilabad,Telangana,Adilabad,10.8,12.8,23.1,26.4,79.48,0.14393939393939395,0,132,exact,18.27,False,True,lower_need_poor_access
+Arunachal Pradesh|Changlang,Arunachal Pradesh,Changlang,9.1,13.2,22.8,27.5,103.35,0.06060606060606061,0,66,exact,18.15,False,True,lower_need_poor_access
+Uttar Pradesh|Gonda,Uttar Pradesh,Gonda,8.7,12.4,22.9,28.6,78.64,0.15476190476190477,0,336,exact,18.15,False,True,lower_need_poor_access
+Odisha|Sundargarh,Odisha,Sundargarh,12.4,13.6,21.1,25.3,116.37,0.01728395061728395,0,405,exact,18.1,False,True,lower_need_poor_access
+Madhya Pradesh|Dindori,Madhya Pradesh,Dindori,8.8,10.6,25.2,27.7,68.98,0.2982456140350877,0,114,exact,18.08,False,True,lower_need_poor_access
+Odisha|Kandhamal,Odisha,Kandhamal,10.5,12.3,24.4,24.8,130.84,0.004166666666666667,0,240,exact,18.0,False,True,lower_need_poor_access
+Gujarat|Bhavnagar,Gujarat,Bhavnagar,16.4,17.1,20.1,18.0,72.24,0.2375,0,329,exact,17.9,False,True,lower_need_poor_access
+Odisha|Balangir,Odisha,Balangir,10.8,16.0,20.1,24.4,91.85,0.11075949367088607,0,316,exact,17.83,False,True,lower_need_poor_access
+Arunachal Pradesh|East Kameng,Arunachal Pradesh,East Kameng,8.9,13.9,19.5,29.0,73.07,0.23684210526315788,0,114,exact+parent_district,17.82,False,True,lower_need_poor_access
+Madhya Pradesh|Narsimhapur,Madhya Pradesh,Narsimhapur,9.9,13.5,23.2,24.4,149.88,0.1875,0,16,fuzzy,17.75,False,True,lower_need_poor_access
+Odisha|Baudh,Odisha,Baudh,10.8,15.0,20.9,24.0,87.84,0.0,0,47,fuzzy,17.68,False,True,lower_need_poor_access
+Jharkhand|Pakur,Jharkhand,Pakur,13.3,19.7,17.1,20.2,65.68,0.22580645161290322,0,131,exact,17.58,False,True,lower_need_poor_access
+Uttar Pradesh|Faizabad,Uttar Pradesh,Faizabad,17.0,20.6,14.9,17.7,67.53,0.256797583081571,0,354,manual,17.55,False,True,lower_need_poor_access
+Chhattisgarh|Janjgir - Champa,Chhattisgarh,Janjgir - Champa,9.0,11.2,21.6,28.3,61.5,0.4859437751004016,0,249,exact,17.52,False,True,lower_need_poor_access
+Assam|Tinsukia,Assam,Tinsukia,13.9,19.5,17.1,19.3,64.64,0.46715328467153283,0,137,exact,17.45,False,True,lower_need_poor_access
+Jharkhand|Garhwa,Jharkhand,Garhwa,12.3,15.7,18.3,23.4,120.85,0.01744186046511628,0,176,exact,17.42,False,True,lower_need_poor_access
+Madhya Pradesh|Chhindwara,Madhya Pradesh,Chhindwara,11.1,14.1,21.7,22.6,81.78,0.2388888888888889,0,360,exact,17.38,False,True,lower_need_poor_access
+Madhya Pradesh|Sagar,Madhya Pradesh,Sagar,7.0,10.6,25.3,26.4,117.39,0.0,0,307,exact,17.33,False,True,lower_need_poor_access
+Madhya Pradesh|Singrauli,Madhya Pradesh,Singrauli,10.6,13.7,18.9,25.9,112.28,0.10714285714285714,0,56,exact,17.27,False,True,lower_need_poor_access
+Maharastra|Nandurbar,Maharastra,Nandurbar,10.4,10.5,23.5,24.6,110.09,0.0,0,235,exact,17.25,False,True,lower_need_poor_access
+Bihar|Katihar,Bihar,Katihar,14.4,19.6,17.0,17.8,71.52,0.24793388429752067,0,171,exact,17.2,False,True,lower_need_poor_access
+Assam|Chirang,Assam,Chirang,8.8,13.3,20.8,25.6,81.52,0.09615384615384616,0,52,exact,17.12,False,True,lower_need_poor_access
+Chhattisgarh|Kabeerdham,Chhattisgarh,Kabeerdham,8.5,9.4,24.0,26.5,82.85,0.05102040816326531,0,98,fuzzy,17.1,False,True,lower_need_poor_access
+Karnataka|Gulbarga,Karnataka,Gulbarga,11.4,15.1,17.0,24.8,120.07,0.0024752475247524753,0,426,manual,17.08,False,True,lower_need_poor_access
+Chhattisgarh|Bastar,Chhattisgarh,Bastar,9.0,11.4,23.7,24.1,209.42,0.0,0,57,exact,17.05,False,True,lower_need_poor_access
+Jharkhand|Godda,Jharkhand,Godda,13.2,16.1,18.6,20.2,67.32,0.26903553299492383,0,218,exact,17.03,False,True,lower_need_poor_access
+Bihar|Kishanganj,Bihar,Kishanganj,11.0,17.0,17.4,22.7,70.08,0.26595744680851063,0,94,exact,17.02,False,True,lower_need_poor_access
+Jharkhand|Kodarma,Jharkhand,Kodarma,11.2,22.4,13.8,20.6,62.7,0.47435897435897434,0,78,fuzzy,17.0,False,True,lower_need_poor_access
+Gujarat|Porbandar,Gujarat,Porbandar,16.4,19.5,15.8,16.2,63.31,0.42857142857142855,0,91,exact,16.98,False,True,lower_need_poor_access
+Odisha|Nuapada,Odisha,Nuapada,10.6,12.2,21.4,23.6,97.98,0.19696969696969696,0,132,exact,16.95,False,True,lower_need_poor_access
+Madhya Pradesh|Jhabua,Madhya Pradesh,Jhabua,9.3,11.2,23.5,23.7,108.92,0.0,0,46,exact,16.92,False,True,lower_need_poor_access
+Uttar Pradesh|Bahraich,Uttar Pradesh,Bahraich,6.1,8.6,24.2,28.7,99.97,0.01730103806228374,0,289,exact,16.9,False,True,lower_need_poor_access
+Gujarat|Surendranagar,Gujarat,Surendranagar,16.4,19.3,17.1,14.7,77.47,0.175,0,292,exact,16.88,False,True,lower_need_poor_access
+Odisha|Gajapati,Odisha,Gajapati,10.9,12.0,19.7,24.9,162.72,0.0,0,147,exact,16.88,False,True,lower_need_poor_access
+Arunachal Pradesh|Lohit,Arunachal Pradesh,Lohit,9.5,9.1,22.1,26.6,123.37,0.03571428571428571,0,28,exact,16.83,False,True,lower_need_poor_access
+Madhya Pradesh|Ujjain,Madhya Pradesh,Ujjain,8.2,10.8,23.3,25.0,67.6,0.4068965517241379,0,145,exact,16.82,False,True,lower_need_poor_access
+Karnataka|Bijapur,Karnataka,Bijapur,11.6,14.3,20.2,21.0,120.53,0.007712082262210797,0,389,manual,16.77,False,True,lower_need_poor_access
+Karnataka|Bidar,Karnataka,Bidar,9.0,12.5,21.2,24.1,67.09,0.2857142857142857,0,37,exact,16.7,False,True,lower_need_poor_access
+Odisha|Koraput,Odisha,Koraput,8.1,12.7,21.1,24.5,142.98,0.003875968992248062,0,272,exact,16.6,False,True,lower_need_poor_access
+Madhya Pradesh|Sidhi,Madhya Pradesh,Sidhi,8.5,14.0,17.5,26.0,91.65,0.12903225806451613,0,93,exact,16.5,False,True,lower_need_poor_access
+Karnataka|Koppal,Karnataka,Koppal,9.6,14.5,19.5,22.2,69.34,0.37155963302752293,0,218,exact,16.45,False,True,lower_need_poor_access
+Madhya Pradesh|Umaria,Madhya Pradesh,Umaria,9.4,13.1,20.9,22.1,59.66,0.5841584158415841,0,101,exact,16.38,False,True,lower_need_poor_access
+Uttar Pradesh|Balrampur,Uttar Pradesh,Balrampur,8.2,8.7,23.2,25.3,79.85,0.11049723756906077,0,181,exact,16.35,False,True,lower_need_poor_access
+Uttar Pradesh|Amethi,Uttar Pradesh,Amethi,12.9,12.0,19.2,21.2,58.63,0.5989304812834224,0,204,exact,16.32,False,True,lower_need_poor_access
+Arunachal Pradesh|West Kameng,Arunachal Pradesh,West Kameng,4.7,10.0,19.8,30.7,75.96,0.15,0,40,exact,16.3,False,True,lower_need_poor_access
+Jharkhand|Palamu,Jharkhand,Palamu,9.4,13.1,18.3,24.3,103.82,0.2775800711743772,1,291,exact,16.27,False,True,lower_need_poor_access
+Madhya Pradesh|Alirajpur,Madhya Pradesh,Alirajpur,7.3,8.0,22.0,27.7,89.2,0.0,0,67,exact,16.25,False,True,lower_need_poor_access
+Jharkhand|Simdega,Jharkhand,Simdega,8.1,9.2,20.9,26.7,108.68,0.10843373493975904,0,107,exact,16.22,False,True,lower_need_poor_access
+Uttarakhand|Chamoli,Uttarakhand,Chamoli,6.8,9.8,19.7,28.5,111.28,0.012396694214876033,0,242,exact,16.2,False,True,lower_need_poor_access
+Karnataka|Bagalkot,Karnataka,Bagalkot,11.8,12.8,19.1,21.0,83.25,0.0979020979020979,0,329,exact,16.18,False,True,lower_need_poor_access
+Madhya Pradesh|Sheopur,Madhya Pradesh,Sheopur,9.6,10.1,19.2,25.7,97.38,0.037037037037037035,0,85,exact,16.15,False,True,lower_need_poor_access
+Madhya Pradesh|Katni,Madhya Pradesh,Katni,9.3,16.0,18.5,20.8,98.59,0.01910828025477707,0,165,exact,16.15,False,True,lower_need_poor_access
+Mizoram|Lunglei,Mizoram,Lunglei,13.5,17.1,13.9,20.0,85.57,0.14705882352941177,0,34,exact+parent_district,16.12,False,True,lower_need_poor_access
+Jammu & Kashmir|Doda,Jammu & Kashmir,Doda,9.9,9.9,23.1,21.5,72.34,0.25,0,10,exact,16.1,False,True,lower_need_poor_access
+Madhya Pradesh|Rajgarh,Madhya Pradesh,Rajgarh,7.6,8.4,24.4,24.0,90.0,0.17857142857142858,0,140,exact,16.1,False,True,lower_need_poor_access
+Madhya Pradesh|Barwani,Madhya Pradesh,Barwani,8.5,9.6,21.1,25.0,63.36,0.43243243243243246,0,148,exact,16.05,False,True,lower_need_poor_access
+Madhya Pradesh|Shajapur,Madhya Pradesh,Shajapur,7.0,7.5,23.3,26.1,79.62,0.23232323232323232,0,99,exact,15.98,False,True,lower_need_poor_access
+Uttar Pradesh|Banda,Uttar Pradesh,Banda,11.5,13.1,20.1,18.9,83.75,0.03827751196172249,0,209,exact,15.9,False,True,lower_need_poor_access
+Bihar|Pashchim Champaran,Bihar,Pashchim Champaran,9.3,13.4,18.1,22.6,62.97,0.45454545454545453,0,275,exact,15.85,False,True,lower_need_poor_access
+Tripura|Dhalai,Tripura,Dhalai,14.5,17.0,14.5,17.4,72.16,0.16,0,25,exact,15.85,False,True,lower_need_poor_access
+Odisha|Malkangiri,Odisha,Malkangiri,11.6,13.9,17.1,20.7,144.73,0.0,0,85,exact,15.82,False,True,lower_need_poor_access
+Mizoram|Champhai,Mizoram,Champhai,13.4,13.9,16.1,19.6,65.16,0.38181818181818183,0,55,exact+parent_district,15.75,False,True,lower_need_poor_access
+Madhya Pradesh|Ratlam,Madhya Pradesh,Ratlam,7.9,9.7,21.3,24.0,113.48,0.0,0,187,exact,15.73,False,True,lower_need_poor_access
+Gujarat|The Dangs,Gujarat,The Dangs,6.7,9.2,22.9,24.1,77.28,0.18181818181818182,0,55,manual,15.72,False,True,lower_need_poor_access
+Karnataka|Bellary,Karnataka,Bellary,9.2,11.6,21.2,20.9,73.53,0.3597285067873303,0,442,manual+parent_district,15.72,False,True,lower_need_poor_access
+Madhya Pradesh|Damoh,Madhya Pradesh,Damoh,8.5,10.0,22.6,21.4,159.3,0.0,0,206,exact,15.62,False,True,lower_need_poor_access
+Arunachal Pradesh|Kurung Kumey,Arunachal Pradesh,Kurung Kumey,6.9,10.3,19.2,26.0,85.56,0.02054794520547945,0,146,exact,15.6,False,True,lower_need_poor_access
+Jharkhand|Chatra,Jharkhand,Chatra,10.8,13.1,16.0,22.1,64.09,0.43617021276595747,0,188,exact,15.5,False,True,lower_need_poor_access
+Rajasthan|Churu,Rajasthan,Churu,6.2,8.9,21.2,25.4,64.64,0.43700787401574803,0,254,exact,15.42,False,True,lower_need_poor_access
+Madhya Pradesh|Vidisha,Madhya Pradesh,Vidisha,12.2,14.1,17.2,18.1,68.61,0.40625,0,128,exact,15.4,False,True,lower_need_poor_access
+Chhattisgarh|Dantewada,Chhattisgarh,Dantewada,8.1,10.7,19.1,23.7,222.71,0.0,0,173,exact,15.4,False,True,lower_need_poor_access
+Madhya Pradesh|Ashoknagar,Madhya Pradesh,Ashoknagar,11.4,14.1,16.3,19.8,116.65,0.0,0,157,exact,15.4,False,True,lower_need_poor_access
+Madhya Pradesh|Harda,Madhya Pradesh,Harda,8.3,10.2,21.7,20.9,77.85,0.0,0,5,exact,15.28,False,True,lower_need_poor_access
+Odisha|Nabarangapur,Odisha,Nabarangapur,7.1,10.3,20.8,22.6,177.72,0.0,0,194,fuzzy,15.2,False,True,lower_need_poor_access
+Uttar Pradesh|Kheri,Uttar Pradesh,Kheri,8.7,9.4,20.1,22.4,94.35,0.13314447592067988,0,374,exact,15.15,False,True,lower_need_poor_access
+Assam|Kokrajhar,Assam,Kokrajhar,10.1,13.2,17.8,19.4,72.52,0.25,0,103,exact,15.12,False,True,lower_need_poor_access
+Bihar|Araria,Bihar,Araria,13.6,18.8,12.1,15.8,89.93,0.03225806451612903,0,148,exact,15.08,False,True,lower_need_poor_access
+Maharastra|Washim,Maharastra,Washim,8.1,9.1,21.9,21.0,89.3,0.14035087719298245,0,171,exact,15.02,False,True,lower_need_poor_access
+Mizoram|Lawngtlai,Mizoram,Lawngtlai,11.4,15.4,13.0,20.3,133.71,0.0,0,26,exact,15.02,False,True,lower_need_poor_access
+Bihar|Bhagalpur,Bihar,Bhagalpur,15.6,16.3,13.3,14.7,74.64,0.42,0,165,exact,14.98,False,True,lower_need_poor_access
+Maharastra|Buldana,Maharastra,Buldana,10.2,9.0,20.1,20.5,66.91,0.3854748603351955,0,358,fuzzy,14.95,False,True,lower_need_poor_access
+Chhattisgarh|Kodagaon,Chhattisgarh,Kodagaon,7.6,9.2,21.2,21.6,173.28,0.0,0,201,fuzzy,14.9,False,True,lower_need_poor_access
+Uttar Pradesh|Sonbhadra,Uttar Pradesh,Sonbhadra,7.9,11.3,19.0,21.4,87.74,0.1347517730496454,0,282,exact,14.9,False,True,lower_need_poor_access
+Gujarat|Dohad,Gujarat,Dohad,11.8,11.4,18.2,17.7,86.71,0.08520179372197309,0,223,exact,14.78,False,True,lower_need_poor_access
+Madhya Pradesh|Bhind,Madhya Pradesh,Bhind,12.7,13.8,15.2,17.0,65.25,0.3497942386831276,0,259,exact,14.68,False,True,lower_need_poor_access
+Bihar|Saharsa,Bihar,Saharsa,11.7,16.5,14.9,15.5,68.56,0.25,0,166,exact,14.65,False,True,lower_need_poor_access
+Uttar Pradesh|Sitapur,Uttar Pradesh,Sitapur,7.9,9.7,17.8,23.0,61.86,0.4852216748768473,0,406,exact,14.6,False,True,lower_need_poor_access
+Assam|Goalpara,Assam,Goalpara,10.2,13.2,16.8,17.9,60.11,0.5,0,12,exact,14.52,False,True,lower_need_poor_access
+Gujarat|Botad,Gujarat,Botad,16.7,16.8,12.5,12.0,66.9,0.4,0,100,exact,14.5,False,True,lower_need_poor_access
+Jharkhand|Latehar,Jharkhand,Latehar,9.0,11.4,15.3,22.2,82.42,0.1813186813186813,0,182,exact,14.48,False,True,lower_need_poor_access
+Maharastra|Akola,Maharastra,Akola,9.6,9.8,19.4,19.1,81.25,0.15767634854771784,0,241,exact,14.48,False,True,lower_need_poor_access
+Bihar|Madhepura,Bihar,Madhepura,15.4,16.9,10.4,14.5,86.72,0.17857142857142858,0,201,exact,14.3,False,True,lower_need_poor_access
+Assam|Bongaigaon,Assam,Bongaigaon,12.6,15.0,13.6,15.9,82.74,0.12121212121212122,0,33,exact,14.28,False,True,lower_need_poor_access
+Maharastra|Yavatmal,Maharastra,Yavatmal,10.6,10.7,17.2,18.2,70.1,0.2833333333333333,0,390,exact,14.18,False,True,lower_need_poor_access
+Chhattisgarh|Raipur,Chhattisgarh,Raipur,9.2,9.1,17.7,20.6,102.51,0.1836734693877551,8,348,exact,14.15,False,True,lower_need_poor_access
+Himachal Pradesh|Kinnaur,Himachal Pradesh,Kinnaur,7.9,7.3,18.5,22.8,119.1,0.0,0,72,exact,14.12,False,True,lower_need_poor_access
+Madhya Pradesh|Chhatarpur,Madhya Pradesh,Chhatarpur,9.0,12.7,17.2,17.5,113.0,0.04081632653061224,0,253,exact,14.1,False,True,lower_need_poor_access
+Ladakh|Kargil,Ladakh,Kargil,7.3,10.2,18.7,20.1,134.16,0.0,0,39,exact,14.08,False,True,lower_need_poor_access
+Karnataka|Yadgir,Karnataka,Yadgir,7.7,13.1,17.5,18.0,104.93,0.0,0,199,exact,14.08,False,True,lower_need_poor_access
+Bihar|Aurangabad,Bihar,Aurangabad,10.6,14.1,16.2,15.3,60.48,0.4594594594594595,0,74,exact,14.05,False,True,lower_need_poor_access
+Rajasthan|Banswara,Rajasthan,Banswara,8.9,10.8,17.1,19.4,112.88,0.0,0,263,exact,14.05,False,True,lower_need_poor_access
+Uttar Pradesh|Auraiya,Uttar Pradesh,Auraiya,6.9,7.0,20.0,22.1,73.68,0.06329113924050633,0,158,exact,14.0,False,True,lower_need_poor_access
+Jharkhand|Pashchimi Singhbhum,Jharkhand,Pashchimi Singhbhum,7.5,11.1,17.8,19.5,72.53,0.3305785123966942,0,269,manual,13.98,False,True,lower_need_poor_access
+Assam|Dhubri,Assam,Dhubri,8.2,10.4,18.2,19.0,60.04,0.4915254237288136,0,118,exact,13.95,False,True,lower_need_poor_access
+Chhattisgarh|Narayanpur,Chhattisgarh,Narayanpur,7.0,8.8,18.8,21.1,185.02,0.0,0,49,exact,13.92,False,True,lower_need_poor_access
+Jharkhand|Gumla,Jharkhand,Gumla,9.0,11.6,15.1,19.9,79.36,0.19402985074626866,0,221,exact,13.9,False,True,lower_need_poor_access
+Arunachal Pradesh|Kra Daadi,Arunachal Pradesh,Kra Daadi,4.1,5.7,19.4,26.1,93.84,0.0,0,3,exact,13.82,False,True,lower_need_poor_access
+Bihar|Rohtas,Bihar,Rohtas,10.3,13.5,15.2,16.0,74.96,0.05531914893617021,0,297,exact,13.75,False,True,lower_need_poor_access
+Uttar Pradesh|Shrawasti,Uttar Pradesh,Shrawasti,8.1,9.7,18.4,18.7,115.2,0.0196078431372549,0,102,fuzzy,13.72,False,True,lower_need_poor_access
+Madhya Pradesh|Shivpuri,Madhya Pradesh,Shivpuri,10.0,15.1,13.7,15.7,78.4,0.34297520661157027,0,262,exact,13.62,False,True,lower_need_poor_access
+Madhya Pradesh|Tikamgarh,Madhya Pradesh,Tikamgarh,12.2,14.9,14.4,12.9,73.71,0.37777777777777777,0,182,exact+parent_district,13.6,False,True,lower_need_poor_access
+Chhattisgarh|Bijapur,Chhattisgarh,Bijapur,8.3,9.2,15.0,21.6,197.86,0.0,0,99,exact,13.52,False,True,lower_need_poor_access
+Bihar|Supaul,Bihar,Supaul,12.7,15.6,11.6,14.1,70.26,0.37755102040816324,0,207,exact,13.5,False,True,lower_need_poor_access
+Karnataka|Raichur,Karnataka,Raichur,8.9,9.2,18.5,16.7,67.59,0.4052044609665427,0,288,exact,13.32,False,True,lower_need_poor_access
+Madhya Pradesh|Guna,Madhya Pradesh,Guna,8.4,9.6,17.0,18.2,126.95,0.0,0,161,exact,13.3,False,True,lower_need_poor_access
+Rajasthan|Dungarpur,Rajasthan,Dungarpur,10.1,15.1,12.9,14.9,80.83,0.03741496598639456,0,294,exact,13.25,False,True,lower_need_poor_access
+Uttar Pradesh|Kanshiram Nagar,Uttar Pradesh,Kanshiram Nagar,6.7,10.3,16.5,19.5,62.34,0.44036697247706424,0,109,manual,13.25,False,True,lower_need_poor_access
+Rajasthan|Pali,Rajasthan,Pali,9.5,13.8,13.0,16.5,62.44,0.478494623655914,1,372,exact,13.2,False,True,lower_need_poor_access
+Maharastra|Gadchiroli,Maharastra,Gadchiroli,7.3,10.3,17.0,17.2,95.31,0.19592875318066158,0,393,exact,12.95,False,True,lower_need_poor_access
+Madhya Pradesh|Panna,Madhya Pradesh,Panna,8.6,12.5,16.1,14.4,74.95,0.17123287671232876,0,147,exact,12.9,False,True,lower_need_poor_access
+Rajasthan|Pratapgarh,Rajasthan,Pratapgarh,5.4,9.9,16.5,18.7,110.99,0.0967741935483871,0,155,exact,12.62,False,True,lower_need_poor_access
+Uttar Pradesh|Fatehpur,Uttar Pradesh,Fatehpur,5.7,8.8,17.0,18.0,60.77,0.46887966804979253,0,251,exact,12.38,False,True,lower_need_poor_access
+Himachal Pradesh|Lahul & Spiti,Himachal Pradesh,Lahul & Spiti,6.7,8.5,15.0,19.2,71.2,0.022222222222222223,0,45,exact,12.35,False,True,lower_need_poor_access
+Rajasthan|Tonk,Rajasthan,Tonk,5.8,6.5,16.7,20.1,66.6,0.391304347826087,0,184,exact,12.28,False,True,lower_need_poor_access
+Jammu & Kashmir|Punch,Jammu & Kashmir,Punch,7.8,7.0,17.9,16.3,73.38,0.2,0,5,manual,12.25,False,True,lower_need_poor_access
+Rajasthan|Sawai Madhopur,Rajasthan,Sawai Madhopur,5.5,8.2,15.4,19.8,91.84,0.03626943005181347,0,193,exact,12.23,False,True,lower_need_poor_access
+Bihar|Buxar,Bihar,Buxar,12.9,11.5,13.9,10.5,63.3,0.3179190751445087,0,184,exact,12.2,False,True,lower_need_poor_access
+Rajasthan|Jhalawar,Rajasthan,Jhalawar,7.7,8.8,15.0,17.3,100.28,0.02880658436213992,0,243,exact,12.2,False,True,lower_need_poor_access
+Uttar Pradesh|Jalaun,Uttar Pradesh,Jalaun,5.2,6.0,16.8,20.0,89.43,0.029288702928870293,0,239,exact,12.0,False,True,lower_need_poor_access
+Rajasthan|Nagaur,Rajasthan,Nagaur,6.9,7.9,15.6,17.5,62.36,0.40497737556561086,0,442,exact,11.98,False,True,lower_need_poor_access
+Uttar Pradesh|Hamirpur,Uttar Pradesh,Hamirpur,5.3,6.7,16.7,18.8,87.12,0.1048951048951049,0,143,exact,11.88,False,True,lower_need_poor_access
+Jammu & Kashmir|Rajouri,Jammu & Kashmir,Rajouri,8.0,8.4,16.5,13.8,73.86,0.0625,0,16,exact,11.68,False,True,lower_need_poor_access
+Uttar Pradesh|Shahjahanpur,Uttar Pradesh,Shahjahanpur,9.1,6.7,16.1,14.5,59.42,0.9,0,269,exact,11.6,False,True,lower_need_poor_access
+Jammu & Kashmir|Ramban,Jammu & Kashmir,Ramban,7.5,5.5,17.5,15.7,59.77,0.5714285714285714,0,7,exact,11.55,False,True,lower_need_poor_access
+Uttar Pradesh|Lalitpur,Uttar Pradesh,Lalitpur,4.7,6.3,17.2,17.9,99.46,0.06896551724137931,0,29,exact,11.52,False,True,lower_need_poor_access
+Uttar Pradesh|Chitrakoot,Uttar Pradesh,Chitrakoot,5.1,9.1,15.1,16.4,59.67,0.5054945054945055,0,91,exact,11.42,False,True,lower_need_poor_access
+Meghalaya|West Khasi Hills,Meghalaya,West Khasi Hills,5.6,7.6,16.0,16.4,69.85,0.13043478260869565,0,46,exact,11.4,False,True,lower_need_poor_access
+Rajasthan|Rajsamand,Rajasthan,Rajsamand,6.8,7.9,15.1,15.4,58.1,0.5534883720930233,0,215,exact,11.3,False,True,lower_need_poor_access
+Chhattisgarh|Sukma,Chhattisgarh,Sukma,6.0,6.5,14.5,18.1,173.09,0.0,0,18,exact,11.28,False,True,lower_need_poor_access
+Rajasthan|Dausa,Rajasthan,Dausa,7.4,8.5,12.2,16.1,58.25,0.5658914728682171,0,163,exact,11.05,False,True,lower_need_poor_access
+Rajasthan|Baran,Rajasthan,Baran,7.2,7.6,12.6,15.6,85.54,0.18652849740932642,0,193,exact,10.75,False,True,lower_need_poor_access
+Uttar Pradesh|Mahoba,Uttar Pradesh,Mahoba,5.9,6.3,15.0,15.7,108.54,0.0,0,95,exact,10.72,False,True,lower_need_poor_access
+Ladakh|Leh(Ladakh),Ladakh,Leh(Ladakh),6.1,6.4,12.8,14.7,220.49,0.0,0,35,exact,10.0,False,True,lower_need_poor_access
+Rajasthan|Bikaner,Rajasthan,Bikaner,7.3,8.5,12.0,11.8,163.0,0.006269592476489028,0,319,exact,9.9,False,True,lower_need_poor_access
+Rajasthan|Jaisalmer,Rajasthan,Jaisalmer,4.9,8.8,9.7,15.8,82.86,0.4105263157894737,1,208,exact,9.8,False,True,lower_need_poor_access
+Jammu & Kashmir|Kishtwar,Jammu & Kashmir,Kishtwar,5.3,6.8,13.2,13.3,70.61,0.2,0,13,exact,9.65,False,True,lower_need_poor_access
+Rajasthan|Barmer,Rajasthan,Barmer,8.2,10.2,8.5,10.9,98.6,0.10126582278481013,0,632,exact,9.45,False,True,lower_need_poor_access
+Rajasthan|Karauli,Rajasthan,Karauli,6.0,7.8,10.6,13.2,82.78,0.07468879668049792,0,241,exact,9.4,False,True,lower_need_poor_access
+NCT of Delhi|North,NCT of Delhi,North,10.6,13.9,21.3,32.9,8.17,1.0,0,72,exact,19.67,False,False,lower_need_good_access
+Odisha|Baleshwar,Odisha,Baleshwar,12.2,13.8,22.9,29.5,36.49,0.9534883720930233,1,497,exact,19.6,False,False,lower_need_good_access
+West Bengal|Nadia,West Bengal,Nadia,20.0,21.2,21.2,16.0,42.14,0.927437641723356,1,450,exact,19.6,False,False,lower_need_good_access
+West Bengal|South Twenty Four Pargana,West Bengal,South Twenty Four Pargana,16.5,21.3,21.5,19.1,18.48,0.9713914174252276,5,769,manual,19.6,False,False,lower_need_good_access
+Karnataka|Dharwad,Karnataka,Dharwad,13.8,14.1,26.6,23.7,21.02,1.0,2,207,exact,19.55,False,False,lower_need_good_access
+Nagaland|Mon,Nagaland,Mon,9.0,13.0,20.4,35.7,54.1,0.59375,0,32,exact,19.52,False,False,lower_need_good_access
+Uttar Pradesh|Mau,Uttar Pradesh,Mau,11.6,12.7,23.9,29.9,16.24,0.984,1,129,exact,19.52,False,False,lower_need_good_access
+West Bengal|North Twenty Four Pargana,West Bengal,North Twenty Four Pargana,18.8,23.2,19.0,17.1,13.71,0.9912790697674418,13,688,manual,19.52,False,False,lower_need_good_access
+Odisha|Bargarh,Odisha,Bargarh,15.7,15.4,22.6,24.3,27.85,0.7563025210084033,2,252,exact,19.5,False,False,lower_need_good_access
+Gujarat|Navsari,Gujarat,Navsari,16.0,16.1,23.7,22.1,18.88,1.0,2,290,exact,19.48,False,False,lower_need_good_access
+West Bengal|Paschim Barddhaman,West Bengal,Paschim Barddhaman,16.2,23.4,17.6,20.7,8.38,0.946524064171123,5,207,fuzzy,19.47,False,False,lower_need_good_access
+Tamil Nadu|Krishnagiri,Tamil Nadu,Krishnagiri,14.0,15.0,23.5,25.3,10.72,1.0,2,287,exact,19.45,False,False,lower_need_good_access
+Assam|Hojai,Assam,Hojai,14.6,16.5,21.0,25.2,56.94,0.7916666666666666,0,76,exact,19.32,False,False,lower_need_good_access
+Chhattisgarh|Surajpur,Chhattisgarh,Surajpur,9.9,11.5,25.0,30.9,44.56,0.8356164383561644,0,73,exact,19.32,False,False,lower_need_good_access
+Haryana|Hisar,Haryana,Hisar,12.6,16.7,19.4,28.6,37.0,0.8170731707317073,6,164,exact,19.32,False,False,lower_need_good_access
+Nagaland|Longleng,Nagaland,Longleng,10.2,14.5,22.6,30.0,33.78,1.0,0,11,exact,19.32,False,False,lower_need_good_access
+Gujarat|Surat,Gujarat,Surat,14.6,16.1,23.4,22.6,16.46,0.9635036496350365,13,432,exact,19.18,False,False,lower_need_good_access
+Uttar Pradesh|Meerut,Uttar Pradesh,Meerut,14.4,16.0,20.0,26.2,17.45,1.0,1,269,exact,19.15,False,False,lower_need_good_access
+Tripura|Khowai,Tripura,Khowai,17.8,18.3,19.0,21.4,38.16,1.0,0,7,exact,19.12,False,False,lower_need_good_access
+Maharastra|Raigarh,Maharastra,Raigarh,11.5,13.5,24.8,26.4,45.75,0.7636363636363637,4,443,fuzzy,19.05,False,False,lower_need_good_access
+Odisha|Mayurbhanj,Odisha,Mayurbhanj,8.8,12.3,26.1,28.8,44.75,0.7717171717171717,0,495,exact,19.0,False,False,lower_need_good_access
+West Bengal|Jalpaiguri,West Bengal,Jalpaiguri,13.8,17.2,21.2,23.7,24.23,1.0,1,358,exact+parent_district,18.98,False,False,lower_need_good_access
+Bihar|Munger,Bihar,Munger,19.5,21.8,16.1,18.3,39.09,0.898876404494382,0,106,exact,18.92,False,False,lower_need_good_access
+Chhattisgarh|Bilaspur,Chhattisgarh,Bilaspur,10.0,12.7,24.4,28.6,29.26,0.7295918367346939,1,196,exact+parent_district,18.92,False,False,lower_need_good_access
+Maharastra|Pune,Maharastra,Pune,12.3,15.1,22.4,25.8,22.35,0.9961190168175937,30,773,exact,18.9,False,False,lower_need_good_access
+NCT of Delhi|South West,NCT of Delhi,South West,12.6,17.0,19.5,26.5,5.91,1.0,0,27,exact,18.9,False,False,lower_need_good_access
+Madhya Pradesh|Anuppur,Madhya Pradesh,Anuppur,10.8,14.0,24.3,26.4,53.49,0.6349206349206349,0,126,exact,18.88,False,False,lower_need_good_access
+Tripura|Gomati,Tripura,Gomati,16.8,17.4,19.8,21.4,40.88,0.75,0,8,exact,18.85,False,False,lower_need_good_access
+Manipur|Tamenglong,Manipur,Tamenglong,11.7,12.7,21.5,29.4,47.53,0.9375,0,64,exact+parent_district,18.82,False,False,lower_need_good_access
+Maharastra|Solapur,Maharastra,Solapur,11.1,12.2,25.7,26.2,48.61,0.66015625,2,532,exact,18.8,False,False,lower_need_good_access
+Uttar Pradesh|Lucknow,Uttar Pradesh,Lucknow,14.7,16.5,21.2,22.8,2.78,0.9961538461538462,21,283,exact,18.8,False,False,lower_need_good_access
+Gujarat|Ahmadabad,Gujarat,Ahmadabad,20.3,20.1,18.5,16.2,21.3,0.8802816901408451,23,426,exact,18.78,False,False,lower_need_good_access
+Uttar Pradesh|Bulandshahr,Uttar Pradesh,Bulandshahr,12.8,14.9,21.2,26.2,52.18,0.6534653465346535,0,311,exact,18.78,False,False,lower_need_good_access
+Meghalaya|South Garo Hills,Meghalaya,South Garo Hills,12.8,23.7,15.8,22.8,53.45,0.625,0,80,exact,18.77,False,False,lower_need_good_access
+Uttar Pradesh|Sultanpur,Uttar Pradesh,Sultanpur,13.5,16.7,20.6,24.3,54.42,0.6380597014925373,0,313,exact,18.77,False,False,lower_need_good_access
+Bihar|Madhubani,Bihar,Madhubani,13.2,20.0,18.2,23.4,37.97,0.9095022624434389,0,408,exact,18.7,False,False,lower_need_good_access
+Telangana|Jogulamba Gadwal,Telangana,Jogulamba Gadwal,9.3,14.3,21.5,29.7,25.81,1.0,0,103,exact,18.7,False,False,lower_need_good_access
+Uttarakhand|Tehri Garhwal,Uttarakhand,Tehri Garhwal,8.9,11.9,20.0,34.0,44.35,0.8157894736842105,0,266,exact,18.7,False,False,lower_need_good_access
+West Bengal|Koch Bihar,West Bengal,Koch Bihar,13.6,18.7,21.7,20.8,22.29,0.9744525547445255,1,274,manual,18.7,False,False,lower_need_good_access
+Assam|Kamrup Metropolitan,Assam,Kamrup Metropolitan,17.1,20.3,17.0,20.3,3.98,1.0,8,78,fuzzy,18.68,False,False,lower_need_good_access
+Chhattisgarh|Bemetara,Chhattisgarh,Bemetara,8.4,11.7,26.9,27.6,46.98,0.8125,0,80,exact,18.65,False,False,lower_need_good_access
+Chhattisgarh|Rajnandgaon,Chhattisgarh,Rajnandgaon,10.3,8.2,27.7,28.3,55.08,0.6410958904109589,0,405,exact,18.62,False,False,lower_need_good_access
+Madhya Pradesh|Bhopal,Madhya Pradesh,Bhopal,14.3,12.9,22.4,24.9,9.49,0.9078014184397163,10,141,exact,18.62,False,False,lower_need_good_access
+Haryana|Rohtak,Haryana,Rohtak,14.3,14.8,20.7,24.5,19.41,1.0,3,118,exact,18.58,False,False,lower_need_good_access
+Odisha|Anugul,Odisha,Anugul,16.1,18.2,18.9,21.1,41.19,0.7569721115537849,1,262,exact,18.58,False,False,lower_need_good_access
+Assam|Dibrugarh,Assam,Dibrugarh,15.4,19.2,18.1,21.4,25.5,0.9953917050691244,3,217,exact,18.52,False,False,lower_need_good_access
+West Bengal|Maldah,West Bengal,Maldah,16.7,20.2,19.3,17.8,16.21,0.9850746268656716,2,332,exact,18.5,False,False,lower_need_good_access
+Bihar|Siwan,Bihar,Siwan,9.0,15.7,19.6,29.6,16.53,0.9824561403508771,1,313,exact,18.48,False,False,lower_need_good_access
+West Bengal|Puruliya,West Bengal,Puruliya,15.3,20.7,17.5,20.4,25.19,0.9977272727272727,1,440,fuzzy,18.48,False,False,lower_need_good_access
+Bihar|Darbhanga,Bihar,Darbhanga,13.5,19.3,17.5,23.5,24.3,0.9480968858131488,2,312,exact,18.45,False,False,lower_need_good_access
+Karnataka|Haveri,Karnataka,Haveri,12.7,15.2,21.4,24.4,52.08,0.69921875,0,256,exact,18.42,False,False,lower_need_good_access
+Madhya Pradesh|Hoshangabad,Madhya Pradesh,Hoshangabad,7.1,12.4,24.0,29.9,23.75,0.7916666666666666,1,24,exact,18.35,False,False,lower_need_good_access
+Nagaland|Kohima,Nagaland,Kohima,6.6,9.9,25.7,31.1,39.33,1.0,0,49,exact,18.33,False,False,lower_need_good_access
+West Bengal|Dakshin Dinajpur,West Bengal,Dakshin Dinajpur,17.5,22.0,17.6,16.2,54.6,0.5873015873015873,0,160,fuzzy,18.32,False,False,lower_need_good_access
+Haryana|Panipat,Haryana,Panipat,12.0,14.0,21.6,25.6,7.05,0.9545454545454546,1,31,exact,18.3,False,False,lower_need_good_access
+Jharkhand|Bokaro,Jharkhand,Bokaro,9.4,14.8,21.5,27.5,12.3,0.9209039548022598,1,177,exact,18.3,False,False,lower_need_good_access
+Uttar Pradesh|Pratapgarh,Uttar Pradesh,Pratapgarh,14.1,19.1,17.6,22.3,19.3,0.9818181818181818,1,55,exact,18.28,False,False,lower_need_good_access
+Himachal Pradesh|Mandi,Himachal Pradesh,Mandi,13.2,15.3,20.8,23.8,21.11,1.0,1,374,exact,18.27,False,False,lower_need_good_access
+Maharastra|Jalgaon,Maharastra,Jalgaon,12.8,15.2,20.7,24.4,44.54,0.7308781869688386,3,353,exact,18.27,False,False,lower_need_good_access
+West Bengal|Murshidabad,West Bengal,Murshidabad,18.4,19.5,18.7,16.3,36.12,0.9912280701754386,1,591,exact,18.22,False,False,lower_need_good_access
+Chhattisgarh|Durg,Chhattisgarh,Durg,11.2,12.2,22.6,26.5,18.38,0.8662790697674418,2,174,exact,18.12,False,False,lower_need_good_access
+Dadra and Nagar Haveli & Daman and Diu|Diu,Dadra and Nagar Haveli & Daman and Diu,Diu,17.3,19.4,18.1,17.7,30.31,1.0,0,4,exact,18.12,False,False,lower_need_good_access
+West Bengal|Uttar Dinajpur,West Bengal,Uttar Dinajpur,13.6,18.8,16.3,23.8,41.37,0.8793103448275862,2,205,fuzzy,18.12,False,False,lower_need_good_access
+Assam|Udalguri,Assam,Udalguri,12.1,18.0,19.7,22.6,47.75,0.797752808988764,0,101,exact,18.1,False,False,lower_need_good_access
+Maharastra|Ahmadnagar,Maharastra,Ahmadnagar,11.0,12.5,23.6,25.3,35.1,0.9381598793363499,2,663,fuzzy,18.1,False,False,lower_need_good_access
+Uttar Pradesh|Ambedkar Nagar,Uttar Pradesh,Ambedkar Nagar,14.6,18.4,17.2,22.0,48.01,0.8602941176470589,0,306,exact,18.05,False,False,lower_need_good_access
+Jharkhand|Hazaribagh,Jharkhand,Hazaribagh,8.8,13.5,18.8,30.8,57.11,0.6,0,131,exact,17.98,False,False,lower_need_good_access
+NCT of Delhi|South East,NCT of Delhi,South East,9.9,10.3,23.7,27.8,1.78,1.0,3,35,exact,17.92,False,False,lower_need_good_access
+Uttar Pradesh|Muzaffarnagar,Uttar Pradesh,Muzaffarnagar,11.5,14.3,21.6,24.2,19.12,1.0,2,227,exact,17.9,False,False,lower_need_good_access
+Uttar Pradesh|Baghpat,Uttar Pradesh,Baghpat,11.8,12.7,21.4,25.5,13.72,1.0,1,130,exact,17.85,False,False,lower_need_good_access
+Uttar Pradesh|Mirzapur,Uttar Pradesh,Mirzapur,9.4,11.3,21.7,29.0,30.0,0.8461538461538461,1,260,exact,17.85,False,False,lower_need_good_access
+Karnataka|Gadag,Karnataka,Gadag,12.1,13.2,22.1,23.9,32.39,1.0,1,165,exact,17.82,False,False,lower_need_good_access
+Haryana|Faridabad,Haryana,Faridabad,10.0,11.6,23.3,26.2,4.28,1.0,5,57,exact,17.78,False,False,lower_need_good_access
+Madhya Pradesh|Shahdol,Madhya Pradesh,Shahdol,11.5,16.6,19.8,23.2,38.63,0.7197452229299363,1,157,exact,17.78,False,False,lower_need_good_access
+Uttar Pradesh|Shamli,Uttar Pradesh,Shamli,8.7,12.5,21.2,28.6,28.81,1.0,0,94,exact,17.75,False,False,lower_need_good_access
+Bihar|Muzaffarpur,Bihar,Muzaffarpur,12.4,16.4,18.1,24.0,20.0,0.9940119760479041,3,400,exact,17.73,False,False,lower_need_good_access
+Maharastra|Nashik,Maharastra,Nashik,10.3,12.0,22.5,26.1,40.35,0.7246621621621622,10,682,exact,17.73,False,False,lower_need_good_access
+Maharastra|Palghar,Maharastra,Palghar,12.2,12.9,23.4,22.4,25.75,0.9958677685950413,3,242,exact,17.73,False,False,lower_need_good_access
+Madhya Pradesh|Sehore,Madhya Pradesh,Sehore,8.2,10.0,26.0,26.6,40.76,0.7265625,0,128,exact,17.7,False,False,lower_need_good_access
+Nagaland|Mokokchung,Nagaland,Mokokchung,8.6,10.1,23.2,28.9,14.34,1.0,1,53,exact,17.7,False,False,lower_need_good_access
+Haryana|Fatehabad,Haryana,Fatehabad,16.1,17.0,17.5,20.1,54.38,0.788135593220339,0,118,exact,17.68,False,False,lower_need_good_access
+Assam|Nagaon,Assam,Nagaon,15.9,21.4,16.4,17.0,36.95,0.99375,0,208,exact,17.67,False,False,lower_need_good_access
+Bihar|Saran,Bihar,Saran,16.5,18.1,16.7,19.3,35.91,1.0,0,372,exact,17.65,False,False,lower_need_good_access
+Maharastra|Jalna,Maharastra,Jalna,11.0,13.0,21.8,24.8,45.5,0.9387755102040817,1,188,exact,17.65,False,False,lower_need_good_access
+Gujarat|Aravali,Gujarat,Aravali,12.4,15.1,21.0,22.0,34.53,0.9252336448598131,1,214,fuzzy,17.62,False,False,lower_need_good_access
+Assam|Biswanath,Assam,Biswanath,8.1,10.4,23.5,28.4,38.16,0.7954545454545454,0,97,exact,17.6,False,False,lower_need_good_access
+Jharkhand|Purbi Singhbhum,Jharkhand,Purbi Singhbhum,11.7,16.5,19.8,22.4,27.77,0.8543307086614174,5,254,manual,17.6,False,False,lower_need_good_access
+Maharastra|Osmanabad,Maharastra,Osmanabad,9.5,11.2,23.5,26.2,46.53,0.7651515151515151,0,286,exact,17.6,False,False,lower_need_good_access
+Mizoram|Kolasib,Mizoram,Kolasib,15.7,13.8,16.5,24.3,44.96,0.75,0,28,exact,17.58,False,False,lower_need_good_access
+Madhya Pradesh|Dewas,Madhya Pradesh,Dewas,7.9,9.3,24.4,28.6,51.4,0.6496815286624203,0,157,exact,17.55,False,False,lower_need_good_access
+Manipur|Churachandpur,Manipur,Churachandpur,13.5,15.2,16.3,25.2,57.55,0.5714285714285714,0,105,exact+parent_district,17.55,False,False,lower_need_good_access
+Nagaland|Peren,Nagaland,Peren,8.0,14.6,19.8,27.7,33.61,0.92,0,25,exact,17.53,False,False,lower_need_good_access
+Chhattisgarh|Dhamtari,Chhattisgarh,Dhamtari,10.1,14.1,21.0,24.9,57.61,0.5454545454545454,0,133,exact,17.52,False,False,lower_need_good_access
+Gujarat|Morbi,Gujarat,Morbi,17.8,18.7,18.4,15.1,52.9,0.6176470588235294,0,170,exact,17.5,False,False,lower_need_good_access
+Haryana|Kaithal,Haryana,Kaithal,15.8,16.9,16.9,20.4,42.56,0.7246376811594203,0,123,exact,17.5,False,False,lower_need_good_access
+Haryana|Mahendragarh,Haryana,Mahendragarh,10.3,12.3,21.6,25.8,17.74,1.0,1,120,exact,17.5,False,False,lower_need_good_access
+Assam|Sonitpur,Assam,Sonitpur,9.5,11.1,24.8,24.5,24.94,0.9821428571428571,1,125,exact,17.48,False,False,lower_need_good_access
+Uttar Pradesh|Mahrajganj,Uttar Pradesh,Mahrajganj,12.0,13.3,19.6,24.9,52.45,0.7383720930232558,0,180,fuzzy,17.45,False,False,lower_need_good_access
+Haryana|Jhajjar,Haryana,Jhajjar,10.2,11.8,21.0,26.8,19.19,1.0,0,147,exact,17.45,False,False,lower_need_good_access
+Haryana|Rewari,Haryana,Rewari,8.2,10.9,24.1,26.5,35.63,1.0,0,24,exact,17.42,False,False,lower_need_good_access
+Uttar Pradesh|Sant Kabir Nagar,Uttar Pradesh,Sant Kabir Nagar,8.7,10.2,22.5,28.2,30.59,0.9789473684210527,0,190,fuzzy,17.4,False,False,lower_need_good_access
+Gujarat|Patan,Gujarat,Patan,18.1,18.8,16.3,16.3,18.56,0.9032258064516129,2,93,exact,17.38,False,False,lower_need_good_access
+Jharkhand|Ramgarh,Jharkhand,Ramgarh,7.5,13.3,21.1,27.4,24.6,1.0,0,70,exact,17.33,False,False,lower_need_good_access
+Uttar Pradesh|Moradabad,Uttar Pradesh,Moradabad,9.5,12.9,21.3,25.6,16.34,1.0,4,137,exact,17.33,False,False,lower_need_good_access
+Chhattisgarh|Balod,Chhattisgarh,Balod,8.1,8.4,25.1,27.7,50.83,0.7246376811594203,0,138,exact,17.32,False,False,lower_need_good_access
+Uttar Pradesh|Gautam Buddha Nagar,Uttar Pradesh,Gautam Buddha Nagar,14.8,17.2,16.4,20.9,21.39,1.0,7,109,exact,17.32,False,False,lower_need_good_access
+Madhya Pradesh|Gwalior,Madhya Pradesh,Gwalior,11.1,13.0,19.9,25.1,24.83,1.0,5,169,exact,17.27,False,False,lower_need_good_access
+Assam|Majuli,Assam,Majuli,11.1,14.9,19.7,23.3,27.07,1.0,1,57,exact,17.25,False,False,lower_need_good_access
+Telangana|Komaram Bheem Asifabad,Telangana,Komaram Bheem Asifabad,8.4,11.6,21.8,27.2,49.28,0.8455284552845529,0,123,fuzzy,17.25,False,False,lower_need_good_access
+Maharastra|Aurangabad,Maharastra,Aurangabad,13.1,14.1,20.8,20.9,43.09,0.8626760563380281,6,324,exact,17.23,False,False,lower_need_good_access
+West Bengal|Birbhum,West Bengal,Birbhum,16.4,20.9,17.5,14.1,46.28,0.9674620390455532,0,461,exact,17.22,False,False,lower_need_good_access
+Uttarakhand|Champawat,Uttarakhand,Champawat,7.9,11.3,19.9,29.7,57.61,0.5952380952380952,0,84,exact,17.2,False,False,lower_need_good_access
+Odisha|Subarnapur,Odisha,Subarnapur,13.0,12.8,22.4,20.5,55.59,0.6355140186915887,0,107,manual,17.18,False,False,lower_need_good_access
+Uttar Pradesh|Bijnor,Uttar Pradesh,Bijnor,11.3,13.3,19.7,24.3,15.51,0.9935064935064936,2,167,exact,17.15,False,False,lower_need_good_access
+Assam|Golaghat,Assam,Golaghat,11.6,14.4,20.5,22.0,45.75,0.8970588235294118,0,148,exact,17.12,False,False,lower_need_good_access
+Assam|Karbi Anglong,Assam,Karbi Anglong,10.7,14.6,20.1,22.8,28.39,0.9873417721518988,0,97,exact,17.05,False,False,lower_need_good_access
+Himachal Pradesh|Solan,Himachal Pradesh,Solan,10.8,13.4,21.7,22.3,11.94,1.0,1,172,exact,17.05,False,False,lower_need_good_access
+Uttar Pradesh|Aligarh,Uttar Pradesh,Aligarh,13.1,14.9,18.2,22.0,51.14,0.690625,0,336,exact,17.05,False,False,lower_need_good_access
+Meghalaya|East Khasi Hills,Meghalaya,East Khasi Hills,9.1,9.4,24.5,25.0,36.11,0.7727272727272727,2,61,exact,17.0,False,False,lower_need_good_access
+Uttar Pradesh|Varanasi,Uttar Pradesh,Varanasi,9.3,12.6,19.0,27.1,7.65,0.9951923076923077,8,264,exact,17.0,False,False,lower_need_good_access
+Bihar|Khagaria,Bihar,Khagaria,17.1,21.7,13.0,16.1,36.09,0.7368421052631579,0,135,exact,16.98,False,False,lower_need_good_access
+Bihar|Patna,Bihar,Patna,17.1,19.9,16.1,14.8,12.42,1.0,24,457,exact,16.98,False,False,lower_need_good_access
+Himachal Pradesh|Shimla,Himachal Pradesh,Shimla,10.4,14.1,19.9,23.5,44.03,0.7688022284122563,0,359,exact,16.98,False,False,lower_need_good_access
+Haryana|Gurgaon,Haryana,Gurgaon,13.5,15.4,16.5,22.4,6.52,1.0,7,108,manual,16.95,False,False,lower_need_good_access
+Bihar|Vaishali,Bihar,Vaishali,13.6,17.1,17.4,19.6,20.74,0.9951690821256038,2,293,exact,16.92,False,False,lower_need_good_access
+Uttar Pradesh|Saharanpur,Uttar Pradesh,Saharanpur,8.8,11.6,23.0,24.3,17.72,1.0,1,210,exact,16.92,False,False,lower_need_good_access
+Madhya Pradesh|Betul,Madhya Pradesh,Betul,13.6,14.7,17.8,21.6,39.2,0.860655737704918,1,244,exact,16.92,False,False,lower_need_good_access
+Manipur|Senapati,Manipur,Senapati,9.8,10.9,18.7,28.2,32.72,0.8175182481751825,0,145,exact+parent_district,16.9,False,False,lower_need_good_access
+Maharastra|Parbhani,Maharastra,Parbhani,11.6,13.4,21.0,21.6,33.07,0.979381443298969,1,194,exact,16.9,False,False,lower_need_good_access
+Jharkhand|Giridih,Jharkhand,Giridih,10.3,15.9,17.4,23.9,29.03,0.7476635514018691,1,214,exact,16.88,False,False,lower_need_good_access
+Haryana|Sonipat,Haryana,Sonipat,13.4,12.1,20.0,21.9,15.15,1.0,2,175,exact,16.85,False,False,lower_need_good_access
+Uttar Pradesh|Mahamaya Nagar,Uttar Pradesh,Mahamaya Nagar,7.6,10.9,22.4,26.4,37.34,0.8264462809917356,0,136,manual,16.82,False,False,lower_need_good_access
+Haryana|Charkhi Dadri,Haryana,Charkhi Dadri,10.3,13.4,20.6,22.9,50.8,1.0,0,77,fuzzy,16.8,False,False,lower_need_good_access
+Bihar|Purba Champaran,Bihar,Purba Champaran,10.8,16.4,16.2,23.6,26.29,0.9927884615384616,1,416,fuzzy,16.75,False,False,lower_need_good_access
+Chhattisgarh|Baloda Bazar,Chhattisgarh,Baloda Bazar,7.1,9.4,22.6,27.9,45.59,0.76,0,172,exact,16.75,False,False,lower_need_good_access
+Manipur|Ukhrul,Manipur,Ukhrul,7.9,11.7,22.3,25.0,56.47,0.603448275862069,0,58,exact+parent_district,16.73,False,False,lower_need_good_access
+Jammu & Kashmir|Kathua,Jammu & Kashmir,Kathua,12.4,11.8,18.9,23.6,29.86,0.865546218487395,0,119,exact,16.68,False,False,lower_need_good_access
+Karnataka|Belgaum,Karnataka,Belgaum,12.9,12.2,19.4,22.2,38.13,0.8627737226277372,1,714,manual,16.68,False,False,lower_need_good_access
+Dadra and Nagar Haveli & Daman and Diu|Daman,Dadra and Nagar Haveli & Daman and Diu,Daman,12.8,15.6,18.4,19.9,23.17,1.0,0,13,exact,16.67,False,False,lower_need_good_access
+Jharkhand|Dhanbad,Jharkhand,Dhanbad,10.1,13.1,18.5,24.9,7.06,0.9951923076923077,2,219,exact,16.65,False,False,lower_need_good_access
+Bihar|Banka,Bihar,Banka,13.0,16.9,17.4,18.8,52.4,0.689873417721519,0,158,exact,16.52,False,False,lower_need_good_access
+Haryana|Jind,Haryana,Jind,12.1,15.4,16.5,21.9,50.28,0.84,0,40,exact,16.48,False,False,lower_need_good_access
+Madhya Pradesh|Balaghat,Madhya Pradesh,Balaghat,9.7,12.0,22.3,21.9,39.63,0.75,0,20,exact,16.48,False,False,lower_need_good_access
+Uttar Pradesh|Hapur,Uttar Pradesh,Hapur,7.7,9.6,22.9,25.7,22.94,1.0,1,95,exact,16.48,False,False,lower_need_good_access
+Uttar Pradesh|Basti,Uttar Pradesh,Basti,10.0,11.6,19.2,25.0,20.28,0.9384057971014492,1,276,exact,16.45,False,False,lower_need_good_access
+Assam|Barpeta,Assam,Barpeta,14.0,17.0,17.9,16.7,42.34,0.8102189781021898,0,187,exact+parent_district,16.4,False,False,lower_need_good_access
+Nagaland|Dimapur,Nagaland,Dimapur,12.0,14.1,18.6,20.8,5.31,1.0,2,46,exact,16.38,False,False,lower_need_good_access
+Uttar Pradesh|Rampur,Uttar Pradesh,Rampur,12.4,14.4,17.7,21.0,24.25,1.0,0,125,exact,16.38,False,False,lower_need_good_access
+Assam|Morigaon,Assam,Morigaon,10.3,14.2,20.1,20.5,54.99,0.9863013698630136,0,101,fuzzy,16.27,False,False,lower_need_good_access
+Haryana|Bhiwani,Haryana,Bhiwani,10.2,11.3,18.7,24.8,45.52,1.0,0,149,exact,16.25,False,False,lower_need_good_access
+Haryana|Palwal,Haryana,Palwal,8.6,11.1,21.9,23.2,13.71,1.0,2,45,exact,16.2,False,False,lower_need_good_access
+Uttar Pradesh|Mathura,Uttar Pradesh,Mathura,7.9,10.2,21.1,25.4,7.58,1.0,4,216,exact,16.15,False,False,lower_need_good_access
+Assam|Lakhimpur,Assam,Lakhimpur,9.3,9.4,20.8,25.0,23.33,0.9710144927536232,1,171,exact,16.12,False,False,lower_need_good_access
+Madhya Pradesh|Rewa,Madhya Pradesh,Rewa,12.4,14.4,17.6,20.1,50.88,0.6428571428571429,0,332,exact,16.12,False,False,lower_need_good_access
+Jharkhand|Ranchi,Jharkhand,Ranchi,9.7,12.0,19.6,23.1,16.03,0.964516129032258,14,325,exact,16.1,False,False,lower_need_good_access
+Madhya Pradesh|Khargone (West Nimar),Madhya Pradesh,Khargone (West Nimar),8.9,9.4,21.2,24.9,42.36,0.9439252336448598,0,214,fuzzy,16.1,False,False,lower_need_good_access
+Gujarat|Rajkot,Gujarat,Rajkot,16.6,15.4,17.8,14.5,36.41,0.7904191616766467,3,334,exact,16.08,False,False,lower_need_good_access
+Chhattisgarh|Gariyaband,Chhattisgarh,Gariyaband,7.4,8.6,22.6,25.6,48.1,0.5227272727272727,0,135,exact,16.05,False,False,lower_need_good_access
+Jammu & Kashmir|Samba,Jammu & Kashmir,Samba,10.3,11.2,21.1,21.5,11.78,0.8809523809523809,1,42,exact,16.02,False,False,lower_need_good_access
+Meghalaya|East Garo Hills,Meghalaya,East Garo Hills,9.3,16.2,15.3,23.2,42.18,0.875,0,56,exact,16.0,False,False,lower_need_good_access
+Uttar Pradesh|Ballia,Uttar Pradesh,Ballia,12.2,14.0,17.1,20.7,42.05,0.9943019943019943,0,351,exact,16.0,False,False,lower_need_good_access
+Uttar Pradesh|Chandauli,Uttar Pradesh,Chandauli,10.3,11.2,18.9,23.6,10.63,1.0,2,179,exact,16.0,False,False,lower_need_good_access
+Gujarat|Jamnagar,Gujarat,Jamnagar,15.3,15.5,18.1,15.0,47.0,0.9733333333333334,0,230,exact,15.98,False,False,lower_need_good_access
+Gujarat|Narmada,Gujarat,Narmada,10.8,13.1,19.2,20.8,56.18,0.5735294117647058,0,136,exact,15.97,False,False,lower_need_good_access
+Uttar Pradesh|Siddharthnagar,Uttar Pradesh,Siddharthnagar,9.5,11.7,19.1,23.5,51.94,0.6396396396396397,0,222,fuzzy,15.95,False,False,lower_need_good_access
+Assam|Dima Hasao,Assam,Dima Hasao,9.8,13.3,17.1,23.5,39.33,0.8450704225352113,0,77,exact,15.92,False,False,lower_need_good_access
+Bihar|Gopalganj,Bihar,Gopalganj,10.5,10.1,20.3,22.8,34.04,0.9900497512437811,0,208,exact,15.92,False,False,lower_need_good_access
+Gujarat|Kachchh,Gujarat,Kachchh,12.9,13.4,19.1,18.2,42.75,0.6445783132530121,7,498,exact,15.9,False,False,lower_need_good_access
+Meghalaya|South West Garo Hills,Meghalaya,South West Garo Hills,12.9,16.7,13.6,20.0,26.0,0.9444444444444444,0,19,exact,15.8,False,False,lower_need_good_access
+Uttar Pradesh|Bara Banki,Uttar Pradesh,Bara Banki,9.4,12.0,19.1,22.7,37.99,0.9601226993865031,0,358,fuzzy,15.8,False,False,lower_need_good_access
+Himachal Pradesh|Chamba,Himachal Pradesh,Chamba,10.6,11.5,17.8,23.2,50.8,0.6559633027522935,0,218,exact,15.78,False,False,lower_need_good_access
+Jharkhand|Jamtara,Jharkhand,Jamtara,10.5,12.9,17.8,21.9,29.38,0.9506172839506173,0,86,exact,15.78,False,False,lower_need_good_access
+Maharastra|Nagpur,Maharastra,Nagpur,10.7,12.8,21.3,18.3,18.79,0.9623824451410659,11,319,exact,15.77,False,False,lower_need_good_access
+Uttar Pradesh|Gorakhpur,Uttar Pradesh,Gorakhpur,13.8,11.7,16.8,20.7,19.67,0.9947089947089947,3,378,exact,15.75,False,False,lower_need_good_access
+Assam|Charaideo,Assam,Charaideo,11.9,14.9,18.2,17.9,48.94,1.0,0,39,exact,15.72,False,False,lower_need_good_access
+Bihar|Sitamarhi,Bihar,Sitamarhi,12.3,14.6,17.8,17.9,45.4,0.8392857142857143,0,291,exact,15.65,False,False,lower_need_good_access
+Madhya Pradesh|Morena,Madhya Pradesh,Morena,11.7,16.8,14.9,19.1,43.78,0.8823529411764706,0,203,exact,15.62,False,False,lower_need_good_access
+Uttarakhand|Uttarkashi,Uttarakhand,Uttarkashi,8.2,10.9,19.0,24.4,55.85,0.5984848484848485,0,132,fuzzy,15.62,False,False,lower_need_good_access
+Gujarat|Devbhumi Dwarka,Gujarat,Devbhumi Dwarka,13.5,13.5,18.1,17.3,30.93,0.8880597014925373,1,137,exact,15.6,False,False,lower_need_good_access
+Bihar|Samastipur,Bihar,Samastipur,14.3,15.9,15.8,16.4,7.75,1.0,1,376,exact,15.6,False,False,lower_need_good_access
+Madhya Pradesh|Indore,Madhya Pradesh,Indore,9.9,10.5,20.7,21.3,15.96,1.0,8,130,exact,15.6,False,False,lower_need_good_access
+Gujarat|Amreli,Gujarat,Amreli,15.5,17.3,18.0,11.5,33.32,0.8823529411764706,1,340,exact,15.58,False,False,lower_need_good_access
+Uttar Pradesh|Unnao,Uttar Pradesh,Unnao,9.7,9.2,22.0,21.4,29.68,0.9925093632958801,0,267,exact,15.58,False,False,lower_need_good_access
+Maharastra|Amravati,Maharastra,Amravati,10.3,13.1,19.8,18.7,39.18,0.8463251670378619,3,449,exact,15.48,False,False,lower_need_good_access
+Madhya Pradesh|Datia,Madhya Pradesh,Datia,12.2,14.6,15.3,19.7,41.73,0.968503937007874,0,138,exact,15.45,False,False,lower_need_good_access
+Maharastra|Bhandara,Maharastra,Bhandara,10.5,10.1,21.8,19.3,55.69,0.6764705882352942,0,136,exact,15.42,False,False,lower_need_good_access
+Jammu & Kashmir|Jammu,Jammu & Kashmir,Jammu,9.9,8.6,20.5,22.6,11.33,0.9633507853403142,6,191,exact,15.4,False,False,lower_need_good_access
+Nagaland|Tuensang,Nagaland,Tuensang,6.4,10.5,20.4,24.3,34.33,0.9591836734693877,0,49,exact+parent_district,15.4,False,False,lower_need_good_access
+Jharkhand|Sahibganj,Jharkhand,Sahibganj,12.8,17.1,15.0,16.6,44.56,0.8666666666666667,0,101,fuzzy,15.38,False,False,lower_need_good_access
+Uttar Pradesh|Kushinagar,Uttar Pradesh,Kushinagar,10.6,12.6,16.4,21.9,47.7,0.7971014492753623,0,203,fuzzy,15.37,False,False,lower_need_good_access
+Maharastra|Chandrapur,Maharastra,Chandrapur,8.8,11.3,20.7,20.6,42.5,0.7457627118644068,3,531,exact,15.35,False,False,lower_need_good_access
+Assam|Dhemaji,Assam,Dhemaji,7.8,13.3,16.0,24.1,24.38,1.0,0,95,exact,15.3,False,False,lower_need_good_access
+Rajasthan|Jhunjhunun,Rajasthan,Jhunjhunun,6.7,8.2,20.7,25.6,25.9,1.0,2,410,fuzzy,15.3,False,False,lower_need_good_access
+Gujarat|Chhota Udaipur,Gujarat,Chhota Udaipur,10.4,13.8,19.4,17.5,41.98,0.8269230769230769,0,56,fuzzy,15.28,False,False,lower_need_good_access
+Uttar Pradesh|Jyotiba Phule Nagar,Uttar Pradesh,Jyotiba Phule Nagar,6.3,11.1,19.1,24.6,25.73,1.0,0,102,manual,15.28,False,False,lower_need_good_access
+Uttar Pradesh|Pilibhit,Uttar Pradesh,Pilibhit,10.8,13.3,19.5,17.5,45.12,0.7575757575757576,0,165,exact,15.28,False,False,lower_need_good_access
+Jammu & Kashmir|Baramula,Jammu & Kashmir,Baramula,10.0,8.3,23.7,19.0,21.09,1.0,0,129,fuzzy,15.25,False,False,lower_need_good_access
+Rajasthan|Chittaurgarh,Rajasthan,Chittaurgarh,9.1,12.3,18.3,21.1,58.1,0.5627240143369175,0,279,fuzzy,15.2,False,False,lower_need_good_access
+Uttar Pradesh|Deoria,Uttar Pradesh,Deoria,9.6,12.6,17.6,21.0,42.63,0.8864864864864865,0,291,exact,15.2,False,False,lower_need_good_access
+Assam|West Karbi Anglong,Assam,West Karbi Anglong,9.1,12.2,17.0,22.2,42.43,0.7241379310344828,0,32,exact,15.12,False,False,lower_need_good_access
+Assam|Karimganj,Assam,Karimganj,11.5,15.2,16.5,17.2,45.44,0.8632478632478633,0,154,exact,15.1,False,False,lower_need_good_access
+Mizoram|Mamit,Mizoram,Mamit,11.4,13.4,14.3,21.0,28.37,0.96,0,25,exact,15.02,False,False,lower_need_good_access
+Himachal Pradesh|Sirmaur,Himachal Pradesh,Sirmaur,10.1,9.9,19.1,20.8,42.13,0.9871794871794872,0,167,exact,14.98,False,False,lower_need_good_access
+Assam|Cachar,Assam,Cachar,13.1,14.4,17.0,15.4,16.97,0.933920704845815,2,282,exact,14.98,False,False,lower_need_good_access
+Bihar|Begusarai,Bihar,Begusarai,13.2,15.8,13.9,17.0,11.96,1.0,1,234,exact,14.98,False,False,lower_need_good_access
+Madhya Pradesh|Dhar,Madhya Pradesh,Dhar,9.7,10.5,19.9,19.8,47.43,0.5919540229885057,1,174,exact,14.97,False,False,lower_need_good_access
+Uttar Pradesh|Sant Ravidas Nagar (Bhadohi),Uttar Pradesh,Sant Ravidas Nagar (Bhadohi),8.7,13.2,14.9,23.0,35.84,1.0,0,103,fuzzy,14.95,False,False,lower_need_good_access
+Jammu & Kashmir|Anantnag,Jammu & Kashmir,Anantnag,10.4,9.9,20.0,19.4,48.57,0.8461538461538461,0,57,exact,14.92,False,False,lower_need_good_access
+Maharastra|Latur,Maharastra,Latur,10.2,11.1,18.6,19.6,49.12,0.680161943319838,1,268,exact,14.88,False,False,lower_need_good_access
+Jharkhand|Saraikela-Kharsawan,Jharkhand,Saraikela-Kharsawan,11.1,15.5,15.6,17.2,27.92,0.8652482269503546,0,157,exact,14.85,False,False,lower_need_good_access
+Madhya Pradesh|Raisen,Madhya Pradesh,Raisen,7.9,11.3,19.0,21.2,50.81,0.6023391812865497,1,171,exact,14.85,False,False,lower_need_good_access
+Uttar Pradesh|Allahabad,Uttar Pradesh,Allahabad,13.4,15.7,12.6,17.7,10.53,1.0,4,401,manual,14.85,False,False,lower_need_good_access
+Bihar|Bhojpur,Bihar,Bhojpur,14.0,17.0,13.9,14.5,36.88,0.952054794520548,0,305,exact,14.85,False,False,lower_need_good_access
+Maharastra|Gondiya,Maharastra,Gondiya,7.9,10.2,21.8,18.9,30.11,0.8225806451612904,1,446,fuzzy,14.7,False,False,lower_need_good_access
+Gujarat|Banas Kantha,Gujarat,Banas Kantha,12.9,15.8,14.3,15.7,30.96,0.8382749326145552,2,371,exact,14.68,False,False,lower_need_good_access
+Rajasthan|Hanumangarh,Rajasthan,Hanumangarh,7.4,8.5,20.0,22.6,46.42,0.8461538461538461,0,182,exact,14.62,False,False,lower_need_good_access
+Rajasthan|Alwar,Rajasthan,Alwar,5.0,7.2,20.3,25.8,46.53,0.7247311827956989,2,465,exact,14.58,False,False,lower_need_good_access
+Jammu & Kashmir|Kulgam,Jammu & Kashmir,Kulgam,6.4,6.1,25.8,19.9,43.87,1.0,0,34,exact,14.55,False,False,lower_need_good_access
+Jammu & Kashmir|Ganderbal,Jammu & Kashmir,Ganderbal,9.7,7.8,21.5,19.1,16.89,1.0,0,25,exact,14.52,False,False,lower_need_good_access
+Madhya Pradesh|Satna,Madhya Pradesh,Satna,10.4,15.1,16.2,16.3,32.21,0.9,1,299,exact,14.5,False,False,lower_need_good_access
+Uttar Pradesh|Sambhal,Uttar Pradesh,Sambhal,7.4,8.5,19.3,22.7,51.5,0.5723684210526315,0,181,exact,14.48,False,False,lower_need_good_access
+Jharkhand|Dumka,Jharkhand,Dumka,10.2,13.6,14.1,20.0,55.44,0.6311787072243346,0,283,exact,14.48,False,False,lower_need_good_access
+Bihar|Sheohar,Bihar,Sheohar,7.5,13.9,15.5,20.8,31.73,1.0,0,38,exact,14.42,False,False,lower_need_good_access
+Jharkhand|Lohardaga,Jharkhand,Lohardaga,10.0,9.7,17.5,20.2,52.34,0.8243243243243243,0,74,exact,14.35,False,False,lower_need_good_access
+Madhya Pradesh|Khandwa (East Nimar),Madhya Pradesh,Khandwa (East Nimar),9.0,9.5,21.3,17.6,32.63,0.8963414634146342,1,164,fuzzy,14.35,False,False,lower_need_good_access
+Mizoram|Serchhip,Mizoram,Serchhip,14.2,13.8,11.6,17.7,42.19,0.7647058823529411,0,34,exact,14.32,False,False,lower_need_good_access
+Haryana|Karnal,Haryana,Karnal,9.4,9.0,17.6,21.2,1.57,0.9761904761904762,8,112,exact,14.3,False,False,lower_need_good_access
+Jammu & Kashmir|Udhampur,Jammu & Kashmir,Udhampur,9.9,8.8,20.1,18.3,28.81,0.9565217391304348,0,29,exact,14.28,False,False,lower_need_good_access
+Rajasthan|Bharatpur,Rajasthan,Bharatpur,6.7,7.7,19.1,23.6,32.56,0.987012987012987,1,385,exact,14.28,False,False,lower_need_good_access
+Nagaland|Kiphire,Nagaland,Kiphire,7.8,11.7,15.3,22.0,56.68,0.5714285714285714,0,21,exact,14.2,False,False,lower_need_good_access
+Bihar|Lakhisarai,Bihar,Lakhisarai,12.8,17.8,12.3,13.8,27.78,1.0,0,85,exact,14.18,False,False,lower_need_good_access
+Dadra and Nagar Haveli & Daman and Diu|Dadra & Nagar Haveli,Dadra and Nagar Haveli & Daman and Diu,Dadra & Nagar Haveli,13.4,16.4,13.3,13.5,10.93,1.0,1,34,exact,14.15,False,False,lower_need_good_access
+Himachal Pradesh|Kullu,Himachal Pradesh,Kullu,9.4,9.1,17.4,20.6,31.16,0.7870967741935484,1,155,exact,14.12,False,False,lower_need_good_access
+Rajasthan|Sikar,Rajasthan,Sikar,6.3,8.8,19.4,22.0,33.96,0.9870967741935484,1,465,exact,14.12,False,False,lower_need_good_access
+Uttar Pradesh|Ghazipur,Uttar Pradesh,Ghazipur,8.7,13.3,14.2,20.3,39.89,1.0,0,52,exact,14.12,False,False,lower_need_good_access
+Gujarat|Mahisagar,Gujarat,Mahisagar,12.3,13.1,16.3,14.7,43.73,0.7341772151898734,0,166,exact,14.1,False,False,lower_need_good_access
+Assam|Darrang,Assam,Darrang,11.0,14.2,16.7,14.5,38.44,0.9242424242424242,0,73,exact,14.1,False,False,lower_need_good_access
+Jharkhand|Deoghar,Jharkhand,Deoghar,10.0,13.5,14.2,18.5,25.5,0.9439252336448598,1,124,exact,14.05,False,False,lower_need_good_access
+Maharastra|Hingoli,Maharastra,Hingoli,10.5,10.7,17.4,17.4,50.69,0.6711409395973155,0,149,exact,14.0,False,False,lower_need_good_access
+Uttar Pradesh|Hardoi,Uttar Pradesh,Hardoi,8.0,9.8,18.1,19.9,30.07,0.99644128113879,1,311,exact,13.95,False,False,lower_need_good_access
+Uttar Pradesh|Firozabad,Uttar Pradesh,Firozabad,7.5,9.4,18.1,20.5,36.68,0.9210526315789473,0,38,exact,13.88,False,False,lower_need_good_access
+Uttar Pradesh|Bareilly,Uttar Pradesh,Bareilly,9.7,11.8,16.4,17.6,22.84,1.0,6,285,exact,13.88,False,False,lower_need_good_access
+Uttar Pradesh|Etawah,Uttar Pradesh,Etawah,8.9,10.2,16.7,19.7,53.81,0.6571428571428571,0,175,exact,13.88,False,False,lower_need_good_access
+Jammu & Kashmir|Bandipore,Jammu & Kashmir,Bandipore,8.7,8.0,21.4,17.4,31.22,1.0,0,52,fuzzy,13.87,False,False,lower_need_good_access
+Chhattisgarh|Mahasamund,Chhattisgarh,Mahasamund,7.6,8.5,17.9,21.4,16.01,0.7727272727272727,1,157,exact,13.85,False,False,lower_need_good_access
+Maharastra|Nanded,Maharastra,Nanded,9.1,12.1,16.7,17.3,43.26,0.7684426229508197,1,488,exact,13.8,False,False,lower_need_good_access
+Bihar|Gaya,Bihar,Gaya,8.2,11.4,16.6,18.8,28.73,0.979253112033195,2,387,exact,13.75,False,False,lower_need_good_access
+Bihar|Nawada,Bihar,Nawada,9.4,11.7,14.5,18.5,26.46,0.9951456310679612,1,222,exact,13.52,False,False,lower_need_good_access
+Bihar|Arwal,Bihar,Arwal,10.9,15.9,12.9,14.0,31.88,0.9625,0,80,exact,13.42,False,False,lower_need_good_access
+Gujarat|Gir Somnath,Gujarat,Gir Somnath,13.2,14.2,14.0,12.3,27.14,1.0,1,165,exact,13.42,False,False,lower_need_good_access
+Jammu & Kashmir|Pulwama,Jammu & Kashmir,Pulwama,7.2,4.8,22.6,19.1,24.15,1.0,0,23,exact,13.42,False,False,lower_need_good_access
+Bihar|Jamui,Bihar,Jamui,11.1,15.1,12.6,14.8,51.11,0.8984771573604061,0,197,exact,13.4,False,False,lower_need_good_access
+Bihar|Sheikhpura,Bihar,Sheikhpura,9.9,11.1,16.3,16.1,35.2,1.0,0,96,exact,13.35,False,False,lower_need_good_access
+Bihar|Jehanabad,Bihar,Jehanabad,11.9,16.0,13.4,12.0,17.04,0.9827586206896551,0,121,exact,13.32,False,False,lower_need_good_access
+Uttar Pradesh|Jaunpur,Uttar Pradesh,Jaunpur,8.0,9.6,16.0,19.7,38.45,0.8766404199475065,0,381,exact,13.32,False,False,lower_need_good_access
+Uttar Pradesh|Agra,Uttar Pradesh,Agra,7.2,8.2,16.8,20.9,17.16,0.9904153354632588,4,338,exact,13.28,False,False,lower_need_good_access
+Uttar Pradesh|Rae Bareli,Uttar Pradesh,Rae Bareli,8.3,7.4,19.4,17.9,50.87,0.7766990291262136,0,220,exact,13.25,False,False,lower_need_good_access
+Assam|South Salmara Mancachar,Assam,South Salmara Mancachar,8.7,12.0,15.5,16.5,49.18,0.9090909090909091,0,11,exact,13.18,False,False,lower_need_good_access
+Jammu & Kashmir|Badgam,Jammu & Kashmir,Badgam,7.3,6.9,19.9,18.6,9.73,0.9615384615384616,1,26,fuzzy,13.18,False,False,lower_need_good_access
+Uttar Pradesh|Kanpur Nagar,Uttar Pradesh,Kanpur Nagar,10.8,8.3,17.3,16.2,16.22,0.9857142857142858,5,280,exact,13.15,False,False,lower_need_good_access
+Rajasthan|Ganganagar,Rajasthan,Ganganagar,9.5,8.4,16.2,18.3,44.76,0.6514084507042254,1,293,exact,13.1,False,False,lower_need_good_access
+Bihar|Nalanda,Bihar,Nalanda,11.1,13.6,13.4,14.0,15.58,0.9912663755458515,1,229,exact,13.02,False,False,lower_need_good_access
+Jammu & Kashmir|Kupwara,Jammu & Kashmir,Kupwara,6.5,7.9,18.1,18.9,15.8,1.0,1,81,exact,12.85,False,False,lower_need_good_access
+Jammu & Kashmir|Srinagar,Jammu & Kashmir,Srinagar,7.4,5.7,20.1,18.1,3.34,1.0,3,56,exact,12.82,False,False,lower_need_good_access
+Uttar Pradesh|Mainpuri,Uttar Pradesh,Mainpuri,8.4,10.2,14.4,17.9,26.28,0.9696969696969697,1,99,exact,12.72,False,False,lower_need_good_access
+Meghalaya|South West Khasi Hills,Meghalaya,South West Khasi Hills,6.3,6.9,18.5,19.0,47.32,0.7142857142857143,0,7,exact,12.68,False,False,lower_need_good_access
+Maharastra|Wardha,Maharastra,Wardha,9.0,10.4,17.1,14.0,56.14,0.6030927835051546,0,194,exact,12.62,False,False,lower_need_good_access
+Jharkhand|Khunti,Jharkhand,Khunti,8.6,15.7,11.7,14.2,39.22,0.9186046511627907,0,92,exact,12.55,False,False,lower_need_good_access
+Rajasthan|Udaipur,Rajasthan,Udaipur,8.8,10.5,14.4,16.5,44.18,0.7593360995850622,1,482,exact,12.55,False,False,lower_need_good_access
+Meghalaya|West Jaintia Hills,Meghalaya,West Jaintia Hills,8.8,7.8,18.0,15.5,49.07,0.65625,0,64,exact,12.52,False,False,lower_need_good_access
+Rajasthan|Bundi,Rajasthan,Bundi,5.9,8.0,17.2,19.0,41.96,0.7769784172661871,0,139,exact,12.52,False,False,lower_need_good_access
+Meghalaya|East Jantia Hills,Meghalaya,East Jantia Hills,6.3,7.7,18.7,17.2,35.64,0.96875,1,32,fuzzy,12.48,False,False,lower_need_good_access
+Rajasthan|Kota,Rajasthan,Kota,5.8,7.8,15.9,20.2,39.01,0.7717391304347826,3,184,exact,12.42,False,False,lower_need_good_access
+Uttar Pradesh|Etah,Uttar Pradesh,Etah,6.2,7.6,16.4,19.2,42.26,0.83,0,200,exact,12.35,False,False,lower_need_good_access
+Haryana|Mewat,Haryana,Mewat,6.0,7.9,15.5,19.2,16.15,1.0,0,9,manual,12.15,False,False,lower_need_good_access
+Rajasthan|Bhilwara,Rajasthan,Bhilwara,6.7,10.7,15.4,15.7,41.81,0.8463541666666666,1,384,exact,12.12,False,False,lower_need_good_access
+Rajasthan|Jaipur,Rajasthan,Jaipur,7.9,8.5,14.7,16.5,26.04,0.9056603773584906,14,371,exact,11.9,False,False,lower_need_good_access
+Uttar Pradesh|Jhansi,Uttar Pradesh,Jhansi,5.3,9.0,15.7,17.3,52.72,0.7091836734693877,1,196,exact,11.82,False,False,lower_need_good_access
+Jammu & Kashmir|Reasi,Jammu & Kashmir,Reasi,7.1,7.1,15.4,17.6,39.45,1.0,0,11,exact,11.8,False,False,lower_need_good_access
+Uttar Pradesh|Budaun,Uttar Pradesh,Budaun,9.0,10.9,13.0,13.8,47.61,0.8518518518518519,0,252,exact,11.68,False,False,lower_need_good_access
+Uttar Pradesh|Kanpur Dehat,Uttar Pradesh,Kanpur Dehat,7.6,9.9,12.6,16.5,46.15,0.8686868686868687,0,198,exact,11.65,False,False,lower_need_good_access
+Uttar Pradesh|Kaushambi,Uttar Pradesh,Kaushambi,11.7,15.5,9.4,10.0,15.95,1.0,1,110,exact,11.65,False,False,lower_need_good_access
+Rajasthan|Sirohi,Rajasthan,Sirohi,5.1,8.6,14.2,18.7,25.13,1.0,1,187,exact,11.65,False,False,lower_need_good_access
+Madhya Pradesh|Burhanpur,Madhya Pradesh,Burhanpur,7.1,9.1,13.9,15.9,54.26,0.8405797101449275,0,69,exact,11.5,False,False,lower_need_good_access
+Meghalaya|Ribhoi,Meghalaya,Ribhoi,8.0,8.1,13.5,16.0,29.37,1.0,0,48,fuzzy,11.4,False,False,lower_need_good_access
+Bihar|Kaimur (Bhabua),Bihar,Kaimur (Bhabua),6.9,10.3,12.3,15.0,43.82,0.8181818181818182,0,161,exact,11.12,False,False,lower_need_good_access
+Uttar Pradesh|Kannauj,Uttar Pradesh,Kannauj,7.3,6.9,14.9,14.4,50.36,0.8695652173913043,0,138,exact,10.88,False,False,lower_need_good_access
+Rajasthan|Jodhpur,Rajasthan,Jodhpur,6.3,7.5,13.1,16.5,53.37,0.5857142857142857,4,350,exact,10.85,False,False,lower_need_good_access
+Rajasthan|Ajmer,Rajasthan,Ajmer,7.5,7.9,14.5,13.1,37.29,0.8186813186813187,2,392,exact,10.75,False,False,lower_need_good_access
+Uttar Pradesh|Farrukhabad,Uttar Pradesh,Farrukhabad,6.7,7.1,13.8,14.8,50.21,1.0,3,140,exact,10.6,False,False,lower_need_good_access
+Rajasthan|Jalor,Rajasthan,Jalor,9.1,10.8,10.4,11.5,36.64,0.8550185873605948,1,269,fuzzy,10.45,False,False,lower_need_good_access
+Rajasthan|Dhaulpur,Rajasthan,Dhaulpur,5.8,7.3,13.4,15.1,35.61,0.8695652173913043,0,184,fuzzy,10.4,False,False,lower_need_good_access
+Jammu & Kashmir|Shupiyan,Jammu & Kashmir,Shupiyan,5.4,5.1,15.1,14.2,31.15,1.0,0,2,fuzzy,9.95,False,False,lower_need_good_access

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Care desert or data desert?</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <header id="topbar">
+      <div class="brand">
+        <div class="title">Care desert or data desert?</div>
+        <span id="mock-badge" class="mock" hidden>MOCK DATA</span>
+      </div>
+      <nav id="line-tabs" class="seg" aria-label="Service line"></nav>
+      <nav id="view-tabs" class="seg" aria-label="View"></nav>
+      <div class="top-actions">
+        <button id="home-btn" title="Back to India">India</button>
+        <button id="story-btn" title="Story mode (space)" hidden>Story</button>
+        <button id="drawer-btn">How we know</button>
+      </div>
+    </header>
+
+    <aside id="left">
+      <section class="card">
+        <div class="card-h">Evidence required</div>
+        <input id="grade-slider" type="range" min="0" max="3" step="1" value="2" aria-label="Evidence required" />
+        <div id="grade-stops" class="stops"></div>
+        <div id="grade-note" class="muted"></div>
+      </section>
+      <section class="card">
+        <div class="card-h">Reach</div>
+        <div id="radius-seg" class="seg"></div>
+        <div id="counter" class="counter"></div>
+      </section>
+      <section id="legend" class="card legend"></section>
+    </aside>
+
+    <aside id="right" class="card" hidden></aside>
+    <div id="caption" hidden></div>
+    <div id="overlay" class="card" hidden></div>
+    <aside id="drawer" class="card"></aside>
+    <div id="status">Loading</div>
+    <div id="fps" hidden></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

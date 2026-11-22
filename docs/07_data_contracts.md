@@ -26,8 +26,11 @@ One row per real facility. Expected about 9,989 rows after removing duplicate id
 | `name` | str | |
 | `facility_type` | str, nullable | from `facilityTypeId` |
 | `operator_type` | str, nullable | `private`, `public`; map `government` to `public` |
-| `lat`, `lon` | float, nullable | null when missing or outside India |
-| `coord_valid` | bool | |
+| `lat`, `lon` | float, nullable | the location to use: the scraped point, or the PIN's location when `coord_check` is `moved_to_pin`; null when missing, outside India, or `excluded_unresolved` |
+| `coord_valid` | bool | true when `lat`, `lon` are present (about 9,670) |
+| `coord_check` | str | result of the check against the facility's own PIN (WP1, `vf.geo.check_facility_locations`): `ok` (within 40 km of the PIN's location), `ok_same_district` (farther, but in the PIN's district), then for points farther than 40 km and outside the PIN's district, settled by the city text: `moved_to_pin` (names only the PIN's place), `kept_city_matches_coords` (names only the point's place), `kept_unresolved` (names both or neither, 40 to 100 km: kept), `excluded_unresolved` (names both or neither, over 100 km: null); `no_pin_check` (no PIN, or a PIN the directory cannot locate), `missing` |
+| `coord_pin_km` | float, nullable | km from the scraped point to the PIN's location |
+| `lat_raw`, `lon_raw` | float, nullable | the scraped point; null when missing or outside India (about 9,953 present) |
 | `pin` | str, nullable | 6 digits or null |
 | `city_raw`, `state_raw` | str, nullable | as scraped, for display only |
 | `specialties` | list[str] | deduped |
@@ -62,8 +65,9 @@ One row per fact, long format. About 450,000 rows.
 | `office_name`, `office_type`, `delivery` | str | |
 | `pin` | str | |
 | `state_pin`, `district_pin` | str | as in the PIN directory |
-| `lat`, `lon` | float, nullable | null when missing, malformed, or outside India |
-| `coord_valid` | bool | about 151,000 true |
+| `lat`, `lon` | float, nullable | null when missing, malformed, or outside India; rows with latitude and longitude swapped in the raw file are swapped back when the corrected point lands among their district's offices (`vf.geo.post_office_coords`), else null |
+| `coord_valid` | bool | about 151,600 true |
+| `coord_swap_repaired` | bool | true for the 579 rows whose swapped coordinates were swapped back |
 | `district_key` | str, nullable | via the crosswalk |
 
 ### `silver/pin_crosswalk.parquet` (WP2)
@@ -86,7 +90,7 @@ Also write `silver/district_crosswalk_review.csv` listing every non-exact match 
 
 ### `silver/nfhs.parquet` and `silver/nfhs_flags.parquet` (WP2)
 
-`nfhs.parquet`: one row per district, `district_key`, `state_ut`, `district_name`, then every indicator as float (null when suppressed or missing). Keep the raw column names.
+`nfhs.parquet`: one row per district, `district_key`, `state_ut`, `district_name`, then every indicator as float (null when suppressed or missing). Keep the raw column names. 705 rows: the raw file's 706 minus `Mizoram|Chandel`, an exact copy of `Manipur|Chandel` standing where Mizoram's Saiha should be. The sidecar lists dropped rows under `dropped_rows`; readers need no exclusion list of their own.
 
 `nfhs_flags.parquet`: same shape, each indicator cell holding `ok`, `low_sample`, `suppressed`, or `missing`.
 
@@ -124,11 +128,17 @@ One row per facility per service line. WP3 writes it first with `method = regex`
 
 ### `gold/post_office_access.parquet` (WP5)
 
-One row per geocoded post office. Columns: `po_id`, `district_key`, `lat`, `lon`, then for each service line and each minimum grade 1 to 3: `dist_km_<line>_g<k>` and `nearest_facility_<line>_g<k>`.
+One row per geocoded post office. Columns: `po_id`, `district_key`, `lat`, `lon`, then for each service line and each minimum grade 1 to 3: `dist_km_<line>_g<k>` and `nearest_facility_<line>_g<k>`, then `coord_suspect` (bool), then `coord_placeholder` (bool).
+
+`coord_suspect` is true for an office more than 200 km from its district's centre (the median of the district's head and sub offices when it has 3 or more, else of all its offices; offices without a `district_key` are grouped by PIN-directory state and district, and state `NA` ones are never suspect). About 5,900 offices, mostly branch offices geocoded to a same-named village elsewhere. Their coordinates and distances are kept but wrong. WP5's district roll-up and national headline numbers leave them out, so any consumer computing a statistic from this table (WP7 coverage, WP8 `po_*.f32` arrays and swarm) must filter `coord_suspect == false` too, or show suspect offices separately.
+
+`coord_placeholder` is true for an office whose exact point is shared by 10 or more geocoded offices from 3 or more PINs (`vf.geo.placeholder_points`). Different PINs are different delivery areas, so such a point (usually the district town) is a placeholder, not where those offices are: in Bihar's Samastipur 358 of 376 offices, from 35 PINs, sit on one point. About 10,000 offices on about 300 points. Their rows keep the point's distances. WP5's district roll-up and national headline numbers count each placeholder point once per district instead of once per office, so a consumer computing a statistic from this table must do the same (keep one row per `district_key` and placeholder point), or show placeholder offices separately. The two flags are independent; filter `coord_suspect` first.
 
 ### `gold/district_access.parquet` (WP5)
 
-One row per district per service line per minimum grade. Columns: `district_key`, `service_line`, `min_grade`, `n_post_offices`, `dist_km_p50`, `dist_km_p75`, `dist_km_p90`, `share_within_30km`, `share_within_60km`, `n_facilities_in_district`.
+One row per district per service line per minimum grade. Columns: `district_key`, `service_line`, `min_grade`, `n_post_offices`, `dist_km_p50`, `dist_km_p75`, `dist_km_p90`, `share_within_30km`, `share_within_60km`, `n_facilities_in_district`, `n_post_offices_excluded`, `n_post_offices_placeholder`, `n_placeholder_points`.
+
+`n_post_offices` counts the district's offices with `coord_suspect == false`; `n_post_offices_excluded` is its `coord_suspect` offices, left out of every number. `n_post_offices_placeholder` is how many of the `n_post_offices` sit on placeholder points (`coord_placeholder`), and `n_placeholder_points` how many distinct such points they sit on. Every percentile and share is over the non-suspect offices with each placeholder point counted once, that is over `n_post_offices - n_post_offices_placeholder + n_placeholder_points` values. WP6 adds a reliability note when more than half of a district's `n_post_offices` are placeholder offices.
 
 ### `gold/district_quadrants.parquet` (WP6)
 
@@ -159,11 +169,12 @@ Written by WP7 or a small export script into `app/public/data/` in the checkout,
 
 | File | Contents |
 | --- | --- |
-| `meta.json` | Counts, model metrics, generated time, caveat strings, list of binary columns |
+| `meta.json` | Counts, model metrics, generated time, caveat strings, `mock` (true only for WP8's mock set), and the list of binary columns as `binary: [{file, dtype, length}]`. Full key list in `app/README.md` |
 | `po_lon.f32`, `po_lat.f32` | Float32 arrays, one value per geocoded post office |
-| `po_district.u16` | Index into `districts.json` |
-| `po_dist_<line>_g<k>.f32` | Distance in km per post office |
-| `facilities.json` | Array of `{id, name, lat, lon, type, operator, city, state, grades: {emoc, dialysis, icu}, evidence: {emoc: [...], ...}, n_domains}` |
+| `po_district.u16` | Index into `districts.json`; 65535 when the post office has no district |
+| `po_dist_<line>_g<k>.f32` | Distance in km per post office, k = 1 to 3 |
+| `po_near_<line>_g<k>.u16` | Index into `facilities.json` of the nearest facility at grade k or better, per post office, k = 1 to 3; 65535 when there is none. Used by patient mode and the patient swarm |
+| `facilities.json` | Array of `{id, name, lat, lon, type, operator, city, state, grades: {emoc, dialysis, icu}, evidence: {emoc: [...], ...}, n_domains}`, plus optional `tags: {emoc: [...], ...}` for the evidence panel |
 | `districts.json` | Array of `{key, state, name, quadrant: {...}, nfhs: {...selected indicators}, access: {...}, residual, crosswalk_method}` |
 | `scenarios.json` | Copy of the gold file |
 | `story.json` | The scripted beats for the video. Hand-authored by WP9 |

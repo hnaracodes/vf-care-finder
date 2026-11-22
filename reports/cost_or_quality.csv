@@ -1,0 +1,136 @@
+rank,district_key,state,district,quadrant_rule,label_stability,emoc_g2_dist_km_p50,emoc_g2_share_within_60km,emoc_g2_facilities_in_district,n_post_offices,n_post_offices_excluded,n_post_offices_placeholder,institutional_birth_pct,outcome_flag,public_facility_birth_pct,public_share_of_institutional_pct,csection_pct,csection_below_5pct,public_facility_csection_pct,residual,crosswalk_method,reliability_notes,health_insurance_pct,oop_per_public_delivery_inr,oop_flag
+1,Meghalaya|South West Khasi Hills,Meghalaya,South West Khasi Hills,cost_or_quality,0.5,87.0,0.0,0,7,0,1,41.7,ok,37.6,90.2,4.2,True,7.7,,exact,access from only 7 post offices,72.3,3902.0,ok
+2,Meghalaya|West Jaintia Hills,Meghalaya,West Jaintia Hills,cost_or_quality,0.5,86.1,0.047,0,64,0,0,42.2,ok,31.9,75.6,6.2,False,8.3,,exact,,65.6,2917.0,ok
+3,Bihar|Kishanganj,Bihar,Kishanganj,cost_or_quality,0.5,75.3,0.266,0,94,1,1,54.6,ok,41.5,76.0,12.1,False,6.6,,exact,,8.1,4174.0,ok
+4,Meghalaya|Ribhoi,Meghalaya,Ribhoi,cost_or_quality,1.0,43.0,0.911,0,48,1,5,56.9,ok,45.6,80.1,8.7,False,10.0,,fuzzy,name matched by fuzzy match,66.8,3648.0,ok
+5,Jharkhand|Dumka,Jharkhand,Dumka,cost_or_quality,1.0,56.7,0.559,0,283,6,23,60.3,ok,51.3,85.1,8.5,False,3.7,,exact,,45.4,1602.0,ok
+6,Jharkhand|Deoghar,Jharkhand,Deoghar,cost_or_quality,1.0,25.5,0.944,1,124,0,20,61.3,ok,47.2,77.0,7.8,False,2.9,,exact,,53.8,2133.0,ok
+7,Bihar|Purba Champaran,Bihar,Purba Champaran,cost_or_quality,1.0,26.7,0.974,1,416,7,0,61.5,ok,43.0,69.9,5.4,False,2.8,,fuzzy,name matched by fuzzy match,19.4,2811.0,ok
+8,Uttar Pradesh|Shahjahanpur,Uttar Pradesh,Shahjahanpur,cost_or_quality,0.5,74.4,0.25,0,269,0,250,63.3,ok,47.8,75.5,8.6,False,4.3,,exact,"93% of post offices sit on 1 placeholder point shared with other PINs (usually the district town), counted once each",14.2,1394.0,ok
+9,Meghalaya|East Khasi Hills,Meghalaya,East Khasi Hills,cost_or_quality,0.5,87.1,0.159,0,61,0,18,63.4,ok,48.4,76.3,13.9,False,13.7,,exact,,47.1,3258.0,ok
+10,Bihar|Sitamarhi,Bihar,Sitamarhi,cost_or_quality,1.0,50.0,0.807,0,291,8,12,64.4,ok,49.9,77.5,8.5,False,5.3,,exact,,20.7,2538.0,ok
+11,Arunachal Pradesh|Longding,Arunachal Pradesh,Longding,cost_or_quality,0.5,83.7,0.324,0,34,0,0,64.5,ok,62.8,97.4,4.2,True,5.1,,exact,,23.8,3778.0,ok
+12,Jharkhand|Pakur,Jharkhand,Pakur,cost_or_quality,0.5,76.2,0.016,0,131,0,8,64.6,ok,57.6,89.2,5.4,False,3.9,,exact,,52.5,1644.0,ok
+13,Bihar|Araria,Bihar,Araria,cost_or_quality,0.5,87.4,0.056,0,148,13,26,66.2,ok,51.5,77.8,9.2,False,4.9,,exact,,19.5,3606.0,ok
+14,Jharkhand|Pashchimi Singhbhum,Jharkhand,Pashchimi Singhbhum,cost_or_quality,0.5,73.0,0.264,0,269,15,29,67.9,ok,64.3,94.7,4.0,True,3.3,,manual,name matched by hand,46.7,1183.0,ok
+15,Bihar|Purnia,Bihar,Purnia,cost_or_quality,0.5,88.3,0.192,0,175,14,57,68.9,ok,55.7,80.8,7.1,False,3.9,,exact,,10.2,4083.0,ok
+16,Uttar Pradesh|Farrukhabad,Uttar Pradesh,Farrukhabad,cost_or_quality,1.0,57.4,0.67,3,140,15,42,69.3,ok,48.8,70.4,10.0,False,4.2,,exact,,13.5,1611.0,ok
+17,Jammu & Kashmir|Reasi,Jammu & Kashmir,Reasi,cost_or_quality,0.5,87.0,0.0,0,11,0,0,69.3,ok,66.6,96.1,23.0,False,33.1,,exact,access from only 11 post offices,11.2,4046.0,ok
+18,Uttar Pradesh|Siddharthnagar,Uttar Pradesh,Siddharthnagar,cost_or_quality,0.5,67.3,0.207,0,222,4,0,69.7,ok,62.9,90.2,4.0,True,3.9,,fuzzy,name matched by fuzzy match,12.2,1943.0,ok
+19,Uttar Pradesh|Balrampur,Uttar Pradesh,Balrampur,cost_or_quality,0.5,84.6,0.171,0,181,4,0,69.7,ok,58.0,83.2,5.3,False,2.7,,exact,,13.0,1810.0,ok
+20,Chhattisgarh|Mungeli,Chhattisgarh,Mungeli,cost_or_quality,1.0,16.8,1.0,1,82,0,0,69.8,ok,56.2,80.5,10.8,False,1.4,,exact,,68.0,685.0,ok
+21,Bihar|Darbhanga,Bihar,Darbhanga,cost_or_quality,1.0,34.5,0.941,0,312,53,24,69.9,ok,55.8,79.8,10.6,False,5.7,,exact,,25.3,3230.0,ok
+22,Arunachal Pradesh|Tirap,Arunachal Pradesh,Tirap,cost_or_quality,0.5,73.3,0.29,0,31,0,0,70.2,ok,62.8,89.5,22.2,False,27.0,,exact,,30.8,12104.0,ok
+23,Jharkhand|Godda,Jharkhand,Godda,cost_or_quality,0.5,76.3,0.198,0,218,3,23,70.2,ok,63.6,90.6,4.7,True,3.5,,exact,,45.9,1463.0,ok
+24,Bihar|Saharsa,Bihar,Saharsa,cost_or_quality,1.0,16.5,0.983,1,166,0,109,70.4,ok,62.0,88.1,6.1,False,4.0,,exact,"66% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each",12.8,2273.0,ok
+25,Jharkhand|Giridih,Jharkhand,Giridih,cost_or_quality,1.0,51.6,0.598,0,214,5,0,70.7,ok,50.3,71.1,10.7,False,4.1,,exact,,52.4,2101.0,ok
+26,Tripura|Unakoti,Tripura,Unakoti,cost_or_quality,0.5,83.9,0.0,0,12,0,8,71.5,ok,55.4,77.5,11.2,False,7.7,,exact,"access from only 5 post office locations (a shared placeholder point counts once); 67% of post offices sit on 1 placeholder point shared with other PINs (usually the district town), counted once each",28.0,7693.0,ok
+27,Himachal Pradesh|Chamba,Himachal Pradesh,Chamba,cost_or_quality,0.75,62.6,0.422,0,218,6,0,72.0,ok,64.9,90.1,10.5,False,8.8,,exact,,26.8,4252.0,ok
+28,Uttar Pradesh|Budaun,Uttar Pradesh,Budaun,cost_or_quality,1.0,51.4,0.745,0,252,0,10,72.3,ok,57.4,79.4,5.7,False,4.4,,exact,,13.6,3622.0,ok
+29,Bihar|Muzaffarpur,Bihar,Muzaffarpur,cost_or_quality,1.0,22.6,0.976,1,400,21,69,72.5,ok,51.3,70.8,10.5,False,3.9,,exact,,13.2,3663.0,ok
+30,Bihar|Saran,Bihar,Saran,cost_or_quality,1.0,23.9,1.0,1,372,18,0,73.0,ok,57.2,78.4,8.0,False,1.9,,exact,,9.4,2903.0,ok
+31,Bihar|Jamui,Bihar,Jamui,cost_or_quality,1.0,53.8,0.888,0,197,0,0,73.4,ok,53.3,72.6,7.5,False,2.3,,exact,,14.3,5290.0,ok
+32,Jammu & Kashmir|Doda,Jammu & Kashmir,Doda,cost_or_quality,0.5,72.4,0.25,0,10,1,3,73.5,ok,68.9,93.7,19.5,False,23.5,,exact,access from only 8 post office locations (a shared placeholder point counts once),7.6,4458.0,ok
+33,Bihar|Madhubani,Bihar,Madhubani,cost_or_quality,0.75,62.5,0.308,0,408,11,199,73.7,ok,52.4,71.1,13.2,False,4.2,,exact,,19.2,2426.0,ok
+34,Jharkhand|Khunti,Jharkhand,Khunti,cost_or_quality,1.0,39.7,0.919,0,92,0,7,73.8,ok,64.2,87.0,7.2,False,4.3,,exact,,58.2,1314.0,ok
+35,Uttar Pradesh|Hardoi,Uttar Pradesh,Hardoi,cost_or_quality,0.5,81.2,0.238,0,311,6,31,73.9,ok,61.3,82.9,7.0,False,2.5,,exact,,16.0,1679.0,ok
+36,Bihar|Khagaria,Bihar,Khagaria,cost_or_quality,1.0,35.2,1.0,0,135,0,119,74.2,ok,64.0,86.3,4.4,True,0.8,,exact,"access from only 19 post office locations (a shared placeholder point counts once); 88% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each",15.6,4327.0,ok
+37,Uttar Pradesh|Sambhal,Uttar Pradesh,Sambhal,cost_or_quality,1.0,51.2,0.77,0,181,2,32,74.2,ok,45.1,60.8,8.1,False,1.4,,exact,,13.7,1214.0,ok
+38,Bihar|Sheohar,Bihar,Sheohar,cost_or_quality,1.0,31.7,1.0,0,38,0,6,74.3,ok,63.8,85.9,5.3,False,2.0,,exact,,18.1,2090.0,ok
+39,Gujarat|The Dangs,Gujarat,The Dangs,cost_or_quality,0.5,86.1,0.036,0,55,1,0,74.5,ok,64.2,86.2,7.1,False,6.0,,manual,name matched by hand,44.3,663.0,ok
+40,Haryana|Mewat,Haryana,Mewat,cost_or_quality,1.0,19.4,0.889,0,9,0,0,74.6,ok,59.2,79.4,4.2,True,3.1,,manual,name matched by hand; access from only 9 post offices,11.5,1031.0,ok
+41,Uttar Pradesh|Kanshiram Nagar,Uttar Pradesh,Kanshiram Nagar,cost_or_quality,1.0,55.7,0.67,0,109,0,0,74.8,ok,46.6,62.3,6.5,False,1.9,,manual,name matched by hand,15.1,1834.0,ok
+42,Bihar|Madhepura,Bihar,Madhepura,cost_or_quality,1.0,26.8,0.964,0,201,0,150,75.0,ok,68.8,91.7,3.0,True,1.0,,exact,"75% of post offices sit on 5 placeholder points shared with other PINs (usually the district town), counted once each",9.5,982.0,ok
+43,Uttar Pradesh|Bareilly,Uttar Pradesh,Bareilly,cost_or_quality,1.0,26.9,0.993,1,285,3,1,75.1,ok,40.3,53.7,15.5,False,5.7,,exact,,18.7,1919.0,ok
+44,Jharkhand|Jamtara,Jharkhand,Jamtara,cost_or_quality,1.0,44.1,0.951,0,86,1,7,75.4,ok,60.4,80.1,13.4,False,9.7,,exact,,62.9,2771.0,ok
+45,Bihar|Lakhisarai,Bihar,Lakhisarai,cost_or_quality,1.0,27.2,1.0,0,85,0,0,75.8,ok,58.4,77.0,9.3,False,2.8,,exact,,15.1,9523.0,ok
+46,Uttar Pradesh|Bara Banki,Uttar Pradesh,Bara Banki,cost_or_quality,1.0,38.8,0.997,0,358,7,33,76.0,ok,63.1,83.0,9.0,False,8.2,,fuzzy,name matched by fuzzy match,14.6,3205.0,ok
+47,Uttarakhand|Garhwal,Uttarakhand,Garhwal,cost_or_quality,0.5,77.9,0.053,0,413,11,0,76.0,ok,59.4,78.2,9.4,False,6.4,,fuzzy,name matched by fuzzy match,62.7,2382.0,ok
+48,Uttar Pradesh|Pilibhit,Uttar Pradesh,Pilibhit,cost_or_quality,1.0,45.1,0.75,0,165,2,36,76.2,ok,50.2,65.9,19.0,False,9.7,,exact,,21.4,1458.0,ok
+49,Maharastra|Nandurbar,Maharastra,Nandurbar,cost_or_quality,0.5,89.0,0.03,0,235,1,0,76.3,ok,60.7,79.6,7.9,False,5.6,,exact,,15.3,1313.0,ok
+50,Uttar Pradesh|Kannauj,Uttar Pradesh,Kannauj,cost_or_quality,0.75,61.9,0.428,0,138,6,0,76.4,ok,56.5,74.0,11.8,False,4.0,,exact,,15.3,1914.0,ok
+51,Uttar Pradesh|Etah,Uttar Pradesh,Etah,cost_or_quality,1.0,42.5,0.965,0,200,1,1,76.7,ok,50.5,65.8,7.5,False,2.8,,exact,,12.8,1929.0,ok
+52,Maharastra|Dhule,Maharastra,Dhule,cost_or_quality,1.0,41.2,0.817,1,273,0,0,77.2,ok,48.8,63.2,17.0,False,11.1,,exact,,19.8,2269.0,ok
+53,Bihar|Bhagalpur,Bihar,Bhagalpur,cost_or_quality,0.5,67.0,0.46,0,165,66,16,77.2,ok,52.1,67.5,11.5,False,5.9,,exact,coordinate check dropped 29% of post offices,16.3,2975.0,ok
+54,Chhattisgarh|Baloda Bazar,Chhattisgarh,Baloda Bazar,cost_or_quality,1.0,40.4,0.64,0,172,0,150,78.1,ok,65.8,84.3,9.7,False,2.6,,exact,"87% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each",66.1,2491.0,ok
+55,Haryana|Palwal,Haryana,Palwal,cost_or_quality,1.0,20.5,1.0,1,45,16,1,78.3,ok,46.5,59.4,11.7,False,6.4,,exact,coordinate check dropped 26% of post offices,23.5,1584.0,ok
+56,Uttar Pradesh|Shamli,Uttar Pradesh,Shamli,cost_or_quality,1.0,25.6,1.0,0,94,3,6,78.3,ok,54.3,69.3,11.3,False,5.0,,exact,,14.8,1725.0,ok
+57,Jharkhand|Dhanbad,Jharkhand,Dhanbad,cost_or_quality,1.0,9.7,0.995,1,219,3,12,78.8,ok,34.5,43.8,21.9,False,9.3,,exact,,45.7,2627.0,ok
+58,Jharkhand|Ramgarh,Jharkhand,Ramgarh,cost_or_quality,1.0,30.8,0.957,0,70,1,0,79.0,ok,51.6,65.3,20.0,False,8.3,,exact,,49.7,2121.0,ok
+59,Bihar|Arwal,Bihar,Arwal,cost_or_quality,1.0,59.6,0.512,0,80,14,0,79.2,ok,58.6,74.0,12.7,False,1.5,,exact,,15.6,1933.0,ok
+60,Chhattisgarh|Bilaspur,Chhattisgarh,Bilaspur,cost_or_quality,1.0,56.0,0.556,0,196,0,0,79.4,ok,55.8,70.3,19.0,False,9.9,,exact+parent_district,pools post offices of district(s) split off after the survey,60.4,2344.0,ok
+61,Uttar Pradesh|Mathura,Uttar Pradesh,Mathura,cost_or_quality,1.0,11.0,1.0,2,216,0,158,79.5,ok,36.9,46.4,15.7,False,5.2,,exact,"73% of post offices sit on 2 placeholder points shared with other PINs (usually the district town), counted once each",10.8,2650.0,ok
+62,Bihar|Pashchim Champaran,Bihar,Pashchim Champaran,cost_or_quality,0.5,64.0,0.436,0,275,1,0,79.5,ok,60.6,76.2,6.4,False,2.8,,exact,,20.0,1882.0,ok
+63,Uttarakhand|Hardwar,Uttarakhand,Hardwar,cost_or_quality,1.0,38.7,0.975,0,118,0,0,79.8,ok,37.9,47.5,22.1,False,17.0,,fuzzy,name matched by fuzzy match,46.6,3786.0,ok
+64,Bihar|Banka,Bihar,Banka,cost_or_quality,1.0,51.4,0.715,0,158,71,1,79.8,ok,68.0,85.2,7.5,False,4.3,,exact,coordinate check dropped 31% of post offices,13.6,8076.0,ok
+65,Uttarakhand|Champawat,Uttarakhand,Champawat,cost_or_quality,1.0,58.8,0.595,0,84,0,0,79.8,ok,51.8,64.9,16.3,False,6.9,,exact,,65.7,2578.0,ok
+66,Bihar|Nawada,Bihar,Nawada,cost_or_quality,0.5,85.6,0.073,0,222,8,17,79.9,ok,51.5,64.5,12.4,False,1.0,,exact,,8.1,2858.0,ok
+67,Uttar Pradesh|Firozabad,Uttar Pradesh,Firozabad,cost_or_quality,0.75,36.8,0.868,0,38,124,0,80.1,ok,56.4,70.4,10.7,False,2.7,,exact,coordinate check dropped 77% of post offices,13.4,1791.0,ok
+68,Uttarakhand|Almora,Uttarakhand,Almora,cost_or_quality,0.75,51.9,0.666,0,325,0,28,80.1,ok,69.4,86.6,16.3,False,13.7,,exact,,66.0,3162.0,ok
+69,Uttar Pradesh|Moradabad,Uttar Pradesh,Moradabad,cost_or_quality,0.75,22.5,1.0,1,137,3,44,80.3,ok,40.0,49.8,22.5,False,13.1,,exact,,17.1,5877.0,ok
+70,Uttar Pradesh|Mahamaya Nagar,Uttar Pradesh,Mahamaya Nagar,cost_or_quality,0.75,31.7,0.992,0,136,14,18,80.3,ok,54.0,67.2,13.9,False,5.8,,manual,name matched by hand,10.9,2896.0,ok
+71,Bihar|Nalanda,Bihar,Nalanda,cost_or_quality,0.75,52.5,0.721,0,229,32,1,80.3,ok,53.9,67.1,17.1,False,9.6,,exact,,12.8,2628.0,ok
+72,Bihar|Supaul,Bihar,Supaul,cost_or_quality,0.75,41.0,0.776,0,207,2,113,80.4,ok,73.6,91.5,3.7,True,2.6,,exact,"55% of post offices sit on 4 placeholder points shared with other PINs (usually the district town), counted once each",14.2,1760.0,ok
+73,Jammu & Kashmir|Ramban,Jammu & Kashmir,Ramban,cost_or_quality,0.75,49.6,0.714,0,7,0,1,80.4,ok,78.7,97.9,17.0,False,20.0,,exact,access from only 7 post offices,9.2,2683.0,ok
+74,Uttar Pradesh|Meerut,Uttar Pradesh,Meerut,cost_or_quality,0.75,34.8,1.0,1,269,0,0,80.6,ok,25.7,31.9,19.9,False,13.7,,exact,,18.4,1726.0,ok
+75,Uttar Pradesh|Unnao,Uttar Pradesh,Unnao,cost_or_quality,0.75,26.8,0.989,1,267,3,0,80.8,ok,62.6,77.5,18.3,False,10.4,,exact,,15.3,2405.0,ok
+76,Uttar Pradesh|Baghpat,Uttar Pradesh,Baghpat,cost_or_quality,0.75,25.5,1.0,0,130,0,0,80.9,ok,44.0,54.4,12.6,False,8.8,,exact,,12.5,2001.0,ok
+77,Jharkhand|Bokaro,Jharkhand,Bokaro,cost_or_quality,0.75,35.9,0.887,0,177,6,0,80.9,ok,44.6,55.1,21.0,False,13.4,,exact,,44.7,3372.0,ok
+78,Uttar Pradesh|Rampur,Uttar Pradesh,Rampur,cost_or_quality,0.75,24.3,1.0,0,125,2,69,81.0,ok,44.7,55.2,16.7,False,4.8,,exact,"55% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each",13.1,2245.0,ok
+79,Uttar Pradesh|Jyotiba Phule Nagar,Uttar Pradesh,Jyotiba Phule Nagar,cost_or_quality,0.75,30.3,1.0,0,102,0,45,81.1,ok,31.3,38.6,20.3,False,6.9,,manual,name matched by hand,8.3,1736.0,ok
+80,Uttar Pradesh|Chitrakoot,Uttar Pradesh,Chitrakoot,cost_or_quality,0.375,87.5,0.198,0,91,1,0,81.1,ok,75.0,92.5,5.3,False,3.0,,exact,label changes under most threshold choices,17.4,2331.0,ok
+81,Uttarakhand|Nainital,Uttarakhand,Nainital,cost_or_quality,0.75,25.0,0.951,1,164,1,0,81.2,ok,56.4,69.5,30.1,False,23.0,,exact,,60.8,3599.0,ok
+82,Uttar Pradesh|Fatehpur,Uttar Pradesh,Fatehpur,cost_or_quality,0.75,55.1,0.734,0,251,3,11,81.4,ok,64.6,79.4,7.0,False,3.9,,exact,,16.8,2145.0,ok
+83,Bihar|Vaishali,Bihar,Vaishali,cost_or_quality,0.75,22.3,0.995,0,293,0,92,81.6,ok,63.1,77.3,9.5,False,3.4,,exact,,13.5,2571.0,ok
+84,Uttar Pradesh|Saharanpur,Uttar Pradesh,Saharanpur,cost_or_quality,0.75,19.7,1.0,1,210,0,0,81.7,ok,53.5,65.5,15.4,False,9.1,,exact,,11.8,4537.0,ok
+85,Gujarat|Narmada,Gujarat,Narmada,cost_or_quality,0.562,62.3,0.463,0,136,24,0,81.7,ok,66.3,81.2,7.3,False,4.8,,exact,,51.1,753.0,ok
+86,Jharkhand|Saraikela-Kharsawan,Jharkhand,Saraikela-Kharsawan,cost_or_quality,0.75,31.9,0.851,0,157,0,18,81.8,ok,62.2,76.0,12.4,False,7.5,,exact,,63.1,1770.0,ok
+87,Uttar Pradesh|Gonda,Uttar Pradesh,Gonda,cost_or_quality,0.75,43.9,0.836,0,336,15,0,81.8,ok,66.9,81.8,11.0,False,8.1,,exact,,13.4,2602.0,ok
+88,NCT of Delhi|South,NCT of Delhi,South,cost_or_quality,0.75,3.4,1.0,3,71,0,0,82.0,ok,52.6,64.1,24.5,False,18.2,,exact,,28.7,2426.0,ok
+89,Jharkhand|Hazaribagh,Jharkhand,Hazaribagh,cost_or_quality,0.375,68.7,0.292,0,131,2,12,82.0,ok,59.8,72.9,14.7,False,10.6,,exact,label changes under most threshold choices,55.0,2328.0,ok
+90,Telangana|Komaram Bheem Asifabad,Telangana,Komaram Bheem Asifabad,cost_or_quality,0.375,72.7,0.114,0,123,0,0,82.0,ok,55.7,67.9,27.2,False,16.6,,fuzzy,name matched by fuzzy match; label changes under most threshold choices,63.6,4121.0,ok
+91,Uttarakhand|Bageshwar,Uttarakhand,Bageshwar,cost_or_quality,0.375,75.1,0.099,0,151,0,0,82.0,ok,75.1,91.6,12.4,False,9.9,,exact,label changes under most threshold choices,71.9,2542.0,ok
+92,Uttarakhand|Tehri Garhwal,Uttarakhand,Tehri Garhwal,cost_or_quality,0.75,48.1,0.729,0,266,1,0,82.2,ok,59.3,72.1,15.0,False,9.7,,exact,,71.2,1827.0,ok
+93,Uttar Pradesh|Aligarh,Uttar Pradesh,Aligarh,cost_or_quality,0.75,22.5,1.0,2,336,44,17,82.6,ok,49.2,59.6,18.7,False,7.0,,exact,,17.6,2638.0,ok
+94,Assam|Tinsukia,Assam,Tinsukia,cost_or_quality,0.375,68.7,0.431,0,137,5,0,82.6,ok,66.2,80.1,26.5,False,25.5,,exact,label changes under most threshold choices,60.0,5163.0,ok
+95,Uttar Pradesh|Mainpuri,Uttar Pradesh,Mainpuri,cost_or_quality,0.75,26.3,1.0,1,99,82,0,82.7,ok,59.7,72.2,8.2,False,2.2,,exact,coordinate check dropped 45% of post offices,16.1,2390.0,ok
+96,Uttar Pradesh|Allahabad,Uttar Pradesh,Allahabad,cost_or_quality,0.75,12.1,0.992,2,401,15,164,83.2,ok,52.6,63.2,15.7,False,4.6,,manual,name matched by hand,20.6,2243.0,ok
+97,Uttar Pradesh|Hapur,Uttar Pradesh,Hapur,cost_or_quality,0.75,34.2,0.965,0,95,4,10,83.3,ok,34.7,41.7,16.5,False,7.0,,exact,,14.9,1297.0,ok
+98,Bihar|Kaimur (Bhabua),Bihar,Kaimur (Bhabua),cost_or_quality,0.375,68.7,0.28,0,161,1,30,83.3,ok,63.2,75.9,7.4,False,1.6,,exact,label changes under most threshold choices,18.1,1671.0,ok
+99,Bihar|Samastipur,Bihar,Samastipur,cost_or_quality,0.75,7.8,1.0,1,376,2,358,83.4,ok,71.9,86.2,6.2,False,1.0,,exact,"access from only 19 post office locations (a shared placeholder point counts once); 95% of post offices sit on 1 placeholder point shared with other PINs (usually the district town), counted once each",19.0,2268.0,ok
+100,Uttar Pradesh|Bulandshahr,Uttar Pradesh,Bulandshahr,cost_or_quality,0.75,41.9,0.898,0,311,1,9,83.5,ok,49.1,58.8,17.0,False,6.5,,exact,,20.5,1709.0,ok
+101,Uttar Pradesh|Bijnor,Uttar Pradesh,Bijnor,cost_or_quality,0.5,36.4,0.961,0,167,114,14,83.7,ok,30.6,36.6,22.4,False,3.7,,exact,coordinate check dropped 41% of post offices,18.8,2240.0,ok
+102,Jharkhand|Gumla,Jharkhand,Gumla,cost_or_quality,0.25,85.5,0.164,0,221,0,22,83.8,ok,80.3,95.8,7.7,False,6.8,,exact,label changes under most threshold choices,51.7,1124.0,ok
+103,Jharkhand|Lohardaga,Jharkhand,Lohardaga,cost_or_quality,0.375,62.8,0.432,0,74,0,1,84.1,ok,72.6,86.3,10.9,False,6.4,,exact,label changes under most threshold choices,58.9,1707.0,ok
+104,Uttar Pradesh|Kanpur Dehat,Uttar Pradesh,Kanpur Dehat,cost_or_quality,0.5,44.4,0.904,0,198,0,0,84.3,ok,69.2,82.1,8.3,False,2.1,,exact,,17.9,1993.0,ok
+105,Assam|Darrang,Assam,Darrang,cost_or_quality,0.5,38.8,0.894,0,73,1,9,84.4,ok,81.1,96.1,10.8,False,10.0,,exact,,53.7,7001.0,ok
+106,Assam|Bongaigaon,Assam,Bongaigaon,cost_or_quality,0.25,88.9,0.121,0,33,3,0,84.5,ok,74.9,88.6,15.2,False,10.2,,exact,label changes under most threshold choices,57.6,4778.0,ok
+107,Arunachal Pradesh|West Siang,Arunachal Pradesh,West Siang,cost_or_quality,0.25,79.5,0.257,0,105,0,0,84.6,ok,79.8,94.3,17.8,False,18.8,,exact+parent_district,pools post offices of district(s) split off after the survey; label changes under most threshold choices,26.6,14222.0,ok
+108,Uttar Pradesh|Sitapur,Uttar Pradesh,Sitapur,cost_or_quality,0.25,70.3,0.19,0,406,17,0,84.8,ok,70.4,83.0,8.4,False,4.6,,exact,label changes under most threshold choices,23.2,1577.0,ok
+109,Uttarakhand|Pithoragarh,Uttarakhand,Pithoragarh,cost_or_quality,0.25,84.7,0.056,0,321,2,0,84.9,ok,80.0,94.2,17.0,False,18.4,,exact,label changes under most threshold choices,72.8,3726.0,ok
+110,Assam|Kamrup,Assam,Kamrup,cost_or_quality,0.5,26.2,0.861,0,200,1,21,85.0,ok,69.8,82.1,32.8,False,31.1,,exact,,47.0,8654.0,ok
+111,Madhya Pradesh|Damoh,Madhya Pradesh,Damoh,cost_or_quality,0.25,88.2,0.068,0,206,0,0,85.0,ok,80.3,94.5,8.8,False,7.3,,exact,label changes under most threshold choices,21.6,1818.0,ok
+112,Uttarakhand|Udham Singh Nagar,Uttarakhand,Udham Singh Nagar,cost_or_quality,0.5,37.8,0.982,0,110,1,2,85.1,ok,51.0,59.9,20.4,False,6.9,,fuzzy,name matched by fuzzy match,59.0,1906.0,ok
+113,Uttar Pradesh|Jalaun,Uttar Pradesh,Jalaun,cost_or_quality,0.25,88.6,0.021,0,239,2,0,85.1,ok,70.0,82.3,12.1,False,4.1,,exact,label changes under most threshold choices,17.6,2194.0,ok
+114,Uttar Pradesh|Etawah,Uttar Pradesh,Etawah,cost_or_quality,0.5,53.8,0.657,0,175,0,0,85.2,ok,70.1,82.3,11.2,False,6.3,,exact,,17.9,1692.0,ok
+115,Gujarat|Chhota Udaipur,Gujarat,Chhota Udaipur,cost_or_quality,0.5,59.1,0.519,0,56,154,5,85.7,ok,68.8,80.3,7.5,False,5.5,,fuzzy,name matched by fuzzy match; coordinate check dropped 73% of post offices,40.0,924.0,ok
+116,Bihar|Gopalganj,Bihar,Gopalganj,cost_or_quality,0.5,56.7,0.706,0,208,0,9,85.9,ok,60.3,70.2,9.1,False,3.4,,exact,,12.7,2559.0,ok
+117,Uttarakhand|Uttarkashi,Uttarakhand,Uttarkashi,cost_or_quality,0.5,57.6,0.561,0,132,0,0,85.9,ok,77.0,89.6,6.2,False,4.8,,fuzzy,name matched by fuzzy match,80.3,3168.0,ok
+118,Bihar|Begusarai,Bihar,Begusarai,cost_or_quality,0.5,12.9,1.0,1,234,0,207,86.0,ok,63.6,74.0,6.3,False,0.9,,exact,"88% of post offices sit on 4 placeholder points shared with other PINs (usually the district town), counted once each",13.2,1710.0,ok
+119,Jammu & Kashmir|Punch,Jammu & Kashmir,Punch,cost_or_quality,0.25,78.4,0.4,0,5,0,0,86.0,ok,84.2,97.9,30.9,False,34.6,,manual,name matched by hand; access from only 5 post offices; label changes under most threshold choices,11.1,3641.0,ok
+120,Uttar Pradesh|Chandauli,Uttar Pradesh,Chandauli,cost_or_quality,0.5,27.0,1.0,0,179,24,77,86.2,ok,53.4,61.9,18.5,False,5.2,,exact,,28.1,2530.0,ok
+121,Assam|Udalguri,Assam,Udalguri,cost_or_quality,0.375,60.6,0.483,0,101,0,14,86.2,ok,78.5,91.1,14.4,False,10.8,,exact,label changes under most threshold choices,70.6,6731.0,ok
+122,Uttar Pradesh|Ghaziabad,Uttar Pradesh,Ghaziabad,cost_or_quality,0.5,7.8,1.0,8,117,1,2,86.4,ok,40.7,47.1,31.8,False,19.2,,exact,,20.0,2251.0,ok
+123,Bihar|Siwan,Bihar,Siwan,cost_or_quality,0.5,56.4,0.518,0,313,0,88,86.4,ok,65.3,75.6,11.3,False,5.2,,exact,,8.2,4135.0,ok
+124,Himachal Pradesh|Lahul & Spiti,Himachal Pradesh,Lahul & Spiti,cost_or_quality,0.25,77.8,0.022,0,45,0,0,86.4,ok,75.9,87.8,17.7,False,16.4,,exact,label changes under most threshold choices,31.2,3533.0,ok
+125,Maharastra|Jalgaon,Maharastra,Jalgaon,cost_or_quality,0.5,58.3,0.521,0,353,0,0,86.5,ok,40.2,46.5,27.5,False,22.2,,exact,,11.9,3366.0,ok
+126,Uttar Pradesh|Kanpur Nagar,Uttar Pradesh,Kanpur Nagar,cost_or_quality,0.5,17.0,0.986,2,280,1,0,86.6,ok,60.3,69.6,19.3,False,11.9,,exact,,16.1,2645.0,ok
+127,Uttar Pradesh|Gautam Buddha Nagar,Uttar Pradesh,Gautam Buddha Nagar,cost_or_quality,0.5,21.9,1.0,4,109,12,1,86.6,ok,32.4,37.4,19.8,False,9.0,,exact,,23.8,3626.0,ok
+128,Himachal Pradesh|Mandi,Himachal Pradesh,Mandi,cost_or_quality,0.5,33.3,0.996,0,374,0,104,86.6,ok,77.4,89.4,16.0,False,14.8,,exact,,41.3,2859.0,ok
+129,Madhya Pradesh|Sagar,Madhya Pradesh,Sagar,cost_or_quality,0.5,39.6,0.84,1,307,0,0,86.9,ok,73.6,84.7,11.6,False,8.6,,exact,,27.5,2054.0,ok
+130,Bihar|Bhojpur,Bihar,Bhojpur,cost_or_quality,0.5,42.1,0.818,0,305,0,14,86.9,ok,61.8,71.1,12.6,False,5.2,,exact,,9.6,2214.0,ok
+131,Uttar Pradesh|Muzaffarnagar,Uttar Pradesh,Muzaffarnagar,cost_or_quality,0.5,17.3,1.0,3,227,0,27,87.0,ok,45.0,51.7,22.4,False,18.7,,exact,,8.2,1747.0,ok
+132,Himachal Pradesh|Kullu,Himachal Pradesh,Kullu,cost_or_quality,0.5,31.2,0.729,1,155,0,0,87.0,ok,66.8,76.8,13.6,False,9.8,,exact,,26.8,2919.0,ok
+133,West Bengal|Murshidabad,West Bengal,Murshidabad,cost_or_quality,0.5,39.2,0.809,1,591,3,23,87.0,ok,71.5,82.2,29.5,False,21.3,,exact,,28.4,2662.0,ok
+134,Uttar Pradesh|Sultanpur,Uttar Pradesh,Sultanpur,cost_or_quality,0.5,58.5,0.586,0,313,17,49,87.0,ok,68.0,78.2,13.0,False,6.5,,exact,,20.7,2642.0,ok
+135,Jammu & Kashmir|Udhampur,Jammu & Kashmir,Udhampur,cost_or_quality,0.25,71.1,0.304,0,29,1,7,87.2,ok,86.0,98.6,37.0,False,41.6,,exact,label changes under most threshold choices,16.8,3412.0,ok

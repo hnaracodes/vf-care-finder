@@ -1,0 +1,99 @@
+rank,district_key,state,district,quadrant_rule,label_stability,emoc_g2_dist_km_p50,emoc_g2_share_within_60km,emoc_g2_facilities_in_district,n_post_offices,n_post_offices_excluded,n_post_offices_placeholder,institutional_birth_pct,outcome_flag,public_facility_birth_pct,public_share_of_institutional_pct,csection_pct,csection_below_5pct,public_facility_csection_pct,residual,crosswalk_method,reliability_notes
+1,Nagaland|Mon,Nagaland,Mon,care_desert,0.75,90.3,0.0,0,32,0,0,21.4,ok,20.2,94.4,1.4,True,2.3,,exact,
+2,Nagaland|Phek,Nagaland,Phek,care_desert,1.0,209.1,0.0,0,39,0,0,32.2,ok,29.2,90.7,1.7,True,3.7,,exact,
+3,Nagaland|Kiphire,Nagaland,Kiphire,care_desert,1.0,177.2,0.0,0,21,0,0,34.8,ok,33.8,97.1,2.1,True,5.1,,exact,
+4,Nagaland|Tuensang,Nagaland,Tuensang,care_desert,1.0,141.4,0.0,0,49,1,0,34.8,ok,34.1,98.0,1.5,True,4.3,,exact+parent_district,pools post offices of district(s) split off after the survey
+5,Nagaland|Zunheboto,Nagaland,Zunheboto,care_desert,1.0,165.9,0.0,0,42,0,0,35.0,ok,32.2,92.0,7.6,False,19.4,,exact,
+6,Nagaland|Longleng,Nagaland,Longleng,care_desert,1.0,109.6,0.0,0,11,0,0,38.7,ok,37.8,97.7,3.6,True,9.4,,exact,access from only 11 post offices
+7,Meghalaya|West Khasi Hills,Meghalaya,West Khasi Hills,care_desert,0.75,96.0,0.022,0,46,0,0,41.7,ok,36.1,86.6,4.7,True,8.3,,exact,
+8,Nagaland|Peren,Nagaland,Peren,care_desert,1.0,203.1,0.0,0,25,0,0,43.5,ok,38.7,89.0,2.4,True,4.3,,exact,
+9,Nagaland|Wokha,Nagaland,Wokha,care_desert,1.0,166.3,0.0,0,29,0,0,43.6,ok,24.2,55.5,10.1,False,11.0,,exact,
+10,Manipur|Ukhrul,Manipur,Ukhrul,care_desert,1.0,268.7,0.0,0,58,0,0,44.6,ok,21.0,47.1,6.4,False,2.9,,exact+parent_district,pools post offices of district(s) split off after the survey
+11,Manipur|Senapati,Manipur,Senapati,care_desert,1.0,250.9,0.0,0,145,0,9,45.8,ok,36.1,78.8,8.8,False,11.0,,exact+parent_district,pools post offices of district(s) split off after the survey
+12,Meghalaya|East Jantia Hills,Meghalaya,East Jantia Hills,care_desert,1.0,123.3,0.0,0,32,0,0,48.4,ok,36.3,75.0,8.0,False,8.6,,fuzzy,name matched by fuzzy match
+13,Nagaland|Mokokchung,Nagaland,Mokokchung,care_desert,1.0,123.6,0.0,0,53,0,0,51.5,ok,47.3,91.8,3.8,True,8.0,,exact,
+14,Mizoram|Lawngtlai,Mizoram,Lawngtlai,care_desert,1.0,223.8,0.0,0,26,0,0,53.7,ok,48.4,90.1,3.9,True,5.4,,exact,
+15,Manipur|Chandel,Manipur,Chandel,care_desert,1.0,281.0,0.0,0,100,0,0,55.5,ok,37.4,67.4,14.9,False,19.0,,exact+parent_district,pools post offices of district(s) split off after the survey
+16,Manipur|Tamenglong,Manipur,Tamenglong,care_desert,1.0,221.9,0.0,0,64,0,1,57.7,ok,53.0,91.9,10.3,False,15.4,,exact+parent_district,pools post offices of district(s) split off after the survey
+17,Meghalaya|North Garo Hills,Meghalaya,North Garo Hills,care_desert,0.75,98.3,0.0,0,23,0,1,61.5,ok,60.4,98.2,3.3,True,5.4,,exact,
+18,Chhattisgarh|Bastar,Chhattisgarh,Bastar,care_desert,1.0,206.7,0.0,0,57,0,2,63.5,ok,56.1,88.3,6.6,False,5.5,,exact,
+19,Chhattisgarh|Bijapur,Chhattisgarh,Bijapur,care_desert,1.0,210.2,0.0,0,99,3,0,63.6,ok,62.3,98.0,3.6,True,4.9,,exact,
+20,Arunachal Pradesh|Namsai,Arunachal Pradesh,Namsai,care_desert,0.75,99.1,0.139,0,36,1,0,63.6,ok,60.3,94.8,10.5,False,13.5,,exact,
+21,Assam|Dhubri,Assam,Dhubri,care_desert,1.0,141.3,0.034,0,118,6,1,64.2,ok,61.8,96.3,6.9,False,8.0,,exact,
+22,Jharkhand|Sahibganj,Jharkhand,Sahibganj,care_desert,0.75,102.2,0.067,0,101,2,12,64.7,ok,59.5,92.0,4.9,True,4.1,,fuzzy,name matched by fuzzy match
+23,Nagaland|Kohima,Nagaland,Kohima,care_desert,1.0,210.7,0.0,0,49,1,0,66.9,ok,44.7,66.8,4.3,True,5.2,,exact,
+24,Bihar|Katihar,Bihar,Katihar,care_desert,0.75,95.2,0.008,0,171,12,52,66.9,ok,59.9,89.5,4.0,True,2.3,,exact,
+25,Uttar Pradesh|Bahraich,Uttar Pradesh,Bahraich,care_desert,0.75,97.2,0.045,0,289,4,0,67.7,ok,58.6,86.6,5.2,False,5.1,,exact,
+26,Odisha|Rayagada,Odisha,Rayagada,care_desert,1.0,180.1,0.0,0,177,0,0,68.9,ok,63.5,92.2,8.5,False,10.7,,exact,
+27,Arunachal Pradesh|Kurung Kumey,Arunachal Pradesh,Kurung Kumey,care_desert,1.0,158.1,0.0,0,146,0,0,69.2,ok,64.2,92.8,17.1,False,25.9,,exact,small survey (542 households)
+28,Madhya Pradesh|Singrauli,Madhya Pradesh,Singrauli,care_desert,1.0,144.9,0.0,0,56,0,0,69.9,ok,62.5,89.4,4.3,True,2.2,,exact,
+29,Jharkhand|Latehar,Jharkhand,Latehar,care_desert,0.75,94.0,0.055,0,182,1,0,70.3,ok,61.4,87.3,10.2,False,9.6,,exact,
+30,Jharkhand|Chatra,Jharkhand,Chatra,care_desert,0.75,101.9,0.133,0,188,3,0,71.5,ok,51.8,72.4,14.1,False,5.2,,exact,
+31,Assam|South Salmara Mancachar,Assam,South Salmara Mancachar,care_desert,1.0,167.7,0.0,0,11,2,0,71.7,ok,69.9,97.5,5.0,False,5.5,,exact,access from only 11 post offices
+32,Assam|West Karbi Anglong,Assam,West Karbi Anglong,care_desert,1.0,113.0,0.0,0,32,1,5,72.5,ok,68.9,95.0,6.4,False,6.0,,exact,
+33,Manipur|Churachandpur,Manipur,Churachandpur,care_desert,1.0,242.0,0.0,0,105,0,0,72.9,ok,50.4,69.1,9.6,False,8.5,,exact+parent_district,pools post offices of district(s) split off after the survey
+34,Arunachal Pradesh|Kra Daadi,Arunachal Pradesh,Kra Daadi,care_desert,1.0,129.8,0.0,0,3,0,0,73.5,ok,69.4,94.4,18.9,False,25.3,,exact,access from only 3 post offices; small survey (516 households)
+35,Nagaland|Dimapur,Nagaland,Dimapur,care_desert,1.0,199.9,0.0,0,46,0,0,73.7,ok,43.2,58.6,14.6,False,14.1,,exact,
+36,Meghalaya|East Garo Hills,Meghalaya,East Garo Hills,care_desert,1.0,122.7,0.0,0,56,0,0,73.8,ok,73.5,99.6,4.0,True,5.0,,exact,
+37,Uttarakhand|Chamoli,Uttarakhand,Chamoli,care_desert,1.0,112.9,0.012,0,242,8,0,73.9,ok,67.3,91.1,8.8,False,7.1,,exact,
+38,Chhattisgarh|Narayanpur,Chhattisgarh,Narayanpur,care_desert,1.0,191.2,0.0,0,49,0,0,74.2,ok,67.2,90.6,5.8,False,5.3,,exact,
+39,Assam|Karbi Anglong,Assam,Karbi Anglong,care_desert,1.0,168.0,0.013,0,97,0,20,74.9,ok,69.2,92.4,15.2,False,16.4,,exact,
+40,Jharkhand|Palamu,Jharkhand,Palamu,care_desert,1.0,123.7,0.278,0,291,22,11,74.9,ok,54.8,73.2,15.8,False,8.3,,exact,
+41,Mizoram|Mamit,Mizoram,Mamit,care_desert,1.0,129.2,0.0,0,25,0,0,75.0,ok,71.8,95.7,3.5,True,3.5,,exact,
+42,Arunachal Pradesh|Changlang,Arunachal Pradesh,Changlang,care_desert,0.75,105.0,0.061,0,66,0,0,75.1,ok,69.3,92.3,12.4,False,14.9,,exact,
+43,Chhattisgarh|Korba,Chhattisgarh,Korba,care_desert,0.75,106.4,0.0,0,129,0,0,75.4,ok,57.4,76.1,18.1,False,11.6,,exact,
+44,Jharkhand|Simdega,Jharkhand,Simdega,care_desert,1.0,111.7,0.108,0,107,1,25,75.7,ok,71.2,94.1,4.5,True,2.5,,exact,
+45,Arunachal Pradesh|East Kameng,Arunachal Pradesh,East Kameng,care_desert,1.0,150.5,0.0,0,114,0,0,76.0,ok,74.2,97.6,9.0,False,11.0,,exact+parent_district,pools post offices of district(s) split off after the survey
+46,Arunachal Pradesh|Upper Siang,Arunachal Pradesh,Upper Siang,care_desert,1.0,117.8,0.0,0,44,0,0,76.0,ok,74.9,98.6,14.2,False,18.3,,exact,
+47,Odisha|Gajapati,Odisha,Gajapati,care_desert,1.0,169.2,0.0,0,147,0,0,76.4,ok,71.2,93.2,13.9,False,16.5,,exact,
+48,Assam|Karimganj,Assam,Karimganj,care_desert,1.0,146.2,0.0,0,154,4,39,76.4,ok,69.8,91.4,7.0,False,5.2,,exact,
+49,Bihar|Gaya,Bihar,Gaya,care_desert,0.75,106.1,0.017,0,387,16,152,76.6,ok,49.1,64.1,14.4,False,2.3,,exact,
+50,Uttar Pradesh|Sonbhadra,Uttar Pradesh,Sonbhadra,care_desert,0.75,94.1,0.057,0,282,1,0,76.8,ok,56.8,74.0,11.8,False,3.7,,exact,
+51,West Bengal|Uttar Dinajpur,West Bengal,Uttar Dinajpur,care_desert,1.0,107.4,0.132,0,205,1,33,76.9,ok,58.9,76.6,22.0,False,13.7,,fuzzy,name matched by fuzzy match
+52,Arunachal Pradesh|Upper Subansiri,Arunachal Pradesh,Upper Subansiri,care_desert,1.0,116.3,0.013,0,152,0,0,77.0,ok,76.2,99.0,17.9,False,23.0,,exact,
+53,Bihar|Aurangabad,Bihar,Aurangabad,care_desert,1.0,120.2,0.027,0,74,230,0,77.5,ok,61.9,79.9,10.2,False,3.1,,exact,coordinate check dropped 76% of post offices
+54,Madhya Pradesh|Dindori,Madhya Pradesh,Dindori,care_desert,1.0,115.5,0.14,0,114,55,0,77.6,ok,76.6,98.7,2.1,True,2.1,,exact,coordinate check dropped 33% of post offices
+55,Arunachal Pradesh|Anjaw,Arunachal Pradesh,Anjaw,care_desert,1.0,158.5,0.019,0,53,0,0,78.0,ok,76.9,98.6,12.6,False,16.0,,exact,
+56,Chhattisgarh|Kodagaon,Chhattisgarh,Kodagaon,care_desert,1.0,173.9,0.0,0,201,0,2,78.7,ok,74.3,94.4,3.6,True,2.8,,fuzzy,name matched by fuzzy match
+57,Chhattisgarh|Balrampur,Chhattisgarh,Balrampur,care_desert,1.0,169.0,0.0,0,137,2,0,78.9,ok,72.7,92.1,8.8,False,8.2,,exact,
+58,Assam|Cachar,Assam,Cachar,care_desert,1.0,177.8,0.0,0,282,1,58,79.2,ok,74.9,94.6,12.5,False,13.2,,exact,
+59,Odisha|Kendujhar,Odisha,Kendujhar,care_desert,0.75,111.5,0.0,0,442,1,0,80.4,ok,70.0,87.1,15.3,False,11.3,,exact,
+60,Madhya Pradesh|Rewa,Madhya Pradesh,Rewa,care_desert,0.75,107.2,0.095,0,332,3,292,80.4,ok,76.4,95.0,9.7,False,9.5,,exact,"88% of post offices sit on 2 placeholder points shared with other PINs (usually the district town), counted once each"
+61,Uttar Pradesh|Shrawasti,Uttar Pradesh,Shrawasti,care_desert,0.562,98.6,0.029,0,102,0,0,80.4,ok,75.3,93.7,3.2,True,2.4,,fuzzy,name matched by fuzzy match
+62,Chhattisgarh|Koriya,Chhattisgarh,Koriya,care_desert,0.75,164.8,0.0,0,89,1,0,80.8,ok,70.7,87.5,10.9,False,8.2,,manual,name matched by hand
+63,Arunachal Pradesh|Siang,Arunachal Pradesh,Siang,care_desert,0.562,92.9,0.0,0,8,0,0,81.1,ok,79.0,97.4,5.8,False,6.3,,exact,access from only 8 post offices
+64,Chhattisgarh|Sukma,Chhattisgarh,Sukma,care_desert,0.75,200.6,0.0,0,18,0,1,81.2,ok,80.8,99.5,3.2,True,3.8,,exact,access from only 18 post offices
+65,Assam|Kokrajhar,Assam,Kokrajhar,care_desert,0.75,125.2,0.031,0,103,7,8,81.9,ok,76.8,93.8,12.0,False,12.2,,exact,
+66,Odisha|Koraput,Odisha,Koraput,care_desert,0.75,143.9,0.004,0,272,0,15,82.1,ok,79.2,96.5,5.0,False,5.3,,exact,
+67,Assam|Hojai,Assam,Hojai,care_desert,0.75,110.1,0.0,0,76,0,54,82.1,ok,59.4,72.4,18.4,False,11.2,,exact,"71% of post offices sit on 2 placeholder points shared with other PINs (usually the district town), counted once each"
+68,Mizoram|Lunglei,Mizoram,Lunglei,care_desert,0.75,182.4,0.0,0,34,0,0,82.7,ok,69.4,83.9,5.4,False,6.0,,exact+parent_district,pools post offices of district(s) split off after the survey
+69,Himachal Pradesh|Kinnaur,Himachal Pradesh,Kinnaur,care_desert,0.75,120.0,0.0,0,72,0,0,82.7,ok,76.4,92.4,18.6,False,19.6,,exact,
+70,Uttar Pradesh|Kheri,Uttar Pradesh,Kheri,care_desert,0.75,113.2,0.008,0,374,3,22,82.8,ok,68.0,82.1,14.2,False,6.7,,exact,
+71,Assam|Hailakandi,Assam,Hailakandi,care_desert,0.75,157.6,0.0,0,90,7,0,83.0,ok,75.1,90.5,12.8,False,9.7,,exact,
+72,Madhya Pradesh|Alirajpur,Madhya Pradesh,Alirajpur,care_desert,0.75,116.6,0.0,0,67,1,0,83.2,ok,80.0,96.2,4.2,True,3.3,,exact,
+73,Assam|Sonitpur,Assam,Sonitpur,care_desert,0.75,113.1,0.0,0,125,1,15,83.5,ok,73.1,87.5,21.1,False,18.5,,exact,
+74,Meghalaya|South West Garo Hills,Meghalaya,South West Garo Hills,care_desert,0.5,184.3,0.0,0,19,0,2,83.7,ok,83.7,100.0,2.4,True,2.9,,exact,access from only 18 post office locations (a shared placeholder point counts once)
+75,Assam|Nagaon,Assam,Nagaon,care_desert,0.375,91.3,0.075,0,208,5,50,83.7,ok,73.4,87.7,17.9,False,13.0,,exact,label changes under most threshold choices
+76,Assam|Chirang,Assam,Chirang,care_desert,0.375,90.6,0.077,0,52,11,1,83.7,ok,71.1,84.9,15.3,False,9.3,,exact,label changes under most threshold choices
+77,Madhya Pradesh|Sidhi,Madhya Pradesh,Sidhi,care_desert,0.5,122.0,0.0,0,93,1,0,83.8,ok,80.4,95.9,7.0,False,6.0,,exact,
+78,Madhya Pradesh|Panna,Madhya Pradesh,Panna,care_desert,0.5,160.0,0.027,0,147,5,2,84.0,ok,76.6,91.2,9.9,False,8.7,,exact,
+79,Jharkhand|Garhwa,Jharkhand,Garhwa,care_desert,0.5,142.3,0.012,0,176,10,5,84.0,ok,67.6,80.5,10.2,False,3.3,,exact,
+80,Madhya Pradesh|Sheopur,Madhya Pradesh,Sheopur,care_desert,0.5,120.5,0.0,0,85,0,5,84.2,ok,76.6,91.0,10.5,False,9.2,,exact,
+81,Arunachal Pradesh|Tawang,Arunachal Pradesh,Tawang,care_desert,0.5,115.8,0.0,0,26,0,0,84.2,ok,83.8,99.5,17.3,False,20.2,,exact,
+82,Assam|Biswanath,Assam,Biswanath,care_desert,0.5,143.3,0.0,0,97,0,11,84.3,ok,74.0,87.8,15.3,False,11.0,,exact,
+83,Madhya Pradesh|Anuppur,Madhya Pradesh,Anuppur,care_desert,0.5,123.9,0.0,0,126,4,0,84.8,ok,80.9,95.4,13.7,False,14.1,,exact,
+84,Madhya Pradesh|Barwani,Madhya Pradesh,Barwani,care_desert,0.375,96.0,0.027,0,148,3,0,85.1,ok,82.3,96.7,10.4,False,10.2,,exact,label changes under most threshold choices
+85,Madhya Pradesh|Chhatarpur,Madhya Pradesh,Chhatarpur,care_desert,0.5,115.9,0.016,0,253,8,9,85.2,ok,73.1,85.8,11.0,False,5.0,,exact,
+86,Chhattisgarh|Surguja,Chhattisgarh,Surguja,care_desert,0.5,188.6,0.0,0,72,0,0,85.3,ok,73.3,85.9,10.2,False,5.9,,exact,
+87,Tripura|North Tripura,Tripura,North Tripura,care_desert,0.375,106.3,0.111,0,12,0,4,85.4,ok,65.2,76.3,18.2,False,14.7,,exact,access from only 9 post office locations (a shared placeholder point counts once); label changes under most threshold choices
+88,Madhya Pradesh|Satna,Madhya Pradesh,Satna,care_desert,0.5,143.3,0.0,0,299,2,262,85.5,ok,75.1,87.8,8.8,False,5.7,,exact,"88% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each"
+89,Arunachal Pradesh|Dibang Valley,Arunachal Pradesh,Dibang Valley,care_desert,0.5,113.0,0.054,0,74,1,0,85.5,ok,78.8,92.2,10.3,False,6.9,,exact,
+90,Chhattisgarh|Jashpur,Chhattisgarh,Jashpur,care_desert,0.5,166.9,0.0,0,186,4,0,85.6,ok,66.2,77.3,13.4,False,7.4,,exact,
+91,Madhya Pradesh|Shahdol,Madhya Pradesh,Shahdol,care_desert,0.5,156.4,0.0,0,157,5,0,85.6,ok,83.0,97.0,9.3,False,9.3,,exact,
+92,Maharastra|Parbhani,Maharastra,Parbhani,care_desert,0.375,106.0,0.005,0,194,1,0,85.6,ok,53.6,62.6,12.5,False,12.9,,exact,label changes under most threshold choices
+93,Gujarat|Surendranagar,Gujarat,Surendranagar,care_desert,0.375,93.1,0.036,0,292,0,13,85.6,ok,45.4,53.0,12.2,False,5.3,,exact,label changes under most threshold choices
+94,Odisha|Anugul,Odisha,Anugul,care_desert,0.5,113.5,0.0,0,262,0,12,85.7,ok,67.6,78.9,18.4,False,10.3,,exact,
+95,Chhattisgarh|Surajpur,Chhattisgarh,Surajpur,care_desert,0.5,184.0,0.0,0,73,0,0,85.9,ok,72.6,84.5,9.8,False,3.5,,exact,
+96,Chhattisgarh|Janjgir - Champa,Chhattisgarh,Janjgir - Champa,care_desert,0.375,105.3,0.004,0,249,0,0,86.2,ok,64.7,75.1,22.8,False,13.1,,exact,label changes under most threshold choices
+97,Uttarakhand|Rudraprayag,Uttarakhand,Rudraprayag,care_desert,0.375,97.3,0.0,0,128,2,0,86.6,ok,81.0,93.5,16.7,False,16.7,,fuzzy,name matched by fuzzy match; label changes under most threshold choices
+98,Gujarat|Gir Somnath,Gujarat,Gir Somnath,care_desert,0.5,181.0,0.0,0,165,0,0,87.1,ok,34.0,39.0,17.2,False,9.2,,exact,

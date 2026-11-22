@@ -1,0 +1,430 @@
+text_norm,tags,labeled_by,note
+rajindra hospital is attached to government medical college patiala,,agent,affiliation statement only
+"cghs recognized poly-trauma, neuro-surgery, critical care and orthopedics center at nagpur",emergency|scheme,agent,polytrauma centre; critical care in a specialty list is not an ICU
+"non-cghs empanelled hospital on ring road, surat named mahavir general and trauma hospital with no cashless facility for indoor admissions",emergency,agent,negated scheme (non-CGHS empanelled); trauma only from the hospital name
+has 24-hour cardiac backup with a fully equipped intensive cardiac care unit (iccu),h24|icu,agent,ICCU is an intensive care unit
+well-equipped nicu,nicu,agent,
+dialysis access procedures,other_clinical,agent,dialysis access procedures only; dialysis itself not stated
+blood bank on site,blood,agent,
+satellite blood storage centre on-site,blood,agent,
+employs a 24x7 monitoring system for embryo/fertilization processes.,other_clinical,agent,"24x7 is equipment monitoring of embryos, not service hours"
+intermittent hemodialysis (ihd) is performed,dialysis,agent,"haemodialysis performed; no unit, machine or nephrologist named"
+ayushman hospital offers ivf and surrogacy services,other_clinical,agent,"Ayushman is the hospital name, not the scheme"
+24+ awards won,reputation,agent,
+has 16 operation theatres,ot,agent,
+dialysis center offering hemodialysis and peritoneal dialysis,dialysis|dialysis_unit,agent,
+hemodialysis is performed in the hemodialysis unit,dialysis|dialysis_unit,agent,
+ventilator/anaesthesia machine with patient monitor visible in the room image,photo_artifact,agent,photo caption; device ambiguous (ventilator or anaesthesia machine)
+cesarean delivery performed at spandan hospital,ob_delivery|csection,agent,
+deliveries including lscs (cesarean section),ob_delivery|csection,agent,
+non-invasive mechanical ventilation,ventilator,agent,non-invasive ventilation named as mechanical ventilation
+neonatal care services provided in nicu.,nicu,agent,
+operates a well-equipped operation theatre,ot,agent,
+100% painless dental treatments,other_clinical,agent,painless dental treatment; no anesthesia service stated
+ear surgeries under ayushman bharat pm-jay scheme (free if eligible),scheme,agent,
+eye trauma management,emergency,agent,eye trauma care
+blood testing with home sample collection and pathologist oversight.,other_clinical,agent,"blood tests, not blood bank"
+"ultrasound imaging capability including nt scan, level ii ultrasound, 3-d ultrasound, growth scans, tvs and 3-d ultrasound for gynecologic diseases",other_clinical,agent,pregnancy scans are not deliveries
+has ventilators,ventilator,agent,
+micro dermabrasion,other_clinical,agent,
+maternity care including normal delivery and cesarean section; high-risk pregnancy management,ob_delivery|csection,agent,
+general medicine and critical care services including icu and emergency care,icu|emergency,agent,
+"regional hospital kullu hosted a blood donation camp organized by district red cross society, kullu",,agent,"blood donation camp, not a blood bank"
+performs pediatric dialysis,dialysis,agent,
+"siddharth hospital offers diagnostic services in pune including blood tests, ultrasound (usg), x-ray, ecg, pft, echo, ct calcium score, pap smear, and sono mammography.",other_clinical,agent,"blood tests, not blood bank"
+provides dental procedures under general anesthesia,anesthesia,agent,general anesthesia service (dental)
+follow up of nicu graduates,other_clinical,agent,follow-up clinic; a NICU at this facility is not stated
+plastic surgery and burns services,other_clinical,agent,burns service without trauma or emergency words
+offers advanced facials,other_clinical,agent,
+24x7 emergency care is provided.,h24|emergency,agent,
+operating theatre presence at blue wheel hospital,ot,agent,
+the hospital provides treatment under ayushman bharat with coverage through the scheme and supports a broad range of specialties.,scheme,agent,
+"nicu and nursery facilities, including two nicu incubators.",nicu,agent,
+cataract surgery capability,other_clinical,agent,
+provides comprehensive diagnostic services and blood banking facilities,blood,agent,
+intensive care unit with ventilators and icu monitoring systems,icu|ventilator,agent,
+icu dialysis machines,dialysis|dialysis_unit|icu,agent,dialysis machines in the ICU
+caesarean section delivery,ob_delivery|csection,agent,
+thermo fisher diagnostic equipment in the laboratory,other_clinical,agent,
+overhead surgical light in the operating theatre,ot|photo_artifact,agent,"caption-like, but names the operating theatre"
+asg eye hospitals brand presence,reputation,agent,
+1000+ successful surgeries,reputation,agent,
+"core-specialities in cancer care including breast, lung, cervical, oral, kidney, colon & rectal, stomach/esophageal, lymphoma, melanoma, skin, endometrial, childhood cancer, adolescent & young adult",other_clinical,agent,
+surgical treatment of venous malformations,other_clinical,agent,
+"delivery procedures include normal delivery, forceps delivery, vacuum delivery, and cesarean section.",ob_delivery|csection,agent,
+"from january 2026, dm pediatric critical care will be started and new pdcc courses will commence in pediatric neurology, pediatric nephrology, and pediatric rheumatology",,agent,future academic course (DM pediatric critical care); not a service
+ayurvedic treatment for premature ejaculation,other_clinical,agent,
+arogya hospital is not described with any clinical procedures in the provided content.,web_presence,agent,about the source content; Arogya is a hospital name
+offers obstetric delivery services including normal delivery and caesarean section,ob_delivery|csection,agent,
+provides dialysis/hemodialysis treatment,dialysis,agent,
+"k. j. somaiya hospital, chunabhatti is listed as a jjdb dialysis centre in mumbai, maharashtra",dialysis|dialysis_unit,agent,named dialysis centre
+0+ critical cases,reputation,agent,"counter artifact (""0+ critical cases"")"
+dialysis center on-site,dialysis|dialysis_unit,agent,
+provides conscious sedation for dental procedures,other_clinical,agent,"dental conscious sedation, not an anesthesia service"
+offers dialysis and eecp therapy,dialysis,agent,
+park hospital has 148 doctors available,other_clinical,agent,staffing count
+dental procedures,other_clinical,agent,
+dedicated post-operative hepa-filtered intensive care units,icu,agent,
+performs cesarean birth,ob_delivery|csection,agent,
+"specialties offered: gynecology, obstetrics, infertility, general medicine, general surgery, minimal invasive surgery, pediatrics & neonatology, orthopedics, ear nose throat, urology, plastic surgery, neurology, cardiology",other_clinical,agent,"specialty list only (obstetrics, neonatology)"
+phc kanonda exists as a government health center,,agent,facility type statement
+"hearing aid brands available include signia, phonak, unitron, widex, and oticon",other_clinical,agent,
+"international patients services department offering airport pickup/drop, language services and ambulance support for international patients",,agent,"ambulance as concierge transport for international patients, not emergency care"
+specialties include orthopedic oncology; women’s urology; pediatric urology; integrative urology and wellness; dialysis; general medicine,dialysis,agent,dialysis listed among services
+adult and paediatric hepatobiliary cancer surgery program,other_clinical,agent,
+has emergency & trauma care department,emergency,agent,
+modern blood bank following strict regulatory protocols,blood,agent,
+ayushman yojna - rghs facility,scheme,agent,Ayushman Yojana and RGHS
+caesarean section (c-section) offered at zoi hospitals attapur,ob_delivery|csection,agent,
+entered into collaboration with the government of india through ayushman bharat jan arogya yojana on 27 june 2019,scheme,agent,
+phototherapy units used in nicu,nicu,agent,
+nephrology with 24/7 advance dialysis unit,h24|dialysis|dialysis_unit,agent,
+offers general medicine & critical care.,other_clinical,agent,"critical care as a department or specialty name; no unit, beds or service named"
+root canal treatment is performed painlessly under local anaesthesia,other_clinical,agent,local anaesthesia for a dental procedure
+new block is linked to existing blocks via an independent link corridor,,agent,
+"on-panel with multiple organizations including air india, cghs, dgehs, dda, derc and others",scheme,agent,CGHS and DGEHS panels
+provides laser vaginal tightening,other_clinical,agent,
+"maquet operating room equipment used in jupiter hospital baner, pune",ot,agent,operating room equipment
+"operates 24 hours on all days except sunday, when hours are 10:30 am to 12:00 pm",h24,agent,24 hours except Sundays
+"performs kidney function tests (bun, creatinine)",other_clinical,agent,
+"premium icu cabins with dedicated resources, first time in eastern india",icu,agent,
+8-bed intensive care unit,icu,agent,
+"need for monitors, ventilators, infusion pumps, and defibrillators to augment icu facilities",icu,agent,"ICU exists; ventilators are a stated need, not present"
+provides intensive care unit (icu) services,icu,agent,
+caesarean section (c-section) is performed at yashlok hospital,ob_delivery|csection,agent,
+"pediatric care services at sakra world hospital include management of dengue fever, malaria, status asthmaticus, seizures in children, septic shock in children, acute liver failure, acute cardiac failure, status epilepticus, head injuries, and severe infections",other_clinical,agent,"critical conditions listed, no unit named"
+non-invasive ventilation is provided,ventilator,agent,non-invasive ventilation
+"ayushman eye hospital is listed as a star health network hospital in dhamnod, madhya pradesh.",,agent,private insurer network; Ayushman is the hospital name
+cataract surgery performed under topical anesthesia with a 2.2 mm corneal incision,other_clinical,agent,topical anaesthesia for cataract surgery
+nicu with neonatal incubators,nicu,agent,
+25 modern operating theatres,ot,agent,
+"dedicated neonatal conventional ventilators including hamilton, dräger, avea, servo-i (maquet)",nicu|ventilator,agent,neonatal ventilators
+accepts ayushman bharat pm-jay for eligible patients,scheme,agent,
+implant procedures performed at marwaha dental clinic,other_clinical,agent,
+bedside ultrasonography in nicu,nicu,agent,
+aarogyam x 1+1 offer (139 tests),other_clinical,agent,lab test package (Aarogyam is a brand)
+manages normal delivery,ob_delivery,agent,
+pediatric intensive care unit with 5 icu beds,icu,agent,paediatric ICU
+departments include cardiology; cardio thoracic & vascular surgery; medical oncology; general & cancer surgery; neurosurgery; internal medicine & critical care; general & laparoscopic surgery; gastroenterology,other_clinical,agent,critical care in a department list
+maternity and eye care specialties,ob_delivery,agent,maternity listed as a specialty
+performs obstetric delivery including normal and cesarean section deliveries,ob_delivery|csection,agent,
+has 2+ emergency services,emergency,agent,counter artifact
+performs obstetric deliveries at sion hospital.,ob_delivery,agent,
+"offers multispecialty services including anesthesiology, cardiology, dermatology, ent, paediatrics, pathology, psychiatry, critical-care, gasterentrology, general-medicine, obstetrics-gynecology, laparoscopic-surgery, plastic-surgery, pulmonology/respiratory, radio-diagnosis, institute-of-laboratary-medicine, medical-oncology, nephrology, neurology, neurosurgery, surgical-oncology, urology, vascular-surgeon, physiotherapy, ophthalmology, oral/maxillofacial-surgery, orthopedics, paediatric-surgery, accident-emergency, endocrinology, dentistry",anesthesia|emergency,agent,anesthesiology offered; critical care and nephrology as specialty names only
+the hospital operates a 24-hour casualty/emergency department.,h24|emergency,agent,
+"has 150 beds including icu, nicu, ccu, emergency and trauma",nicu|icu|emergency,agent,
+emergency blood in urine treatment,emergency,agent,emergency treatment of haematuria; not a blood bank
+blood bank services,blood,agent,
+cesarean delivery is performed,ob_delivery|csection,agent,
+gynecology and obstetrics services provided at shri hari hospital,other_clinical,agent,OBG services with no delivery word
+provides non-invasive ventilation services,ventilator,agent,
+emphasizes painless treatment,other_clinical,agent,
+has a critical care department,other_clinical,agent,critical care department = specialty claim; no unit named
+"in 2012, a sting operation led to a case against the doctor under ipc sections 312, 316, 317, 511 and mtp act sections 3, 4, 5",,agent,legal case; word-internal 'section'
+cghs-empanelled dental clinic,scheme,agent,
+dialysis unit inaugurated on 31 october 2023,dialysis|dialysis_unit,agent,
+queen's care hospital provides neonatal care services,other_clinical,agent,"neonatal care, not intensive or special care"
+the cardiac program aims to deliver exceptional outcomes and provide world-class heart care accessible to all,other_clinical,agent,
+provides neuro-critical care with ventilator support following surgery,icu|ventilator,agent,neuro-critical care service with ventilator support
+"{""has 24 years of operation in healthcare"":null}",reputation,agent,years of operation
+offers home delivery of medicines via medplus app and other delivery services,,agent,"home delivery of medicines, not childbirth"
+fully equipped dialysis center,dialysis|dialysis_unit,agent,
+well-equipped intensive care units,icu,agent,
+empaneled with volomd india,,agent,"private corporate panel, not a public scheme"
+three ventilators total,ventilator,agent,
+pm-jay free medical treatment under ayushman bharat pm-jay,scheme,agent,
+icu with ventilators,icu|ventilator,agent,
+"sir jj group of hospitals, mumbai, served as an ethics review site for clinical research, including the mumbai maternal nutrition project trial (isrctn62811278).",,agent,research ethics site
+major trauma rehabilitation,other_clinical,agent,"rehabilitation after trauma, not trauma care"
+haemodialysis and peritoneal dialysis are offered,dialysis,agent,
+kevalya hospital hosts dr alpa modi's breast clinic,staff_name|other_clinical,agent,
+surgery icu,icu,agent,
+ventilators for ards ventilation including prone positioning,ventilator,agent,
+"casualty and intensive care units amcu, iccu, sicu, picu, and nicu are fully equipped",nicu|icu|emergency,agent,
+obstetrics and gynecology department includes infertility treatment and gynecological laparoscopy.,other_clinical,agent,"OBG department, no delivery word"
+"empanelled with hdfc ergo, aditiya birla, ericson tpa and ayushman tpa",scheme,agent,'Ayushman TPA' in an insurer list; read as Ayushman Bharat
+government district blood bank,blood,agent,
+"offers ophthalmology, otorhinolaryngology (ent), dermatology, psychiatry, dentistry, and anaesthesiology procedures",anesthesia,agent,
+high-flow nasal cannula (hfnc) system used for respiratory support in mucormycosis case,other_clinical,agent,HFNC is not mechanical ventilation
+laparoscopic instruments and high-intensity operating room lights,ot,agent,operating room lights
+"provides a wide range of specialties including anesthesiology, arthroscopy, cardiology, critical care, dermatology, diabetology, endocrinology, ent, gastroenterology, general and laparoscopic surgery, general medicine, maxillofacial surgery, nephrology and dialysis, neurology, neurosurgery, orthopedics, plastic surgery, pulmonology, clinical psychology, radiology, and urology",anesthesia|dialysis,agent,dialysis listed as a service; critical care in a specialty list
+24/7 dialysis,h24|dialysis,agent,
+c-section (cesarean),ob_delivery|csection,agent,
+comprehensive dialysis program,dialysis,agent,dialysis program; no unit or machine named
+nicu with level iii care and ventilatory support,nicu|ventilator,agent,ventilatory support in the NICU
+maquet surgical equipment in operating room,ot,agent,
+neurocritical care,other_clinical,agent,'neurocritical care' as a bare specialty label; no unit or service stated
+government of west bengal issued essentiality certificate for establishment (certificate no me/ wbuhs- 06-09/m/1307 dated 19 august 2009),,agent,regulatory certificate
+ventilator facility available,ventilator,agent,
+two france-made advanced air-liquid ventilators,ventilator,agent,
+operating theatre features overhead surgical lights,ot,agent,
+24x7 helpline (not listed? will not mention),h24,agent,24x7 helpline (garbled extraction)
+dedicated paediatric section,other_clinical,agent,word-internal 'section'
+"offers dental care to rghs, cghs beneficiaries and general patients",scheme,agent,
+modern clinical laboratory and blood bank,blood,agent,
+specializes in polytrauma management,emergency,agent,polytrauma management
+cesarean deliveries,ob_delivery|csection,agent,
+offers diagnostic testing through blood sample collection at the center,other_clinical,agent,blood sample collection for tests
+includes anesthesia and critical care services as part of its clinical offerings,anesthesia|icu,agent,critical care services stated as provided
+intensive obstetric care (obstetric icu),icu,agent,obstetric ICU; no delivery word
+approved by ministry of ayush (govt. of india),reputation,agent,AYUSH approval
+treats neonates/newborns,other_clinical,agent,treats newborns; no intensive or special care unit
+promotes kidney health check-ups for world kidney day,other_clinical,agent,
+urology and nephrology services,other_clinical,agent,nephrology services are not dialysis
+performs cesarean sections (c-sections) as part of maternity care,ob_delivery|csection,agent,
+facilitates normal deliveries,ob_delivery,agent,
+offers maternal care/ checkup,other_clinical,agent,"maternal check-ups (antenatal), not deliveries"
+"swanetra eye hospital is listed as a star health network hospital in jaipur, rajasthan.",,agent,private insurer network listing
+icu ventilator,icu|ventilator,agent,ICU ventilator
+normal delivery and cesarean section services,ob_delivery|csection,agent,
+performs squint eye treatment,other_clinical,agent,
+nicu and pediatrics department,nicu,agent,
+empanelled under ayushman bharat pm-jay,scheme,agent,
+centre of excellence in obstetrics & gynecology,other_clinical,agent,OBG centre of excellence; no delivery word
+normal delivery and cesarean delivery services available 24x7,ob_delivery|csection|h24,agent,
+on-site emergency entrance with 24x7 chemist,h24|emergency|photo_artifact,agent,"emergency entrance and 24x7 chemist, caption-like"
+"staff includes dr. hirachand mutagi, anesthesiologist.",anesthesia|staff_name,agent,
+icu (intensive care unit) present,icu,agent,
+"empaneled with isro, iima, prl, ongc, esic, iho, cghs, and echs",scheme,agent,"ESIC, CGHS, ECHS"
+has level iii nicu,nicu,agent,
+maternity and new born nicu,ob_delivery|nicu,agent,
+centre for anesthesiology.,anesthesia,agent,
+shri fever clinic is an infectious disease diagnostic and treatment centre,other_clinical,agent,
+ventilator,ventilator,agent,
+lscs,ob_delivery|csection,agent,
+ventilators available for adult and pediatric patients,ventilator,agent,
+outpatient department includes paediatric section,other_clinical,agent,word-internal 'section'
+gynecology and obstetrics surgeries including laparoscopic techniques are performed,other_clinical,agent,obstetric surgery with no delivery or caesarean named
+high-end ventilators with icu monitoring,icu|ventilator,agent,ICU monitoring named
+gastrointestinal oncology surgeries,other_clinical,agent,
+provides advanced neonatal care including cpap and mechanical ventilation,nicu|ventilator,agent,neonatal mechanical ventilation
+operates a blood bank at dr. imkongliba memorial district hospital in mokokchung,blood,agent,
+provides maternity and childbirth services,ob_delivery,agent,
+quality and safety program,,agent,
+nephrology & kidney transplant medicine department offers both simple dialysis and complex nephrological surgeries,dialysis,agent,"nephrology department offers dialysis; no unit, machine or nephrologist named"
+performs epidural injections for pain relief,other_clinical,agent,"epidural steroid injections for pain, not anesthesia service"
+dialysis center with 8 dialysis units,dialysis|dialysis_unit,agent,
+"critical care services offered in gotri and narayan garden, vadodara",icu,agent,critical care services stated as offered
+uncomplicated lscs (lower segment caesarean section),ob_delivery|csection,agent,
+provides maternity care and delivery services,ob_delivery,agent,
+neonatal ventilator facility,nicu|ventilator,agent,
+operates 24/7 with open 24 hours every day,h24,agent,
+care & maintenance of sound processors,other_clinical,agent,
+sai clinic & maternity provides ayurvedic general physician services,ob_delivery,agent,maternity only from the clinic name
+medical intensive care unit,icu,agent,
+"has a department of critical care medicine at orchid medical centre, ranchi, jharkhand, india.",other_clinical,agent,department of critical care medicine = specialty claim
+blood bank: 0,,agent,blood bank count is zero
+24/7 ct scanning and ultrasound imaging capability,h24,agent,
+mittal hospital has nicu,nicu,agent,
+has a 24/7 casualty block to handle trauma,h24|emergency,agent,
+"empanelled with ayushman bharat, esi, cghs, echs, golden card, star health, vipul med corp and all other private insurance and tpas",scheme,agent,
+"supports delivery options including normal delivery, cesarean section, and painless delivery",ob_delivery|csection,agent,painless delivery alone is not an anesthesia statement
+maternity care program featuring dr. monika bhargav,ob_delivery|staff_name,agent,
+serves nearby suburban regions of kolkata,location,agent,
+nicu for infants,nicu,agent,
+offers kidney care services including dialysis at kidney care center,dialysis,agent,kidney care centre is not a named dialysis unit
+provides maternity and pregnancy care services,ob_delivery,agent,
+labour room facility,ob_delivery,agent,
+"emergency department with critical care units (ccu, icu, nicu, sicu)",nicu|icu|emergency,agent,
+dr vaishali dubey is a gastroenterologist at vidya hospital and kidney centre,staff_name,agent,kidney centre in a name; no dialysis stated
+ventilators and oxygen cylinders,ventilator,agent,
+blood bank services provided by north western railway hospital blood bank,blood,agent,
+neonatology - (level – 3 nicu),nicu,agent,
+"14-bed iccu equipped with a ventilator, cpap/bipap, bedside multi-parameter monitors, infusion pumps, and defibrillator",icu|ventilator,agent,
+fundus fluorescein angiography services,other_clinical,agent,
+offers cesarean section delivery services,ob_delivery|csection,agent,
+"charge: secured loan of ₹82,500,000.00 from siemens financial services private limited (charge creation date: 2014-05-24; charge closure date: 2019-04-24)",,agent,financial filing
+does not operate an emergency department,,agent,negation: no emergency department
+neonatal incubator and nicu equipment,nicu,agent,NICU equipment named
+semirecumbent positioning of icu patients to reduce vap.,icu|ventilator,agent,ICU practice to prevent ventilator-associated pneumonia implies ventilated ICU patients
+provides av fistula creation for patients on hemodialysis,other_clinical,agent,dialysis access procedure only
+ayushman bharat coverage provided,scheme,agent,
+"has 24 employees as of may 1, 2025",,agent,
+"nmc criticisms included manpower shortages, lack of government icu, pediatric unit concerns, and hygiene issues",,agent,lack of an ICU (negation)
+on-site hemodialysis machines with 24/7 dialysis capability and crrt equipment,h24|dialysis|dialysis_unit,agent,
+blood bank and eye bank facilities are available on site,blood,agent,
+has 14 itu beds,icu,agent,ITU is an intensive therapy unit
+provides 24x7 dialysis services at patna dialysis centre,h24|dialysis|dialysis_unit,agent,
+exchange blood transfusion,blood,agent,
+newborn health checks,other_clinical,agent,
+"department of paediatric surgery collaborates with department of pediatrics and neonatology to provide comprehensive care to surgical neonates, infants and children",other_clinical,agent,
+24×7 ambulance services,h24|emergency,agent,
+over 2250 surrogate deliveries and 2500 newborns achieved,reputation,agent,surrogacy outcome counts; deliveries at this facility not stated
+blood bank not available at the hospital,,agent,negation: blood bank not available
+dialysis (nephrology) services,dialysis,agent,
+"agilus diagnostics brand operates diagnostic centers in halisahar, north 24 parganas",location,agent,diagnostics brand in a place; '24' is the district name
+operates a blood bank as part of jorhat medical college hospital,blood,agent,
+"offers diagnostic medicine including routine blood tests, ecgs, and x-rays",other_clinical,agent,
+neonatal intensive care unit (nicu) level iii with 16 beds,nicu,agent,
+"billroth hospital provides nephrology services via dr. dhanasegaran s e, a nephrologist",dialysis_unit|staff_name,agent,nephrologist named; dialysis not stated
+neonatal intensive care unit (nicu) and pediatric intensive care unit (picu) on site,nicu|icu,agent,
+"specialties include paediatrician, pulmonologist, anaesthesia, orthopaedics, cardiologist, diabetologist, child specialist, neurologists",anesthesia,agent,anaesthesia listed as a service
+patient monitoring display visible in operating room,ot|photo_artifact,agent,
+management of hormonal disorders offered,other_clinical,agent,
+gynaecology and obstetric care is offered at rama clinic,other_clinical,agent,OBG care with no delivery word
+nephrology dialysis equipment (dialysis facilities not explicit but dialysis mentioned).,dialysis|dialysis_unit,agent,"hedged extraction, but dialysis equipment listed"
+"dedicated multi-disciplinary teams for transplant programs including liver transplant surgeons, hepatologists, intensivists, and anaesthetists with 20+ members for liver transplant",anesthesia,agent,anaesthetists named; intensivists alone do not name an ICU
+"master of implant prosthetic section, icoi, awarded in 2012",reputation,agent,award; word-internal 'section'
+advanced pediatric ventilators in picu,icu|ventilator,agent,
+operates an on-site dialysis centre.,dialysis|dialysis_unit,agent,
+operates as a multi-specialty hospital with gynecology and obstetrics and pediatrics,other_clinical,agent,
+hemodialysis machines with reverse osmosis water treatment system,dialysis|dialysis_unit,agent,
+laminar flow system in operating theatres and icu,ot|icu,agent,
+provides maternity care for pregnancy-related conditions,ob_delivery,agent,maternity care
+"public sector/government tie-ups with coal india, indian railways, airports, cseb, esic, cghs, ayushman bharat pm-jay",scheme,agent,
+has over 40 nicu beds designed for level ii and level iii neonatal care,nicu,agent,
+blood bank facility started in may,blood,agent,
+round-the-clock community cancer care center,h24,agent,
+apollo hospitals bilaspur employs a nephrology department with a senior consultant nephrologist and transplant physician (dr. jignesh pandya),dialysis_unit|staff_name,agent,nephrologist named
+pediatric intensive care unit (picu) with invasive and non-invasive ventilation,icu|ventilator,agent,
+renal dialysis unit with 48 machines,dialysis|dialysis_unit,agent,
+provides blood bank services at sadar hospital in sitamarhi.,blood,agent,
+dr. deepshika jha holds ms in obstetrics and gynecology.,staff_name,agent,
+modular operating theater (ot) with laminar flow,ot,agent,
+the blood bank at district hospital rajouri is categorized as government (govt.).,blood,agent,
+"incubators, radiant warmers, and phototherapy equipment in nicu",nicu,agent,
+"located in chennai, india.",location,agent,
+gynaecology consultation and post-delivery care,other_clinical,agent,post-delivery care only; deliveries not stated
+conducts a multidimensional infection control program in intensive care units to reduce ventilator-associated pneumonia.,icu|ventilator,agent,VAP prevention in its ICUs implies ventilated patients
+engages in obstetric anesthesia research at murshidabad medical college & hospital,,agent,"obstetric anesthesia research, not a service"
+manages ocular trauma with foreign body removal and globe perforation repair; 24/7 emergency ophthalmology services,h24|emergency,agent,
+"ayushman card empanelled hospital in lucknow, uttar pradesh under ayushman bharat pm-jay",scheme,agent,
+signage indicates iccu presence,icu|photo_artifact,agent,
+specializes in women’s health and maternity care,ob_delivery,agent,
+oxygen booth and oxygen plant on-site to support emergency patients (up to 8 patients at a time),emergency,agent,oxygen supply for emergency patients
+ventilators used for covid-19 treatment at victoria hospital,ventilator,agent,
+"two operating theatres with state-of-the-art lighting, anesthetic and patient monitoring devices",anesthesia|ot,agent,anesthetic devices in the OTs
+"medeor hospital is listed for a dwarka sector-12 haf-b, phase 1 campus with cghs approval: no",,agent,negation: CGHS approval no
+on-site nephroplus dialysis center at amandeep hospital.,dialysis|dialysis_unit,agent,
+tele-icu hub inaugurated at gmch under e-gov. foundation,icu,agent,tele-ICU hub
+has adult icu,icu,agent,
+labor room for deliveries including cesarean sections,ob_delivery|csection,agent,
+operating theater with anesthesia equipment,anesthesia|ot,agent,
+uses dental lasers for painless treatments,other_clinical,agent,
+emergency care provided via casualty ward (24/7),h24|emergency,agent,
+provides in-clinic hemodialysis (hemo dialysis),dialysis,agent,
+"robotic surgery for urogenital disorders including stone disease, prostate enlargement, and erectile dysfunction",other_clinical,agent,
+provides ambulance facilities,emergency,agent,ambulance service
+offers anaesthesia & critical care specialty.,anesthesia,agent,anaesthesia specialty is the service; critical care as a specialty name is not an ICU
+has dialysis centre on site,dialysis|dialysis_unit,agent,
+ventilator and bipap facilities,ventilator,agent,
+has obstetrician & gynecologist dr suprita rajput,staff_name,agent,
+state-of-the-art operation theatres with laminar flow,ot,agent,
+accepts central government health scheme (cghs) insurance,scheme,agent,
+"caesarean section performed at nalanda medical college and hospital, sadikpur",ob_delivery|csection,agent,
+nicu with advanced monitoring systems,nicu,agent,
+spectra xt lutronics laser system for revital treatment,other_clinical,agent,
+blood bank services include donor blood collection,blood,agent,
+has a prioritized emergency room,emergency,agent,
+"walk-ins are accepted; no prior registration required for ayushman treatment at jagdale mama hospital, barshi.",scheme,agent,"'no' refers to prior registration, not the scheme"
+listed as top clinic in gurgaon sector 54 on practo,reputation|web_presence,agent,
+performs caesarean delivery,ob_delivery|csection,agent,
+at least one operating theater equipped with anesthesia machine and patient monitoring equipment,anesthesia|ot,agent,
+cghs empanelled dental clinic in delhi with cashless dental care,scheme,agent,
+gmch admitted a patient with a serious head injury,emergency,agent,admitted a serious head injury (trauma care)
+"tertiary care centre in neurosciences, orthopedics & trauma",emergency,agent,trauma tertiary centre
+aims to provide comprehensive dialysis services to patients in need,dialysis,agent,mission statement about dialysis services
+provides round-the-clock dialysis services (24/7),h24|dialysis,agent,
+blood bank services with plasmapheresis,blood,agent,
+dr. chaitasi shah is a consulting obstetrician and gynecologist affiliated with epic hospital,staff_name,agent,
+hemodialysis (hd) and haemodiafiltration (hdf),dialysis,agent,
+offers online and whatsapp appointment booking,web_presence,agent,
+separate operating theatre (ot) suite with interventional pulmonology setup,ot,agent,
+operates eight ambulances providing free services; icu ambulance service available 24/7 at fair rates,h24|emergency,agent,ICU ambulance is not an ICU unit
+provides treatment for dentofacial trauma,emergency,agent,dentofacial trauma care
+"well-equipped critical care unit with ventilators, defibrillators, pulse oximeters, and monitoring equipment",icu|ventilator,agent,
+historically used a 25-bed maternity hospital model,,agent,"historical maternity model, not current"
+offers epidural steroid injections,other_clinical,agent,epidural steroid injection for pain
+dr. s.s. jawahar is a sexologist with over 35 years of experience,reputation|staff_name,agent,
+has 40+ doctors on staff,other_clinical,agent,staffing count
+sedation dentistry with general anesthesia and conscious sedation,anesthesia,agent,general anesthesia offered
+hemodialysis sessions (24/7),h24|dialysis,agent,
+"employs obstetrics and gynecology specialists including obstetricians, gynecologists, and childbirth specialists",ob_delivery,agent,childbirth specialists on staff
+resuscitation and critical care,emergency,agent,resuscitation; critical care as a bare label is not an ICU
+icu and nicu services,nicu|icu,agent,
+kadam maternity and nursing home operates as a maternity and nursing home.,ob_delivery,agent,
+on-site blood bank and advanced ventilator support,blood|ventilator,agent,
+dialysis ward,dialysis|dialysis_unit,agent,dialysis ward = named unit
+haemodialysis equipment,dialysis|dialysis_unit,agent,haemodialysis equipment = machines
+ecmo equipment for cardiac and respiratory support,other_clinical,agent,ECMO is not mechanical ventilation
+anesthetist and pain management specialist dr. upasna,anesthesia|staff_name,agent,
+advanced anaesthesia workstation,anesthesia,agent,
+normal delivery & caesarean section,ob_delivery|csection,agent,
+pediatric intensive care unit with 7 beds,icu,agent,paediatric ICU
+ceiling-mounted surgical lights (in or/nicu setup visible in images),photo_artifact,agent,caption; OR or NICU ambiguous
+pediatric respiratory support facilities including 10 cpap/hfnc,other_clinical,agent,"CPAP/HFNC is not mechanical ventilation; paediatric, not neonatal"
+offers infertility treatments including iui and ivf,other_clinical,agent,
+blood transfusion services provided,blood,agent,
+non-invasive ventilation devices (nivs),ventilator,agent,non-invasive ventilation devices
+has burn unit,other_clinical,agent,burn unit without trauma or emergency words
+provides vaginal birth after cesarean (vbac) services as a supported option,ob_delivery,agent,"VBAC is a vaginal birth, not a caesarean"
+acute & chronic kidney failure / haemodialysis,dialysis,agent,
+md india tpa network affiliation,,agent,private TPA network
+operates a 24/7 blood bank,blood|h24,agent,
+congenital breast anomalies,other_clinical,agent,
+provides general anesthesia,anesthesia,agent,
+blood banks,blood,agent,
+mission to eradicate blindness in north india by providing quality care to all economic sections of society,,agent,mission statement; word-internal 'section'
+restorative dentistry services including dental implants and crowns and bridges,other_clinical,agent,
+walk-ins are accepted for ayushman card treatment; no prior registration is required.,scheme,agent,
+dr. sunil kr gupta is head of the respiratory intensive care unit (ricu) at paras hospital,icu|staff_name,agent,respiratory ICU
+performs general and major surgical procedures in the operation theater and modular operation theater,ot,agent,
+24/7 emergency and trauma services with ambulance,h24|emergency,agent,
+hemodialysis performed at the dialysis center,dialysis|dialysis_unit,agent,
+provides hemodialysis treatment,dialysis,agent,
+blood bank (transfusion medicine),blood,agent,
+"among bcv investigations, 81.4% of confirmed bcv cases were symptomatic; 3 cases required icu transfer; no deaths reported.",,agent,research statistic; ICU transfer is not a service statement
+has neonatal and pediatric intensive care units (nicu & picu).,nicu|icu,agent,
+"open 24x7 hours is not listed as a capability per se due to the restrictions on business hours, but the hospital is described as a 'multi-speciality hospital' with 24x7 operation in the site content; an explicit capability note is avoided here.",h24|web_presence,agent,"meta-comment, but states 24x7 operation"
+pediatric and neonatal laparoscopic instrumentation,other_clinical,agent,
+does not attend cardiac emergency cases.,,agent,negation: does not attend cardiac emergencies
+"offers trauma care with spine, sports injury, and general injury treatment",emergency,agent,
+offers normal delivery and cesarean section deliveries,ob_delivery|csection,agent,
+"centers of excellence include orthopedics, general surgery, critical care, and dialysis",dialysis,agent,critical care in a centre-of-excellence list is not an ICU
+no prior registration required for ayushman card treatment; walk-ins are accepted,scheme,agent,
+"aryan hospital is located in gurugram, haryana.",location,agent,
+liquid oxygen plant with 300-bed capacity constructed to provide emergency oxygen supply,other_clinical,agent,"backup oxygen supply, not emergency care"
+"medical tourist health check-up packages are available for international patients, including male and female variants with tests such as cbc, esr, fbs, post prandial blood sugar, lft, lipid profile, hba1c, hiv, hcv, vdrl, cea, psa, vitamin d3, stool analysis, urine analysis, ecg, chest x-ray, treadmill test, ultrasound abdomen, dental consultation, gynaecology consultation, mammography where indicated, and physician consultation.",other_clinical,agent,
+hosts academic events such as the national conference on emerging trends in health care and multidisciplinary studies (ncethms’24) on 19 july 2024,,agent,academic event
+"dialysis clinic located at lions eye & general hospital in sahapur, thane, maharashtra, india.",dialysis|dialysis_unit,agent,named dialysis clinic
+on-site hemodialysis machines used for patient care,dialysis|dialysis_unit,agent,
+"ayushman card empanelled hospital in jhansi, uttar pradesh",scheme,agent,
+"departments include cardiology, cardio vascular thoracic surgery, cardiac anaesthesia, radiology & nuclear medicine, and other department",anesthesia,agent,cardiac anaesthesia department
+cesarean delivery performed,ob_delivery|csection,agent,
+operating theatre with surgical setup and anesthesia equipment visible in photographs,anesthesia|ot|photo_artifact,agent,
+maternity and gynecology services,ob_delivery,agent,
+listed under category – a3 as a secondary care institution for cemonc and trauma & sncu / nicu under the directorate of medical education,ob_delivery|nicu|emergency,agent,CeMONC designation; caesarean and blood not named
+physician on staff holds mbbs and md in obstetrics & gynecology,other_clinical,agent,"qualification, no name"
+dr. ravi bhadania is a nephrologist and pediatrician,dialysis_unit|staff_name,agent,nephrologist named; dialysis not stated
+"ayushman card empanelled hospital in porbandar, gujarat",scheme,agent,
+emergency care is available 24x7.,h24|emergency,agent,
+open 24x7 service availability,h24,agent,
+"empanelled under ayushman bharat – pmjay in lucknow, uttar pradesh",scheme,agent,
+laughing gas (nitrous oxide) sedation and advanced anesthesia available for pain-free dentistry,other_clinical,agent,dental N2O sedation and unspecified 'advanced anesthesia' (likely local); no anesthesia service
+root canal treatment is usually painless due to local anesthesia,other_clinical,agent,local anaesthesia for a dental procedure
+blood bank license valid up to 2026-07-05,blood,agent,
+"offers departments including surgical oncology, medical oncology, radiation oncology, internal medicine, radiology, pathology, anaesthesiology, blood centre, microbiology, research & clinical genetics, nursing, breast and lymphedema clinic, stoma clinic, physiotherapy, dietetics, psychology",blood|anesthesia,agent,anaesthesiology department and blood centre
+"centers of excellence in neurology, neuro surgery, endovascular neurosurgery, neuro psychiatry, neuro rehabilitation, neuro anesthesiology, interventional neuro radiology, and general medicine & emergency",anesthesia|emergency,agent,neuro-anaesthesiology and emergency departments
+operating theatre equipped with anesthesia machine,anesthesia|ot,agent,
+licensed blood bank,blood,agent,
+"multidisciplinary team of neurologists, anesthesiologists, and rehabilitation specialists",anesthesia,agent,anesthesiologists on the team
+two fully fledged modern operating theatres with c-arm and laparoscopic instruments,ot,agent,
+24-hour blood bank facilities with transfusion service,blood|h24,agent,
+pmjay facilities available,scheme,agent,
+7 eye operation theaters,ot,agent,
+"the trauma centre includes its own blood bank, mri, ct scan facility, pathology labs, and ambulance facilities.",blood|emergency,agent,
+"ayushman card empanelled hospital under pm-jay in patiala, punjab",scheme,agent,
+fully equipped blood bank for transfusions,blood,agent,
+dedicated burns operation theatre,ot,agent,
+"operation theatres for spine, kidney and eyes in the spine/kidney/ophthalmic hospital",ot,agent,
+robotic-enabled operating theatre facility,ot,agent,
+three major operating theatres with laminar airflow,ot,agent,
+"center of excellence including accident & emergency, cardiac care center, kidney care & dialysis center, neuroscience, mother and baby care center, and cancer center",dialysis|dialysis_unit|emergency,agent,named dialysis centre; 'mother and baby care' has no delivery or maternity word
+"multi-specialty hospital with departments including orthopaedics, anaesthesia & critical care, general medicine, pulmonology, ophthalmology, gynaecology, cardiothoracic surgery, radiology, dental, laboratory & pathology, ent, urology, medical gastroenterology, surgical gastroenterology, neurology, neurosurgery, maxillo facial surgeon, cardiology",anesthesia,agent,critical care as a department name is not an ICU
+dialysis center infrastructure,dialysis|dialysis_unit,agent,
+surgeries are performed in an advanced operation theater,ot,agent,
+one major operating theatre (ot),ot,agent,
+"specialty departments including laparoscopy & general surgery, gynecology, orthopedics, pediatrics, internal medicine, urology, anesthesia & critical care, plastic surgery, neurosurgery, cardiology, ent",anesthesia,agent,critical care as a department name is not an ICU
+operating theatre with overhead surgical lights and anesthesia machine with patient monitoring,anesthesia|ot,agent,
+24-hour in-house pharmacy,h24,agent,
+operates a blood bank in bhagalpur (812001),blood,agent,

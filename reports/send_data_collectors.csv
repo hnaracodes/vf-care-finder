@@ -1,0 +1,138 @@
+rank,district_key,state,district,quadrant_rule,label_stability,emoc_g2_dist_km_p50,emoc_g2_share_within_60km,emoc_g2_facilities_in_district,n_post_offices,n_post_offices_excluded,n_post_offices_placeholder,institutional_birth_pct,outcome_flag,public_facility_birth_pct,public_share_of_institutional_pct,csection_pct,csection_below_5pct,public_facility_csection_pct,residual,crosswalk_method,reliability_notes
+1,Andaman & Nicobar Islands|Nicobars,Andaman & Nicobar Islands,Nicobars,data_desert,1.0,1540.2,0.0,0,4,0,0,97.8,ok,96.7,98.9,11.5,False,10.7,,exact,island district: distance runs across the sea to the mainland or another island; access from only 4 post offices
+2,Andaman & Nicobar Islands|South Andaman,Andaman & Nicobar Islands,South Andaman,data_desert,1.0,1218.8,0.0,0,13,0,0,99.5,ok,83.8,84.2,37.1,False,29.6,,fuzzy,island district: distance runs across the sea to the mainland or another island; name matched by fuzzy match; access from only 13 post offices
+3,Andaman & Nicobar Islands|North & Middle Andaman,Andaman & Nicobar Islands,North & Middle Andaman,data_desert,1.0,1151.8,0.0,0,8,0,0,97.7,ok,95.0,97.2,12.9,False,11.4,,exact,island district: distance runs across the sea to the mainland or another island; access from only 8 post offices
+4,Manipur|Thoubal,Manipur,Thoubal,data_desert,0.75,276.2,0.0,0,91,0,0,87.8,ok,72.4,82.5,20.2,False,17.5,,exact+parent_district,pools post offices of district(s) split off after the survey
+5,Lakshadweep|Lakshadweep,Lakshadweep,Lakshadweep,data_desert,1.0,274.8,0.0,0,8,1,0,99.6,ok,65.3,65.6,31.3,False,28.2,,fuzzy,island district: distance runs across the sea to the mainland or another island; name matched by fuzzy match; access from only 8 post offices
+6,Manipur|Imphal East,Manipur,Imphal East,data_desert,0.75,267.6,0.0,0,106,1,0,91.7,ok,66.7,72.7,35.8,False,32.9,,exact+parent_district,pools post offices of district(s) split off after the survey
+7,Manipur|Imphal West,Manipur,Imphal West,data_desert,1.0,263.5,0.0,0,75,0,0,95.7,ok,67.6,70.6,44.5,False,35.4,,exact,
+8,Manipur|Bishnupur,Manipur,Bishnupur,data_desert,0.75,261.7,0.0,0,36,0,0,89.5,ok,68.6,76.6,38.2,False,34.2,,exact,
+9,Chhattisgarh|Dantewada,Chhattisgarh,Dantewada,data_desert,0.75,233.9,0.0,0,173,1,0,90.5,ok,84.1,92.9,5.1,False,3.9,,exact,
+10,Ladakh|Leh(Ladakh),Ladakh,Leh(Ladakh),data_desert,1.0,213.6,0.0,0,35,0,0,96.4,ok,95.7,99.3,43.1,False,44.3,,exact,
+11,Mizoram|Champhai,Mizoram,Champhai,data_desert,1.0,212.0,0.0,0,55,0,0,96.7,ok,91.5,94.6,6.6,False,5.8,,exact+parent_district,pools post offices of district(s) split off after the survey
+12,Odisha|Jharsuguda,Odisha,Jharsuguda,data_desert,1.0,201.4,0.0,0,92,0,1,98.6,ok,66.7,67.6,30.7,False,18.9,,exact,
+13,Odisha|Sambalpur,Odisha,Sambalpur,data_desert,1.0,197.9,0.0,0,215,0,0,99.5,ok,88.7,89.1,25.3,False,19.3,,exact,
+14,Dadra and Nagar Haveli & Daman and Diu|Diu,Dadra and Nagar Haveli & Daman and Diu,Diu,data_desert,1.0,196.8,0.0,0,4,0,0,95.7,ok,63.9,66.8,33.5,False,25.6,,exact,access from only 4 post offices
+15,Odisha|Kandhamal,Odisha,Kandhamal,data_desert,1.0,188.1,0.0,0,240,0,0,93.9,ok,92.4,98.4,10.0,False,9.7,,exact,
+16,Madhya Pradesh|Umaria,Madhya Pradesh,Umaria,data_desert,1.0,183.1,0.0,0,101,1,0,92.2,ok,89.2,96.7,10.5,False,8.8,,exact,
+17,Karnataka|Raichur,Karnataka,Raichur,data_desert,0.75,179.7,0.004,0,288,1,20,88.9,ok,64.4,72.4,20.0,False,13.7,,exact,
+18,Odisha|Nabarangapur,Odisha,Nabarangapur,data_desert,0.75,178.6,0.0,0,194,1,0,87.6,ok,84.6,96.6,7.2,False,6.1,,fuzzy,name matched by fuzzy match
+19,Mizoram|Serchhip,Mizoram,Serchhip,data_desert,1.0,175.8,0.0,0,34,0,1,96.2,ok,90.7,94.3,13.9,False,13.0,,exact,
+20,Odisha|Subarnapur,Odisha,Subarnapur,data_desert,1.0,174.5,0.0,0,107,0,0,96.1,ok,83.0,86.4,26.4,False,20.1,,manual,name matched by hand
+21,Telangana|Jayashankar Bhupalapally,Telangana,Jayashankar Bhupalapally,data_desert,1.0,172.4,0.0,0,281,12,0,99.5,ok,61.3,61.6,64.3,False,50.4,,exact+parent_district,pools post offices of district(s) split off after the survey
+22,Odisha|Baudh,Odisha,Baudh,data_desert,1.0,172.1,0.0,0,47,0,0,93.4,ok,86.7,92.8,13.4,False,9.9,,fuzzy,name matched by fuzzy match
+23,Madhya Pradesh|Katni,Madhya Pradesh,Katni,data_desert,0.75,170.3,0.0,0,165,2,9,91.8,ok,84.4,91.9,5.1,False,1.9,,exact,
+24,Assam|Dima Hasao,Assam,Dima Hasao,data_desert,0.75,169.3,0.0,0,77,1,8,89.5,ok,84.6,94.5,19.7,False,18.5,,exact,
+25,Odisha|Kalahandi,Odisha,Kalahandi,data_desert,1.0,168.5,0.0,0,267,1,0,92.8,ok,84.7,91.3,13.2,False,12.8,,exact,
+26,Mizoram|Aizawl,Mizoram,Aizawl,data_desert,1.0,165.0,0.0,0,157,0,13,97.4,ok,76.3,78.3,18.2,False,14.2,,exact+parent_district,pools post offices of district(s) split off after the survey
+27,Odisha|Sundargarh,Odisha,Sundargarh,data_desert,0.75,164.5,0.0,0,405,2,0,91.3,ok,80.3,88.0,20.8,False,16.3,,exact,
+28,Telangana|Jogulamba Gadwal,Telangana,Jogulamba Gadwal,data_desert,1.0,163.4,0.0,0,103,0,0,94.2,ok,46.5,49.4,41.7,False,22.2,,exact,
+29,Odisha|Malkangiri,Odisha,Malkangiri,data_desert,0.75,162.6,0.0,0,85,3,39,90.7,ok,89.9,99.1,5.7,False,6.1,,exact,
+30,Odisha|Ganjam,Odisha,Ganjam,data_desert,1.0,160.2,0.0,0,703,0,0,93.0,ok,72.3,77.7,22.6,False,13.1,,exact,
+31,Odisha|Debagarh,Odisha,Debagarh,data_desert,0.75,159.7,0.026,0,77,0,0,91.2,ok,76.6,84.0,15.9,False,10.3,,fuzzy,name matched by fuzzy match
+32,Arunachal Pradesh|Papum Pare,Arunachal Pradesh,Papum Pare,data_desert,0.75,157.6,0.0,0,76,2,0,88.0,ok,77.3,87.8,16.5,False,17.4,,exact,
+33,Chhattisgarh|Raigarh,Chhattisgarh,Raigarh,data_desert,0.75,153.4,0.007,0,290,7,0,87.7,ok,72.3,82.4,18.9,False,13.1,,exact,
+34,Rajasthan|Banswara,Rajasthan,Banswara,data_desert,1.0,151.3,0.0,0,263,0,0,97.7,ok,83.8,85.8,6.4,False,4.6,,exact,
+35,Rajasthan|Rajsamand,Rajasthan,Rajsamand,data_desert,1.0,150.8,0.005,0,215,1,0,95.1,ok,84.3,88.6,9.0,False,5.2,,exact,
+36,Assam|Golaghat,Assam,Golaghat,data_desert,0.75,150.8,0.044,0,148,0,13,90.4,ok,81.4,90.0,22.6,False,19.6,,exact,
+37,Karnataka|Bijapur,Karnataka,Bijapur,data_desert,0.75,149.6,0.005,0,389,1,0,91.8,ok,59.6,64.9,20.9,False,9.9,,manual,name matched by hand
+38,Mizoram|Kolasib,Mizoram,Kolasib,data_desert,0.75,148.2,0.0,0,28,0,0,91.4,ok,82.9,90.7,8.4,False,7.5,,exact,
+39,Gujarat|Amreli,Gujarat,Amreli,data_desert,0.75,147.5,0.003,0,340,3,0,90.1,ok,45.5,50.5,18.7,False,10.2,,exact,
+40,Odisha|Bargarh,Odisha,Bargarh,data_desert,1.0,147.3,0.0,0,252,0,15,99.6,ok,91.9,92.3,29.5,False,26.0,,exact,
+41,Madhya Pradesh|Jabalpur,Madhya Pradesh,Jabalpur,data_desert,1.0,145.8,0.017,0,186,1,11,94.7,ok,89.2,94.2,7.2,False,1.8,,exact,small survey (213 households)
+42,Madhya Pradesh|Burhanpur,Madhya Pradesh,Burhanpur,data_desert,0.75,145.2,0.0,0,69,2,0,90.7,ok,76.3,84.1,14.0,False,7.9,,exact,
+43,Telangana|Warangal Rural,Telangana,Warangal Rural,data_desert,1.0,145.0,0.0,0,123,6,0,100.0,ok,63.1,63.1,71.8,False,64.6,,manual,name matched by hand
+44,West Bengal|Dakshin Dinajpur,West Bengal,Dakshin Dinajpur,data_desert,0.75,143.9,0.016,0,160,0,35,91.4,ok,81.2,88.8,25.3,False,19.5,,fuzzy,name matched by fuzzy match
+45,Meghalaya|South Garo Hills,Meghalaya,South Garo Hills,data_desert,0.75,143.2,0.0,0,80,0,1,88.3,ok,88.3,100.0,4.7,True,5.3,,exact,
+46,Rajasthan|Dungarpur,Rajasthan,Dungarpur,data_desert,1.0,142.9,0.003,0,294,0,0,94.1,ok,81.2,86.3,5.9,False,4.0,,exact,
+47,Meghalaya|West Garo Hills,Meghalaya,West Garo Hills,data_desert,0.75,142.4,0.0,0,114,0,9,89.6,ok,85.1,95.0,8.4,False,8.2,,exact,
+48,Rajasthan|Jodhpur,Rajasthan,Jodhpur,data_desert,0.75,141.8,0.006,0,350,8,0,90.0,ok,73.9,82.1,13.6,False,10.8,,exact,
+49,Karnataka|Koppal,Karnataka,Koppal,data_desert,0.75,141.0,0.0,0,218,1,0,90.7,ok,68.2,75.2,19.1,False,13.5,,exact,
+50,Rajasthan|Pratapgarh,Rajasthan,Pratapgarh,data_desert,1.0,140.7,0.013,0,155,2,0,96.4,ok,92.3,95.7,3.6,True,1.8,,exact,
+51,Rajasthan|Udaipur,Rajasthan,Udaipur,data_desert,1.0,139.5,0.0,0,482,2,0,96.1,ok,89.4,93.0,7.3,False,5.4,,exact,
+52,Arunachal Pradesh|Lower Subansiri,Arunachal Pradesh,Lower Subansiri,data_desert,0.75,137.8,0.019,0,54,1,0,89.8,ok,86.8,96.7,19.6,False,20.4,,exact+parent_district,pools post offices of district(s) split off after the survey
+53,Andhra Pradesh|East Godavari,Andhra Pradesh,East Godavari,data_desert,1.0,137.7,0.012,0,562,11,0,96.6,ok,46.0,47.6,52.2,False,34.1,,exact+parent_district,pools post offices of district(s) split off after the survey
+54,Andhra Pradesh|Kurnool,Andhra Pradesh,Kurnool,data_desert,0.75,137.6,0.0,0,114,0,0,88.5,ok,51.1,57.7,32.9,False,17.2,,exact+parent_district,pools post offices of district(s) split off after the survey
+55,Rajasthan|Chittaurgarh,Rajasthan,Chittaurgarh,data_desert,1.0,137.5,0.065,0,279,2,0,96.8,ok,85.3,88.1,15.4,False,11.3,,fuzzy,name matched by fuzzy match
+56,Odisha|Balangir,Odisha,Balangir,data_desert,1.0,136.6,0.0,0,316,0,0,97.9,ok,90.9,92.8,19.8,False,14.9,,exact,
+57,Telangana|Peddapalli,Telangana,Peddapalli,data_desert,1.0,136.4,0.0,0,148,0,0,96.5,ok,45.8,47.5,71.6,False,58.2,,exact,
+58,Karnataka|Yadgir,Karnataka,Yadgir,data_desert,1.0,136.2,0.016,0,199,0,14,93.3,ok,73.4,78.7,14.3,False,7.2,,exact,
+59,Odisha|Baleshwar,Odisha,Baleshwar,data_desert,1.0,135.8,0.0,0,497,2,26,97.6,ok,80.8,82.8,35.0,False,26.8,,exact,
+60,Puducherry|Yanam,Puducherry,Yanam,data_desert,1.0,134.8,0.0,0,1,0,0,100.0,ok,53.1,53.1,59.1,False,43.4,,exact,access from only 1 post offices
+61,Chhattisgarh|Uttar Bastar Kanker,Chhattisgarh,Uttar Bastar Kanker,data_desert,1.0,133.7,0.009,0,229,1,2,94.1,ok,83.9,89.2,11.0,False,7.0,,fuzzy,name matched by fuzzy match
+62,Telangana|Mahabubabad,Telangana,Mahabubabad,data_desert,1.0,132.4,0.0,0,175,1,0,97.7,ok,41.5,42.5,74.0,False,60.5,,exact,
+63,Madhya Pradesh|Jhabua,Madhya Pradesh,Jhabua,data_desert,1.0,131.1,0.0,0,46,1,0,92.9,ok,86.1,92.7,7.0,False,4.6,,exact,
+64,Gujarat|Botad,Gujarat,Botad,data_desert,1.0,130.9,0.07,0,100,1,1,93.5,ok,39.2,41.9,16.6,False,7.1,,exact,
+65,Arunachal Pradesh|West Kameng,Arunachal Pradesh,West Kameng,data_desert,1.0,130.2,0.05,0,40,0,0,93.6,ok,92.0,98.3,10.0,False,10.3,,exact,
+66,Ladakh|Kargil,Ladakh,Kargil,data_desert,1.0,129.4,0.0,0,39,3,0,93.7,ok,93.7,100.0,32.0,False,34.2,,exact,
+67,Karnataka|Gadag,Karnataka,Gadag,data_desert,1.0,128.0,0.0,0,165,0,0,96.2,ok,67.5,70.2,33.5,False,27.8,,exact,
+68,Gujarat|Junagadh,Gujarat,Junagadh,data_desert,1.0,127.6,0.0,0,291,0,0,97.4,ok,60.3,61.9,23.0,False,17.3,,exact,
+69,Assam|Jorhat,Assam,Jorhat,data_desert,1.0,127.4,0.0,0,172,16,4,96.5,ok,74.9,77.6,44.4,False,33.9,,exact,
+70,Madhya Pradesh|Guna,Madhya Pradesh,Guna,data_desert,1.0,127.4,0.0,0,161,2,17,98.0,ok,90.6,92.4,6.7,False,2.3,,exact,
+71,Maharastra|Solapur,Maharastra,Solapur,data_desert,1.0,126.8,0.006,0,532,2,22,96.2,ok,51.5,53.5,21.2,False,10.8,,exact,
+72,Karnataka|Bagalkot,Karnataka,Bagalkot,data_desert,1.0,126.3,0.0,0,329,0,46,95.2,ok,57.1,60.0,31.0,False,14.2,,exact,
+73,Telangana|Warangal Urban,Telangana,Warangal Urban,data_desert,1.0,124.9,0.0,0,176,0,0,99.7,ok,41.9,42.0,69.3,False,44.2,,manual,name matched by hand
+74,Tamil Nadu|Thiruvarur,Tamil Nadu,Thiruvarur,data_desert,1.0,124.7,0.003,0,355,0,14,100.0,ok,62.7,62.7,60.6,False,48.8,,exact,
+75,Telangana|Bhadradri Kothagudem,Telangana,Bhadradri Kothagudem,data_desert,1.0,124.0,0.003,0,333,0,0,97.4,ok,53.9,55.3,58.0,False,48.6,,exact,
+76,Arunachal Pradesh|Lohit,Arunachal Pradesh,Lohit,data_desert,0.75,123.4,0.036,0,28,0,0,90.2,ok,84.6,93.8,19.7,False,18.5,,exact,
+77,Telangana|Wanaparthy,Telangana,Wanaparthy,data_desert,1.0,123.1,0.034,0,29,0,0,99.0,ok,51.4,51.9,50.9,False,35.8,,exact,
+78,Odisha|Mayurbhanj,Odisha,Mayurbhanj,data_desert,0.75,122.0,0.053,0,495,1,0,91.7,ok,90.2,98.4,8.6,False,8.6,,exact,
+79,Assam|Goalpara,Assam,Goalpara,data_desert,1.0,119.8,0.0,0,12,0,0,92.3,ok,87.2,94.5,16.2,False,13.4,,exact,access from only 12 post offices
+80,Gujarat|Dohad,Gujarat,Dohad,data_desert,1.0,118.0,0.004,0,223,1,0,92.5,ok,68.2,73.7,6.1,False,1.5,,exact,
+81,Madhya Pradesh|Mandla,Madhya Pradesh,Mandla,data_desert,0.75,117.7,0.08,0,199,125,0,87.6,ok,81.0,92.5,10.2,False,6.0,,exact,coordinate check dropped 39% of post offices
+82,Andhra Pradesh|Srikakulam,Andhra Pradesh,Srikakulam,data_desert,1.0,117.1,0.0,0,565,4,14,97.9,ok,52.2,53.3,57.0,False,44.5,,exact,
+83,Maharastra|Hingoli,Maharastra,Hingoli,data_desert,1.0,117.1,0.0,0,149,0,0,94.0,ok,68.6,73.0,16.4,False,13.0,,exact,
+84,Telangana|Karimnagar,Telangana,Karimnagar,data_desert,1.0,116.9,0.0,0,180,0,0,98.4,ok,34.2,34.8,82.4,False,66.8,,exact,
+85,Rajasthan|Ganganagar,Rajasthan,Ganganagar,data_desert,1.0,116.5,0.035,0,293,16,10,97.7,ok,74.0,75.7,14.3,False,8.1,,exact,
+86,Madhya Pradesh|Neemuch,Madhya Pradesh,Neemuch,data_desert,1.0,115.7,0.0,0,133,2,0,97.5,ok,86.7,88.9,13.5,False,10.1,,exact,
+87,Rajasthan|Pali,Rajasthan,Pali,data_desert,1.0,115.4,0.005,0,372,1,0,98.8,ok,82.4,83.4,10.2,False,4.4,,exact,
+88,Karnataka|Mysore,Karnataka,Mysore,data_desert,1.0,112.9,0.0,0,89,0,0,100.0,ok,56.2,56.2,43.7,False,24.7,,manual,name matched by hand
+89,Arunachal Pradesh|Lower Dibang Valley,Arunachal Pradesh,Lower Dibang Valley,data_desert,0.75,112.7,0.056,0,18,0,0,90.1,ok,86.8,96.3,11.0,False,10.7,,exact,access from only 18 post offices
+90,Madhya Pradesh|Ashoknagar,Madhya Pradesh,Ashoknagar,data_desert,0.75,111.9,0.0,0,157,2,0,91.3,ok,83.6,91.6,6.2,False,1.3,,exact,
+91,Telangana|Mancherial,Telangana,Mancherial,data_desert,0.75,111.6,0.014,0,148,0,0,90.1,ok,33.9,37.6,67.9,False,46.8,,exact,
+92,Assam|Sivasagar,Assam,Sivasagar,data_desert,1.0,111.5,0.095,0,137,36,22,95.3,ok,76.2,80.0,30.0,False,20.6,,exact,
+93,Madhya Pradesh|Narsimhapur,Madhya Pradesh,Narsimhapur,data_desert,0.75,111.2,0.125,0,16,0,0,91.4,ok,76.2,83.4,19.1,False,14.0,,fuzzy,name matched by fuzzy match; access from only 16 post offices
+94,Jammu & Kashmir|Kupwara,Jammu & Kashmir,Kupwara,data_desert,1.0,110.1,0.123,0,81,0,0,97.1,ok,88.7,91.3,51.7,False,50.7,,exact,
+95,Uttar Pradesh|Mahoba,Uttar Pradesh,Mahoba,data_desert,1.0,109.9,0.0,0,95,3,0,96.3,ok,87.6,91.0,9.6,False,4.7,,exact,
+96,Gujarat|Kachchh,Gujarat,Kachchh,data_desert,1.0,109.4,0.046,0,498,3,0,97.4,ok,45.3,46.5,15.8,False,10.1,,exact,
+97,Tamil Nadu|Thanjavur,Tamil Nadu,Thanjavur,data_desert,1.0,109.1,0.0,0,513,0,18,100.0,ok,59.5,59.5,51.4,False,33.8,,exact,
+98,West Bengal|Maldah,West Bengal,Maldah,data_desert,0.75,108.6,0.045,0,332,7,268,87.7,ok,76.6,87.3,22.2,False,16.1,,exact,"81% of post offices sit on 3 placeholder points shared with other PINs (usually the district town), counted once each"
+99,West Bengal|Koch Bihar,West Bengal,Koch Bihar,data_desert,1.0,108.5,0.117,0,274,29,0,93.0,ok,81.3,87.4,23.9,False,16.1,,manual,name matched by hand
+100,Gujarat|Bhavnagar,Gujarat,Bhavnagar,data_desert,1.0,107.4,0.0,0,329,0,10,94.2,ok,44.3,47.0,23.7,False,18.0,,exact,
+101,Rajasthan|Barmer,Rajasthan,Barmer,data_desert,1.0,106.9,0.054,0,632,5,0,93.3,ok,86.0,92.2,4.9,True,4.0,,exact,
+102,Chhattisgarh|Raipur,Chhattisgarh,Raipur,data_desert,0.75,106.6,0.184,7,348,425,107,90.7,ok,63.9,70.5,24.3,False,14.7,,exact,coordinate check dropped 55% of post offices
+103,Karnataka|Uttara Kannada,Karnataka,Uttara Kannada,data_desert,0.75,106.1,0.156,0,263,17,0,99.3,ok,69.5,70.0,36.3,False,32.4,,exact,
+104,Telangana|Nagarkurnool,Telangana,Nagarkurnool,data_desert,0.75,105.7,0.0,0,21,0,0,98.0,ok,56.2,57.3,53.0,False,39.5,,exact,
+105,Telangana|Suryapet,Telangana,Suryapet,data_desert,0.75,105.6,0.0,0,218,0,0,95.9,ok,40.5,42.2,77.0,False,69.1,,exact,
+106,Telangana|Mahabubnagar,Telangana,Mahabubnagar,data_desert,0.75,105.5,0.004,0,238,0,0,98.1,ok,59.2,60.3,43.4,False,25.9,,exact+parent_district,pools post offices of district(s) split off after the survey
+107,Madhya Pradesh|Mandsaur,Madhya Pradesh,Mandsaur,data_desert,0.75,105.1,0.071,0,211,9,0,99.4,ok,93.2,93.8,18.5,False,14.3,,exact,
+108,Uttar Pradesh|Banda,Uttar Pradesh,Banda,data_desert,0.562,104.1,0.005,0,209,0,0,89.8,ok,85.9,95.7,4.2,True,2.3,,exact,
+109,Madhya Pradesh|Khandwa (East Nimar),Madhya Pradesh,Khandwa (East Nimar),data_desert,0.75,102.8,0.067,0,164,10,0,93.2,ok,90.0,96.6,7.6,False,7.6,,fuzzy,name matched by fuzzy match; small survey (531 households)
+110,Maharastra|Osmanabad,Maharastra,Osmanabad,data_desert,0.75,102.6,0.167,0,286,0,23,98.1,ok,68.4,69.7,18.5,False,13.1,,exact,
+111,Jharkhand|Kodarma,Jharkhand,Kodarma,data_desert,0.562,101.6,0.077,0,78,3,0,91.3,ok,64.2,70.3,22.0,False,7.3,,fuzzy,name matched by fuzzy match
+112,Rajasthan|Bhilwara,Rajasthan,Bhilwara,data_desert,0.75,100.9,0.031,0,384,0,0,95.0,ok,87.4,92.0,5.9,False,3.6,,exact,
+113,Maharastra|Gadchiroli,Maharastra,Gadchiroli,data_desert,0.75,99.8,0.163,0,393,53,0,97.3,ok,90.5,93.0,17.3,False,12.5,,exact,
+114,Karnataka|Bellary,Karnataka,Bellary,data_desert,0.75,98.3,0.086,0,442,0,0,95.7,ok,76.8,80.3,29.1,False,19.1,,manual+parent_district,pools post offices of district(s) split off after the survey; name matched by hand
+115,Puducherry|Karaikal,Puducherry,Karaikal,data_desert,0.75,98.1,0.037,0,27,0,0,99.6,ok,67.2,67.5,45.9,False,46.2,,exact,
+116,Gujarat|Mahisagar,Gujarat,Mahisagar,data_desert,0.75,98.1,0.146,0,166,0,10,93.0,ok,26.6,28.6,16.6,False,14.1,,exact,
+117,Odisha|Nuapada,Odisha,Nuapada,data_desert,0.562,98.0,0.197,0,132,0,0,89.8,ok,85.1,94.8,14.0,False,12.3,,exact,
+118,Madhya Pradesh|Seoni,Madhya Pradesh,Seoni,data_desert,0.75,97.7,0.071,0,15,1,2,94.8,ok,86.8,91.6,15.9,False,10.3,,exact,access from only 14 post office locations (a shared placeholder point counts once)
+119,Gujarat|Porbandar,Gujarat,Porbandar,data_desert,0.75,97.4,0.0,0,91,0,0,100.0,ok,61.2,61.2,19.2,False,10.0,,exact,
+120,Karnataka|Hassan,Karnataka,Hassan,data_desert,0.75,97.1,0.005,0,413,0,0,100.0,ok,71.7,71.7,41.8,False,30.0,,exact,
+121,Andhra Pradesh|West Godavari,Andhra Pradesh,West Godavari,data_desert,0.75,96.8,0.207,0,908,17,0,98.7,ok,48.8,49.4,55.7,False,40.4,,exact+parent_district,pools post offices of district(s) split off after the survey
+122,Maharastra|Ratnagiri,Maharastra,Ratnagiri,data_desert,0.75,95.0,0.022,0,657,0,30,97.8,ok,53.5,54.7,30.8,False,28.0,,exact,
+123,Rajasthan|Sawai Madhopur,Rajasthan,Sawai Madhopur,data_desert,0.75,94.9,0.026,0,193,22,0,97.4,ok,83.2,85.4,10.4,False,9.5,,exact,
+124,Telangana|Jangoan,Telangana,Jangoan,data_desert,0.75,94.8,0.043,0,116,33,0,99.6,ok,49.6,49.8,79.1,False,73.0,,exact,
+125,Andhra Pradesh|Sri Potti Sriramulu Nello,Andhra Pradesh,Sri Potti Sriramulu Nello,data_desert,0.75,94.6,0.045,0,584,5,0,97.0,ok,34.9,36.0,42.3,False,18.8,,manual,name matched by hand
+126,Madhya Pradesh|Chhindwara,Madhya Pradesh,Chhindwara,data_desert,0.75,94.1,0.114,0,360,40,0,92.2,ok,78.1,84.7,17.1,False,10.1,,exact,
+127,Bihar|Rohtas,Bihar,Rohtas,data_desert,0.562,93.9,0.017,0,297,1,63,89.1,ok,51.7,58.0,14.1,False,1.5,,exact,
+128,Tamil Nadu|Pudukkottai,Tamil Nadu,Pudukkottai,data_desert,0.75,92.6,0.038,0,339,0,0,100.0,ok,68.6,68.6,41.2,False,30.1,,exact,
+129,Karnataka|Haveri,Karnataka,Haveri,data_desert,0.75,92.5,0.113,0,256,0,0,97.2,ok,82.6,85.0,23.9,False,20.2,,exact,
+130,Assam|Majuli,Assam,Majuli,data_desert,0.562,92.4,0.0,0,57,0,22,90.3,ok,85.8,95.0,22.5,False,21.9,,exact,
+131,Karnataka|Udupi,Karnataka,Udupi,data_desert,0.75,92.3,0.0,0,329,0,0,98.9,ok,37.6,38.0,51.9,False,39.1,,exact,
+132,Karnataka|Chamarajanagar,Karnataka,Chamarajanagar,data_desert,0.75,91.9,0.042,0,24,0,0,100.0,ok,82.7,82.7,31.4,False,27.1,,fuzzy,name matched by fuzzy match
+133,Odisha|Bhadrak,Odisha,Bhadrak,data_desert,0.75,91.9,0.0,0,305,0,0,96.1,ok,74.0,77.0,28.7,False,13.8,,exact,
+134,Jammu & Kashmir|Bandipore,Jammu & Kashmir,Bandipore,data_desert,0.75,91.7,0.0,0,52,0,0,92.8,ok,82.2,88.6,48.1,False,52.2,,fuzzy,name matched by fuzzy match
+135,Maharastra|Bid,Maharastra,Bid,data_desert,0.75,91.5,0.152,0,341,0,0,94.0,ok,63.7,67.8,17.5,False,17.3,,manual,name matched by hand
+136,Jammu & Kashmir|Baramula,Jammu & Kashmir,Baramula,data_desert,0.75,91.3,0.023,0,129,1,0,96.2,ok,86.8,90.2,51.1,False,49.6,,fuzzy,name matched by fuzzy match
+137,Rajasthan|Jhalawar,Rajasthan,Jhalawar,data_desert,0.75,90.5,0.029,0,243,6,0,98.3,ok,92.2,93.8,8.6,False,6.6,,exact,

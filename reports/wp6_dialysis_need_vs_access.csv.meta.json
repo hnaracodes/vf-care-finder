@@ -1,0 +1,69 @@
+{
+  "created_at_utc": "2026-11-21T21:32:59Z",
+  "git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+  "code_uncommitted": true,
+  "script": "scripts/wp6_rule_quadrants.py",
+  "version": "wp6-rule-v2",
+  "stage": "rule_only",
+  "grades_method": "regex",
+  "recipe_version": "v0.1",
+  "inputs": {
+    "silver/nfhs.parquet": {
+      "sha256": "ad56dbf5e20d842f3017d8aea6ac16c66938816a5faf26d5da3c2ff48c0df909"
+    },
+    "silver/nfhs_flags.parquet": {
+      "sha256": "5dd6fbcfbb89c334b4dff5b68a2d2c74d2197e500edad63891038ba2b9c5a8d6"
+    },
+    "silver/district_crosswalk.parquet": {
+      "sha256": "0b5df44b99973dbf2e7ccab1c16dc167a553b37ea7036af05520493c077a21a2"
+    },
+    "gold/district_access.parquet": {
+      "sha256": "891133fd2fcd2b5e3f524a82ff3a669ab16adacdb8a88d056bd6052a081ed3d4"
+    }
+  },
+  "comparison": "need versus access, not an outcome",
+  "need_cut_pct": 19.675,
+  "access_cut_km": 58.09972314843705,
+  "min_grade": 2,
+  "need_definition": "mean of four NFHS percentages: women and men 15+ with high or very high blood sugar or on medicine, women and men 15+ with elevated blood pressure or on medicine",
+  "cells": {
+    "lower_need_good_access": 293,
+    "high_need_good_access": 177,
+    "lower_need_poor_access": 176,
+    "high_need_poor_access": 59
+  },
+  "spearman_need_vs_distance": {
+    "rho": -0.25614858427441217,
+    "p": 5.032219900238067e-12
+  },
+  "high_need_poor_access_top_states": {
+    "Telangana": 16,
+    "Arunachal Pradesh": 8,
+    "Odisha": 6,
+    "Andhra Pradesh": 5,
+    "Sikkim": 3,
+    "Andaman & Nicobar Islands": 3
+  },
+  "median_need_pct": 17.700000000000003,
+  "median_distance_km": 43.81573427320694,
+  "output": "reports/wp6_dialysis_need_vs_access.csv",
+  "rows": 705,
+  "columns": [
+    "district_key",
+    "state",
+    "district",
+    "high_blood_sugar_women_pct",
+    "high_blood_sugar_men_pct",
+    "high_bp_women_pct",
+    "high_bp_men_pct",
+    "dialysis_g2_dist_km_p50",
+    "dialysis_g2_share_within_60km",
+    "dialysis_g2_facilities_in_district",
+    "n_post_offices",
+    "crosswalk_method",
+    "need_index_pct",
+    "need_high",
+    "access_poor",
+    "cell"
+  ]
+}

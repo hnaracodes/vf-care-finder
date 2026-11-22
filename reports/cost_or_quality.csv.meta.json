@@ -1,0 +1,61 @@
+{
+  "created_at_utc": "2026-11-21T21:32:59Z",
+  "git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+  "code_uncommitted": true,
+  "script": "scripts/wp6_rule_quadrants.py",
+  "version": "wp6-rule-v2",
+  "stage": "rule_only",
+  "grades_method": "regex",
+  "recipe_version": "v0.1",
+  "inputs": {
+    "silver/nfhs.parquet": {
+      "sha256": "ad56dbf5e20d842f3017d8aea6ac16c66938816a5faf26d5da3c2ff48c0df909"
+    },
+    "silver/nfhs_flags.parquet": {
+      "sha256": "5dd6fbcfbb89c334b4dff5b68a2d2c74d2197e500edad63891038ba2b9c5a8d6"
+    },
+    "silver/district_crosswalk.parquet": {
+      "sha256": "0b5df44b99973dbf2e7ccab1c16dc167a553b37ea7036af05520493c077a21a2"
+    },
+    "gold/district_access.parquet": {
+      "sha256": "891133fd2fcd2b5e3f524a82ff3a669ab16adacdb8a88d056bd6052a081ed3d4"
+    }
+  },
+  "source": "gold/district_quadrants.parquet quadrant_rule",
+  "thresholds": {
+    "access_km": 90.29605519274944,
+    "outcome_pct": 87.3
+  },
+  "residual_note": "empty until Model B runs",
+  "rank_rule": "institutional births, lowest first (ties: nearer first)",
+  "quadrant": "cost_or_quality",
+  "output": "reports/cost_or_quality.csv",
+  "rows": 135,
+  "columns": [
+    "rank",
+    "district_key",
+    "state",
+    "district",
+    "quadrant_rule",
+    "label_stability",
+    "emoc_g2_dist_km_p50",
+    "emoc_g2_share_within_60km",
+    "emoc_g2_facilities_in_district",
+    "n_post_offices",
+    "n_post_offices_excluded",
+    "n_post_offices_placeholder",
+    "institutional_birth_pct",
+    "outcome_flag",
+    "public_facility_birth_pct",
+    "public_share_of_institutional_pct",
+    "csection_pct",
+    "csection_below_5pct",
+    "public_facility_csection_pct",
+    "residual",
+    "crosswalk_method",
+    "reliability_notes",
+    "health_insurance_pct",
+    "oop_per_public_delivery_inr",
+    "oop_flag"
+  ]
+}

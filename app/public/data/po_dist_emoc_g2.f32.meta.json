@@ -1,0 +1,10 @@
+{
+  "file": "po_dist_emoc_g2.f32",
+  "rows": 151010,
+  "created": "2026-11-21T19:58:20+00:00",
+  "git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+  "recipe_version": "wp8-mock-v1",
+  "script": "scripts/wp8_mock_app_data.py",
+  "mock": true,
+  "dtype": "float32"
+}
