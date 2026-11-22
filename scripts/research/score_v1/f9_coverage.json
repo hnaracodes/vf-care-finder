@@ -1,0 +1,86 @@
+{
+ "emoc": {
+  "window_min": 120,
+  "beyond_window_pop": 0.166,
+  "beyond_window_po": 0.215,
+  "radius_km": 50,
+  "beyond_radius_pop": 0.506
+ },
+ "trauma": {
+  "window_min": 120,
+  "beyond_window_pop": 0.071,
+  "beyond_window_po": 0.107,
+  "radius_km": 50,
+  "beyond_radius_pop": 0.34
+ },
+ "icu": {
+  "window_min": 120,
+  "beyond_window_pop": 0.038,
+  "beyond_window_po": 0.06,
+  "radius_km": 75,
+  "beyond_radius_pop": 0.094
+ },
+ "nicu": {
+  "window_min": 120,
+  "beyond_window_pop": 0.101,
+  "beyond_window_po": 0.132,
+  "radius_km": 75,
+  "beyond_radius_pop": 0.226
+ },
+ "ct": {
+  "window_min": 120,
+  "beyond_window_pop": 0.046,
+  "beyond_window_po": 0.069,
+  "radius_km": 75,
+  "beyond_radius_pop": 0.138
+ },
+ "cath_lab": {
+  "window_min": 90,
+  "beyond_window_pop": 0.256,
+  "beyond_window_po": 0.31,
+  "radius_km": 100,
+  "beyond_radius_pop": 0.132
+ },
+ "neurosurgery": {
+  "window_min": 150,
+  "beyond_window_pop": 0.038,
+  "beyond_window_po": 0.059,
+  "radius_km": 150,
+  "beyond_radius_pop": 0.018
+ },
+ "burns": {
+  "window_min": 240,
+  "beyond_window_pop": 0.048,
+  "beyond_window_po": 0.076,
+  "radius_km": 200,
+  "beyond_radius_pop": 0.083
+ },
+ "dialysis": {
+  "window_min": 60,
+  "beyond_window_pop": 0.374,
+  "beyond_window_po": 0.438,
+  "radius_km": 50,
+  "beyond_radius_pop": 0.351
+ },
+ "mri": {
+  "window_min": 180,
+  "beyond_window_pop": 0.016,
+  "beyond_window_po": 0.027,
+  "radius_km": 100,
+  "beyond_radius_pop": 0.096
+ },
+ "cardiac_surgery": {
+  "window_min": 240,
+  "beyond_window_pop": 0.004,
+  "beyond_window_po": 0.011,
+  "radius_km": 250,
+  "beyond_radius_pop": 0.001
+ },
+ "oncology": {
+  "window_min": 240,
+  "beyond_window_pop": 0.008,
+  "beyond_window_po": 0.014,
+  "radius_km": 250,
+  "beyond_radius_pop": 0.003
+ }
+}

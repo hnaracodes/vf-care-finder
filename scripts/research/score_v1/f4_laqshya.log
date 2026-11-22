@@ -1,0 +1,17 @@
+links 41 excluded 3
+distinct facilities with a Maternity OT row: 32  uids: 32
+valid on Nov 21: 10  fully certified (ever): 25
+caesarean in any fact: 1
+emoc grades: {0: 9, 1: 22, 2: 1}
+headline: 1 of 32 have caesarean text; Wilson 95% 0.006 to 0.157
+public share: {'public': 31, 'private': 1}
+one-sided 95% CP lower bound, 50/50 correct: 0.942
+one-sided 95% CP lower bound, 49/50 correct: 0.909
+one-sided 95% CP lower bound, 48/50 correct: 0.879
+one-sided 95% CP lower bound, 98/100 correct: 0.938
+one-sided 95% CP lower bound, 95/100 correct: 0.898
+one-sided 95% CP lower bound, 37/41 correct: 0.790
+phone k/n 14 20 [0.48, 0.85]
+phone k/n 16 20 [0.58, 0.92]
+phone k/n 18 20 [0.7, 0.97]
+phone k/n 10 20 [0.3, 0.7]

@@ -79,35 +79,23 @@ Mention counts are rough regex counts over `silver/facts.parquet` (Nov 21), to s
 
 Anything else ("cataract surgery", "snake bite antivenom") goes to the search fallback: keyword retrieval over fact text and specialties, results labeled "keyword match, no service recipe" and never above "claimed" confidence (D026).
 
-## The ranking
+## The ranking (score spec v1-final, D048)
 
-Two steps, both shown to the user (D027).
+Full spec, evidence and sources: `reports/score_methodology_research.md`. Earlier versions (the 0.5/0.3/0.2 additive score, D027; the calibrated-probability plan, D039) are superseded.
 
-Gates, in order:
+Rule: a number that filters or orders results must be measured on our data, cited to a published standard, or a declared design choice shown in "How we decided" with a sensitivity check. Nothing in the score is a probability.
 
-1. Location usable: drop facilities whose location is `excluded_unresolved`.
-2. Within reach: candidates within 3 times the service radius, at most 50.
-3. Recommendable: grade 2 (supported) or 3 (corroborated), and no blocking flag (a major location conflict, or an implausible claim for the facility type). Everything else can still appear, but only in the "also nearby, not verified" list.
+Gates, all required for "recommendable":
 
-Score for recommendable candidates, each part from 0 to 1:
+1. Usable location (not `excluded_unresolved`).
+2. Evidence: grade 2+ under recipe v0.3 (rules aligned to WHO 2009, FBNC 2025, PM-JAY criteria, PMNDP; tags measured on the gold set, shipped macro F1 0.91), with no major trust flag for the line.
+3. Reach: estimated drive time within the service window. Drive time = state factor x 2.30 x km^0.842 minutes, fitted to 934 OSRM free-flow trips (out-of-fold log error SD 0.26). Windows: emoc and trauma 120 min (Lancet Commission 2-hour indicator), cath_lab 90 (informed by ESC 2023), neurosurgery 150, dialysis 60, icu, nicu and ct 120, mri 180, burns 240; planning thresholds, not clinical deadlines.
 
-```
-score = 0.5 * evidence + 0.3 * distance + 0.2 * trust - penalties
-evidence = grade part (supported 0.7, corroborated 1.0) adjusted by evidence strength (thin -0.2, strong +0.1, capped at 1)
-distance = exp(-km / radius)
-trust    = source_confidence (distinct web domains, official website, page recency; vf.recipes)
-penalties = named, each shown: possible merged record 0.15, minor location conflict 0.10
-```
+Order: nearest first by estimated minutes, with one declared evidence allowance: a better-evidenced facility can come first if it is at most 15 minutes further (30 for planned care). Ties are said to be ties.
 
-The card shows each part as a bar with its number and the facts or fields behind it. Ties within 0.02 are broken by distance and said to be ties.
+Abstention: if nothing passes the gates, "No facility in this dataset shows clear evidence of X within about N hours' estimated drive", followed by the nearest recommendable facility beyond the window, claim-only facilities inside it, and any government-listed facility nearby as a dated, cited outside fact.
 
-Abstention: if no recommendable facility is within the radius, the answer is "No reliable option nearby" (D028), followed by the nearest recommendable facility beyond the radius (with its distance) and any claim-only facilities inside it, labeled "claim not supported by the record". The wording is "no facility in this dataset shows reliable evidence of X within N km", never "there is no X".
-
-Confidence label per card, in plain words:
-
-- High: corroborated, strong or moderate evidence, no flags, location precise to the facility or the PIN.
-- Medium: supported, or corroborated with one minor flag.
-- Low: anything recommendable that is thin, flagged, or located only to a district.
+Each card shows the evidence quotes, what is missing, flags, estimated minutes with its band, "Before you go, ask" questions, and any dated outside-list line. Confidence words describe the record (corroborated, supported, thin), never a chance.
 
 ## The trust checks (WP11)
 
@@ -125,7 +113,8 @@ Each check is precision-tested by hand on a sample (WP11) and its numbers are re
 The ML is Model A, the fact tagger (WP3 teacher, WP4 student). It turns 460,000 noisy facts into evidence tags, and it is what grades rest on. Grades stay rules over tags (D010) so every grade can be explained by quoting facts.
 
 - Baseline: regex recipe v0.1, macro F1 0.90 on a 429-fact gold set (13 tags, agent-labeled, hard cases over-sampled). v0.2 adds 11 tags for the new lines; the gold set is extended to cover them.
-- Teacher and student: unblocked (D037). If they run, they ship only if they beat regex on gold F1, per tag. If not, regex ships and the report says so.
+- Teacher and student: done. The teacher (Claude Haiku, 29,300 facts) tied the regex on gold (0.888 vs 0.890); the shipped per-tag mix scores 0.91 (0.90 to 0.93) on 777 agent-labeled gold facts.
+- Drive-time model: fitted to 934 OSRM trips, used for the reach gate (D048). If they run, they ship only if they beat regex on gold F1, per tag. If not, regex ships and the report says so.
 
 Model B (district outcomes) is dropped. The ranking is deliberately not learned: there are no labels for "best facility", and a learned ranker could not explain itself.
 

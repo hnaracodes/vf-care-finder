@@ -1,0 +1,9 @@
+in-sample fit: log(min) = 0.833 + 0.842 log(km); resid SD 0.257; n=934, anchors=30
+leave-one-anchor-out residual SD 0.261; mean bias +0.000
+band exp(+-0.26) covers OSRM 80.2% (target 68%)
+band exp(+-0.51) covers OSRM 94.6% (target 95%)
+band exp(+-0.52) covers 94.6% LOAO
+T=60: LOAO fallback on wrong side of window vs OSRM: 7.1%
+T=90: LOAO fallback on wrong side of window vs OSRM: 11.7%
+T=120: LOAO fallback on wrong side of window vs OSRM: 8.5%
+pairs in hill/NE states: 95 anchors: 3  LOAO mean resid hill 0.353

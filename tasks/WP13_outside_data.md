@@ -1,6 +1,6 @@
 # WP13: Outside data and the calibration model
 
-New Nov 21 (D040). Size: about 8 hours wall-clock with up to 15 agents, run as workflows by the orchestrator. Runs in parallel with the core build. Feeds WP5 (probability mode, D039) and WP8 (simulation, D038).
+New Nov 21 (D040). **Re-scoped by D048: no calibration model tonight.** The track is time-boxed and descriptive: link LaQshya first, then at most 2 more sources (1 agent, 1.5 h each, go/no-go at 00:30), show outside lists only as dated card facts from links with agent-checked precision lower bound >= 0.90, and report descriptive agreement tables with Wilson intervals. Phase T below is retained as future work only. Size: about 8 hours wall-clock with up to 15 agents, run as workflows by the orchestrator. Runs in parallel with the core build. Feeds WP5 (probability mode, D039) and WP8 (simulation, D038).
 
 ## Goal
 

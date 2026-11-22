@@ -1,6 +1,6 @@
 # WP5: Ranking engine
 
-Re-scoped Nov 21 (D023, D027, D028). The old WP5 (post office access tables for the India map) is done and retired: `gold/post_office_access.parquet` and `gold/district_access.parquet` are not maintained. Its distance code (`vf.geo.haversine_km`) is what carries over.
+Re-scoped Nov 21 (D023, D027, D028). **Superseded in part by D048 (score spec v1-final):** gates on recipe v0.3 grades and estimated drive time within a service window, nearest-first order with a 15/30-minute evidence allowance, no additive score and no probability mode. Spec: `docs/04_thesis_and_plan.md`, "The ranking", and `reports/score_methodology_research.md`. The old WP5 (post office access tables for the India map) is done and retired: `gold/post_office_access.parquet` and `gold/district_access.parquet` are not maintained. Its distance code (`vf.geo.haversine_km`) is what carries over.
 
 Size: medium to large (about 3 hours). Depends on WP2 Part B (resolver), WP3 v0.2 grades, WP11 flags. Can start at once against v0.1 grades and stub flags. Feeds WP8, WP9.
 

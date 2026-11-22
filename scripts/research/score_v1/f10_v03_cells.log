@@ -1,0 +1,4 @@
+nicu      v0.3 hospitals g2   533 (need 304) g3  104 (need 1558)  [all records g2+ 694, g3 113]
+emoc      v0.3 hospitals g2   299 (need 542) g3   55 (need 2946)  [all records g2+ 432, g3 59]
+cath_lab  v0.3 hospitals g2   404 (need 402) g3  206 (need 787)  [all records g2+ 691, g3 220]
+dialysis  v0.3 hospitals g2   525 (need 309) g3  417 (need 389)  [all records g2+ 1036, g3 456]

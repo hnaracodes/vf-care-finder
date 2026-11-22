@@ -1,0 +1,9 @@
+['pin', 'state_pin', 'district_pin', 'n_offices', 'share', 'rank', 'is_ambiguous']
+chain domains: 162 records: 462
+hospitals, multi-state rule: groups 635 largest dist:GUJARAT|AHMADABAD 177 3.1%
+Maharashtra    hospitals  834 | district-or-chain largest 17% (dist:MAHARASHTRA|PUNE) | PIN-or-chain largest 1.8% (pin:440012), groups 332
+Karnataka      hospitals  303 | district-or-chain largest 45% (dist:KARNATAKA|BENGALURU URBAN) | PIN-or-chain largest 2.3% (pin:560076), groups 169
+Telangana      hospitals  261 | district-or-chain largest 47% (dist:TELANGANA|HYDERABAD) | PIN-or-chain largest 4.6% (pin:500072), groups 104
+Gujarat        hospitals  574 | district-or-chain largest 31% (dist:GUJARAT|AHMADABAD) | PIN-or-chain largest 3.1% (pin:380015), groups 189
+Tamil Nadu     hospitals  463 | district-or-chain largest 24% (dist:TAMIL NADU|CHENNAI) | PIN-or-chain largest 2.2% (pin:625020), groups 250
+Uttar Pradesh  hospitals  535 | district-or-chain largest 13% (dist:UTTAR PRADESH|LUCKNOW) | PIN-or-chain largest 2.4% (pin:244001), groups 218

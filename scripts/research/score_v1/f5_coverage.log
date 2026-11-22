@@ -1,0 +1,20 @@
+post offices on masked sea pixels: 1032 of 151587  pop weight share: 0.0067
+national median MAP/fallback ratio: 1.006
+multiplier (state median / national), top: {'LAKSHADWEEP': 1024.84, 'ANDAMAN AND NICOBAR ISLANDS': 327.48, 'ARUNACHAL PRADESH': 3.08, 'LADAKH': 1.43, 'MEGHALAYA': 1.38, 'MANIPUR': 1.31, 'TRIPURA': 1.3, 'MIZORAM': 1.28, 'CHHATTISGARH': 1.24, 'NA': 1.23}
+multiplier bottom: {'DELHI': 0.8, 'CHANDIGARH': 0.8, 'GOA': 0.81, 'KERALA': 0.83, 'PUDUCHERRY': 0.84}
+emoc     fallback             false-inside 7.0% (hill/NE 12.6%); false-outside 1.0%
+emoc     fallback x national  false-inside 6.8% (hill/NE 12.4%); false-outside 1.1%
+emoc     fallback x state     false-inside 5.8% (hill/NE 7.4%); false-outside 1.4%
+trauma   fallback             false-inside 6.6% (hill/NE 17.3%); false-outside 0.3%
+trauma   fallback x national  false-inside 6.4% (hill/NE 17.0%); false-outside 0.3%
+trauma   fallback x state     false-inside 4.7% (hill/NE 8.5%); false-outside 0.8%
+dialysis fallback             false-inside 6.2% (hill/NE 11.9%); false-outside 2.8%
+dialysis fallback x national  false-inside 6.0% (hill/NE 11.6%); false-outside 2.9%
+dialysis fallback x state     false-inside 5.7% (hill/NE 7.8%); false-outside 3.4%
+cath_lab fallback             false-inside 7.9% (hill/NE 11.7%); false-outside 1.3%
+cath_lab fallback x national  false-inside 7.6% (hill/NE 11.5%); false-outside 1.4%
+cath_lab fallback x state     false-inside 6.4% (hill/NE 6.7%); false-outside 2.1%
+emoc beyond 120 min [fallback]: post offices 20.2%; population-weighted 15.6%
+emoc beyond 120 min [fallback x state terrain]: post offices 21.8%; population-weighted 16.9%
+emoc beyond 120 min [MAP (reach lens, nearest grade2+ no flags)]: post offices 26.2%; population-weighted 20.8%
+emoc beyond 50 km straight line: post offices 58.5% pop-weighted 50.6%

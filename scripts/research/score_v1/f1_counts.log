@@ -1,0 +1,64 @@
+grades sha 07c52631ee5c fact_tags sha 6fa461a5b77a
+recipe <ArrowStringArray>
+['v0.2']
+Length: 1, dtype: str method <ArrowStringArray>
+['student']
+Length: 1, dtype: str
+grade               0     1     2    3
+service_line                          
+burns            8261  1583    71   74
+cardiac_surgery  9075   360   435  119
+cath_lab         6834  2464   210  481
+ct               6537  2030   446  976
+dialysis         7631  1322   556  480
+emoc             5325  4232   391   41
+icu              7173   543  1850  423
+mri              6663  2392   304  630
+neurosurgery     7681  1106   805  397
+nicu             8513   770   528  178
+oncology         7982  1565   277  165
+trauma           4952  3905   669  463
+drift vs regex v0.2 snapshot:
+                  changed  crossed_gate  g2_rx    g2  g3_rx   g3
+service_line                                                   
+burns                  6             0     75    71     70   74
+cardiac_surgery        9             0    442   435    112  119
+cath_lab              41             0    235   210    456  481
+ct                     0             0    446   446    976  976
+dialysis               0             0    556   556    480  480
+emoc                  42             0    391   391     41   41
+icu                  418           391   1677  1850    375  423
+mri                    0             0    304   304    630  630
+neurosurgery          51             0    848   805    354  397
+nicu                   4             0    532   528    174  178
+oncology               0             0    277   277    165  165
+trauma                41             0    698   669    434  463
+facilities with an obstetric specialty label: 4577
+emoc grade>=2 (caesarean named in a fact): 432  grade1+: 4664
+of obstetric-label facilities, share with caesarean named: 0.092 421
+usable hospitals 5401
+           line   g1   g2  g3  hosp_for_30_g1  hosp_for_30_g2  hosp_for_30_g3
+          burns 1344   62  68             121            2614            2383
+cardiac_surgery  321  396 117             505             410            1385
+       cath_lab 1845  163 447              88             995             363
+             ct 1347  377 713             121             430             228
+       dialysis 1073  508 434             152             319             374
+           emoc 3149  314  40              52             517            4051
+            icu  460 1672 386             353              97             420
+            mri 1638  262 448              99             619             362
+   neurosurgery  954  689 371             170             236             437
+           nicu  638  481 166             254             337             977
+       oncology 1300  249 156             125             651            1039
+         trauma 2825  588 434              58             276             374
+burns g2+ 145 public 16 11.0
+cardiac_surgery g2+ 554 public 33 6.0
+cath_lab g2+ 691 public 41 5.9
+ct g2+ 1422 public 116 8.2
+dialysis g2+ 1036 public 75 7.2
+emoc g2+ 432 public 17 3.9
+icu g2+ 2273 public 148 6.5
+mri g2+ 934 public 77 8.2
+neurosurgery g2+ 1202 public 44 3.7
+nicu g2+ 706 public 50 7.1
+oncology g2+ 442 public 45 10.2
+trauma g2+ 1132 public 56 4.9
