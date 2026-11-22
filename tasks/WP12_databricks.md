@@ -8,6 +8,8 @@ The brief's first requirement: "Run on Databricks Free Edition." The pipeline ru
 
 ## Needs from Hruday
 
+**Done Nov 21 (D042):** CLI authenticated (profile DEFAULT). Catalog `databricks_virtue_foundation_dataset_dais_2026`, schema `virtue_foundation_dataset`, tables `facilities`, `india_post_pincode_directory`, `nfhs_5_district_health_indicators`. Warehouse `ee1fa7958ed99cf2` (Serverless Starter). The items below are kept for reference.
+
 - A Free Edition workspace with the Marketplace listing "Virtue Foundation Dataset (DAIS 2026)" added to a catalog. Write down the catalog and schema names here once known.
 - The Databricks CLI authenticated on this machine. The agent installs the CLI; Hruday runs `! databricks auth login --host <workspace-url>` in the session. Agents never handle the password.
 
