@@ -2,7 +2,7 @@
 
 How facts become evidence tags, and how tags become a facility grade. This is a starting spec. WP3 owns it: change it when the data says so, bump the version, and log the change in `08_decisions_log.md`.
 
-Recipe version: `v0.1` (Nov 21, 2026). v0.1 changes four things in the v0 tagger, listed under "Changes in v0.1" below. The grade rules are unchanged.
+Recipe version: `v0.1` (Nov 21, 2026), with v0.2 specified below for the re-scope (D025). v0.1 changes four things in the v0 tagger, listed under "Changes in v0.1" below. The grade rules are unchanged.
 
 ## Two layers
 
@@ -95,6 +95,64 @@ Basis: the WHO signal functions for comprehensive emergency obstetric care add c
 - corroborated: `icu` and `ventilator`
 
 Baseline counts from regex alone, to sanity-check an implementation: 4,585 facilities with an obstetric specialty, 443 with a C-section mention, 2,156 with nephrology, 1,046 with a dialysis mention, 1,677 with critical care, 2,048 with an ICU mention, 380 with ICU and ventilator.
+
+## v0.2: twelve service lines (draft spec, Nov 21, D025)
+
+Status: spec written at the re-scope; WP3 implements it, settles the regexes by reading facts (not gold labels), and bumps `RECIPE_VERSION` to `v0.2`. The v0.1 tags and the `emoc`, `dialysis`, `icu` rules above are unchanged. Specialty names below were checked against `silver/facilities.parquet` (Nov 21).
+
+### New evidence tags
+
+Starter patterns are loose on purpose: read 50 matches of each before tightening. Negation and absence cues (v0.1, change 4) apply to every new tag. Referral wording ("refer", "tie-up with", "outsourced to") and stated needs ("need for", "proposed", "planned") must not tag.
+
+| Tag | Meaning | Starter pattern | Watch for |
+| --- | --- | --- | --- |
+| `neonatal_resp` | Neonatal breathing support | `\bcpap\b\|bubble cpap\|neonatal ventilat\|infant ventilat` | adult CPAP for sleep apnoea |
+| `cardiac_surgery` | Heart surgery performed | `\bcabg\b\|bypass surgery\|open heart\|valve (replacement\|repair)\|cardiac surg\|cardiothoracic surg\|\bctvs\b` | gastric bypass (bariatric) |
+| `cath_lab` | Cardiac catheterisation | `cath ?lab\|angioplast\|coronary angiograph\|\bptca\b\|\bpci\b\|(coronary\|cardiac) stent` | "angiography" of other organs; peripheral stents |
+| `ccu` | Cardiac intensive care | `\bccu\b\|\biccu\b\|cardiac (intensive\|critical) care\|coronary care unit` | |
+| `mri` | MRI on site | `\bmri\b\|magnetic resonance` | "MRI reports reviewed", referral to a scan centre |
+| `ct` | CT on site | `\bct ?scan\|computed tomograph\|\d+[- ]?slice\|\bmdct\b\|\bhrct\b` | "CT" as an abbreviation for something else; CT-guided referral |
+| `trauma` | Trauma care | `trauma (cent(re\|er)\|care\|unit\|ward\|team\|surgery\|services)\|polytrauma\|accident (and\|&) emergency` | "trauma counselling", "birth trauma", "dental trauma" |
+| `neurosurgery` | Brain or spine surgery performed | `neurosurg\|craniotom\|brain tumou?r (surgery\|removal)\|(spine\|spinal) surgery\|head injur(y\|ies) (management\|surgery\|care)` | neurology consults only |
+| `burns` | Burn care | `\bburns? (unit\|ward\|icu\|care\|centre\|center\|management\|treatment)\|burn injur` | "heartburn", "razor burns" |
+| `chemo` | Chemotherapy given | `chemotherap\|\bchemo\b\|day care chemo` | |
+| `radiotherapy` | Radiotherapy on site | `radiotherap\|radiation (therapy\|oncology)\|\blinac\b\|linear accelerator\|brachytherap\|\bcobalt[- ]?60\b` | radiology (imaging) |
+
+Bonus tags from v0.1 that the new rules reuse: `icu`, `ventilator`, `blood`, `ot`, `anesthesia`, `h24`, `emergency`.
+
+### New grade rules
+
+`claimed` is any listed specialty or any v0.2 tag of a weaker kind; `supported` needs the defining tag; `corroborated` needs the enabling pieces too.
+
+| Line | Claimed (specialties, or tag) | Supported | Corroborated |
+| --- | --- | --- | --- |
+| `nicu` | `neonatologyPerinatalMedicine` | `nicu` | `nicu` and (`neonatal_resp` or `ventilator`) |
+| `cardiac_surgery` | `cardiacSurgery`, `cardiothoracicSurgery` | `cardiac_surgery` | `cardiac_surgery` and (`icu` or `ccu`) and `blood` |
+| `cath_lab` | `cardiology`, `interventionalRadiology` | `cath_lab` | `cath_lab` and (`ccu` or `icu`) and (`h24` or `emergency`) |
+| `mri` | `radiology`, `diagnosticRadiology` | `mri` | `mri` in at least 2 distinct facts, or in 2 different fields |
+| `ct` | `radiology`, `diagnosticRadiology` | `ct` | `ct` in at least 2 distinct facts, or in 2 different fields |
+| `trauma` | `emergencyMedicine`, `orthopedicSurgery`; or tag `emergency` | `trauma` | `trauma` and `ot` and (`blood` or `icu`) and `h24` |
+| `burns` | `burnAndTraumaPlasticSurgery`, `plasticSurgery`, `reconstructivePlasticSurgery` | `burns` | `burns` and `icu` and `ot` |
+| `neurosurgery` | `neurosurgery`, `spineNeurosurgery`, `skullBaseNeurosurgery` | `neurosurgery` | `neurosurgery` and `icu` and `ct` |
+| `oncology` | `medicalOncology`, `surgicalOncology`, `radiationOncology`, `gynecologicalOncology` | `chemo` or `radiotherapy` | `chemo` and `radiotherapy` |
+
+Notes:
+
+- `mri` and `ct` corroboration counts facts, not tags, so the rule engine needs a `min_distinct_facts` or distinct-field condition (WP3 step 2). Imaging has no natural "enabling piece" in this data; two independent mentions are the next best thing.
+- `cath_lab` claimed from `cardiology` is weak on purpose: cardiology is listed by 3,003 facilities. Claimed never makes a facility recommendable (D027), so breadth here only affects the "also nearby, not verified" list.
+- Each group needs a plain-language `requirement` name for the cards ("caesarean section", "blood bank or transfusion", "intensive care unit"), kept next to the rule in `vf.recipes`.
+- These rules are product choices informed by what a service needs, not clinical standards. Before the video quotes one, check its basis (as for the WHO signal functions under `emoc`).
+
+### Evidence strength (per facility and line)
+
+Computed over the facts that satisfied the grade's required groups.
+
+- `thin`: grade 2 or 3 resting on a single fact, or on facts from a record with one source domain and no official website.
+- `strong`: grade 3, at least 3 supporting facts, and at least 2 source domains or an official website.
+- `moderate`: everything else at grade 2 or 3.
+- `none` at grade 0; grade 1 is `thin` by definition.
+
+`description`-only support (no capability, procedure or equipment fact) caps strength at `thin`. Add the description as a fact source with `field = description` only if WP3 finds it adds real support; log the choice.
 
 ## Source confidence (separate from the grade)
 

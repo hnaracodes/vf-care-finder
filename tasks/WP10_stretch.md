@@ -1,33 +1,31 @@
 # WP10: Stretch
 
-Start only after WP9 has a complete first cut on real data. Each item is independent. Pick by what would most improve the video, and log the choice.
+Re-scoped Nov 21 (D023). Start only after WP8 answers the brief's five scenarios on Databricks with real data. Each item is independent. Pick by what most improves a real user's answer, and log the choice. The pre-pivot items (NFHS C-section rates, dentists as screening, who pays) are dropped with the NFHS work.
 
-## A. Too few and too many C-sections (best "surprise" segment)
+## A. Plain-language query
 
-NFHS gives the C-section rate separately for births in private and in public facilities. Test whether the density of private obstetric facilities (or access to them) tracks the private C-section rate across districts, and flag districts with an overall rate under about 5% as lacking surgical access. One chart, one sentence in the video.
+One box: "my sister is pregnant and bleeding, we are in Gaya". A model call (Databricks Foundation Model API if Free Edition allows it, else none) turns it into service and location, shows its reading ("Looks like: emergency C-section, near Gaya, Bihar. Change?"), and the normal pipeline answers. The model never writes card text (D030). Test on 20 phrasings, including Hindi in Latin script.
 
-Care needed: correlation across districts is confounded by wealth. Control for the development proxies, and describe the result as an association.
+## B. LaQshya cross-check for `emoc`
 
-## B. Dentists as an oral cancer screening network
+WP2b already has 1,261 LaQshya-certified public maternity units, 724 of them located on OSM points. For `emoc` scenarios, show how many certified units lie within the radius, and on an abstention, say "N government-certified maternity units are within 50 km but are not in this dataset" with the list's date and source. Outside data is allowed (D015); keep it visibly separate from the dataset's evidence.
 
-4,192 facilities list dentistry. Find districts with high tobacco use (`w15_plus_who_use_any_kind_of_tobacco_pct`, `m15_plus_who_use_any_kind_of_tobacco_pct`), very low oral cancer exams (`women_age_30_49_years_ever_undergone_an_oral_cancer_exam_pct`), and good access to dental clinics. Output a ranked list.
+## C. Claim plausibility model
 
-## C. Claim plausibility model (a third model)
+Predict whether a facility has a given evidence tag from features that do not contain it (type, operator, beds, doctors, other tags, source domains). A low predicted probability strengthens WP11's `implausible_claim`. Report AUC by line; ship only if it beats the type rule.
 
-Predict whether a facility has a given evidence tag from features that do not contain that tag: type, operator, beds, doctors, other tags, number of source domains. Facilities whose claim has a low predicted probability are flagged as implausible, for example a one-doctor clinic that lists an ICU. Adds a trust score to the gold table.
+## D. Genie space
 
-## D. Who pays?
+A Genie space over the WP12 Delta tables so a planner can ask "which districts in Bihar have no corroborated dialysis?" Free, and shows Databricks use. Document its limits: it answers from grades and flags, not from the ranking.
 
-Cross the private share of nearby facilities with `hh_member_covered_health_insurance_pct` and `average_out_of_pocket_expenditure_per_delivery_in_a_public_fac`, plus facilities tagged `scheme`. Explains the "good access, poor outcome" quadrant.
+## E. Vector search fallback
 
-## E. Dialysis and ICU brought up to the obstetrics standard
-
-Full treatment for the second and third service lines in the app and the lists.
+Replace TF-IDF in the `search` fallback with Databricks Vector Search (one endpoint on Free Edition). Ship only if it finds clearly better matches on the fallback scenarios, read by hand.
 
 ## F. Repair the 30 truncated facility rows
 
-Re-attach the junk fragments to the rows they came from. Only worth it if it is clean.
+As before. Only if clean.
 
-## G. Gold table handoff
+## G. Data handoff
 
-Package `silver/facilities.parquet` joined with tags and grades as a single table with a one-page data card, as something Virtue Foundation could load. Do not publish the raw data publicly without checking the listing's terms.
+Grades, evidence and flags as one table with a data card, for Virtue Foundation. Do not publish the raw data publicly without checking the listing's terms.

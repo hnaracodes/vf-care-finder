@@ -1,4 +1,11 @@
-# WP7: Simulator
+# WP7: Simulator (DROPPED)
+
+**Dropped Nov 21 by the re-scope (D023, D024).** The official challenge asks for a facility-finding tool, not a district map. Do not work on this package. It never ran as its own package; the greedy-upgrade view in `app/src/sim.ts` stays in the repo as history and is not maintained.
+
+The original spec follows, unchanged, for reference only.
+
+---
+
 
 Size: medium (about 2 hours). Depends on WP5 and WP6. Feeds WP8, WP9.
 

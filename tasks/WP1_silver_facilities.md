@@ -1,5 +1,7 @@
 # WP1: Silver facilities
 
+**Status Nov 21: done, kept unchanged by the re-scope (D023).** `silver/facilities.parquet` (9,989 rows) and `silver/facts.parquet` exist. The coordinate check against each facility's PIN (`coord_check`, `vf.geo.check_facility_locations`) is the base of WP11's location-conflict flag. Rerun only if WP12 finds the Marketplace tables differ from the local CSV export.
+
 Size: small to medium (about 1 hour). Depends on WP0. Blocks WP3, WP4, WP5.
 
 ## Goal

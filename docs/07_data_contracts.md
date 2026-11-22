@@ -2,13 +2,15 @@
 
 The files each work package must produce. These are the interfaces between agents. If you need to change one, update this file in the same commit and add a line to `08_decisions_log.md`, because another agent is coding against it.
 
+**Contract v2 (Nov 21, re-scope D023).** New: `silver/places.parquet` (WP2 B), `gold/facility_flags.parquet` and `gold/facility_duplicates.parquet` (WP11), the app bundle (WP12). Changed: `service_line` takes 12 values; `capability_grades` gains structured evidence and evidence strength. Retired (D024, nothing new may read them): `silver/nfhs*.parquet`, `silver/district_crosswalk*` as an NFHS mapping, `gold/post_office_access.parquet`, `gold/district_access.parquet`, `gold/district_quadrants.parquet`, `gold/scenarios.json`, and the "App data (retired)" section at the end.
+
 Conventions:
 
 - Shared data lives under `vf.paths.data_dir()`: one folder for all worktrees, not versioned.
 - Parquet for tables, written atomically (write to a temp name, then rename).
 - `facility_id` is the raw `unique_id`. After WP1 it is unique.
 - `district_key` is `"<NFHS state_ut>|<NFHS district_name>"`, exactly as spelled in the NFHS file. It is the canonical district id everywhere downstream.
-- `service_line` is one of `emoc`, `dialysis`, `icu`.
+- `service_line` is one of `emoc`, `nicu`, `dialysis`, `icu`, `cardiac_surgery`, `cath_lab`, `mri`, `ct`, `trauma`, `burns`, `neurosurgery`, `oncology` (D025). Display names, radii and recipe text live in `vf.services`, nowhere else.
 - Distances are straight-line kilometres.
 - Each producing script also writes `<output>.meta.json` with row count, created time, git commit, and recipe or model version.
 
@@ -121,12 +123,65 @@ One row per facility per service line. WP3 writes it first with `method = regex`
 | `grade` | int | 0 to 3 |
 | `grade_label` | str | `none`, `claimed`, `supported`, `corroborated` |
 | `tags_present` | list[str] | |
-| `evidence` | list[str] | up to 5 fact texts that justify the grade |
+| `evidence` | list[str] | up to 5 fact texts that justify the grade (kept for v0.1 readers) |
+| `evidence_items` | list[struct] | v2: one item per satisfied recipe group: `{requirement, tag, fact_id, field, text}`. `requirement` is the plain-language group name from the recipe ("caesarean section", "blood bank or transfusion"). `text` is the original fact text, verbatim from `silver/facts.parquet`; `field` is `capability`, `procedure`, `equipment` or `description` |
+| `missing_for_next` | list[str] | v2: plain-language requirements of the next grade up that no fact satisfies; empty at grade 3 |
+| `n_supporting_facts` | int | v2: distinct facts carrying any tag that counts toward this line's grade |
+| `evidence_strength` | str | v2: `strong`, `moderate`, `thin`, or `none` at grade 0 (rule in `06_capability_recipes.md`, v0.2) |
 | `source_confidence` | float | 0 to 1, see the recipes doc |
 | `method` | str | |
 | `recipe_version` | str | |
 
-### `gold/post_office_access.parquet` (WP5)
+### `gold/facility_flags.parquet` (WP11)
+
+One row per facility per flag raised; a facility with no flags has no rows.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `facility_id` | str | |
+| `flag` | str | `location_conflict`, `possible_merge`, `implausible_claim` |
+| `service_line` | str, nullable | set for `implausible_claim`; null when the flag is about the whole record |
+| `severity` | str | `minor` (penalty and warning) or `major` (blocking for recommendation) |
+| `signal` | str | which rule fired, for example `coord_unresolved`, `state_mismatch`, `name_joins_two`, `shared_website`, `type_cannot_offer` |
+| `reason` | str | one plain sentence for the card: "The record's location is 140 km from its PIN code's area." |
+| `quote` | str, nullable | the record text that triggered it, verbatim |
+| `check_version` | str | |
+
+### `gold/facility_duplicates.parquet` (WP11)
+
+Pairs `facility_id_a`, `facility_id_b` (a < b), `distance_km`, `name_score`, `signal`, `keep` (the id WP5 shows; the other is "also listed as").
+
+### `silver/places.parquet` (WP2 B)
+
+The gazetteer for the location resolver. One row per place.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `place_id` | str | `<kind>:<key>` |
+| `kind` | str | `pin`, `district`, `post_office`, `city` |
+| `name`, `name_norm` | str | display name, and the normalised match key |
+| `state`, `district` | str | PIN-directory spelling |
+| `pin` | str, nullable | for `pin` and `post_office` |
+| `lat`, `lon` | float | inside India |
+| `precision_km` | float | at least 2; how far the true place may be from the point |
+| `n_offices` | int | offices behind the point |
+| `note` | str, nullable | for example "centre from all offices: no head or sub office" |
+
+### The app bundle (WP12, read by WP8)
+
+`dbapp/bundle/` in the checkout, committed only if under about 50 MB and free of raw text dumps beyond the quoted evidence; otherwise built at deploy time by `scripts/wp12_bundle.py`.
+
+| File | Contents |
+| --- | --- |
+| `manifest.json` | row counts, recipe and check versions, git commit, created time, default weights and radii |
+| `facilities.parquet` | `facility_id`, `name`, `facility_type`, `operator_type`, `lat`, `lon` (null when unusable), `location_precision_km`, `location_note`, `city_raw`, `state_raw`, `pin`, `official_website`, `source_domains`, `n_source_domains`, `source_confidence` |
+| `grades.parquet` | `capability_grades` columns for all 12 lines |
+| `flags.parquet`, `duplicates.parquet` | as above |
+| `places.parquet` | as above |
+| `post_offices.parquet` | `lat`, `lon`, `pin` for non-suspect geocoded offices, one per placeholder point; for the map context and the trip view |
+| `keyword_index/` | fitted TF-IDF vectoriser and matrix over distinct fact texts plus specialty names, and the fact id map, for the `search` fallback |
+
+### `gold/post_office_access.parquet` (WP5, retired)
 
 One row per geocoded post office. Columns: `po_id`, `district_key`, `lat`, `lon`, then for each service line and each minimum grade 1 to 3: `dist_km_<line>_g<k>` and `nearest_facility_<line>_g<k>`, then `coord_suspect` (bool), then `coord_placeholder` (bool).
 
@@ -134,13 +189,13 @@ One row per geocoded post office. Columns: `po_id`, `district_key`, `lat`, `lon`
 
 `coord_placeholder` is true for an office whose exact point is shared by 10 or more geocoded offices from 3 or more PINs (`vf.geo.placeholder_points`). Different PINs are different delivery areas, so such a point (usually the district town) is a placeholder, not where those offices are: in Bihar's Samastipur 358 of 376 offices, from 35 PINs, sit on one point. About 10,000 offices on about 300 points. Their rows keep the point's distances. WP5's district roll-up and national headline numbers count each placeholder point once per district instead of once per office, so a consumer computing a statistic from this table must do the same (keep one row per `district_key` and placeholder point), or show placeholder offices separately. The two flags are independent; filter `coord_suspect` first.
 
-### `gold/district_access.parquet` (WP5)
+### `gold/district_access.parquet` (WP5, retired)
 
 One row per district per service line per minimum grade. Columns: `district_key`, `service_line`, `min_grade`, `n_post_offices`, `dist_km_p50`, `dist_km_p75`, `dist_km_p90`, `share_within_30km`, `share_within_60km`, `n_facilities_in_district`, `n_post_offices_excluded`, `n_post_offices_placeholder`, `n_placeholder_points`.
 
 `n_post_offices` counts the district's offices with `coord_suspect == false`; `n_post_offices_excluded` is its `coord_suspect` offices, left out of every number. `n_post_offices_placeholder` is how many of the `n_post_offices` sit on placeholder points (`coord_placeholder`), and `n_placeholder_points` how many distinct such points they sit on. Every percentile and share is over the non-suspect offices with each placeholder point counted once, that is over `n_post_offices - n_post_offices_placeholder + n_placeholder_points` values. WP6 adds a reliability note when more than half of a district's `n_post_offices` are placeholder offices.
 
-### `gold/district_quadrants.parquet` (WP6)
+### `gold/district_quadrants.parquet` (WP6, retired)
 
 One row per district per service line.
 
@@ -159,11 +214,13 @@ One row per district per service line.
 
 Also `gold/model_b_report.json`: features, cross-validation scheme, error with and without access features, and the thresholds used.
 
-### `gold/scenarios.json` (WP7)
+### `gold/scenarios.json` (WP7, retired)
 
 For each service line and radius: an ordered list of sites with `facility_id` (or `lat`, `lon` for a new site), `kind` (`upgrade` or `new`), `marginal_gain`, `cumulative_coverage`. Two variants per setting: `naive` and `desert_aware`.
 
-## App data (committed, small)
+## App data (retired)
+
+The India-wide map's data files. Retired by D023 and D024; kept so the old app still builds.
 
 Written by WP7 or a small export script into `app/public/data/` in the checkout, and committed so the app can be hosted. Keep the total under about 15 MB.
 

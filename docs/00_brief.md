@@ -11,16 +11,36 @@
 
 Source for the above: https://cmudsc.netlify.app/competitions (read Nov 21, 2026).
 
+## The official challenge (read Nov 21, re-scope D023)
+
+Source: the organizers' challenge document, "CMU Datathon - Fall 2026 - Challenge" (published Google Doc, link from Hruday). Summary, with short quotes:
+
+- Title: "Your challenge this weekend: find the right care".
+- The user: someone who needs a specific kind of care from a place. The doc's examples: a community health worker in rural Bihar who needs dialysis for a patient; an NGO coordinator in Maharashtra finding a hospital for a high-risk delivery; a district planner finding trauma destinations near a highway accident hotspot. In the dataset section: "Where can a patient get dialysis near Jaipur?" and "Which hospital near Lucknow can handle an emergency C-section?"
+- The mission: take two inputs, a service (examples: dialysis, emergency C-section, NICU, cardiac surgery, MRI, burn care) and a location (city, district, PIN code, or coordinates), and return the best facility option or options with an evidence-based explanation. Any format: app, dashboard, Genie space, notebook, agent, or a mix. Think about the audience that would really use it.
+- The one rule: show reasoning. For every recommendation answer WHY (what evidence says this facility exists, offers the service, and is the best choice for the location) and HOW (what logic, scoring, model or rules turned about 10,000 records into the answer, and what was traded off). A build that cannot explain itself does not meet the requirements, "however good it looks."
+- The submission must:
+  - "Run on Databricks Free Edition."
+  - "Use the provided facility dataset."
+  - "Support a clear non-technical user workflow."
+  - "Cite the underlying facility text for any important claim, recommendation, score, or ranking."
+  - "Communicate uncertainty instead of presenting weak evidence as fact."
+- On the data: treat every field as a claim to verify. Some records merge several facilities; some have locations and capabilities that contradict each other; some services have little support. "A confident wrong answer can cost a patient hours." Field coverage per the doc: description 100%, capability 99.7%, procedure 92.5%, equipment 77.0%, year established 47.8%, number of doctors 36.4%, capacity 25.2%.
+- Not stated in the doc: judging criteria or weights, submission format, length, or deadline time.
+
+## Databricks Free Edition constraints (D034)
+
+From the Databricks docs, Nov 21; recheck before deploying. Serverless compute only. About 3 apps per account. An app stops 24 hours after it was last started or redeployed, so restart it before judging. One Vector Search endpoint. Non-commercial use only.
+
 ## The deliverable
 
-- A submitted video. It is not a live demo.
-- Due Sunday, Nov 22, 2026. The exact time is not confirmed.
-- Hruday wants the video built around an interactive, simulation-style map. See `09_presentation.md`.
+- The tool itself, as a Databricks App on Free Edition (D023, D033).
+- Hruday's earlier plan was a submitted video due Sunday, Nov 22 (D005). The official doc does not mention a video. Default: keep a video of the tool (about 3 minutes, plus a 90-second cut), the app, and the repo.
 
 ## Who
 
-- Hruday Nara (CMU CS, GitHub `hnaracodes`). Whether he has teammates is not confirmed.
-- The work is done by Claude Code agents running unattended overnight on Nov 21, with Hruday checking in.
+- Hruday Nara (CMU CS, GitHub `hnaracodes`). Whether Hruday has teammates is not confirmed.
+- The work is done by Claude Code agents, partly unattended, with Hruday checking in.
 
 ## Open questions for Hruday
 
@@ -28,13 +48,13 @@ Agents: do not block on these. Use the stated default, and log it in `08_decisio
 
 | Question | Default until answered |
 | --- | --- |
-| Exact submission deadline and time zone | Treat Sunday 12:00 noon ET as the cutoff, with the video recorded by 09:00 ET |
-| Video length limit | Plan for 3 minutes, with a 90-second cut ready |
-| Judging rubric | Assume insight, rigor, and communication count about equally |
-| What else is submitted besides the video (repo, slides, link) | Prepare a public repo link and a hosted link to the map |
+| Exact submission deadline and time zone | Treat Sunday 12:00 noon ET as the cutoff, with everything ready by 09:00 ET |
+| What is submitted (video, app link, repo) and length limits | The official doc does not say. Prepare the app URL, the repo, and a 3-minute video with a 90-second cut |
+| Judging rubric | Not in the official doc. Assume the five "must" requirements are pass or fail, and the WHY and HOW explanation decides the rest |
 | Are external datasets allowed | **Answered Nov 21 (D015): yes, organizers encourage outside data and scraping.** Flag each one used |
-| Are paid LLM APIs allowed, and what is the budget | Assume yes, with a hard cap of 30 USD total. Track spend |
+| Are paid LLM APIs allowed, and what is the budget | Assume yes for offline labeling only, with a hard cap of 30 USD total. `ANTHROPIC_API_KEY` in `.env` is empty as of Nov 21 20:15 (D036) |
 | Teammates | Assume solo |
+| Databricks workspace and Marketplace catalog name | Needed for WP12. Hruday sets up Free Edition, adds the listing, and runs `databricks auth login` |
 
 ## What the organizers signal they want
 

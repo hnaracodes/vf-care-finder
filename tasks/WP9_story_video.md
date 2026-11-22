@@ -1,49 +1,47 @@
-# WP9: Story, video, submission
+# WP9: Demo, video, submission
 
-Size: medium (about 2 hours of agent work, plus Hruday's recording). Depends on everything. Last.
+Re-scoped Nov 21 (D023). Size: medium (about 2 hours of agent work, plus Hruday's recording). Depends on WP8 and WP12. Last.
 
 ## Goal
 
-A finished, truthful story: real numbers in every beat, a voiceover script, a recorded take, and the submission materials.
+Submission materials that show the tool answering real questions truthfully: a scripted demo on the deployed app, a short video if Hruday still submits one, and a write-up that answers the brief's WHY and HOW for a reader who never opens the code.
+
+The official brief states no submission format, length or judging rubric (`00_brief.md`). Until Hruday says otherwise: a video of about 3 minutes with a 90-second cut, the app URL, and the repo.
 
 ## Inputs
 
-- `docs/09_presentation.md` (draft beats, checklist)
-- All gold outputs, `gold/model_a_report.json`, `gold/model_b_report.json`, the three lists in `reports/`
-- The app from WP8 on real data
+- The deployed app (WP8, WP12)
+- `reports/ranking_scenarios.md` (WP5), `reports/trust_checks.md` (WP11), `reports/model_a_results.md` (WP3, WP4), `reports/resolver_eval.md` (WP2)
+- `docs/09_presentation.md` (demo beats and checklist)
 
 ## Outputs
 
-- `app/public/data/story.json` with final beats and captions
-- `reports/voiceover_script.md`: the words for each beat, timed
-- `reports/findings.md`: one page with the headline numbers and where each came from (file and column), so every claim in the video can be traced
-- `reports/methods_and_limits.md`: half a page
-- A screen recording of the autoplay take, if the agent can record; otherwise clear instructions for Hruday
-- `README.md` updated for a public reader
+- `reports/demo_script.md`: the queries to type, in order, with what each shows and the voiceover, timed
+- `reports/findings.md`: every number in the demo and write-up with its source file
+- `reports/methods_and_limits.md`: one page answering WHY and HOW (recipes, gates, score, abstention, checks, evaluation numbers, limits)
+- `README.md` rewritten for a public reader: what the tool does, how to run it locally and on Databricks, how it decides
+- A screen recording, if the agent can record; otherwise instructions for Hruday
 
 ## Steps
 
-1. Pick the opening district for beats 1 and 2: a real post office where the nearest claimed obstetric facility is close and the nearest evidenced one is far. Choose a striking but typical case, and say how typical it is (what share of post offices have a gap at least that large).
-2. Fill every bracketed value in the draft beats from the data. Write each number into `reports/findings.md` with its source.
-3. Check the story against the results. If a planned beat is not supported (for example Model B shows no signal), rewrite the beat to say what was found. Do not bend the result to fit the script.
-4. Write the voiceover script. About 130 to 150 words per minute. Read it aloud against the autoplay timings and adjust the timings.
-5. Make the 90-second cut.
-6. Write the methods and limits half-page, and make sure the same limits appear on the limits card in the app.
-7. Final checks from the recording checklist in `docs/09_presentation.md`.
-8. Hand off to Hruday: a short message with the hosted link, the script, what to record, and anything he should double-check before submitting.
+1. Choose the demo queries from the scenario suite, not new ones. Use the brief's own examples first. Include one abstention and one case where a trust flag changes the answer. Say in `findings.md` how typical each one is (for example "the nearest claimed facility had no supporting evidence in X of the 15 scenarios").
+2. Every number in the script comes from the app or a report and goes into `findings.md` with its source.
+3. If a planned beat does not hold (the scenario check shows wrong answers, a flag is imprecise), rewrite the beat to say what was found.
+4. Script at about 140 words per minute. Read it against the real app. Make the 90-second cut.
+5. Restart the app (D034) shortly before Hruday records or submits.
+6. Hand off to Hruday: URL, script, what to record, what to double-check.
 
 ## Acceptance checks
 
-- [ ] No bracketed placeholder remains in `story.json` or the script
-- [ ] Every number in the script appears in `reports/findings.md` with a source file
-- [ ] The video contains no mock data
-- [ ] Limits are stated in the video, not only in the repo
-- [ ] Both cuts fit their time targets when read aloud
-- [ ] Writing has no em-dashes and no filler (Hruday's preference)
+- [ ] Every number in the script is in `findings.md` with a source
+- [ ] Demo contains no mock data and no query invented to look good
+- [ ] Limits are said in the video and shown in the app, not only in the repo
+- [ ] Both cuts fit their time when read aloud
+- [ ] No em-dashes, no filler (Hruday's preference)
 
 ## Pitfalls
 
-- Do not write "X has no facility that can do a C-section". Write "no facility in this dataset shows evidence of it".
-- Do not present straight-line distance as travel time.
-- If the gold set was agent-labeled, say so in the methods note.
+- Write "no facility in this dataset shows evidence of", never "there is no".
+- Straight-line distance is not travel time.
+- The gold set and flag reviews were agent-labeled. Say so.
 - Do not submit anything on Hruday's behalf. Prepare everything and stop.

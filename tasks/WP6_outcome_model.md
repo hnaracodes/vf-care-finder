@@ -1,4 +1,11 @@
-# WP6: Outcome model and quadrants (Model B)
+# WP6: Outcome model and quadrants (Model B) (DROPPED)
+
+**Dropped Nov 21 by the re-scope (D023, D024).** The official challenge asks for a facility-finding tool, not a district map. Do not work on this package. Its code, outputs and tests stay in the repo as history and are not maintained. What it found is in D022 and `reports/wp6_rule_quadrants.md`.
+
+The original spec follows, unchanged, for reference only.
+
+---
+
 
 Size: medium to large (about 2.5 hours). Depends on WP2 and WP5. Feeds WP7, WP8, WP9.
 
