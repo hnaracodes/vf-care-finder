@@ -399,6 +399,24 @@ def _protocol(tmp_path, body_extra=""):
     return p, pts
 
 
+def _draft_amendment(number: int = 3) -> str:
+    """The reach amendment exactly as drafted (the text between the draft's two
+    rules), with its placeholder number filled in."""
+    t = (ROOT / "reports" / "eval_sealed_amendment_reach_draft.md").read_text(encoding="utf-8")
+    parts = t.split("\n---\n")
+    assert len(parts) >= 3, "the draft keeps the amendment between two '---' rules"
+    return parts[1].replace("## Amendment N:", f"## Amendment {number}:", 1)
+
+
+def _add_reach(p, number: int = 3, edit=None) -> str:
+    """Append the drafted reach amendment below the last seal and seal it."""
+    txt = _draft_amendment(number)
+    if edit:
+        txt = edit(txt)
+    p.write_text(p.read_text() + "\n" + txt.strip("\n") + "\n")
+    return E.seal_protocol(p)
+
+
 def _clean_git(monkeypatch, clean=True):
     monkeypatch.setattr(E, "git_guard", lambda root, rel_paths=E.GUARDED_PATHS: {
         "git_commit": "abc", "clean": clean, "tracked": {}, "porcelain": [] if clean else ["?? x"]})
@@ -411,17 +429,19 @@ def test_reseal_after_edit_is_caught_by_the_pinned_chain(tmp_path, monkeypatch):
     _clean_git(monkeypatch)
     st = E.protocol_status(p, expected=(h,))
     assert st["ok"] and st["pinned"] and st["chain"] == [h]
-    E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h,))  # passes
-    # the review's attack: edit the body, delete the seal line, seal again
-    body = E.protocol_body(p.read_text()).replace("at most 10 per query", "at most 3 per query")
+    hr = _add_reach(p)
+    E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h, hr))  # passes
+    # the review's attack: edit the text under the last seal, delete that seal line, seal again
+    body = E.protocol_body(p.read_text()).replace("the walk cap of 10", "the walk cap of 3")
+    assert body != E.protocol_body(p.read_text())
     p.write_text(body)
     h2 = E.seal_protocol(p)
-    st = E.protocol_status(p, expected=(h,))
-    assert st["ok"] and not st["pinned"] and h2 != h
+    st = E.protocol_status(p, expected=(h, hr))
+    assert st["ok"] and not st["pinned"] and h2 != hr
     with pytest.raises(SystemExit, match="seal chain"):
-        E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h,))
+        E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h, hr))
     # dev runs only warn
-    E.check_sealed_inputs("dev", False, root=tmp_path, protocol=p, expected=(h,))
+    E.check_sealed_inputs("dev", False, root=tmp_path, protocol=p, expected=(h, hr))
     # deleting a sealed amendment is caught too (the chain is shorter than pinned)
     (tmp_path / "x").mkdir()
     p2, _ = _protocol(tmp_path / "x")
@@ -436,13 +456,14 @@ def test_reseal_after_edit_is_caught_by_the_pinned_chain(tmp_path, monkeypatch):
 def test_sealed_picks_and_judge_refuse_uncommitted_code(tmp_path, monkeypatch):
     p, pts = _protocol(tmp_path)
     h = E.seal_protocol(p)
+    hr = _add_reach(p)
     monkeypatch.setattr(E, "read_points", lambda: pts)
     _clean_git(monkeypatch, clean=False)
     for stage in ("picks", "judge"):
         with pytest.raises(SystemExit, match="commit"):
-            E.check_sealed_inputs("sealed", True, stage=stage, root=tmp_path, protocol=p, expected=(h,))
-    E.check_sealed_inputs("sealed", True, stage="score", root=tmp_path, protocol=p, expected=(h,))  # warns
-    E.check_sealed_inputs("dev", False, stage="picks", root=tmp_path, protocol=p, expected=(h,))
+            E.check_sealed_inputs("sealed", True, stage=stage, root=tmp_path, protocol=p, expected=(h, hr))
+    E.check_sealed_inputs("sealed", True, stage="score", root=tmp_path, protocol=p, expected=(h, hr))  # warns
+    E.check_sealed_inputs("dev", False, stage="picks", root=tmp_path, protocol=p, expected=(h, hr))
 
 
 def test_git_guard_on_a_real_repo(tmp_path):
@@ -454,7 +475,9 @@ def test_git_guard_on_a_real_repo(tmp_path):
     (tmp_path / "reports").mkdir()
     (tmp_path / "scripts").mkdir()
     (tmp_path / "src" / "vf").mkdir(parents=True)
-    for f in ("reports/eval_sealed_protocol.md", "scripts/eval_sealed.py", "src/vf/rank.py"):
+    (tmp_path / "reference").mkdir()
+    for f in ("reports/eval_sealed_protocol.md", "scripts/eval_sealed.py", "src/vf/rank.py", E.TERRAIN_PATH,
+              E.SEA_PIXEL_PATH):
         (tmp_path / f).write_text("x\n")
     assert not E.git_guard(tmp_path)["clean"]  # nothing committed yet
     run("add", "-A")
@@ -467,7 +490,10 @@ def test_git_guard_on_a_real_repo(tmp_path):
     g = E.git_guard(tmp_path)
     assert not g["clean"] and any("rank.py" in l for l in g["porcelain"])
     hs = E.code_hashes(tmp_path)
-    assert set(hs) == {"scripts/eval_sealed.py", "reports/eval_sealed_protocol.md", "src/vf/rank.py"}
+    assert set(hs) == {"scripts/eval_sealed.py", "reports/eval_sealed_protocol.md", "src/vf/rank.py", E.TERRAIN_PATH,
+                       E.SEA_PIXEL_PATH}
+    (tmp_path / E.TERRAIN_PATH).write_text("changed\n")  # the terrain factors are guarded too
+    assert any("terrain" in l for l in E.git_guard(tmp_path)["porcelain"])
 
 
 def test_sealed_judge_settings_are_the_protocols(tmp_path, monkeypatch):
@@ -479,10 +505,16 @@ def test_sealed_judge_settings_are_the_protocols(tmp_path, monkeypatch):
         E.check_judges(E.judge_specs({}, "single"), p)
     assert E.judge_specs({}) == E.PROTOCOL_JUDGES
     monkeypatch.setattr(E, "protocol_path", lambda: p)
-    info = {"protocol": {"sha256": "s"}, "code_sha256": {"scripts/eval_sealed.py": "1"}}
-    doc = {"protocol": {"sha256": "s"}, "code_sha256": {"scripts/eval_sealed.py": "1"}}
+    info = {"protocol": {"sha256": "s"}, "code_sha256": {"scripts/eval_sealed.py": "1"},
+            "reach_amendment": {"seal": "r", "active": True}}
+    doc = {"protocol": {"sha256": "s"}, "code_sha256": {"scripts/eval_sealed.py": "1"},
+           "reach": {"rule": "window", "amendment": {"seal": "r"}}}
     ok = SimpleNamespace(walk_cap=E.WALK_CAP, judges="mixed")
     E.check_sealed_judge_settings(ok, doc, info, E.PROTOCOL_JUDGES)
+    for bad in ({**doc, "reach": {"rule": "radius"}}, {k: v for k, v in doc.items() if k != "reach"},
+                {**doc, "reach": {"rule": "window", "amendment": {"seal": "other"}}}):
+        with pytest.raises(SystemExit, match="reach amendment"):
+            E.check_sealed_judge_settings(ok, bad, info, E.PROTOCOL_JUDGES)
     with pytest.raises(SystemExit, match="walk-cap"):
         E.check_sealed_judge_settings(SimpleNamespace(walk_cap=3, judges="mixed"), doc, info, E.PROTOCOL_JUDGES)
     with pytest.raises(SystemExit, match="mixed"):
@@ -618,3 +650,371 @@ def test_rejudge_refuses_the_sealed_half():
     args = SimpleNamespace(split="sealed", unseal=True, prompt_q1="j2", units_file="x")
     with pytest.raises(SystemExit, match="dev half only"):
         E.cmd_rejudge(args)
+
+
+# ---------------------------------------------------------------------------- reach amendment (D048 windows)
+
+KM_PER_DEG = 111.195  # haversine degree of latitude on vf.geo's sphere, close enough for these tests
+
+
+def test_drive_minutes_formula_monotone_and_window_km_inverse():
+    assert abs(float(E.drive_minutes(10.0, 1.0)) - 2.30 * 10 ** 0.842) < 1e-9
+    assert abs(float(E.drive_minutes(10.0, 2.0)) - 2 * 2.30 * 10 ** 0.842) < 1e-9
+    km = np.array([0.0, 1.0, 5.0, 50.0, 200.0, np.nan])
+    m = E.drive_minutes(km, 1.11)
+    assert np.all(np.diff(m[:5]) > 0) and np.isnan(m[5])  # minutes rise strictly with km for one origin
+    for w in E.WINDOW_MIN.values():
+        for f in (0.8, 1.0, 3.08):
+            assert abs(float(E.drive_minutes(E.window_km(w, f), f)) - w) < 1e-6
+    # the draft's reading table (km at factor 0.80, 1.00, 3.08)
+    assert [round(E.window_km(120, f)) for f in (0.8, 1.0, 3.08)] == [143, 110, 29]
+    assert [round(E.window_km(60, f)) for f in (0.8, 1.0, 3.08)] == [63, 48, 13]
+    assert E.ALLOWANCE_MIN["mri"] == 30 and E.ALLOWANCE_MIN["emoc"] == 15 and E.ALLOWANCE_MIN["oncology"] == 30
+
+
+def test_terrain_factor_by_origin_state_and_blank_refuses():
+    terrain = E.load_terrain()
+    assert E.state_factor(terrain, "Jammu And Kashmir") == E.state_factor(terrain, "JAMMU AND KASHMIR") == 0.85
+    assert E.state_factor(terrain, "ARUNACHAL PRADESH") == 3.08
+    for st in ("ANDAMAN AND NICOBAR ISLANDS", "LAKSHADWEEP", "NOWHERE"):
+        with pytest.raises(SystemExit, match="terrain factor"):
+            E.state_factor(terrain, st)
+    assert E.sha256_file(ROOT / E.TERRAIN_PATH) == E.TERRAIN_SHA256
+    assert E.sha256_file(ROOT / E.SEA_PIXEL_PATH) == E.SEA_PIXEL_SHA256
+
+
+def test_every_sampled_state_has_a_factor():
+    if not E.points_path().exists():
+        pytest.skip("points not drawn yet")
+    terrain = E.load_terrain()
+    for st in E.read_points()["state"].unique():
+        assert E.state_factor(terrain, st) > 0
+
+
+def _win_ctx():
+    """Facilities due north of (20, 78) at known km. a: grade 2 at 60 km; b:
+    specialty only at 30 km; c: grade 2 at 100 km; d: grade 2 at 130 km; e:
+    grade 1 keyword at 105 km; f: no location."""
+    km = np.array([60.0, 30.0, 100.0, 130.0, 105.0, np.nan])
+    ids = ["a", "b", "c", "d", "e", "f"]
+    idx = SimpleNamespace(
+        id_to_pos={k: i for i, k in enumerate(ids)},
+        lines={"emoc": SimpleNamespace(grade=np.array([2, 0, 2, 2, 1, 3]))},
+        dup_canon={}, lat=20.0 + km / KM_PER_DEG, lon=np.full(len(km), 78.0),
+        fac=pd.DataFrame({"facility_id": ids, "name": [i.upper() for i in ids]}))
+    n = len(ids)
+    return E.Ctx(idx=idx, rank_mod=None, silver=pd.DataFrame({"description": [None] * n}), facts_by_pos={},
+                 fact_text={}, spec_mask={"emoc": np.array([False, True, False, False, False, False])},
+                 kw_mask={"emoc": np.array([False, False, False, False, True, False])})
+
+
+TERRAIN = {"FLAT": 1.0, "HILL": 3.08, "ISLE": None}
+
+
+def _q(state="FLAT"):
+    return {"query_id": f"dev-1-emoc-{state}", "po_id": 1, "split": "dev", "service": "emoc", "radius_km": 50.0,
+            "lat": 20.0, "lon": 78.0, "office_name": "X", "pin": "100001", "state": state, "district": "D"}
+
+
+def test_baselines_take_fewest_minutes_inside_the_window():
+    ctx = _win_ctx()
+    from vf.geo import haversine_km
+    d = haversine_km(20.0, 78.0, ctx.idx.lat, ctx.idx.lon)
+    flat = E.reach_for(_q("FLAT"), "window", TERRAIN)
+    hill = E.reach_for(_q("HILL"), "window", TERRAIN)
+    assert flat.window_min == 120 and flat.factor == 1.0 and abs(flat.limit_km - 109.6) < 0.2
+    # radius 50 km: any_fact abstains (a is at 60 km); the window (about 110 km at factor 1) takes a
+    assert E.tool_any_fact(ctx, "emoc", d, 50.0) is None
+    assert E.tool_any_fact(ctx, "emoc", d, flat) == 0
+    assert E.tool_specialty(ctx, "emoc", d, flat) == 1
+    # a hill origin (factor 3.08, about 29 km): both abstain, the same rule for every tool
+    assert E.tool_any_fact(ctx, "emoc", d, hill) is None and E.tool_specialty(ctx, "emoc", d, hill) is None
+    # the judge pool under the window: signal and inside the window, nearest first; no-location f never
+    assert E.judge_pool(ctx, "emoc", d, flat) == [1, 0, 2, 4]
+    assert E.judge_pool(ctx, "emoc", d, 50.0) == [1]
+    with pytest.raises(SystemExit):
+        E.reach_for(_q("ISLE"), "window", TERRAIN)
+
+
+class _FakeRank:
+    """rank() returns cards for d (130 km, outside the window) then a then c,
+    each reporting its own minutes and window like the frozen ranker should."""
+
+    def __init__(self, minutes_off=0.0, window=120, report=True, status="ok"):
+        self.minutes_off, self.window, self.report, self.status = minutes_off, window, report, status
+
+    def rank(self, idx, line, res, k=3):
+        cards = []
+        for fid, km in (("d", 130.0), ("a", 60.0), ("c", 100.0)):
+            c = {"facility_id": fid, "evidence": []}
+            if self.report:
+                c.update(minutes=float(E.drive_minutes(km, 1.0)) + self.minutes_off, window_min=self.window)
+            cards.append(c)
+        out = {"status": self.status, "results": cards if self.status == "ok" else [], "unverified_nearby": [],
+               "how_we_decided": {"score_status": "v1"}}
+        return SimpleNamespace(to_dict=lambda: out)
+
+
+def test_ranker_pick_is_first_card_inside_the_window_and_cards_are_checked():
+    ctx = _win_ctx()
+    ctx.rank_mod = _FakeRank()
+    o = E.run_tools(ctx, _q("FLAT"), "window", TERRAIN)
+    rk = o["tools"]["ranker"]
+    assert rk["pick"]["facility_id"] == "a"  # d is the first card but outside the window
+    assert abs(rk["pick"]["minutes"] - float(E.drive_minutes(60.0, 1.0))) < 0.01
+    assert [c["inside"] for c in rk["cards_reach"]] == [False, True, True]
+    assert o["tools"]["any_fact"]["pick"]["facility_id"] == "a" and "minutes" in o["tools"]["any_fact"]["pick"]
+    assert o["reach"]["rule"] == "window" and o["reach"]["window_min"] == 120.0
+    # every tool answered: the walk stops at the farthest pick (a, 60 km); pool minutes run parallel
+    assert o["d_stop_km"] == pytest.approx(60.0, abs=0.05)
+    assert len(o["pool_minutes"]) == len(o["pool"]) and all(len(e) == 3 for e in o["pool"])
+    cc = E.ranker_card_consistency([o])
+    assert cc["ok"] and cc["n_cards"] == 3 and cc["max_abs_diff_min"] < 0.01
+    # the card check fails on minutes off by more than 0.5, a wrong window, or no minutes at all
+    for fake in (_FakeRank(minutes_off=0.6), _FakeRank(window=90), _FakeRank(report=False)):
+        ctx.rank_mod = fake
+        assert not E.ranker_card_consistency([E.run_tools(ctx, _q("FLAT"), "window", TERRAIN)])["ok"]
+    # no reliable option: the ranker abstains and the walk stops at the window km
+    ctx.rank_mod = _FakeRank(status="no_reliable_option")
+    o2 = E.run_tools(ctx, _q("FLAT"), "window", TERRAIN)
+    assert o2["tools"]["ranker"]["pick"] is None
+    assert o2["d_stop_km"] == pytest.approx(E.window_km(120, 1.0), abs=1e-3)
+    assert [e[0] for e in o2["pool"]] == ["b", "a", "c", "e"]
+    # the radius rule is unchanged: no reach block, no minutes
+    ctx.rank_mod = _FakeRank()
+    o3 = E.run_tools(ctx, _q("FLAT"), "radius")
+    assert "reach" not in o3 and "pool_minutes" not in o3 and o3["tools"]["any_fact"]["pick"] is None
+    assert o3["tools"]["ranker"]["pick"] is None and "cards_reach" not in o3["tools"]["ranker"]
+
+
+def _win_query(pick_km, ny_km=None):
+    reach = {"rule": "window", "radius_km": 50.0, "window_min": 120.0, "factor": 1.0,
+             "window_km": E.window_km(120, 1.0), "allowance_min": 15.0}
+    pk = lambda fid, km: {"facility_id": fid, "pos": 0, "name": fid, "distance_km": km, "dup_group": fid,  # noqa
+                          "minutes": round(float(E.drive_minutes(km, 1.0)), 4)}
+    return {"query_id": "q", "po_id": 7, "service": "emoc", "radius_km": 50.0, "state": "FLAT", "reach": reach,
+            "tools": {"specialty": {"pick": None}, "any_fact": {"pick": None},
+                      "ranker": {"pick": pk("p", pick_km) if pick_km else None, "quote_check": {}}},
+            "pool": [], "pool_size": 0, "major_flags": {}}
+
+
+def test_outcomes_under_the_window_inside_and_allowance_split():
+    # skipped a facility at 50 km for a pick at 60 km: about 10 minutes further, inside the 15-minute allowance
+    q = _win_query(60.0)
+    jq = {"walk_status": "found", "q1": {"p": True}, "q2": {"p": True},
+          "nearest_yes": {"facility_id": "n", "distance_km": 50.0, "dup_group": "n"}}
+    rows = {r["tool"]: r for r in E.outcome_rows(q, jq)}
+    rk = rows["ranker"]
+    assert rk["skipped_nearer"] and rk["skip_within_allowance"] and not rk["skip_beyond_allowance"]
+    assert 9 < rk["skip_extra_min"] < 12 and rk["pick_minutes"] > rk["nearest_yes_minutes"]
+    # a facility at 20 km: about 44 minutes nearer, beyond the allowance
+    jq2 = {**jq, "nearest_yes": {"facility_id": "n", "distance_km": 20.0, "dup_group": "n"}}
+    rk2 = {r["tool"]: r for r in E.outcome_rows(q, jq2)}["ranker"]
+    assert rk2["skipped_nearer"] and rk2["skip_beyond_allowance"] and not rk2["skip_within_allowance"]
+    # abstentions: supported option inside the window (100 km at factor 1) counts; at 115 km it does not
+    assert rows["any_fact"]["abstained_with_support"] is True
+    q3 = _win_query(None)
+    out = {r["tool"]: r for r in E.outcome_rows(q3, {**jq, "nearest_yes": {"facility_id": "n", "distance_km": 100.0,
+                                                                           "dup_group": "n"}})}
+    assert out["ranker"]["abstained_with_support"] is True
+    out = {r["tool"]: r for r in E.outcome_rows(q3, {**jq, "nearest_yes": {"facility_id": "n", "distance_km": 115.0,
+                                                                           "dup_group": "n"}})}
+    assert out["ranker"]["abstained_with_support"] is False  # 115 km > 50 km radius too, but here it is the window
+    # summary carries the split and the markdown names both counts
+    res = E.summarize(pd.DataFrame(E.outcome_rows(q, jq) + E.outcome_rows(
+        {**q, "query_id": "q2"}, jq2)))
+    a = res["tools"]["ranker"]["skipped_nearer_allowance"]
+    assert a["within_allowance"]["k"] == 1 and a["beyond_allowance"]["k"] == 1 and res["reach_rule"] == "window"
+    md = E.render_results_md("dev", res, {"judges": {"A": "m"}, "reach_amendment_sealed": False})
+    assert "drive-time window" in md and "allowance" in md and "Preview" in md and chr(0x2014) not in md
+    # radius picks keep the old outcome and report no split
+    res_r = E.summarize(pd.DataFrame(E.outcome_rows(_query(), {"walk_status": "found", "q1": {}, "q2": {},
+                                                               "nearest_yes": None})))
+    assert "skipped_nearer_allowance" not in res_r["tools"]["ranker"] and res_r["reach_rule"] == "radius"
+
+
+def test_sea_pixel_sensitivity_keeps_and_reports_without():
+    q = _win_query(60.0)
+    jq = {"walk_status": "found", "q1": {"p": True}, "q2": {"p": True}, "nearest_yes": None}
+    qa, qb = {**q, "query_id": "a", "po_id": 1}, {**q, "query_id": "b", "po_id": 2}
+    df = pd.DataFrame(E.outcome_rows(qa, jq) + E.outcome_rows(qb, jq))
+    sp = E.sea_pixel_sensitivity(df, [qa, qb], {2, 999})
+    assert sp["po_ids"] == [2] and sp["n_queries_dropped"] == 1 and sp["n_queries_scored"] == 1
+    assert sp["tools"]["ranker"]["coverage"]["n"] == 1 and sp["coverage_all_queries"]["ranker"]["n"] == 1
+    md = E.render_sea_pixel_md(sp)
+    assert "stay in the sample" in md and "po_id 2" in md and chr(0x2014) not in md
+    # the real list holds the two dev points the draft names
+    sea = E.load_sea_pixel_ids()
+    assert len(sea) == 1032 and {142781, 13304} <= sea
+
+
+def test_draft_amendment_activates_only_once_sealed(tmp_path):
+    p, _ = _protocol(tmp_path)
+    E.seal_protocol(p)
+    st = E.reach_amendment_status(p)
+    assert not st["present"] and not st["active"]
+    assert E.resolve_reach_rule("dev", status=st)[0] == "radius"
+    with pytest.raises(SystemExit, match="not in the protocol"):
+        E.resolve_reach_rule("sealed", status=st)
+    p.write_text(p.read_text() + "\n" + _draft_amendment(3))
+    st = E.reach_amendment_status(p)
+    assert st["present"] and not st["sealed"] and not st["active"] and st["number"] == 3 and not st["problems"]
+    assert E.resolve_reach_rule("dev", status=st)[0] == "radius"
+    assert E.resolve_reach_rule("dev", "window", status=st)[0] == "window"  # a dev preview
+    with pytest.raises(SystemExit, match="not sealed"):
+        E.resolve_reach_rule("sealed", status=st)
+    h = E.seal_protocol(p)
+    st = E.reach_amendment_status(p)
+    assert st["active"] and st["seal"] == h and st["windows_in_text"] == {k: float(v) for k, v in E.WINDOW_MIN.items()}
+    assert E.resolve_reach_rule("dev", status=st)[0] == "window"
+    assert E.resolve_reach_rule("sealed", status=st)[0] == "window"
+    with pytest.raises(SystemExit, match="cannot change"):
+        E.resolve_reach_rule("sealed", "radius", status=st)
+    assert E.resolve_reach_rule("dev", "radius", status=st)[0] == "radius"  # dev comparison only
+
+
+def test_amendment_that_differs_from_the_harness_does_not_activate(tmp_path):
+    for edit, why in ((lambda t: t.replace("| `emoc` | 120 |", "| `emoc` | 100 |"), "windows"),
+                      (lambda t: t.replace("2.30 x km^0.842", "2.40 x km^0.842"), "formula"),
+                      (lambda t: t.replace("at most 15 minutes further", "at most 20 minutes further"), "allowance")):
+        d = tmp_path / why
+        d.mkdir()
+        p, _ = _protocol(d)
+        E.seal_protocol(p)
+        _add_reach(p, edit=edit)
+        st = E.reach_amendment_status(p)
+        assert st["sealed"] and not st["active"] and any(why in x for x in st["problems"]), (why, st)
+        with pytest.raises(SystemExit, match="does not match"):
+            E.resolve_reach_rule("sealed", status=st)
+
+
+def test_sealed_half_refuses_until_the_reach_amendment_is_sealed(tmp_path, monkeypatch):
+    p, pts = _protocol(tmp_path)
+    h = E.seal_protocol(p)
+    monkeypatch.setattr(E, "read_points", lambda: pts)
+    _clean_git(monkeypatch)
+    for stage in ("picks", "judge", "score", "human"):
+        with pytest.raises(SystemExit, match="reach amendment"):
+            E.check_sealed_inputs("sealed", True, stage=stage, root=tmp_path, protocol=p, expected=(h,))
+    E.check_sealed_inputs("dev", False, root=tmp_path, protocol=p, expected=(h,))  # dev is not blocked
+    # appended but not sealed: the protocol hash check refuses first
+    p.write_text(p.read_text() + "\n" + _draft_amendment(3))
+    with pytest.raises(SystemExit, match="protocol hash check failed"):
+        E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h,))
+    hr = E.seal_protocol(p)
+    # sealed but its seal not pinned in the harness: the chain check refuses
+    with pytest.raises(SystemExit, match="seal chain"):
+        E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h,))
+    info = E.check_sealed_inputs("sealed", True, root=tmp_path, protocol=p, expected=(h, hr))
+    assert info["reach_amendment"]["active"] and info["reach_amendment"]["seal"] == hr
+
+
+def test_real_sealed_half_refuses_while_the_reach_amendment_is_unsealed():
+    if not E.points_path().exists() or not E.protocol_path().exists():
+        pytest.skip("no protocol")
+    if E.reach_amendment_status()["sealed"]:
+        pytest.skip("the reach amendment is sealed")
+    with pytest.raises(SystemExit, match="reach amendment"):
+        E.check_sealed_inputs("sealed", True, stage="score")
+    assert E.resolve_reach_rule("dev")[0] == "radius"
+
+
+def _dev_doc(seal="r", rule="window", ok=True, code=None):
+    return {"reach": {"rule": rule, "amendment": {"seal": seal}, "ranker_cards": {"ok": ok, "n_cards": 5}},
+            "code_sha256": code if code is not None else _code_now()}
+
+
+def _code_now():
+    return {"scripts/eval_sealed.py": "1", E.TERRAIN_PATH: E.TERRAIN_SHA256, E.SEA_PIXEL_PATH: E.SEA_PIXEL_SHA256}
+
+
+def test_sealed_picks_need_dev_picks_under_the_sealed_rule_and_matching_ranker():
+    am = {"seal": "r", "active": True}
+    rw = {k: float(v) for k, v in E.WINDOW_MIN.items()}
+    E.check_sealed_reach(_dev_doc(), _code_now(), am, rw)  # passes
+    bad = [
+        (None, _code_now(), rw, "no dev picks"),
+        (_dev_doc(rule="radius"), _code_now(), rw, "radius rule"),
+        (_dev_doc(seal="old"), _code_now(), rw, "not computed under the sealed"),
+        (_dev_doc(ok=False), _code_now(), rw, "card check failed"),
+        (_dev_doc(code={**_code_now(), "scripts/eval_sealed.py": "0"}), _code_now(), rw, "code changed"),
+        (_dev_doc(), _code_now(), None, "holds no drive-time windows"),
+        (_dev_doc(), _code_now(), {**rw, "cath_lab": 120.0}, "differ from the pinned"),
+        (_dev_doc(code={**_code_now(), E.TERRAIN_PATH: "x"}), {**_code_now(), E.TERRAIN_PATH: "x"}, rw, "pinned"),
+    ]
+    for dev, code, w, msg in bad:
+        with pytest.raises(SystemExit, match=msg):
+            E.check_sealed_reach(dev, code, am, w)
+
+
+def test_ranker_windows_discovery():
+    w = {k: v for k, v in E.WINDOW_MIN.items()}
+    assert E.ranker_windows(SimpleNamespace(WINDOWS_MIN=w)) == {k: float(v) for k, v in w.items()}
+    assert E.ranker_windows(SimpleNamespace(WINDOWS={k: (v, 0.3) for k, v in w.items()}))["emoc"] == 120.0
+    svcs = {k: SimpleNamespace(window_min=v) for k, v in w.items()}
+    assert E.ranker_windows(SimpleNamespace(SERVICES=svcs))["dialysis"] == 60.0
+    assert E.ranker_windows(SimpleNamespace(SERVICES={"emoc": SimpleNamespace()})) is None
+    assert E.check_ranker_reach(None) and not E.check_ranker_reach({k: float(v) for k, v in w.items()})
+    # vf.services.Window-like objects carry minutes and the allowance
+    objs = {k: SimpleNamespace(minutes=v, allowance=E.ALLOWANCE_MIN[k]) for k, v in w.items()}
+    mod = SimpleNamespace(WINDOWS=objs)
+    assert E.ranker_windows(mod)["mri"] == 180.0 and E.ranker_allowances(mod)["mri"] == 30.0
+    assert not E.check_ranker_reach(E.ranker_windows(mod), E.ranker_allowances(mod))
+    bad = {**E.ranker_allowances(mod), "dialysis": 30.0}
+    assert "allowances" in E.check_ranker_reach(E.ranker_windows(mod), bad)[0]
+
+
+def test_ranker_gets_the_origin_state_under_the_window_rule_only():
+    seen = []
+
+    class Rec(_FakeRank):
+        def rank(self, idx, line, res, k=3):
+            seen.append(dict(res))
+            return super().rank(idx, line, res, k)
+
+    ctx = _win_ctx()
+    ctx.rank_mod = Rec()
+    E.run_tools(ctx, _q("FLAT"), "window", TERRAIN)
+    E.run_tools(ctx, _q("FLAT"), "radius")
+    assert seen[0]["state"] == "FLAT" and "state" not in seen[1]
+    assert seen[0]["precision_km"] == 2.0 and seen[0]["lat"] == 20.0
+
+
+def test_card_minutes_and_window_field_names():
+    assert E.card_minutes({"minutes": 41.2}) == 41.2
+    assert E.card_minutes({"drive": {"minutes": 12}}) == 12.0
+    assert E.card_minutes({"parts": {"drive_minutes": 7.5}}) == 7.5
+    assert E.card_minutes({"distance_km": 10, "score": 0.4}) is None  # a v0 card reports none
+    assert E.card_window({"window_min": 90}) == 90.0
+    assert E.card_window({"window": {"minutes": 120}}) == 120.0
+    assert E.card_window({}, {"window_min": 60}) == 60.0  # the answer's window
+    assert E.card_window({}, {}) is None
+
+
+def test_dev_preview_never_replaces_the_dev_picks():
+    inactive, active = {"active": False}, {"active": True}
+    a = SimpleNamespace(reach="window")
+    assert E.preview_tag(a, "dev", inactive) == E.PREVIEW_TAG
+    assert E.preview_tag(a, "dev", active) == ""
+    assert E.preview_tag(SimpleNamespace(reach=None), "dev", inactive) == ""
+    assert E.picks_path("dev", E.PREVIEW_TAG).name == "picks_dev_window_preview.json"
+
+
+def test_estimate_skips_cached_units(tmp_path):
+    doc = {"queries": [_query()]}
+    full = E.estimate_cost(doc, [], _specs())
+    cached = {"q1": ["near_claim|emoc", "mid|emoc", "dup_of_mid|emoc", "far|emoc"],
+              "q2": ["dev-1-emoc|near_claim", "dev-1-emoc|mid"]}
+    none_left = E.estimate_cost(doc, [], _specs(), cached=cached)
+    assert none_left["high (every walk to the cap)"]["usd"] == 0 < full["high (every walk to the cap)"]["usd"]
+    # cached_units reads the judge cache: a unit judged before is found
+    fn, _ = _fake_call({})
+    b = E.Budget(tmp_path / "s.jsonl", 10.0, None, None)
+    b.others = 0.0
+    r = E.JudgeRunner(_specs(), b, call_fn=fn, cache_dir=tmp_path / "c")
+    E.Units(r).judge("q1", "mid|emoc", E.SYSTEM_Q1, E.user_q1("emoc", "REC mid"), {})
+    q = _query()
+    q["place_label"] = "X post office"
+    recs = {f: f"REC {f}" for f in ("near_claim", "mid", "dup_of_mid", "far")}
+    cu = E.cached_units({"queries": [q]}, recs, _specs(), tmp_path / "c")
+    assert cu["q1"] == ["mid|emoc"] and cu["q2"] == []

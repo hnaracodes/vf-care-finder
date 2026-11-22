@@ -87,7 +87,7 @@ from vf import services as S  # noqa: E402
 from vf.geo import haversine_km  # noqa: E402
 
 SCRIPT = "scripts/eval_sealed.py"
-HARNESS_VERSION = "eval_sealed_v1"
+HARNESS_VERSION = "eval_sealed_v2_reach"
 
 # =============================================================================
 # Protocol constants (copied into the protocol; changing one after sealing
@@ -152,9 +152,43 @@ EXPECTED_SEALS = (
 )
 
 #: Paths whose committed, unmodified state the sealed half requires (git):
-#: the protocol, this harness, and every vf module the tools import (the
-#: ranker, the recipes the specialty baseline reads, the services and radii).
-GUARDED_PATHS = ("reports/eval_sealed_protocol.md", SCRIPT, "src/vf")
+#: the protocol, this harness, every vf module the tools import (the ranker,
+#: the recipes the specialty baseline reads, the services and radii), and the
+#: two reference files the reach amendment reads (terrain factors, sea pixels).
+TERRAIN_PATH = "reference/terrain_multiplier.csv"
+SEA_PIXEL_PATH = "reference/sea_pixel_post_offices.csv"
+GUARDED_PATHS = ("reports/eval_sealed_protocol.md", SCRIPT, "src/vf", TERRAIN_PATH, SEA_PIXEL_PATH)
+
+# =============================================================================
+# Reach amendment (D048 drive-time windows; reports/eval_sealed_amendment_reach_draft.md)
+#
+# Implemented here, active only once the amendment is sealed into the protocol.
+# Until then every run uses the sealed km radii (rule "radius"), except a dev
+# preview asked for with ``--reach window``; the sealed half refuses to run at
+# all until the amendment is sealed (the radii it replaces are superseded).
+# =============================================================================
+
+#: Heading the amendment carries in the protocol (its number is free).
+REACH_AMENDMENT_RX = re.compile(r"^## Amendment (\d+): the same drive-time window for every tool[ \t]*$", re.M)
+#: Drive time, minutes = state factor x DRIVE_A x km ** DRIVE_B (D048 item 2).
+DRIVE_A = 2.30
+DRIVE_B = 0.842
+#: The displayed range is minutes x e^(+-DRIVE_BAND_LOG); it plays no part in any gate.
+DRIVE_BAND_LOG = 0.52
+#: Windows in minutes per service (D048 item 3), the same for every tool.
+WINDOW_MIN = {
+    "emoc": 120, "trauma": 120, "cath_lab": 90, "neurosurgery": 150, "dialysis": 60, "icu": 120, "nicu": 120,
+    "ct": 120, "mri": 180, "burns": 240, "cardiac_surgery": 240, "oncology": 240,
+}
+#: The ranker's declared evidence allowance in minutes (D048 item 4): 30 for planned care.
+ALLOWANCE_MIN = {s: (30 if s in ("mri", "cardiac_surgery", "oncology") else 15) for s in WINDOW_MIN}
+#: sha256 of the reference files, pinned when the amendment was implemented.
+TERRAIN_SHA256 = "a3695f7bd3466921a9b97e0e98a29efb4b9d41c72f6df8a627b1f7ed0964a344"
+SEA_PIXEL_SHA256 = "5278e3d7b6cfd25ff5194aa8d974b1439f6d5c7bedee689f9a1f83b12e0cd557"
+#: The dev-half check (amendment item 4): a ranker card's own minutes may differ
+#: from the harness's by at most this much.
+CARD_MINUTES_TOL = 0.5
+REACH_RULES = ("radius", "window")
 
 
 def judge_specs(env: dict, preset: str = "mixed") -> dict[str, JudgeSpec]:
@@ -587,11 +621,13 @@ def git_guard(root: Path, rel_paths: tuple = GUARDED_PATHS) -> dict:
 
 
 def code_hashes(root: Optional[Path] = None) -> dict:
-    """sha256 of this harness, the protocol and every vf module: the code the
-    sealed numbers depend on beyond the frozen data bundle (the ranker, and
-    vf.recipes' claim specialties, which the specialty baseline reads)."""
+    """sha256 of this harness, the protocol, every vf module and the reach
+    amendment's two reference files: what the sealed numbers depend on beyond the
+    frozen data bundle (the ranker, vf.recipes' claim specialties, which the
+    specialty baseline reads, the terrain factors and the sea-pixel list)."""
     root = root or paths.code_root()
-    files = [root / SCRIPT, root / "reports" / "eval_sealed_protocol.md"] + sorted((root / "src" / "vf").glob("*.py"))
+    files = [root / SCRIPT, root / "reports" / "eval_sealed_protocol.md"] + sorted((root / "src" / "vf").glob("*.py")) \
+        + [root / TERRAIN_PATH, root / SEA_PIXEL_PATH]
     return {str(f.relative_to(root)): sha256_file(f) for f in files if f.exists()}
 
 
@@ -632,7 +668,371 @@ def check_sealed_inputs(split: str, unseal: bool, stage: str = "picks", root: Op
                              f"{gg.get('porcelain') or gg.get('tracked') or gg.get('error')}")
         if not gg.get("clean"):
             print(f"warning: guarded code is not clean at stage {stage}: {gg.get('porcelain')}", file=sys.stderr)
+    # the reach amendment: refuses the sealed half until it is sealed and matches
+    ra = reach_amendment_status(protocol)
+    if split == "sealed":
+        resolve_reach_rule("sealed", None, status=ra)
+    info["reach_amendment"] = ra
     return info
+
+
+# =============================================================================
+# Reach: the km radius (as sealed) or the drive-time window (the amendment)
+# =============================================================================
+
+
+def drive_minutes(km, factor: float):
+    """Estimated free-flow drive minutes from straight-line km (D048 item 2):
+    ``factor x 2.30 x km^0.842``. ``factor`` is the ORIGIN's state factor, so for
+    one query minutes rise strictly with km. NaN stays NaN. Unrounded."""
+    k = np.asarray(km, dtype=float)
+    with np.errstate(invalid="ignore"):
+        return float(factor) * DRIVE_A * np.power(k, DRIVE_B)
+
+
+def window_km(window_min: float, factor: float) -> float:
+    """The straight-line km at which ``drive_minutes`` reaches ``window_min``."""
+    return float((float(window_min) / (DRIVE_A * float(factor))) ** (1.0 / DRIVE_B))
+
+
+def load_terrain(path: Optional[Path] = None) -> dict:
+    """State (upper case, as in the PIN directory) -> factor, or None when blank."""
+    df = pd.read_csv(path or (paths.code_root() / TERRAIN_PATH), dtype={"state": str})
+    return {str(s).strip().upper(): (None if pd.isna(m) else float(m)) for s, m in zip(df["state"], df["multiplier"])}
+
+
+def state_factor(terrain: dict, state) -> float:
+    key = str(state or "").strip().upper()
+    f = terrain.get(key)
+    if f is None:
+        raise SystemExit(f"reach rule: no terrain factor for state {state!r} in {TERRAIN_PATH}; the harness refuses "
+                         "to run rather than guess (amendment item 1)")
+    return float(f)
+
+
+def load_sea_pixel_ids(path: Optional[Path] = None) -> set:
+    p = path or (paths.code_root() / SEA_PIXEL_PATH)
+    if not Path(p).exists():
+        return set()
+    return {int(x) for x in pd.read_csv(p, usecols=["po_id"])["po_id"]}
+
+
+@dataclass(frozen=True)
+class Reach:
+    """One query's reach rule. ``radius``: inside means km <= radius (the sealed
+    protocol). ``window``: inside means estimated minutes <= the service window,
+    with the origin's state factor (the reach amendment)."""
+    rule: str
+    service: str
+    radius_km: float
+    window_min: Optional[float] = None
+    factor: Optional[float] = None
+    allowance_min: Optional[float] = None
+
+    @property
+    def is_window(self) -> bool:
+        return self.rule == "window"
+
+    def minutes(self, km):
+        return drive_minutes(km, self.factor) if self.is_window else None
+
+    def inside(self, d) -> np.ndarray:
+        d = np.asarray(d, dtype=float)
+        ok = ~np.isnan(d)
+        if self.is_window:
+            with np.errstate(invalid="ignore"):
+                return ok & (drive_minutes(d, self.factor) <= self.window_min)
+        return ok & (d <= self.radius_km)
+
+    @property
+    def limit_km(self) -> float:
+        return window_km(self.window_min, self.factor) if self.is_window else float(self.radius_km)
+
+    def to_dict(self) -> dict:
+        out = {"rule": self.rule, "radius_km": float(self.radius_km)}
+        if self.is_window:
+            out.update(window_min=float(self.window_min), factor=float(self.factor),
+                       window_km=round(self.limit_km, 3), allowance_min=float(self.allowance_min))
+        return out
+
+
+def reach_for(q: dict, rule: str, terrain: Optional[dict] = None) -> Reach:
+    line = q["service"]
+    R = float(q.get("radius_km", S.RADII_KM[line]))
+    if rule == "radius":
+        return Reach("radius", line, R)
+    if rule != "window":
+        raise ValueError(f"unknown reach rule {rule!r}")
+    f = state_factor(terrain if terrain is not None else load_terrain(), q.get("state"))
+    return Reach("window", line, R, float(WINDOW_MIN[line]), f, float(ALLOWANCE_MIN[line]))
+
+
+def _inside(d: np.ndarray, R) -> np.ndarray:
+    if isinstance(R, Reach):
+        return R.inside(d)
+    return ~np.isnan(d) & (d <= float(R))
+
+
+def _seal_after(text: str, start: int) -> tuple[int, Optional[str]]:
+    j = text.find(SEAL_PREFIX, start)
+    if j < 0:
+        return -1, None
+    rest = text[j + len(SEAL_PREFIX):]
+    nl = rest.find("\n")
+    return j, (rest if nl < 0 else rest[:nl]).strip().strip("`")
+
+
+_WINDOW_ROW_RX = re.compile(r"^[ \t]*\|\s*`(\w+)`\s*\|\s*(\d+(?:\.\d+)?)\s*\|", re.M)
+AMENDMENT_FORMULA_TEXT = f"{DRIVE_A:.2f} x km^{DRIVE_B}"
+AMENDMENT_ALLOWANCE_TEXT = "at most 15 minutes further, 30 for MRI, cardiac surgery and oncology"
+
+
+def reach_amendment_status(path: Optional[Path] = None) -> dict:
+    """Is the reach amendment in the protocol, sealed (the first seal line after
+    its heading covers it), and does its text match what this harness pins (the
+    windows table, the formula's constants, the allowance)? ``active``: sealed
+    and matching; only then does the window rule become the default and the
+    sealed half run."""
+    p = path or protocol_path()
+    out = {"present": False, "sealed": False, "active": False, "number": None, "seal": None,
+           "windows_in_text": {}, "problems": []}
+    if not p.exists():
+        return out
+    text = p.read_text(encoding="utf-8")
+    m = REACH_AMENDMENT_RX.search(text)
+    if not m:
+        return out
+    j, value = _seal_after(text, m.end())
+    section = text[m.start(): j if j >= 0 else len(text)]
+    sealed = j >= 0 and sha256_bytes(text[:j].encode("utf-8")) == value
+    win = {s: float(v) for s, v in _WINDOW_ROW_RX.findall(section)}
+    probs = []
+    want = {k: float(v) for k, v in WINDOW_MIN.items()}
+    if win != want:
+        diff = sorted(k for k in set(win) | set(want) if win.get(k) != want.get(k))
+        probs.append(f"windows table differs from WINDOW_MIN for {diff}")
+    if AMENDMENT_FORMULA_TEXT not in section:
+        probs.append(f"formula text '{AMENDMENT_FORMULA_TEXT}' not found")
+    if AMENDMENT_ALLOWANCE_TEXT not in section:
+        probs.append(f"allowance text '{AMENDMENT_ALLOWANCE_TEXT}' not found")
+    if len(REACH_AMENDMENT_RX.findall(text)) > 1:
+        probs.append("more than one reach amendment heading")
+    out.update(present=True, sealed=sealed, number=int(m.group(1)), seal=value if sealed else None,
+               windows_in_text=win, problems=probs, active=bool(sealed and not probs))
+    return out
+
+
+def resolve_reach_rule(split: str, requested: Optional[str] = None, status: Optional[dict] = None,
+                       path: Optional[Path] = None) -> tuple[str, dict]:
+    """The reach rule a run uses. Sealed half: the window rule, and only once the
+    amendment is active. Dev half: the window rule once active, else the radius;
+    ``requested`` overrides on dev only (``window`` before the seal is a preview)."""
+    st = status if status is not None else reach_amendment_status(path)
+    if requested is not None and requested not in REACH_RULES:
+        raise SystemExit(f"unknown reach rule {requested!r}; known: {REACH_RULES}")
+    if split == "sealed":
+        if not st.get("active"):
+            why = ("not in the protocol" if not st.get("present") else
+                   "not sealed" if not st.get("sealed") else f"sealed but does not match the harness: {st['problems']}")
+            raise SystemExit("sealed half: the reach amendment (drive-time windows, D048) is " + why +
+                             "; the sealed half runs only under the sealed window rule")
+        if requested not in (None, "window"):
+            raise SystemExit("sealed half: the reach rule is the sealed amendment's window rule; --reach cannot change it")
+        return "window", st
+    if requested is None:
+        if st.get("present") and st.get("sealed") and not st.get("active"):
+            print(f"warning: the reach amendment is sealed but does not match the harness ({st['problems']}); "
+                  "dev runs fall back to the radius rule", file=sys.stderr)
+        return ("window" if st.get("active") else "radius"), st
+    if requested == "window" and not st.get("active"):
+        print("warning: dev preview of the reach amendment's window rule; the amendment is not sealed, so nothing "
+              "from this run is part of the evaluation", file=sys.stderr)
+    return requested, st
+
+
+def _window_value(v, attr: str = "minutes", item: int = 0) -> float:
+    if hasattr(v, attr):
+        return float(getattr(v, attr))
+    if isinstance(v, dict):
+        return float(v[attr])
+    if isinstance(v, (tuple, list)):
+        return float(v[item])
+    return float(v)
+
+
+def ranker_windows(mod=None) -> Optional[dict]:
+    """The windows the ranker's own code holds (minutes per service), wherever
+    the frozen ranker keeps them: a dict ``WINDOWS_MIN``, ``WINDOW_MIN`` or
+    ``WINDOWS`` in ``vf.services`` (a value may be a number, an object or dict
+    with ``minutes``, as ``vf.services.Window``, or a tuple whose first item is
+    the minutes), or a ``window_min`` on every ``Service``. None: none found."""
+    mod = mod if mod is not None else S
+    for name in ("WINDOWS_MIN", "WINDOW_MIN", "WINDOWS"):
+        w = getattr(mod, name, None)
+        if isinstance(w, dict) and w:
+            try:
+                return {str(k): _window_value(v) for k, v in w.items()}
+            except (TypeError, ValueError, KeyError):
+                continue
+    svcs = getattr(mod, "SERVICES", None) or {}
+    vals = {k: getattr(s, "window_min", None) for k, s in svcs.items()}
+    if vals and all(v is not None for v in vals.values()):
+        return {k: float(v) for k, v in vals.items()}
+    return None
+
+
+def _num(v) -> Optional[float]:
+    if isinstance(v, bool) or v is None:
+        return None
+    if isinstance(v, (int, float, np.integer, np.floating)):
+        f = float(v)
+        return None if math.isnan(f) else f
+    return None
+
+
+_CARD_MIN_KEYS = ("minutes", "drive_minutes", "est_minutes", "travel_minutes", "minutes_est")
+_CARD_NEST_KEYS = ("drive", "travel", "drive_time", "travel_time", "reach", "parts")
+_CARD_WIN_KEYS = ("window_min", "window_minutes")
+
+
+def card_minutes(card: dict) -> Optional[float]:
+    """The estimated minutes a ranker card reports (top-level, or inside a
+    ``drive``/``travel``/``reach``/``parts`` dict). None: the card reports none."""
+    if not isinstance(card, dict):
+        return None
+    for k in _CARD_MIN_KEYS:
+        v = _num(card.get(k))
+        if v is not None:
+            return v
+    for nk in _CARD_NEST_KEYS:
+        sub = card.get(nk)
+        if isinstance(sub, dict):
+            for k in _CARD_MIN_KEYS + ("point", "estimate"):
+                v = _num(sub.get(k))
+                if v is not None:
+                    return v
+    return None
+
+
+def card_window(card: dict, answer: Optional[dict] = None) -> Optional[float]:
+    """The window (minutes) a card reports, else the answer's."""
+    for obj in (card, answer):
+        if not isinstance(obj, dict):
+            continue
+        for k in _CARD_WIN_KEYS:
+            v = _num(obj.get(k))
+            if v is not None:
+                return v
+        w = obj.get("window")
+        if _num(w) is not None:
+            return _num(w)
+        if isinstance(w, dict):
+            for k in ("minutes",) + _CARD_WIN_KEYS:
+                v = _num(w.get(k))
+                if v is not None:
+                    return v
+        for nk in _CARD_NEST_KEYS:
+            sub = obj.get(nk)
+            if isinstance(sub, dict):
+                for k in _CARD_WIN_KEYS:
+                    v = _num(sub.get(k))
+                    if v is not None:
+                        return v
+    return None
+
+
+def ranker_card_consistency(queries: list[dict], tol: float = CARD_MINUTES_TOL) -> dict:
+    """Amendment item 4, over one half's picks made under the window rule: does
+    every ranker result card report minutes within ``tol`` of the harness's and
+    the window in WINDOW_MIN? ``ok`` needs at least one card and no miss."""
+    n = n_min = n_win = 0
+    worst, bad_min, bad_win = 0.0, [], []
+    for q in queries:
+        rk = (q.get("tools") or {}).get("ranker") or {}
+        for c in rk.get("cards_reach") or []:
+            n += 1
+            cm, hm, cw = c.get("card_minutes"), c.get("harness_minutes"), c.get("card_window_min")
+            if cm is None or hm is None:
+                bad_min.append({"query_id": q.get("query_id"), "facility_id": c.get("facility_id"), "why": "no minutes"})
+            else:
+                n_min += 1
+                diff = abs(float(cm) - float(hm))
+                worst = max(worst, diff)
+                if diff > tol:
+                    bad_min.append({"query_id": q.get("query_id"), "facility_id": c.get("facility_id"),
+                                    "card": cm, "harness": hm})
+            want = WINDOW_MIN.get(q.get("service"))
+            if cw is None or want is None or float(cw) != float(want):
+                bad_win.append({"query_id": q.get("query_id"), "facility_id": c.get("facility_id"), "card": cw,
+                                "table": want})
+            else:
+                n_win += 1
+    return {"n_cards": n, "n_with_minutes": n_min, "n_window_match": n_win, "max_abs_diff_min": round(worst, 4),
+            "tolerance_min": tol, "minute_misses": bad_min[:20], "n_minute_misses": len(bad_min),
+            "window_misses": bad_win[:20], "n_window_misses": len(bad_win),
+            "ok": bool(n > 0 and not bad_min and not bad_win)}
+
+
+def ranker_allowances(mod=None) -> Optional[dict]:
+    """The evidence allowance (minutes) per service in the ranker's code, when it
+    keeps one on each window (``vf.services.WINDOWS[line].allowance``)."""
+    w = getattr(mod if mod is not None else S, "WINDOWS", None)
+    if isinstance(w, dict) and w:
+        try:
+            return {str(k): _window_value(v, "allowance", 1) for k, v in w.items()}
+        except (TypeError, ValueError, KeyError, IndexError):
+            return None
+    return None
+
+
+def check_ranker_reach(rw: Optional[dict], ra: Optional[dict] = None) -> list[str]:
+    """Problems with the ranker's own windows (and allowances, when it keeps
+    them) against the pinned tables (item 10)."""
+    if rw is None:
+        return ["the ranker's code holds no drive-time windows (vf.services WINDOWS_MIN or Service.window_min)"]
+    out = []
+    want = {k: float(v) for k, v in WINDOW_MIN.items()}
+    diff = sorted(k for k in set(rw) | set(want) if rw.get(k) != want.get(k))
+    if diff:
+        out.append(f"the ranker's windows differ from the pinned table for {diff}")
+    if ra is not None:
+        wa = {k: float(v) for k, v in ALLOWANCE_MIN.items()}
+        diff = sorted(k for k in set(ra) | set(wa) if ra.get(k) != wa.get(k))
+        if diff:
+            out.append(f"the ranker's evidence allowances differ from the pinned ones for {diff}")
+    return out
+
+
+def check_sealed_reach(dev_doc: Optional[dict], code_now: dict, amendment: dict, rw: Optional[dict],
+                       rallow: Optional[dict] = None) -> None:
+    """Before the sealed picks (amendment items 4 and 10): the ranker's windows
+    are the pinned table, the reference files are the pinned ones, and the dev
+    picks were computed under the sealed window rule with this same code and
+    seal, with every ranker card's minutes and window matching the harness."""
+    probs = check_ranker_reach(rw, rallow)
+    for rel, want in ((TERRAIN_PATH, TERRAIN_SHA256), (SEA_PIXEL_PATH, SEA_PIXEL_SHA256)):
+        got = code_now.get(rel)
+        if got != want:
+            probs.append(f"{rel} sha256 {got} is not the pinned {want}")
+    if dev_doc is None:
+        probs.append("no dev picks: run `picks --split dev` under the sealed amendment first")
+    else:
+        r = dev_doc.get("reach") or {}
+        if r.get("rule") != "window":
+            probs.append(f"the dev picks used the {r.get('rule') or 'radius'} rule, not the window rule")
+        if (r.get("amendment") or {}).get("seal") != amendment.get("seal") or not amendment.get("seal"):
+            probs.append("the dev picks were not computed under the sealed reach amendment")
+        then = dev_doc.get("code_sha256") or {}
+        changed = sorted(k for k in set(then) | set(code_now) if then.get(k) != code_now.get(k))
+        if changed:
+            probs.append(f"code changed since the dev picks: {changed}")
+        cc = r.get("ranker_cards") or {}
+        if not cc.get("ok"):
+            probs.append(f"dev ranker card check failed: {cc.get('n_cards', 0)} cards, "
+                         f"{cc.get('n_minute_misses', 'n/a')} minute misses (tolerance {CARD_MINUTES_TOL} min), "
+                         f"{cc.get('n_window_misses', 'n/a')} window misses")
+    if probs:
+        raise SystemExit("sealed half refuses (reach amendment items 4 and 10): " + "; ".join(probs))
 
 
 # =============================================================================
@@ -794,25 +1194,30 @@ def build_ctx(bundle: Optional[Path]) -> Ctx:
     return ctx
 
 
-def _pick(ctx: Ctx, pos: int, d: float) -> dict:
-    return {"facility_id": ctx.fid(pos), "pos": int(pos), "name": str(ctx.idx.fac["name"].iat[pos]),
-            "distance_km": round(float(d), 3), "dup_group": ctx.fid(ctx.dup_group(pos))}
+def _pick(ctx: Ctx, pos: int, d: float, reach: Optional["Reach"] = None) -> dict:
+    out = {"facility_id": ctx.fid(pos), "pos": int(pos), "name": str(ctx.idx.fac["name"].iat[pos]),
+           "distance_km": round(float(d), 3), "dup_group": ctx.fid(ctx.dup_group(pos))}
+    if reach is not None and reach.is_window:
+        out["minutes"] = round(float(reach.minutes(float(d))), 4)
+    return out
 
 
-def nearest_in(mask: np.ndarray, d: np.ndarray, R: float) -> Optional[int]:
-    """Nearest position with ``mask`` inside ``R`` km (ties: lower position)."""
-    ok = mask & ~np.isnan(d) & (d <= R)
+def nearest_in(mask: np.ndarray, d: np.ndarray, R) -> Optional[int]:
+    """Nearest position with ``mask`` inside ``R``: a km radius, or a ``Reach``
+    (the window rule: estimated minutes at most the window). For one origin
+    fewest minutes is nearest km. Ties: lower position."""
+    ok = mask & _inside(d, R)
     ix = np.flatnonzero(ok)
     if len(ix) == 0:
         return None
     return int(ix[np.lexsort((ix, d[ix]))][0])
 
 
-def tool_specialty(ctx: Ctx, line: str, d: np.ndarray, R: float) -> Optional[int]:
+def tool_specialty(ctx: Ctx, line: str, d: np.ndarray, R) -> Optional[int]:
     return nearest_in(ctx.spec_mask[line], d, R)
 
 
-def tool_any_fact(ctx: Ctx, line: str, d: np.ndarray, R: float) -> Optional[int]:
+def tool_any_fact(ctx: Ctx, line: str, d: np.ndarray, R) -> Optional[int]:
     return nearest_in(ctx.idx.lines[line].grade >= 2, d, R)
 
 
@@ -844,59 +1249,94 @@ def quote_check(ctx: Ctx, cards: list) -> dict:
     return {"n_quotes": n, "strict": strict, "loose": loose, "failures": bad[:20]}
 
 
-def tool_ranker(ctx: Ctx, line: str, lat: float, lon: float, R: float, d: np.ndarray, label: str) -> dict:
+def tool_ranker(ctx: Ctx, line: str, lat: float, lon: float, R, d: np.ndarray, label: str,
+                state: Optional[str] = None) -> dict:
+    """The ranker's pick: its first result card inside ``R`` (a km radius, or a
+    ``Reach``: under the window rule, minutes recomputed by the harness from the
+    post office and the facility's mapped location). Under the window rule each
+    result card's own minutes and window are stored next to the harness's
+    (amendment item 4)."""
+    window = isinstance(R, Reach) and R.is_window
     res = {"status": "ok", "lat": lat, "lon": lon, "precision_km": 2.0, "kind": "post_office",
            "how": "Evaluation point: the post office's own coordinates.", "label": label}
+    if window and state is not None:  # the ranker takes the factor from the origin's state, as the harness does
+        res["state"] = state
     ans = ctx.rank_mod.rank(ctx.idx, line, res, k=3)
     a = ans.to_dict()
     pick = None
+    cards_reach = []
     for c in a.get("results") or []:
         pos = ctx.idx.id_to_pos.get(c["facility_id"])
-        if pos is not None and not math.isnan(d[pos]) and d[pos] <= R:
+        ok = pos is not None and bool(_inside(np.array([d[pos]]), R)[0])
+        if window:
+            hm = None if pos is None or math.isnan(d[pos]) else round(float(R.minutes(float(d[pos]))), 4)
+            cards_reach.append({"facility_id": c["facility_id"],
+                                "km": None if pos is None or math.isnan(d[pos]) else round(float(d[pos]), 3),
+                                "harness_minutes": hm, "card_minutes": card_minutes(c),
+                                "card_window_min": card_window(c, a), "inside": ok})
+        if ok and pick is None:
             pick = pos
-            break
     cards = list(a.get("results") or []) + ([a["beyond_radius"]] if a.get("beyond_radius") else []) + \
         list(a.get("unverified_nearby") or [])
-    return {"pos": pick, "status": a.get("status"), "n_results": len(a.get("results") or []),
-            "score_status": (a.get("how_we_decided") or {}).get("score_status"),
-            "result_ids": [c["facility_id"] for c in a.get("results") or []],
-            "quote_check": quote_check(ctx, cards)}
+    out = {"pos": pick, "status": a.get("status"), "n_results": len(a.get("results") or []),
+           "score_status": (a.get("how_we_decided") or {}).get("score_status"),
+           "result_ids": [c["facility_id"] for c in a.get("results") or []],
+           "quote_check": quote_check(ctx, cards)}
+    if window:
+        out["cards_reach"] = cards_reach
+    return out
 
 
-def judge_pool(ctx: Ctx, line: str, d: np.ndarray, d_stop: float) -> list[int]:
+def judge_pool(ctx: Ctx, line: str, d: np.ndarray, d_stop) -> list[int]:
     """Facilities the judges may read while looking for the nearest
-    judge-supported option: usable location, within ``d_stop`` km, and any
-    signal for the service (a grade of 1 or more by our tags, a related
-    specialty, or a keyword in its text). Nearest first."""
+    judge-supported option: usable location, within ``d_stop`` (km, or a
+    ``Reach``: inside the query's window), and any signal for the service (a
+    grade of 1 or more by our tags, a related specialty, or a keyword in its
+    text). Nearest first."""
     sig = (ctx.idx.lines[line].grade >= 1) | ctx.spec_mask[line] | ctx.kw_mask[line]
-    ok = sig & ~np.isnan(d) & (d <= d_stop)
+    ok = sig & _inside(d, d_stop)
     ix = np.flatnonzero(ok)
     return [int(p) for p in ix[np.lexsort((ix, d[ix]))]]
 
 
-def run_tools(ctx: Ctx, q: dict) -> dict:
-    line, R = q["service"], float(q["radius_km"])
+def run_tools(ctx: Ctx, q: dict, rule: str = "radius", terrain: Optional[dict] = None) -> dict:
+    """The three tools on one query under one reach rule (``radius``: the sealed
+    km radii; ``window``: the reach amendment's drive-time windows, applied to
+    every tool, the judge walk and the metrics alike)."""
+    line = q["service"]
+    reach = reach_for(q, rule, terrain)
+    R = reach if reach.is_window else float(q["radius_km"])
     d = haversine_km(q["lat"], q["lon"], ctx.idx.lat, ctx.idx.lon)
     label = f"{q['office_name']} post office, {q['district']} district, {q['state']} (PIN {q['pin']})"
     out = {k: q[k] for k in ("query_id", "po_id", "split", "service", "radius_km", "lat", "lon", "office_name",
                              "pin", "state", "district")}
     out["place_label"] = label
+    if reach.is_window:
+        out["reach"] = reach.to_dict()
+    pk_reach = reach if reach.is_window else None
     tools = {}
     p = tool_specialty(ctx, line, d, R)
-    tools["specialty"] = {"pick": _pick(ctx, p, d[p]) if p is not None else None}
+    tools["specialty"] = {"pick": _pick(ctx, p, d[p], pk_reach) if p is not None else None}
     p = tool_any_fact(ctx, line, d, R)
-    tools["any_fact"] = {"pick": _pick(ctx, p, d[p]) if p is not None else None}
-    rk = tool_ranker(ctx, line, q["lat"], q["lon"], R, d, label)
+    tools["any_fact"] = {"pick": _pick(ctx, p, d[p], pk_reach) if p is not None else None}
+    rk = tool_ranker(ctx, line, q["lat"], q["lon"], R, d, label, q.get("state"))
     p = rk.pop("pos")
-    tools["ranker"] = {"pick": _pick(ctx, p, d[p]) if p is not None else None, **rk}
+    tools["ranker"] = {"pick": _pick(ctx, p, d[p], pk_reach) if p is not None else None, **rk}
     out["tools"] = tools
     picks = [t["pick"]["distance_km"] for t in tools.values() if t["pick"]]
     any_abstain = any(t["pick"] is None for t in tools.values())
-    d_stop = R if any_abstain or not picks else max(picks)
+    # the walk stops at the farthest pick when every tool answered, else at the
+    # radius, or under the window rule at the query's window (amendment item 5)
+    if any_abstain or not picks:
+        d_stop, d_stop_km = R, reach.limit_km
+    else:
+        d_stop = d_stop_km = max(picks)
     pool = judge_pool(ctx, line, d, d_stop)
-    out["d_stop_km"] = round(float(d_stop), 3)
+    out["d_stop_km"] = round(float(d_stop_km), 3)
     out["pool_size"] = len(pool)
     out["pool"] = [[ctx.fid(p), round(float(d[p]), 3), ctx.fid(ctx.dup_group(p))] for p in pool[:POOL_STORE]]
+    if reach.is_window:  # a parallel list, so the [id, km, group] entries keep their shape
+        out["pool_minutes"] = [round(float(reach.minutes(float(d[p]))), 4) for p in pool[:POOL_STORE]]
     # WP11 major flags for this line (record-level ones included) on every pick
     # and stored pool entry: the judges never see them, the report splits the
     # "skipped" and "abstained" rates by them.
@@ -1217,7 +1657,8 @@ def judge_query(units: Units, ctx_records: Callable[[str], str], q: dict, walk_c
     walked = 0
     nearest_yes = None
     status = "exhausted"
-    for fid, dist, grp in q["pool"]:
+    pm = q.get("pool_minutes")  # window rule only
+    for i, (fid, dist, grp) in enumerate(q["pool"]):
         if fid in q1:
             v = q1[fid]
         else:
@@ -1230,6 +1671,8 @@ def judge_query(units: Units, ctx_records: Callable[[str], str], q: dict, walk_c
             walked += 1
         if v:
             nearest_yes = {"facility_id": fid, "distance_km": dist, "dup_group": grp}
+            if pm:
+                nearest_yes["minutes"] = pm[i]
             status = "found"
             break
     if status == "exhausted" and q["pool_size"] > len(q["pool"]):
@@ -1282,14 +1725,35 @@ def _lo_level(v) -> Optional[str]:
     return "any" if v == "any" else None
 
 
+def _minutes_of(obj: Optional[dict], reach: dict) -> Optional[float]:
+    """Minutes stored with a pick or a nearest supported option, else recomputed
+    from its km with the query's factor (window rule only)."""
+    if obj is None or reach.get("rule") != "window":
+        return None
+    m = obj.get("minutes")
+    return float(m) if m is not None else float(drive_minutes(float(obj["distance_km"]), reach["factor"]))
+
+
 def outcome_rows(q: dict, jq: dict, listing_only: Optional[dict] = None,
                  flags: Optional[dict] = None) -> list[dict]:
     """Per tool outcome for one judged query. ``listing_only``: Q1 unit id ->
     whether its yes rests only on the specialties listing. ``flags``: facility id
-    -> WP11 major flags for this line (default: the ones stored with the picks)."""
+    -> WP11 major flags for this line (default: the ones stored with the picks).
+    Under the window rule (picks made with the reach amendment) "inside" means
+    minutes at most the window, and a skip is split by whether the pick is at
+    most the ranker's evidence allowance further in minutes (amendment item 6)."""
     rows = []
     R = float(q["radius_km"])
+    reach = q.get("reach") or {"rule": "radius"}
+    win = reach.get("rule") == "window"
     ny = jq.get("nearest_yes")
+    ny_min = _minutes_of(ny, reach)
+    if ny is None:
+        ny_inside = False
+    elif win:
+        ny_inside = ny_min <= float(reach["window_min"])
+    else:
+        ny_inside = ny["distance_km"] <= R
     lo = listing_only or {}
     fl_known = flags is not None or "major_flags" in q  # picks made before flags were stored: unknown
     fl = (q.get("major_flags") if flags is None else flags) or {}
@@ -1306,11 +1770,15 @@ def outcome_rows(q: dict, jq: dict, listing_only: Optional[dict] = None,
              "nearest_yes_major_flags": "|".join(ny_flags) if ny else None,
              "nearest_yes_flagged": (bool(ny_flags) if fl_known else None) if ny else None,
              "nearest_yes_listing_only": ny_lo, "nearest_yes_listing_any": (ny_lv is not None) if ny else None,
-             "flags_known": fl_known}
+             "flags_known": fl_known, "reach_rule": reach.get("rule"),
+             "window_min": reach.get("window_min"), "allowance_min": reach.get("allowance_min"),
+             "nearest_yes_minutes": round(ny_min, 4) if ny_min is not None else None,
+             "pick_minutes": None, "skip_extra_min": None, "skip_within_allowance": None,
+             "skip_beyond_allowance": None}
         if pk is None:
             r.update(answered=False, pick_id=None, pick_km=None, q1=None, q2=None, correct=None, good=None,
                      pick_listing_only=None, pick_listing_any=None, pick_major_flags=None, skipped_nearer=None,
-                     abstained_with_support=bool(ny is not None and ny["distance_km"] <= R))
+                     abstained_with_support=bool(ny_inside))
         else:
             v1 = jq["q1"].get(pk["facility_id"])
             v2 = jq["q2"].get(pk["facility_id"])
@@ -1322,6 +1790,16 @@ def outcome_rows(q: dict, jq: dict, listing_only: Optional[dict] = None,
                      pick_listing_any=_lo_level(lo.get(f"{pk['facility_id']}|{line}")) is not None,
                      pick_major_flags="|".join(fl.get(pk["facility_id"], [])),
                      skipped_nearer=skipped, abstained_with_support=None)
+            if win:
+                pm_ = _minutes_of(pk, reach)
+                r["pick_minutes"] = round(pm_, 4)
+                if skipped:
+                    extra = pm_ - ny_min
+                    within = extra <= float(reach["allowance_min"])
+                    r.update(skip_extra_min=round(extra, 4), skip_within_allowance=bool(within),
+                             skip_beyond_allowance=bool(not within))
+                else:
+                    r.update(skip_within_allowance=False, skip_beyond_allowance=False)
         if t == "ranker":
             qc = q["tools"]["ranker"].get("quote_check") or {}
             r.update(quotes=qc.get("n_quotes"), quotes_strict=qc.get("strict"), quotes_loose=qc.get("loose"),
@@ -1382,6 +1860,14 @@ def summarize(rows: pd.DataFrame) -> dict:
         if "flags_known" in r and len(r) and r["flags_known"].astype(bool).all():
             m["abstained_with_support_split"] = _split_by_nearest(abst, "abstained_with_support", int(len(abst)))
             m["skipped_nearer_split"] = _split_by_nearest(ans, "skipped_nearer", int(len(ans)))
+        if "reach_rule" in r and len(r) and (r["reach_rule"] == "window").all():
+            # amendment item 6: skips where the pick is at most the evidence
+            # allowance further in minutes (the ranker's declared allowance), and beyond it
+            w_in = int(ans["skip_within_allowance"].fillna(False).astype(bool).sum()) if len(ans) else 0
+            w_out = int(ans["skip_beyond_allowance"].fillna(False).astype(bool).sum()) if len(ans) else 0
+            m["skipped_nearer_allowance"] = {
+                "within_allowance": _rate(w_in, int(len(ans))), "beyond_allowance": _rate(w_out, int(len(ans))),
+                "allowance_min": sorted({float(x) for x in r["allowance_min"].dropna()})}
         out[t] = m
     integ = {}
     rk = rows[rows["tool"] == "ranker"] if len(rows) else rows
@@ -1398,8 +1884,9 @@ def summarize(rows: pd.DataFrame) -> dict:
                              "correct": int(g[(g.tool == t) & g.answered]["correct"].astype(bool).sum()),
                              "queries": int(g[g.tool == t].shape[0])} for t in TOOLS}
     walk = rows.drop_duplicates("query_id")["walk_status"].value_counts().to_dict() if len(rows) else {}
+    rules = sorted({str(x) for x in rows["reach_rule"].dropna()}) if "reach_rule" in rows and len(rows) else []
     return {"n_queries": int(nq), "tools": out, "by_service": by_service, "walk_status": walk,
-            "integrity_checks": integ}
+            "integrity_checks": integ, "reach_rule": rules[0] if len(rules) == 1 else (rules or "radius")}
 
 
 #: The card-quote figure holds by construction (the ranker's quote IS the cited
@@ -1431,26 +1918,40 @@ def _split_line(m: dict, what: str) -> str:
             f"{s['nearest_listing_any']['k']} (loose: at least one did).")
 
 
+def _allowance_line(m: dict) -> str:
+    a = m.get("skipped_nearer_allowance")
+    if not a:
+        return ""
+    return (f" Of all answers, the pick was at most the declared evidence allowance further in estimated minutes "
+            f"(15, or 30 for MRI, cardiac surgery and oncology; by design, a better-evidenced record within the "
+            f"allowance may come first) in {fmt_rate(a['within_allowance'])}, and beyond it in "
+            f"{fmt_rate(a['beyond_allowance'])}.")
+
+
 def render_results_md(split: str, res: dict, meta: dict) -> str:
     t = res["tools"]
     rk, an, sp = t["ranker"], t["any_fact"], t["specialty"]
+    win = res.get("reach_rule") == "window"
+    inside = "inside the same drive-time window" if win else "inside the same radius"
     L = [f"# Sealed evaluation results: {split} half", ""]
     if split == "dev":
         L += ["**Dev half. A dry run of the harness, not the result.** Numbers below cover only the queries "
               "that were fully judged in this run; they are too few to read as rates.", ""]
+    if win and not meta.get("reach_amendment_sealed", True):
+        L += ["**Preview of the reach amendment's window rule: the amendment is not sealed.**", ""]
     n_abst = rk["coverage"]["n"] - rk["coverage"]["k"]
     L += ["## The cost of our caution (lead)", "",
           f"- Our ranker abstained on {n_abst} of {rk['coverage']['n']} judged "
           f"queries. In {fmt_rate(rk['abstained_with_support'])} of those abstentions, the AI judges found a "
-          "facility inside the same radius whose record clearly shows the service." +
+          f"facility {inside} whose record clearly shows the service." +
           _split_line(rk, "abstained_with_support_split"),
           f"- As a share of all judged queries, that is {fmt_rate(rk['abstained_with_support_of_all'])}. "
           "This is a lower bound: the judges read only facilities with some signal for the service, at most "
           f"{WALK_CAP} per query.",
           f"- When the ranker did answer, it skipped a nearer judge-supported option in "
           f"{fmt_rate(rk['skipped_nearer'])} of answers (at least {SKIP_MARGIN_KM:.0f} km nearer, a different record "
-          "group)." + _split_line(rk, "skipped_nearer_split"),
-          "", "## All three tools, same radius, same right to abstain", "",
+          "group)." + _split_line(rk, "skipped_nearer_split") + _allowance_line(rk),
+          "", "## All three tools, same " + ("drive-time window" if win else "radius") + ", same right to abstain", "",
           "| | Specialty filter | Any fact names it | Our ranker |", "| --- | --- | --- | --- |"]
 
     def row(name, key):
@@ -1486,7 +1987,10 @@ def render_results_md(split: str, res: dict, meta: dict) -> str:
           "They are checked against hand labels by Hruday on 40 items (agreement reported separately).",
           "- 'Clearly shows' is a statement about the record, not about the facility: a 'no' means the record does "
           "not show the service, not that the facility does not offer it.",
-          "- Straight-line distances. Same radius per service for every tool (vf.services).",
+          ("- Estimated drive time from straight-line distance (origin state factor x 2.30 x km^0.842 minutes, "
+           "free-flow; real trips take longer). The same window per service for every tool, the judge walk and "
+           "the metrics; windows are planning thresholds, not clinical deadlines." if win else
+           "- Straight-line distances. Same radius per service for every tool (vf.services)."),
           f"- Scored queries: {res['n_queries']} of {meta.get('queries_total', res['n_queries'])} (the fully judged "
           f"prefix of the fixed seeded order). Walk status per query: {res['walk_status']}.",
           f"- Unresolved picks (judges split and the third pass did not settle it): "
@@ -1592,12 +2096,25 @@ def read_points() -> pd.DataFrame:
     return df
 
 
-def picks_path(split: str) -> Path:
-    return out_dir() / f"picks_{split}.json"
+PREVIEW_TAG = "_window_preview"
 
 
-def records_path(split: str) -> Path:
-    return out_dir() / f"records_{split}.json"
+def picks_path(split: str, tag: str = "") -> Path:
+    return out_dir() / f"picks_{split}{tag}.json"
+
+
+def records_path(split: str, tag: str = "") -> Path:
+    return out_dir() / f"records_{split}{tag}.json"
+
+
+def preview_tag(args, split: str, status: Optional[dict] = None) -> str:
+    """A dev run of the window rule before the amendment is sealed is a preview:
+    it writes ``picks_dev_window_preview.json`` and never replaces the dev picks
+    the judged file was made on."""
+    if split != "dev" or getattr(args, "reach", None) != "window":
+        return ""
+    st = status if status is not None else reach_amendment_status()
+    return "" if st.get("active") else PREVIEW_TAG
 
 
 # =============================================================================
@@ -1645,6 +2162,15 @@ def cmd_picks(args) -> None:
         raise SystemExit(f"{picks_path('sealed')} exists: the sealed picks are computed once (protocol rule 2). "
                          "Resume an interrupted sealed run with `judge --split sealed --unseal`, which reads them "
                          "and the judge cache.")
+    ra = info.get("reach_amendment") or reach_amendment_status()
+    rule, _ = resolve_reach_rule(args.split, getattr(args, "reach", None), status=ra)
+    tag = preview_tag(args, args.split, ra)
+    rw, rallow = ranker_windows(), ranker_allowances()
+    if args.split == "sealed":
+        dp = picks_path("dev")
+        check_sealed_reach(json.loads(dp.read_text()) if dp.exists() else None, info.get("code_sha256") or {}, ra, rw,
+                           rallow)
+    terrain = load_terrain() if rule == "window" else None
     pts = read_points()
     q = make_queries(pts[pts["split"] == args.split])
     t0 = time.time()
@@ -1652,7 +2178,7 @@ def cmd_picks(args) -> None:
     load_s = time.time() - t0
     out, records = [], {}
     for r in q.to_dict("records"):
-        o = run_tools(ctx, r)
+        o = run_tools(ctx, r, rule, terrain)
         out.append(o)
         for t in TOOLS:
             pk = o["tools"][t]["pick"]
@@ -1662,34 +2188,56 @@ def cmd_picks(args) -> None:
         for fid, _, _ in o["pool"]:
             if fid not in records:
                 records[fid] = ctx.record(ctx.idx.id_to_pos[fid])
+    reach_doc = {"rule": rule, "preview": bool(tag),
+                 "amendment": {k: ra.get(k) for k in ("present", "sealed", "active", "number", "seal", "problems")}}
+    if rule == "window":
+        sea = load_sea_pixel_ids()
+        reach_doc.update(
+            formula="minutes = origin state factor x 2.30 x km^0.842 (point estimate, unrounded)",
+            drive_a=DRIVE_A, drive_b=DRIVE_B, band_log=DRIVE_BAND_LOG, window_min=dict(WINDOW_MIN),
+            allowance_min=dict(ALLOWANCE_MIN),
+            terrain_sha256=sha256_file(paths.code_root() / TERRAIN_PATH), terrain_sha256_pinned=TERRAIN_SHA256,
+            sea_pixel_sha256=sha256_file(paths.code_root() / SEA_PIXEL_PATH), sea_pixel_sha256_pinned=SEA_PIXEL_SHA256,
+            sea_pixel_po_ids_in_half=sorted({int(o["po_id"]) for o in out} & sea),
+            ranker_windows=rw, ranker_allowances=rallow, ranker_window_problems=check_ranker_reach(rw, rallow),
+            ranker_cards=ranker_card_consistency(out))
     doc = {"split": args.split, "created_at_utc": now_utc(), "harness_version": HARNESS_VERSION,
            "protocol": info["protocol"], "points_sha256": info["points_sha256"], "bundle": ctx.bundle_info,
            "git": info["git"], "code_sha256": info["code_sha256"],
-           "radius_km": {s: float(S.RADII_KM[s]) for s in S.SERVICE_LINES}, "queries": out}
+           "radius_km": {s: float(S.RADII_KM[s]) for s in S.SERVICE_LINES}, "reach": reach_doc, "queries": out}
     # records first: the picks file is the "computed once" marker for the sealed half
-    write_json_atomic(records_path(args.split), records)
-    write_meta(records_path(args.split), {"rows": len(records), "note": "record text as the judges read it"})
-    write_json_atomic(picks_path(args.split), doc)
-    write_meta(picks_path(args.split), {"rows": len(out), "split": args.split, "bundle": ctx.bundle_info,
-                                        "points_sha256": info["points_sha256"], "git": info["git"],
-                                        "code_sha256": info["code_sha256"],
-                                        "protocol_seal": info["protocol"].get("sha256"),
-                                        "seal_pinned": info["protocol"].get("pinned")})
+    write_json_atomic(records_path(args.split, tag), records)
+    write_meta(records_path(args.split, tag), {"rows": len(records), "note": "record text as the judges read it"})
+    write_json_atomic(picks_path(args.split, tag), doc)
+    write_meta(picks_path(args.split, tag), {"rows": len(out), "split": args.split, "bundle": ctx.bundle_info,
+                                             "points_sha256": info["points_sha256"], "git": info["git"],
+                                             "code_sha256": info["code_sha256"],
+                                             "protocol_seal": info["protocol"].get("sha256"),
+                                             "seal_pinned": info["protocol"].get("pinned"), "reach_rule": rule,
+                                             "preview": bool(tag)})
     n_ans = {t: sum(1 for o in out if o["tools"][t]["pick"]) for t in TOOLS}
     qc = [o["tools"]["ranker"]["quote_check"] for o in out]
     nq, ns = sum(x["n_quotes"] for x in qc), sum(x["strict"] for x in qc)
     same = sum(1 for o in out if len({(o["tools"][t]["pick"] or {}).get("facility_id") for t in TOOLS}) == 1)
-    print(f"[picks {args.split}] {len(out)} queries; answered: " +
+    print(f"[picks {args.split}{tag}] reach rule {rule}; {len(out)} queries; answered: " +
           ", ".join(f"{t} {n_ans[t]}" for t in TOOLS) +
           f"; all three tools agree (same pick or all abstain) on {same}; ranker card quotes verbatim "
-          f"{ns}/{nq}; index load {load_s:.1f}s; {len(records)} records stored")
+          f"{ns}/{nq}; pool entries {sum(o['pool_size'] for o in out)}; index load {load_s:.1f}s; "
+          f"{len(records)} records stored")
+    if rule == "window":
+        cc = reach_doc["ranker_cards"]
+        print(f"  ranker card check (amendment item 4): {cc['n_cards']} result cards, {cc['n_with_minutes']} report "
+              f"minutes (max diff {cc['max_abs_diff_min']} min, {cc['n_minute_misses']} misses), "
+              f"{cc['n_window_match']} report the pinned window; ok={cc['ok']}. Ranker windows: "
+              f"{'match' if not reach_doc['ranker_window_problems'] else reach_doc['ranker_window_problems']}. "
+              f"Sea-pixel points in this half: {reach_doc['sea_pixel_po_ids_in_half']}")
 
 
-def _load_picks(split: str) -> tuple[dict, dict]:
-    p = picks_path(split)
+def _load_picks(split: str, tag: str = "") -> tuple[dict, dict]:
+    p = picks_path(split, tag)
     if not p.exists():
-        raise SystemExit(f"no picks for {split}: run `picks --split {split}` first")
-    return json.loads(p.read_text()), json.loads(records_path(split).read_text())
+        raise SystemExit(f"no picks for {split}{tag}: run `picks --split {split}` first")
+    return json.loads(p.read_text()), json.loads(records_path(split, tag).read_text())
 
 
 def judged_path(split: str) -> Path:
@@ -1726,6 +2274,9 @@ def check_sealed_judge_settings(args, doc: dict, info: dict, specs: dict) -> Non
         raise SystemExit(f"sealed half: code changed since the sealed picks were computed: {changed}")
     if doc.get("protocol", {}).get("sha256") != info["protocol"].get("sha256"):
         raise SystemExit("sealed half: the protocol seal changed since the sealed picks were computed")
+    r, ra = doc.get("reach") or {}, info.get("reach_amendment") or {}
+    if r.get("rule") != "window" or not ra.get("seal") or (r.get("amendment") or {}).get("seal") != ra.get("seal"):
+        raise SystemExit("sealed half: the sealed picks were not computed under the sealed reach amendment")
 
 
 def ledger_summary(path: Path, purpose: str) -> dict:
@@ -1923,6 +2474,9 @@ def cmd_score(args) -> None:
     qc = [q["tools"]["ranker"]["quote_check"] for q in doc["queries"]]
     nq = sum(x["n_quotes"] for x in qc)
     res["all_queries"] = {"n": len(doc["queries"]), "coverage": cov_all}
+    reach_doc = doc.get("reach") or {"rule": "radius"}
+    if reach_doc.get("rule") == "window":
+        res["without_sea_pixel"] = sea_pixel_sensitivity(df, doc["queries"], load_sea_pixel_ids())
     res["integrity_checks_all_queries"] = {
         "card_quotes_match_cited_fact": {**_rate(sum(x["strict"] for x in qc), nq), "label": INTEGRITY_LABEL},
         "card_quotes_found_in_record": _rate(sum(x["loose"] for x in qc), nq)}
@@ -1935,6 +2489,9 @@ def cmd_score(args) -> None:
             "ledger": ledger_summary(out_dir() / "spend.jsonl", f"judge_{args.split}"),
             "picks_created_at_utc": doc.get("created_at_utc"), "judged_created_at_utc": jd.get("created_at_utc"),
             "flags_stored_with_picks": all("major_flags" in q for q in doc["queries"]),
+            "reach_rule": reach_doc.get("rule"), "reach_preview": reach_doc.get("preview"),
+            "reach_amendment_sealed": bool((reach_doc.get("amendment") or {}).get("active"))
+            if reach_doc.get("rule") == "window" else None,
             "code_sha256_at_picks": doc.get("code_sha256"), "git_at_picks": (doc.get("git") or {}).get("git_commit"),
             "git_clean_at_picks": (doc.get("git") or {}).get("clean"),
             "code_sha256_now": info["code_sha256"]}
@@ -1951,6 +2508,8 @@ def cmd_score(args) -> None:
            "\n".join(f"- {TOOL_PLAIN[t]}: {fmt_rate(cov_all[t])}" for t in TOOLS) +
            f"\n- Integrity check over all queries (not a judged result): every quote on a ranker card is the exact "
            f"text of the fact it cites, {ica['k']} of {ica['n']}.\n")
+    if res.get("without_sea_pixel"):
+        md += render_sea_pixel_md(res["without_sea_pixel"])
     write_text_atomic(out_dir() / f"results_{args.split}.md", md)
     t = res["tools"]
     print(f"[score {args.split}] scored {res['n_queries']} of {len(doc['queries'])} queries (the fully judged prefix "
@@ -1968,6 +2527,45 @@ def cmd_score(args) -> None:
                 print(f"    {k}: nearest supported record flagged {sp_['nearest_flagged']['k']}, unflagged "
                       f"{sp_['nearest_unflagged']['k']}, listing-only {sp_['nearest_listing_only']['k']}")
     print(f"  integrity (not judged): card quotes = cited fact text {ica['k']}/{ica['n']}")
+
+
+HEADLINE_KEYS = ("coverage", "precision", "precision_excluding_listing_only", "good_pick", "abstained_with_support",
+                 "skipped_nearer")
+
+
+def sea_pixel_sensitivity(df: pd.DataFrame, queries: list[dict], sea: set) -> dict:
+    """Amendment item 8: sampled post offices on the sea-pixel list stay in the
+    sample and the headline; each headline figure is also given without them."""
+    po = sorted({int(q["po_id"]) for q in queries} & set(sea))
+    keep = [q for q in queries if int(q["po_id"]) not in sea]
+    out = {"po_ids": po, "n_points": len(po), "n_queries_dropped": len(queries) - len(keep),
+           "coverage_all_queries": {t: _rate(sum(1 for q in keep if q["tools"][t]["pick"]), len(keep)) for t in TOOLS}}
+    if len(df):
+        sub = df[~df["po_id"].astype(int).isin(sea)]
+        sm = summarize(sub) if len(sub) else {"n_queries": 0, "tools": {t: {} for t in TOOLS}}
+        out["n_queries_scored"] = sm["n_queries"]
+        out["tools"] = {t: {k: sm["tools"][t].get(k) for k in HEADLINE_KEYS} for t in TOOLS}
+    return out
+
+
+def render_sea_pixel_md(sp: dict) -> str:
+    L = ["", "## Sensitivity: without the sea-pixel post offices", "",
+         f"- {sp['n_points']} sampled post offices in this half are on the sea-pixel list "
+         f"(`{SEA_PIXEL_PATH}`): po_id {', '.join(str(x) for x in sp['po_ids']) or 'none'}. They stay in the sample "
+         f"and in every figure above (no query is dropped after the fact); here each headline figure is given "
+         f"without their {sp['n_queries_dropped']} queries.",
+         "- Coverage over all queries without them: " +
+         "; ".join(f"{TOOL_PLAIN[t]} {fmt_rate(sp['coverage_all_queries'][t])}" for t in TOOLS) + "."]
+    if sp.get("tools"):
+        L += ["", "| Without sea-pixel points | Specialty filter | Any fact names it | Our ranker |",
+              "| --- | --- | --- | --- |"]
+        names = {"coverage": "Coverage (judged queries)", "precision": "Precision",
+                 "precision_excluding_listing_only": "Precision, not counting listing-only yes votes",
+                 "good_pick": "Top pick also sensible", "abstained_with_support":
+                 "Abstained when a judge-supported option existed", "skipped_nearer": "Skipped a nearer option"}
+        for k in HEADLINE_KEYS:
+            L.append(f"| {names[k]} | " + " | ".join(fmt_rate(sp["tools"][t].get(k)) for t in TOOLS) + " |")
+    return "\n".join(L) + "\n"
 
 
 _PHONE_RX = re.compile(r"(?<![\w])(?:\+?91[\s-]*|0)?(?:\d[\s-]?){9,11}\d(?![\w])")
@@ -2070,10 +2668,44 @@ def cmd_agreement(args) -> None:
     print(f"[agreement {args.split}] " + json.dumps(res))
 
 
+def cached_units(doc: dict, records: dict, specs: dict[str, JudgeSpec], cache_root: Path) -> dict:
+    """Q1 units (``facility|service``, over picks and every stored pool entry)
+    and Q2 units (``query|facility``, picks) whose A and B answers are already in
+    the judge cache, so judging them again costs nothing."""
+    runner = JudgeRunner(specs, None, cache_dir=cache_root)
+
+    def hit(kind, system, user) -> bool:
+        for j in ("A", "B"):
+            sp = specs[j]
+            if not (cache_root / runner.versions[kind] / sp.name / f"{runner._key(sp, kind, system, user)}.json").exists():
+                return False
+        return True
+
+    q1, q2 = set(), set()
+    for q in doc["queries"]:
+        line = q["service"]
+        fids = {q["tools"][t]["pick"]["facility_id"] for t in TOOLS if q["tools"][t]["pick"]} | \
+            {e[0] for e in q["pool"]}
+        for fid in fids:
+            uid = f"{fid}|{line}"
+            if uid not in q1 and fid in records and hit("q1", SYSTEM_Q1, user_q1(line, records[fid])):
+                q1.add(uid)
+        for t in TOOLS:
+            pk = q["tools"][t]["pick"]
+            if pk and pk["facility_id"] in records:
+                if hit("q2", SYSTEM_Q2, user_q2(line, q["place_label"], pk["distance_km"], records[pk["facility_id"]])):
+                    q2.add(f"{q['query_id']}|{pk['facility_id']}")
+    return {"q1": sorted(q1), "q2": sorted(q2)}
+
+
 def estimate_cost(doc: dict, ledger_rows: list[dict], specs: dict[str, JudgeSpec], walk_cap: int = WALK_CAP,
-                  disagreement_rate: Optional[float] = None, walk_share: Optional[float] = None) -> dict:
+                  disagreement_rate: Optional[float] = None, walk_share: Optional[float] = None,
+                  cached: Optional[dict] = None) -> dict:
     """Expected API cost of judging every query in ``doc``, from the measured
-    tokens per call (by kind and judge model) in ``ledger_rows``."""
+    tokens per call (by kind and judge model) in ``ledger_rows``. ``cached``
+    (from ``cached_units``): units already in the judge cache cost nothing."""
+    c_q1 = set((cached or {}).get("q1") or [])
+    c_q2 = set((cached or {}).get("q2") or [])
     tok: dict = {}
     for r in ledger_rows:
         k = (r["kind"], r["model"])
@@ -2089,10 +2721,11 @@ def estimate_cost(doc: dict, ledger_rows: list[dict], specs: dict[str, JudgeSpec
     for q in doc["queries"]:
         picks = {q["tools"][t]["pick"]["facility_id"] for t in TOOLS if q["tools"][t]["pick"]}
         for f in picks:
-            q1_units.add(f"{f}|{q['service']}")
-        q2_units += len(picks)
-        extra = [p for p in q["pool"] if p[0] not in picks]
-        walk_upper += min(walk_cap, len(extra))
+            if f"{f}|{q['service']}" not in c_q1:
+                q1_units.add(f"{f}|{q['service']}")
+        q2_units += sum(1 for f in picks if f"{q['query_id']}|{f}" not in c_q2)
+        extra = [p for p in q["pool"] if p[0] not in picks][:walk_cap]
+        walk_upper += sum(1 for p in extra if f"{p[0]}|{q['service']}" not in c_q1)
     dis = 0.15 if disagreement_rate is None else disagreement_rate
     # walk_share: measured walked / possible walk on judged queries that had something to walk
     wm = walk_upper * (0.5 if walk_share is None else walk_share)
@@ -2106,13 +2739,15 @@ def estimate_cost(doc: dict, ledger_rows: list[dict], specs: dict[str, JudgeSpec
         out[label] = {"q1_units": round(n1), "q2_units": q2_units,
                       "api_calls": round((n1 + q2_units) * (2 + dis)), "usd": round(c, 3)}
     out["assumptions"] = {"disagreement_rate": dis, "walk_upper": walk_upper,
+                          "cached_units_skipped": {"q1": len(c_q1), "q2": len(c_q2)},
                           "walk_share": 0.5 if walk_share is None else walk_share,
                           "measured_calls": {f"{k[0]}|{k[1]}": len(v) for k, v in tok.items()}}
     return out
 
 
 def cmd_estimate(args) -> None:
-    doc, _ = _load_picks(args.split)
+    tag = preview_tag(args, args.split)
+    doc, _ = _load_picks(args.split, tag)
     env = read_env()
     specs = judge_specs(env, args.judges)
     led = out_dir() / "spend.jsonl"
@@ -2121,7 +2756,8 @@ def cmd_estimate(args) -> None:
     dis = share = None
     if jd and jd["units"]:
         dis = sum(1 for u in jd["units"] if u["third_pass"]) / len(jd["units"])
-        qmap = {q["query_id"]: q for q in doc["queries"]}
+        # the walk share is measured on the picks the judged file was made on
+        qmap = {q["query_id"]: q for q in (_load_picks(args.split)[0] if tag else doc)["queries"]}
         used = possible = 0
         for qid, jq in jd["queries"].items():
             q = qmap[qid]
@@ -2132,11 +2768,20 @@ def cmd_estimate(args) -> None:
                 possible += room
         if possible >= 30:  # too few walks measured: keep the 0.5 default
             share = used / possible
-    est = estimate_cost(doc, rows, specs, args.walk_cap, dis, share)
+    cached = None
+    if tag or (doc.get("reach") or {}).get("rule") == "window":
+        _, recs = _load_picks(args.split, tag)
+        cached = cached_units(doc, recs, specs, out_dir() / "judge_cache")
+    est = estimate_cost(doc, rows, specs, args.walk_cap, dis, share, cached)
     est["per_half"] = args.split
+    est["reach_rule"] = (doc.get("reach") or {}).get("rule", "radius")
+    est["picks_file"] = picks_path(args.split, tag).name
+    if cached is not None:
+        est["cached_units"] = {"q1": len(cached["q1"]), "q2": len(cached["q2"]),
+                               "note": "Q1 and Q2 answers already in the judge cache are not counted"}
     est["full_run_note"] = ("a full run is this half plus the sealed half, which is assumed to look like this half "
                             "(its picks are not computed before the seal is broken): about twice these figures")
-    write_json_atomic(out_dir() / f"cost_estimate_{args.split}.json", est)
+    write_json_atomic(out_dir() / f"cost_estimate_{args.split}{tag}.json", est)
     print(f"[estimate {args.split}] judges {', '.join(f'{k}={v.model}' for k, v in specs.items())}: " +
           "; ".join(f"{k}: ${v['usd']:.2f} ({v['api_calls']} calls)" for k, v in est.items()
                     if isinstance(v, dict) and "usd" in v) + " per half")
@@ -2175,6 +2820,9 @@ def main(argv=None) -> None:
         p.add_argument("--force", action="store_true")
         p.add_argument("--prompt-q1", default=KIND_PROMPT_VERSION["q1"], help="rejudge: Q1 rubric version")
         p.add_argument("--units-file", default=None, help="rejudge: file of Q1 unit ids, one per line")
+        p.add_argument("--reach", choices=REACH_RULES, default=None,
+                       help="dev only: reach rule (default: window once the reach amendment is sealed, else radius; "
+                            "window before the seal is a preview written to *_window_preview.json)")
 
     for name in ("draw", "seal"):
         common(sub.add_parser(name), split=False)

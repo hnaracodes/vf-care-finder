@@ -1,8 +1,8 @@
 {
   "bundle_version": "wp12-bundle-v1",
-  "created_at_utc": "2026-11-22T04:57:15+00:00",
-  "git_commit": "d597c74516af623acd8b441b157de9deaee91d16",
-  "code_uncommitted": false,
+  "created_at_utc": "2026-11-22T06:06:57+00:00",
+  "git_commit": "f5a74270474ea67e448b3e8912987535d09e2e3a",
+  "code_uncommitted": true,
   "script": "scripts/wp12_bundle.py",
   "data_dir": "vf.paths.data_dir()",
   "pipeline_source": "csv",
@@ -12,7 +12,9 @@
     "flags": 3350,
     "duplicates": 75,
     "places": 182755,
-    "post_offices": 137748
+    "post_offices": 137748,
+    "record_info": 9989,
+    "laqshya_links": 121
   },
   "upstream_row_counts": {
     "silver/facilities.parquet": 9989,
@@ -22,9 +24,11 @@
     "silver/places.parquet": 182755,
     "gold/fact_tags.parquet": 451105,
     "gold/capability_grades.parquet": 119868,
+    "gold/capability_grades_v03.parquet": 119868,
     "gold/facility_flags.parquet": 3350,
     "gold/facility_duplicates.parquet": 75,
-    "gold/service_probability.parquet": null
+    "gold/service_probability.parquet": null,
+    "silver/laqshya_links.parquet": 121
   },
   "grade_counts": {
     "burns": {
@@ -42,8 +46,8 @@
     "cath_lab": {
       "0": 6834,
       "1": 2464,
-      "2": 210,
-      "3": 481
+      "2": 486,
+      "3": 205
     },
     "ct": {
       "0": 6537,
@@ -54,14 +58,14 @@
     "dialysis": {
       "0": 7631,
       "1": 1322,
-      "2": 556,
-      "3": 480
+      "2": 580,
+      "3": 456
     },
     "emoc": {
       "0": 5325,
       "1": 4232,
-      "2": 391,
-      "3": 41
+      "2": 378,
+      "3": 54
     },
     "icu": {
       "0": 7173,
@@ -83,9 +87,9 @@
     },
     "nicu": {
       "0": 8513,
-      "1": 770,
-      "2": 528,
-      "3": 178
+      "1": 782,
+      "2": 582,
+      "3": 112
     },
     "oncology": {
       "0": 7982,
@@ -100,6 +104,7 @@
       "3": 463
     }
   },
+  "grades_status": "recipe v0.3 (gold/capability_grades_v03.parquet, D048)",
   "grade_source": {
     "script": "scripts/wp4_student.py",
     "method": "student",
@@ -205,7 +210,7 @@
   "versions": {
     "silver_facilities": "wp1-silver-v3",
     "recipes": [
-      "v0.2"
+      "v0.3"
     ],
     "grade_method": [
       "student"
@@ -218,11 +223,6 @@
   },
   "defaults": {
     "source": "vf.services",
-    "weights": {
-      "evidence": 0.5,
-      "distance": 0.3,
-      "trust": 0.2
-    },
     "radii_km": {
       "emoc": 50,
       "nicu": 75,
@@ -236,6 +236,11 @@
       "burns": 200,
       "neurosurgery": 150,
       "oncology": 250
+    },
+    "weights_v0_legacy": {
+      "evidence": 0.5,
+      "distance": 0.3,
+      "trust": 0.2
     },
     "penalties": {
       "possible_merge": 0.15,
@@ -274,7 +279,83 @@
       "burns",
       "neurosurgery",
       "oncology"
-    ]
+    ],
+    "windows": {
+      "emoc": {
+        "minutes": 120,
+        "allowance": 15.0,
+        "kind": "cited",
+        "basis": "Cited: the Lancet Commission on Global Surgery's 2-hour access indicator (share of people within 2 hours of a facility that can do caesarean section, laparotomy and treatment of open fracture). Holmer et al. 2019, Br J Surg, https://pmc.ncbi.nlm.nih.gov/articles/PMC6790969, note that it \"does not capture whether patients actually receive care\"."
+      },
+      "trauma": {
+        "minutes": 120,
+        "allowance": 15.0,
+        "kind": "cited",
+        "basis": "Cited: the Lancet Commission on Global Surgery's 2-hour access indicator (share of people within 2 hours of a facility that can do caesarean section, laparotomy and treatment of open fracture). Holmer et al. 2019, Br J Surg, https://pmc.ncbi.nlm.nih.gov/articles/PMC6790969, note that it \"does not capture whether patients actually receive care\"."
+      },
+      "cath_lab": {
+        "minutes": 90,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice informed by ESC 2023, which sets \"an absolute time of 120 min from STEMI diagnosis to PCI-mediated reperfusion\" (https://academic.oup.com/eurheartj/article/44/38/3720/7243210). The 90-minute travel window inside that is ours, not ESC's."
+      },
+      "neurosurgery": {
+        "minutes": 150,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice informed by Seelig et al. 1981 (N Engl J Med): comatose patients with an acute subdural haematoma did much better when operated within 4 hours of injury. The 2.5-hour travel window is ours."
+      },
+      "dialysis": {
+        "minutes": 60,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice informed by DOPPS (Moist et al. 2008, Clin J Am Soc Nephrol): longer travel time to dialysis went with worse quality of life, adherence and survival. Dialysis is repeated two or three times a week, so the window is short. The 60 minutes is ours."
+      },
+      "icu": {
+        "minutes": 120,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; set equal to the 2-hour emergency indicator."
+      },
+      "nicu": {
+        "minutes": 120,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; set equal to the 2-hour emergency indicator."
+      },
+      "ct": {
+        "minutes": 120,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; set equal to the 2-hour emergency indicator."
+      },
+      "mri": {
+        "minutes": 180,
+        "allowance": 30.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; MRI is usually planned, so 3 hours."
+      },
+      "burns": {
+        "minutes": 240,
+        "allowance": 15.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; specialist burn units are few, so 4 hours."
+      },
+      "cardiac_surgery": {
+        "minutes": 240,
+        "allowance": 30.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; heart surgery is usually planned, so 4 hours."
+      },
+      "oncology": {
+        "minutes": 240,
+        "allowance": 30.0,
+        "kind": "design choice",
+        "basis": "Design choice: no published travel-time standard was found for this service; cancer treatment is planned and repeated, so 4 hours."
+      }
+    },
+    "reach_factor_v1": 3.0,
+    "rank_version": "v1"
   },
   "defaults_note": null,
   "files": {
@@ -306,11 +387,12 @@
     },
     "grades.parquet": {
       "rows": 119868,
-      "from": "gold/capability_grades.parquet",
-      "input_created_at_utc": "2026-11-22T03:06:11Z",
-      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
-      "bytes": 1748546,
-      "sha256": "f46d0ce67abacc0e8cf8986c56b5e5be2a004d19c1b0741d955b45f511a0a571"
+      "from": "gold/capability_grades_v03.parquet",
+      "input_created_at_utc": "2026-11-22T04:42:43Z",
+      "input_git_commit": "f5cc686a02f67a293414b460ad182bb275972930",
+      "status": "recipe v0.3 (gold/capability_grades_v03.parquet, D048)",
+      "bytes": 1680459,
+      "sha256": "2549455dfd684c2b395d614f88f311dd774065be1e3454f89881130607a8da20"
     },
     "flags.parquet": {
       "rows": 3350,
@@ -352,6 +434,28 @@
       "bytes": 2193995,
       "sha256": "2dcb227e72b13f13534e82c0e313bccb0d74f13c522a6ecc621ed763cb98b013"
     },
+    "terrain_multiplier.csv": {
+      "from": "reference/terrain_multiplier.csv",
+      "rows": 36,
+      "bytes": 807,
+      "sha256": "a3695f7bd3466921a9b97e0e98a29efb4b9d41c72f6df8a627b1f7ed0964a344"
+    },
+    "record_info.parquet": {
+      "rows": 9989,
+      "from": "gold/fact_tags.parquet + silver/facts.parquet",
+      "questions_version": "questions_v2",
+      "contains_phone_numbers": false,
+      "bytes": 474423,
+      "sha256": "7a8f15e3f40786ea53e009d14479f0c3267afa044a0cd5272f967f4e319b876e"
+    },
+    "laqshya_links.parquet": {
+      "rows": 121,
+      "from": "silver/laqshya_links.parquet",
+      "input_created_at_utc": "2026-11-22T04:08:05Z",
+      "input_git_commit": "b580a96d686fbf37b646f545b4416632024b77bf",
+      "bytes": 41882,
+      "sha256": "33b43601676ada68701c3672af77fd5813447e53ace89f259f1a668f2c210b3d"
+    },
     "keyword_index/": {
       "files": [
         "docs.parquet",
@@ -370,7 +474,7 @@
     "service_probability.parquet": "gold/service_probability.parquet not found (WP13 has not written it yet); skipped"
   },
   "sizes": {
-    "total_bytes": 48064789,
+    "total_bytes": 48513814,
     "largest": [
       "places.parquet",
       7151201
@@ -383,7 +487,7 @@
     "policy": "built at deploy time by scripts/wp12_bundle.py; only manifest.json is versioned",
     "rule": "docs/07: commit only under about 50 MB and with no raw text dump beyond quoted evidence",
     "rule_allows_commit_of_this_build": false,
-    "total_bytes": 48064789,
+    "total_bytes": 48513814,
     "keyword_index_present": true,
     "why": "the final bundle holds the keyword index (all distinct fact texts, a text dump), it changes on every upstream rerun, and the facilities table's reuse terms are unchecked"
   }

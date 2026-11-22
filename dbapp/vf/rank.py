@@ -5,22 +5,36 @@ Pure Python at query time: ``load_index`` reads everything once, then
 ``rank``, ``search`` and ``simulate`` do no I/O. The same code runs in tests,
 scripts and the app.
 
-Two scoring modes (D039):
+Score spec v1-final (D048), the shipped ranker (``rank_version = "v1"``):
 
-* v0 (default, provisional): gates, then
-  ``score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties``
-  (D027, weights in ``vf.services``). ``how_we_decided["score_status"]`` is
-  ``"provisional"``.
-* probability: when a ``service_probability`` table (WP13) is passed to
-  ``load_index`` or sits in the bundle, lines it covers use
-  ``score = p_offers x exp(-km / radius)`` and "recommendable" means
-  ``p_offers >= vf.services.p_threshold(line)``.
+* Gates. G1 a usable location; G2 grade 2+ (recipe v0.3) with no major WP11
+  flag for the line; G3 estimated drive time (``vf.travel``: state factor x
+  2.30 x km^0.842, free-flow) within the line's window (``vf.services.WINDOWS``).
+* Order. Nearest first by estimated minutes, with one declared evidence
+  allowance: a corroborated record may come first if it is at most the
+  line's allowance (15 minutes, 30 for planned care) further. No score, no
+  weights, nothing is a probability.
+* Recommendable facilities beyond the window go on a separate ``further_away``
+  line, never into ``results``. Islands (no terrain factor: sea travel is not
+  modelled) fall back to the old km radius.
+
+The legacy rankers stay behind a flag for the v0 against v1 comparison
+(``rank(..., version="v0")``, ``VF_RANK_VERSION=v0``, or
+``build_index(..., rank_version="v0")``):
+
+* v0 (D027, superseded): gates, then
+  ``score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties``.
+* probability (D039, superseded, not shipped): when a ``service_probability``
+  table (WP13) is loaded, the index defaults to the legacy path and lines it
+  covers use ``score = p_offers x exp(-km / radius)``.
 
 Inputs (no stubs, D041 WP5B):
 
-* Grades: ``gold/capability_grades.parquet`` v2 (12 lines, ``evidence_items``,
-  ``missing_for_next``, ``evidence_strength``). Older grades without
-  ``evidence_items`` are refused: there would be no fact ids to cite.
+* Grades: ``gold/capability_grades_v03.parquet`` (recipe v0.3, D048), else
+  ``gold/capability_grades.parquet`` (v0.2) with a status saying so. Contract
+  v2 (12 lines, ``evidence_items``, ``missing_for_next``,
+  ``evidence_strength``). Older grades without ``evidence_items`` are refused:
+  there would be no fact ids to cite.
 * Trust checks: ``gold/facility_flags.parquet`` and
   ``gold/facility_duplicates.parquet`` (WP11). ``load_index`` refuses to run
   without them. ``build_index`` with ``flags=None`` means "no record is
@@ -51,9 +65,19 @@ import numpy as np
 import pandas as pd
 
 from . import services as S
+from . import travel as T
 from .geo import haversine_km
 
 KEYWORD_INDEX_VERSION = "kw_v1"
+#: "v1" is score spec v1-final (D048), shipped; "v0" is the legacy ranker
+#: (the D027 additive score, or D039 probability mode when a probability table
+#: is loaded), kept for the v0 against v1 comparison.
+RANK_VERSIONS = ("v1", "v0")
+_ENV_VERSION = os.environ.get("VF_RANK_VERSION", "v1").strip().lower()
+DEFAULT_RANK_VERSION = _ENV_VERSION if _ENV_VERSION in RANK_VERSIONS else "v1"
+RANK_V1_VERSION = "rank_v1 (score spec v1-final, D048)"
+#: Distance label for a record placed on a shared or PIN-centre point (D046).
+APPROX_LABEL = "position approximate"
 FACT_FIELDS = ("capability", "procedure", "equipment", "description")
 FLAG_COLUMNS = ("facility_id", "flag", "service_line", "severity", "signal", "reason", "quote", "check_version")
 
@@ -98,7 +122,10 @@ class Card:
     location_note: str
     grade: Optional[int]
     grade_label: str
-    confidence: str  # "high" | "medium" | "low"
+    #: "high" | "medium" | "low" under the legacy v0 ranker; None under v1, which
+    #: never shows a confidence level (D048 (6)). The field is kept for compatibility.
+    confidence: Optional[str]
+    #: under v1, a neutral evidence note (no level): what the support rests on
     confidence_reason: str
     score: Optional[float]
     #: {evidence, distance, trust, penalties: [{name, value, reason, quote}], combine, ...}
@@ -114,6 +141,29 @@ class Card:
     evidence_strength: str = "none"
     #: every WP11 flag on the record that applies here: [{flag, severity, signal, reason, quote}]
     flags: list = field(default_factory=list)
+    # --- v1-final (D048); defaults keep older callers working ---------------
+    #: estimated free-flow drive minutes (point estimate) and its range; None where
+    #: sea travel is not modelled. The range is the 95% band, widened by the
+    #: origin's precision when the searched place is loose (``vf.travel``).
+    minutes: Optional[float] = None
+    minutes_low: Optional[float] = None
+    minutes_high: Optional[float] = None
+    #: "about 25 min estimated drive, free-flow; real trips take longer"
+    minutes_label: str = ""
+    #: "3.4 km straight-line", "about 12 km straight-line", or "position approximate"
+    distance_label: str = ""
+    #: the record sits on a point shared with other records, or at its PIN's centre
+    position_approximate: bool = False
+    #: the line's window (minutes) and whether this card is inside it
+    window_min: Optional[float] = None
+    inside_window: Optional[bool] = None
+    #: v0.3 emoc FRU-level note (never changes the grade)
+    level_note: Optional[str] = None
+    #: v1: this card is the nearest recommendable facility inside the window (always shown)
+    nearest_in_window: Optional[bool] = None
+    #: v1: the searched place is loose and this card's drive-time range straddles the
+    #: window, so whether it is inside depends on where the trip starts
+    window_uncertain: Optional[bool] = None
 
     def recompute_score(self) -> Optional[float]:
         """The score rebuilt from ``parts``; equals ``score`` by construction."""
@@ -144,6 +194,12 @@ class Answer:
     beyond_radius: Optional[Card] = None
     unverified_nearby: list = field(default_factory=list)
     how_we_decided: dict = field(default_factory=dict)
+    # --- v1-final (D048) ------------------------------------------------------
+    #: recommendable facilities beyond the window, nearest first; never top cards
+    further_away: list = field(default_factory=list)
+    #: this query's window: {minutes, allowance, kind, basis, km_equivalent, reach_minutes, factor, ...}
+    window: dict = field(default_factory=dict)
+    rank_version: str = "v0"
 
     def to_dict(self) -> dict:
         return _jsonable(self)
@@ -385,6 +441,8 @@ class LineData:
     top_factors: Optional[list] = None
     n_labels: Optional[int] = None
     model_version: Optional[str] = None
+    #: per position: the v0.3 level note (emoc) or None
+    level_note: Optional[list] = None
 
 
 @dataclass
@@ -408,6 +466,24 @@ class Index:
     post_offices: Optional[pd.DataFrame] = None
     probability_source: Optional[str] = None
     dup_canon: dict = field(default_factory=dict)  # pos -> the group's preferred position
+    #: "v1" (D048, shipped) or "v0" (legacy: additive score, or probability mode)
+    rank_version: str = "v1"
+    #: which grades file was loaded, and a plain status (v0.3, or the v0.2 fallback)
+    grades_source: str = ""
+    grades_status: str = ""
+    #: per position: the record sits on a shared point or at its PIN's centre
+    approx: Optional[np.ndarray] = None
+    #: PIN points with their state, to find an origin's state when the resolution has none
+    pin_lat: Optional[np.ndarray] = None
+    pin_lon: Optional[np.ndarray] = None
+    pin_state: Optional[np.ndarray] = None
+
+    def state_at(self, lat: float, lon: float) -> Optional[str]:
+        """The PIN-directory state of the PIN point nearest (lat, lon), or None."""
+        if self.pin_lat is None or not len(self.pin_lat):
+            return None
+        d = haversine_km(lat, lon, self.pin_lat, self.pin_lon)
+        return str(self.pin_state[int(np.nanargmin(d))])
 
     @property
     def graded_lines(self) -> tuple:
@@ -472,8 +548,15 @@ def build_index(
     places: Optional[pd.DataFrame] = None,
     keyword: Optional[KeywordIndex] = None,
     post_offices: Optional[pd.DataFrame] = None,
+    *,
+    rank_version: Optional[str] = None,
+    grades_source: Optional[str] = None,
+    grades_status: Optional[str] = None,
 ) -> Index:
-    """Build the in-memory index from frames (``load_index`` reads them)."""
+    """Build the in-memory index from frames (``load_index`` reads them).
+    ``rank_version``: "v1" (default, D048) or "v0" (legacy). When a
+    ``service_probability`` table is given and no version is, the legacy path
+    is used: probability mode belongs to the superseded D039 ranker."""
     fac = facilities.reset_index(drop=True).copy()
     n = len(fac)
     id_to_pos = {fid: i for i, fid in enumerate(fac["facility_id"])}
@@ -543,6 +626,8 @@ def build_index(
         n_support = np.zeros(n, dtype=np.int64)
         evidence = [[] for _ in range(n)]
         missing = [[] for _ in range(n)]
+        level = [None] * n
+        has_level = "level_note" in gl.columns
         for r in gl.itertuples(index=False):
             p = r.pos
             grade[p] = int(r.grade)
@@ -552,6 +637,8 @@ def build_index(
             missing[p] = [str(x) for x in _as_list(r.missing_for_next)]
             strength[p] = _str_or_none(r.evidence_strength) or "none"
             n_support[p] = int(getattr(r, "n_supporting_facts", 0) or 0)
+            if has_level:
+                level[p] = _str_or_none(r.level_note)
         blocked = np.zeros(n, dtype=bool)
         penalty = np.zeros(n, dtype=float)
         minor, major = {}, {}
@@ -564,7 +651,8 @@ def build_index(
             else:
                 penalty[r["pos"]] += S.PENALTIES.get(r["flag"], S.PENALTY_OTHER_MINOR)
                 minor.setdefault(r["pos"], []).append(r)
-        lines[line] = LineData(grade, strength, n_support, evidence, missing, blocked, penalty, minor, major)
+        lines[line] = LineData(grade, strength, n_support, evidence, missing, blocked, penalty, minor, major,
+                               level_note=level)
 
     # probability mode
     prob_source = None
@@ -629,25 +717,69 @@ def build_index(
     kw_facts = None
     if keyword is None and facts is not None:
         kw_facts = facts
+
+    # approximate positions (D046): a point shared with another record, or a PIN centre
+    usable_pt = ~np.isnan(lat) & ~np.isnan(lon)
+    shared = np.zeros(n, dtype=bool)
+    if usable_pt.any():
+        pts = np.round(np.c_[lat[usable_pt], lon[usable_pt]], 6)
+        _, inv, cnt = np.unique(pts, axis=0, return_inverse=True, return_counts=True)
+        shared[np.flatnonzero(usable_pt)] = cnt[inv.ravel()] > 1
+    moved = np.array(["centre of its PIN code area" in (x or "") for x in fac["location_note"]], dtype=bool)
+    if "coord_check" in fac.columns:
+        moved |= (fac["coord_check"].astype(str) == "moved_to_pin").to_numpy()
+    approx = usable_pt & (shared | moved)
+
+    # PIN points with their state, for an origin without one (coordinates typed into a test or the harness)
+    pin_lat = pin_lon = pin_state = None
+    if places is not None and {"kind", "lat", "lon", "state"} <= set(places.columns):
+        pp = places[(places["kind"] == "pin") & places["lat"].notna() & places["state"].notna()]
+        if len(pp):
+            pin_lat, pin_lon = pp["lat"].to_numpy(float), pp["lon"].to_numpy(float)
+            pin_state = pp["state"].astype(str).to_numpy(object)
+
+    if rank_version is None:
+        rank_version = "v0" if prob_source is not None else DEFAULT_RANK_VERSION
+    if rank_version not in RANK_VERSIONS:
+        raise ValueError(f"rank_version must be one of {RANK_VERSIONS}, not {rank_version!r}")
     idx = Index(fac=fac, lat=lat, lon=lon, precision_km=prec, id_to_pos=id_to_pos, lines=lines,
                 record_major=record_major, record_minor=record_minor, dup_of=dup_of, dup_drop=dup_drop,
                 dup_canon=dup_canon,
                 recipe_version=recipe_version, grades_method=grades_method, flags_source=flags_source,
                 keyword=keyword, facts_for_keyword=kw_facts, post_offices=post_offices,
-                probability_source=prob_source)
+                probability_source=prob_source, rank_version=rank_version,
+                grades_source=grades_source or "frames", grades_status=grades_status or f"recipe {recipe_version}",
+                approx=approx, pin_lat=pin_lat, pin_lon=pin_lon, pin_state=pin_state)
     if keyword is not None:
         keyword.bind(id_to_pos)
     return idx
 
 
+#: Grades the v1-final ranker gates on (D048), and the fallback.
+GRADES_V03 = "capability_grades_v03.parquet"
+GRADES_V02 = "capability_grades.parquet"
+
+
+def _grades_status(grades: pd.DataFrame, source: str) -> str:
+    vers = sorted({str(v) for v in grades.get("recipe_version", pd.Series(dtype=str)).dropna().unique()})
+    if vers == ["v0.3"]:
+        return f"recipe v0.3 (rules aligned to WHO 2009, FBNC 2025, PM-JAY criteria, PMNDP; D048, D052), from {source}"
+    return (f"recipe {', '.join(vers) or 'unknown'} from {source}: the v0.3 grades the v1-final spec gates on "
+            "(D048) were not found, so the older rules are used. Rebuild with scripts/wp3_regrade_v03.py and "
+            "scripts/wp12_bundle.py.")
+
+
 def load_index(bundle_dir=None, service_probability: Optional[pd.DataFrame] = None,
-               *, load_post_offices: bool = True) -> Index:
+               *, load_post_offices: bool = True, rank_version: Optional[str] = None) -> Index:
     """Load everything once. ``bundle_dir`` is a WP12 bundle (``facilities.parquet``,
     ``grades.parquet``, ``flags.parquet``, ``duplicates.parquet``, ...); ``None``
-    reads ``vf.paths.data_dir()`` silver and gold. The trust checks (WP11) are
-    required: without them a merged record or a wrong location would be
-    recommended silently. A ``service_probability`` frame (or the bundle's or
-    gold's ``service_probability.parquet``) switches its lines to probability mode."""
+    reads ``vf.paths.data_dir()`` silver and gold. Grades: recipe v0.3
+    (``gold/capability_grades_v03.parquet``, or a bundle ``grades_v03.parquet`` or
+    ``grades.parquet`` written from it), else v0.2 with ``grades_status`` saying so.
+    The trust checks (WP11) are required: without them a merged record or a
+    wrong location would be recommended silently. A ``service_probability``
+    frame (or the bundle's or gold's ``service_probability.parquet``) switches
+    the index to the legacy probability mode (D039, superseded)."""
     from . import paths
 
     def opt(p: Path) -> Optional[pd.DataFrame]:
@@ -661,18 +793,23 @@ def load_index(bundle_dir=None, service_probability: Optional[pd.DataFrame] = No
     if bundle_dir is not None and (Path(bundle_dir) / "facilities.parquet").exists():
         b = Path(bundle_dir)
         fac = pd.read_parquet(b / "facilities.parquet")
-        grades = req(b / "grades.parquet", "rebuild the bundle (scripts/wp12_bundle.py)")
+        gpath = b / "grades_v03.parquet" if (b / "grades_v03.parquet").exists() else b / "grades.parquet"
+        grades = req(gpath, "rebuild the bundle (scripts/wp12_bundle.py)")
+        gsrc = f"bundle {gpath.name}"
         flags = req(b / "flags.parquet", "the trust checks (WP11) are required; rebuild the bundle")
         dups = req(b / "duplicates.parquet", "the duplicate pairs (WP11) are required; rebuild the bundle")
         kw = load_keyword_index(b / "keyword_index") if (b / "keyword_index").exists() else None
         sp = service_probability if service_probability is not None else opt(b / "service_probability.parquet")
         return build_index(fac, grades, flags=flags, duplicates=dups, service_probability=sp,
                            places=opt(b / "places.parquet"), keyword=kw,
-                           post_offices=opt(b / "post_offices.parquet") if load_post_offices else None)
+                           post_offices=opt(b / "post_offices.parquet") if load_post_offices else None,
+                           rank_version=rank_version, grades_source=gsrc, grades_status=_grades_status(grades, gsrc))
 
     silver, gold = paths.silver_dir(), paths.gold_dir()
     fac = pd.read_parquet(silver / "facilities.parquet")
-    grades = req(gold / "capability_grades.parquet", "run WP3 or WP4 first")
+    gpath = gold / GRADES_V03 if (gold / GRADES_V03).exists() else gold / GRADES_V02
+    grades = req(gpath, "run WP3 or WP4 first")
+    gsrc = f"gold/{gpath.name}"
     flags = req(gold / "facility_flags.parquet", "run scripts/wp11_trust_checks.py first")
     dups = req(gold / "facility_duplicates.parquet", "run scripts/wp11_trust_checks.py first")
     facts = pd.read_parquet(silver / "facts.parquet", columns=["fact_id", "facility_id", "field", "text"])
@@ -682,7 +819,8 @@ def load_index(bundle_dir=None, service_probability: Optional[pd.DataFrame] = No
         po = pd.read_parquet(silver / "post_offices.parquet", columns=["lat", "lon", "pin", "coord_valid"])
         po = po[po["coord_valid"]].drop_duplicates(["lat", "lon"])[["lat", "lon", "pin"]].reset_index(drop=True)
     return build_index(fac, grades, facts=facts, flags=flags, duplicates=dups, service_probability=sp,
-                       places=opt(silver / "places.parquet"), post_offices=po)
+                       places=opt(silver / "places.parquet"), post_offices=po,
+                       rank_version=rank_version, grades_source=gsrc, grades_status=_grades_status(grades, gsrc))
 
 
 # ---------------------------------------------------------------------------
@@ -764,6 +902,22 @@ def _confidence_v0(grade: int, strength: str, n_minor: int, precision: float, n_
     if grade == 2 and n_minor == 0:
         return "medium", "Medium: the record names the service, but not everything it needs."
     return "low", "Low: the record carries warnings that may affect this answer."
+
+
+def _evidence_note_v1(grade: int, strength: str, n_minor: int, precision: float, n_support: int) -> str:
+    """The v1 card's evidence note: the same facts as the legacy confidence
+    reason, with no level (D048 (6): never "confidence")."""
+    if strength == "thin":
+        return "Thin support: one fact, or a record with one web source and no official website."
+    if precision is not None and precision > S.DISTRICT_PRECISION_KM:
+        return f"The facility's location is known only to within about {precision:.0f} km."
+    if grade == 3 and n_minor == 0:
+        return f"Corroborated by {n_support} facts, {strength} evidence, no warnings, precise location."
+    if grade == 3 and n_minor == 1:
+        return "Corroborated, but the record carries one warning."
+    if grade == 2 and n_minor == 0:
+        return "The record names the service, but not everything it needs."
+    return "The record carries warnings that may affect this answer."
 
 
 def _confidence_prob(ld: LineData, pos: int, n_minor: int, precision: float, thr: float) -> tuple[str, str]:
@@ -1004,9 +1158,10 @@ def _base_answer(service: str, label: str, radius: float, method: str, res) -> O
     return None
 
 
-def rank(index: Index, service: str, resolution, k: int = 3) -> Answer:
-    """Top ``k`` recommendable facilities for ``service`` near ``resolution``,
-    or an abstention. Lines with no grades loaded fall back to ``search``."""
+def _rank_v0(index: Index, service: str, resolution, k: int = 3) -> Answer:
+    """Legacy ranker (D027 additive score, or D039 probability mode), kept for
+    the v0 against v1 comparison. Top ``k`` recommendable facilities for
+    ``service`` near ``resolution``, or an abstention."""
     if service not in S.SERVICES:
         raise ValueError(f"unknown service line {service!r}; free text goes to search()")
     svc = S.SERVICES[service]
@@ -1147,6 +1302,635 @@ def rank(index: Index, service: str, resolution, k: int = 3) -> Answer:
 
 
 # ---------------------------------------------------------------------------
+# rank: score spec v1-final (D048)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class _V1Ctx:
+    """Everything one v1 query needs, computed once (``_v1_context``)."""
+    service: str
+    W: float  # window, minutes
+    A: float  # evidence allowance, minutes
+    factor: T.Factor
+    sea: bool  # no minutes: km fallback on the old radius
+    d: np.ndarray  # straight-line km to every facility
+    t: Optional[np.ndarray]  # estimated minutes (None when sea)
+    R: float  # straight-line km equivalent of the window (or the old radius when sea)
+    reach_km: float  # km equivalent of REACH_FACTOR_V1 x the window
+    within: np.ndarray  # bool: inside the window
+    in_reach_pt: np.ndarray  # bool: within reach (distance only)
+    o_prec: Optional[float]
+    loose: bool  # origin too loose for one number (D048)
+    place: str
+    #: the searched place is wider (2 x its precision) than the window reaches in
+    #: straight-line km: which facilities are inside the window depends on where the
+    #: trip starts, and a drive-time range would run from minutes to hours (fix round, Nov 22)
+    too_loose: bool = False
+    #: warnings that deny the allowance (``S.ALLOWANCE_DENY_FLAGS``; empty for the sensitivity check)
+    deny: frozenset = S.ALLOWANCE_DENY_FLAGS
+
+
+def _label_lc(service: str) -> str:
+    """Display name mid-sentence: "emergency C-section and high-risk delivery", "MRI scan"."""
+    lab = S.label(service)
+    return lab if lab[1:2].isupper() else lab[:1].lower() + lab[1:]
+
+
+def _place_name(loc: Mapping) -> str:
+    """Short name of the searched place for sentences: 'Jaipur', 'PIN 302001'."""
+    if loc.get("kind") == "coords":
+        return "the point you gave"
+    lab = _str_or_none(loc.get("label")) or _str_or_none(loc.get("query")) or "the place you searched"
+    first = re.sub(r"\s*\([^)]*\)", "", lab).split(",")[0].strip()
+    first = re.sub(r"(?i)^(the\s+)?centre of\s+", "", first)
+    first = re.sub(r"(?i)\s+(district|city)$", "", first).strip()
+    return first or lab
+
+
+def _v1_context(index: Index, service: str, loc: Mapping, *, window_scale: float = 1.0,
+                allowance: Optional[float] = None, terrain: bool = True,
+                d: Optional[np.ndarray] = None, deny_flags: bool = True) -> _V1Ctx:
+    w = S.WINDOWS[service]
+    W = float(w.minutes) * float(window_scale)
+    A = float(w.allowance if allowance is None else allowance)
+    fac = T.origin_factor(loc, index.state_at if index.pin_lat is not None else None, terrain=terrain)
+    if d is None:
+        d = _distances(index, loc["lat"], loc["lon"])
+    o_prec = _origin_precision(loc)
+    if fac.sea:
+        R = float(S.SERVICES[service].radius_km)
+        reach = S.REACH_FACTOR * R
+        t = None
+        within = d <= R
+        in_reach = d <= reach
+        loose = False
+    else:
+        f = float(fac.value)
+        R = T.window_km(W, factor=f)
+        reach = T.window_km(S.REACH_FACTOR_V1 * W, factor=f)
+        with np.errstate(invalid="ignore"):
+            t = f * T.A_MIN * np.power(np.maximum(d, 0.0), T.B_EXP)
+            within = t <= W
+            in_reach = t <= S.REACH_FACTOR_V1 * W
+        loose = T.origin_is_loose(o_prec, W, f)
+    too_loose = bool(not fac.sea and o_prec is not None and 2.0 * float(o_prec) > float(R))
+    return _V1Ctx(service, W, A, fac, fac.sea, d, t, float(R), float(reach), np.asarray(within, bool),
+                  np.asarray(in_reach, bool), o_prec, loose, _place_name(loc), too_loose,
+                  S.ALLOWANCE_DENY_FLAGS if deny_flags else frozenset())
+
+
+def _v1_sets(index: Index, ctx: _V1Ctx) -> dict:
+    """The gate masks and the candidate set, in the same dict shape the legacy
+    ranker's mirror in ``vf.why_not`` uses. ``scored`` maps each candidate to its
+    tier (0 inside the window, 1 beyond); empty when nothing recommendable is
+    inside the window."""
+    ld = index.lines[ctx.service]
+    d = ctx.d
+    usable = ~np.isnan(d)
+    claim = ld.grade >= 1
+    rec_mask = (ld.grade >= 2) & ~ld.blocked
+    in_reach = usable & ctx.in_reach_pt & claim
+    rec = in_reach & rec_mask
+    rec_all = np.flatnonzero(rec)
+    rec_all = rec_all[np.argsort(d[rec_all], kind="stable")]
+    in_W = rec_all[ctx.within[rec_all]]
+    # the nearest MAX_CANDIDATES only, as in v0 and the why-not strip; when a corroborated record
+    # beyond the cap would have come first under the allowance, the answer says so
+    # (``_cap_exception``; reports/ordering_behaviour.md: 16 of 18,000 line-origin queries)
+    cand = [int(p) for p in rec_all[: S.MAX_CANDIDATES]]
+    scored = {} if len(in_W) == 0 else {p: 0 if bool(ctx.within[p]) else 1 for p in cand}
+    return {"R": ctx.R, "reach": ctx.reach_km, "usable": usable, "prob": False, "claim": claim,
+            "rec_mask": rec_mask, "in_reach": in_reach, "rec": rec, "rec_all": rec_all, "in_R": in_W,
+            "scored": scored, "version": "v1", "window_min": ctx.W, "sea": ctx.sea,
+            "labels": _v1_funnel_labels(ctx)}
+
+
+def _v1_funnel_labels(ctx: _V1Ctx) -> dict:
+    """Wording for the why_not funnel's steps under v1."""
+    label = _label_lc(ctx.service)
+    if ctx.sea:
+        return {
+            "claim_within_reach": f"List or claim {label} and are within {ctx.reach_km:.0f} km",
+            "beyond_reach": f"Lists or claims {label}, but more than {ctx.reach_km:.0f} km away "
+                            f"(3 x the {ctx.R:.0f} km radius; sea travel is not modelled).",
+            "within_radius": f"Within the {ctx.R:.0f} km radius (sea travel is not modelled)",
+            "beyond_radius": f"Recommendable, but more than {ctx.R:.0f} km away.",
+        }
+    reach_m = S.REACH_FACTOR_V1 * ctx.W
+    return {
+        "claim_within_reach": f"List or claim {label} and are within about {T.fmt_minutes(reach_m)} estimated drive",
+        "beyond_reach": f"Lists or claims {label}, but more than about {T.fmt_minutes(reach_m)} estimated drive "
+                        f"away (3 x the {ctx.W:.0f}-minute window).",
+        "within_radius": f"Within the {ctx.W:.0f}-minute window (estimated drive, free-flow; about "
+                         f"{ctx.R:.0f} km straight-line from here)",
+        "beyond_radius": f"Recommendable, but more than about {T.fmt_minutes(ctx.W)} estimated drive away "
+                         f"(the {ctx.W:.0f}-minute window).",
+    }
+
+
+def gate_masks(index: Index, line: str, d: np.ndarray, resolution=None) -> dict:
+    """The ranker's gates for one query, as ``vf.why_not`` mirrors them:
+    ``{R, reach, usable, prob, claim, rec_mask, in_reach, rec, rec_all, in_R,
+    scored, version, ...}``. Under v1, ``R`` and ``reach`` are the straight-line
+    km equivalents of the window and of 3 x the window for this origin."""
+    if index.rank_version == "v1":
+        loc = _location_dict(resolution) if resolution is not None else {}
+        return _v1_sets(index, _v1_context(index, line, loc, d=d))
+    ld = index.lines[line]
+    R = float(S.SERVICES[line].radius_km)
+    reach = float(S.REACH_FACTOR) * R
+    usable = ~np.isnan(d)
+    prob = ld.p is not None
+    claim = ((ld.grade >= 1) | (ld.p > 0)) if prob else (ld.grade >= 1)
+    rec_mask = (ld.grade >= 2) & ~ld.blocked
+    if prob:
+        rec_mask &= ld.p >= S.p_threshold(line)
+    in_reach = usable & (d <= reach) & claim
+    rec = in_reach & rec_mask
+    rec_all = np.flatnonzero(rec)
+    rec_all = rec_all[np.argsort(d[rec_all], kind="stable")]
+    in_R = rec_all[d[rec_all] <= R]
+    scored = {} if len(in_R) == 0 else {int(p): 0 if d[p] <= R else 1 for p in rec_all[: S.MAX_CANDIDATES]}
+    return {"R": R, "reach": reach, "usable": usable, "prob": prob, "claim": claim, "rec_mask": rec_mask,
+            "in_reach": in_reach, "rec": rec, "rec_all": rec_all, "in_R": in_R, "scored": scored, "version": "v0"}
+
+
+def _allowance_denied_by(index: Index, line: str, p: int, deny: Optional[frozenset] = None) -> list:
+    """The warnings on this record (for this line, or the whole record) that deny it
+    the evidence allowance: possible merge, location conflict (``S.ALLOWANCE_DENY_FLAGS``)."""
+    deny = S.ALLOWANCE_DENY_FLAGS if deny is None else deny
+    out = []
+    for f in index.lines[line].minor_flags.get(p, []):
+        name = str(f.get("flag") or "")
+        if name in deny and name.replace("_", " ") not in out:
+            out.append(name.replace("_", " "))
+    return out
+
+
+def _gets_allowance(index: Index, line: str, p: int, deny: Optional[frozenset] = None) -> bool:
+    return int(index.lines[line].grade[p]) >= 3 and not _allowance_denied_by(index, line, p, deny)
+
+
+def _order_key(index: Index, ctx: _V1Ctx, p: int) -> tuple:
+    """Nearest first, with the allowance taken off a corroborated record's minutes
+    (not for a record with a possible-merge or location-conflict warning)."""
+    g3 = _gets_allowance(index, ctx.service, p, ctx.deny)
+    if ctx.sea:
+        return (float(ctx.d[p]), 0, float(ctx.d[p]), float(ctx.d[p]))
+    t = float(ctx.t[p])
+    # "at most the allowance further": at exactly the allowance the corroborated record comes first
+    return (round(t - (ctx.A if g3 else 0.0), 9), 0 if g3 else 1, t, float(ctx.d[p]))
+
+
+def order_v1(index: Index, ctx: _V1Ctx, sets: Optional[dict] = None) -> list:
+    """Window candidates in card order, one per duplicate group."""
+    sets = sets or _v1_sets(index, ctx)
+    cand = [p for p, tier in sets["scored"].items() if tier == 0]
+    order = sorted(cand, key=lambda p: _order_key(index, ctx, p))
+    return _dedupe(index, order)
+
+
+def _cap_exception(index: Index, ctx: _V1Ctx, sets: dict, shown: list) -> list:
+    """In-window records beyond the MAX_CANDIDATES cap whose order key beats the
+    last shown card's: the allowance would have listed them, but the cap left them
+    out. Usually empty."""
+    in_W = sets["in_R"]
+    if len(in_W) <= S.MAX_CANDIDATES or not shown or ctx.sea or ctx.A <= 0:
+        return []
+    bar = max(_order_key(index, ctx, p)[0] for p in shown)
+    return [int(p) for p in in_W[S.MAX_CANDIDATES:] if _order_key(index, ctx, int(p))[0] < bar]
+
+
+def _canon(index: Index, p: int):
+    return index.dup_canon.get(int(p), -1 - int(p))
+
+
+def shown_v1(index: Index, order: list, in_W, k: int) -> tuple[list, Optional[int], bool]:
+    """The cards shown from ``order``: the first ``k``, except that the nearest
+    recommendable facility in the window is always shown (D048 Order). When the
+    allowance pushes it past ``k``, it takes the last place. ``k`` = 1 asks for the
+    top pick alone (evaluation, sensitivity), so nothing is reserved there.
+    Returns ``(shown, nearest_pos, reserved)``."""
+    if not order or len(in_W) == 0:
+        return list(order[:k]), None, False
+    g0 = _canon(index, in_W[0])  # in_W is nearest first
+    near = next((p for p in order if _canon(index, p) == g0), None)
+    top = list(order[:k])
+    if near is None or near in top or k < 2:
+        return top, near, False
+    return top[: k - 1] + [near], near, True
+
+
+def pick_v1(index: Index, service: str, lat: float, lon: float, *, state: Optional[str] = None,
+            window_scale: float = 1.0, allowance: Optional[float] = None, terrain: bool = True,
+            d: Optional[np.ndarray] = None, deny_flags: bool = True) -> dict:
+    """The v1 top pick for one origin without building cards (sensitivity runs):
+    ``{top, nearest, n_in_window, top_minutes, nearest_minutes, sea}``; ``top`` is
+    None when the answer would abstain."""
+    loc = {"lat": lat, "lon": lon, "state": state, "precision_km": None, "label": ""}
+    ctx = _v1_context(index, service, loc, window_scale=window_scale, allowance=allowance, terrain=terrain, d=d,
+                      deny_flags=deny_flags)
+    sets = _v1_sets(index, ctx)
+    order = order_v1(index, ctx, sets)
+    in_W = sets["in_R"]
+    top = order[0] if order else None
+    near = int(in_W[0]) if len(in_W) else None
+    shown3, _, reserved = shown_v1(index, order, in_W, 3)
+    mins = (lambda p: None if p is None or ctx.t is None else float(ctx.t[p]))
+    return {"top": top, "nearest": near, "n_in_window": int(len(in_W)), "top_minutes": mins(top),
+            "nearest_minutes": mins(near), "sea": ctx.sea, "factor": ctx.factor.value,
+            "shown3": [int(p) for p in shown3], "nearest_reserved": reserved}
+
+
+def _merge_evidence(items: list) -> list:
+    """One row per quoted fact: a fact that meets two requirements is shown once,
+    with both requirements and the note "one fact covers both requirements" (D046)."""
+    out, by_key = [], {}
+    for it in items:
+        key = (it.get("fact_id"), it.get("quote"), it.get("field"))
+        if it.get("quote") is None or key not in by_key:
+            row = dict(it)
+            row["requirements"] = [it.get("requirement")]
+            by_key.setdefault(key, row)
+            out.append(row)
+            continue
+        row = by_key[key]
+        if it.get("requirement") not in row["requirements"]:
+            row["requirements"].append(it.get("requirement"))
+    for row in out:
+        reqs = [r for r in row["requirements"] if r]
+        if len(reqs) > 1:
+            row["requirement"] = "; ".join(reqs)
+            row["note"] = ("one fact covers both requirements" if len(reqs) == 2
+                           else f"one fact covers all {len(reqs)} requirements")
+    return out
+
+
+def _v1_distance_label(index: Index, pos: int, km: float, o_prec: Optional[float]) -> tuple[str, bool]:
+    approx = bool(index.approx[pos]) if index.approx is not None else False
+    if km is None or math.isnan(km):
+        return "unknown distance", approx
+    if approx:
+        return APPROX_LABEL, True
+    if o_prec is not None and o_prec > S.ORIGIN_FUZZY_KM:
+        r = int(round(km))
+        return ("under 1 km straight-line" if r < 1 else f"about {r} km straight-line"), False
+    if km < 0.05:  # never "0.0 km" (D046)
+        return "less than 0.1 km straight-line", False
+    return f"{km:.1f} km straight-line", False
+
+
+def _v1_fill(card: Card, index: Index, ctx: _V1Ctx, pos: int) -> Card:
+    """The v1 fields on a card built by ``_make_card``."""
+    km = float(ctx.d[pos])
+    card.distance_label, card.position_approximate = _v1_distance_label(index, pos, km, ctx.o_prec)
+    card.window_min = None if ctx.sea else ctx.W
+    card.inside_window = bool(ctx.within[pos])
+    if ctx.sea:
+        card.minutes = card.minutes_low = card.minutes_high = None
+        card.minutes_label = T.minutes_label(None, None, None, sea=True)
+    else:
+        t, lo, hi = T.minutes_range(km, float(ctx.factor.value), ctx.o_prec, ctx.loose)
+        card.minutes = round(t, 1)
+        card.minutes_low, card.minutes_high = round(lo, 1), round(hi, 1)
+        card.minutes_label = T.minutes_label(t, lo, hi, loose=ctx.loose, place=ctx.place,
+                                             approximate=card.position_approximate,
+                                             span_km=(2 * ctx.o_prec) if ctx.too_loose else None)
+        card.window_uncertain = bool(ctx.loose and lo <= ctx.W < hi)
+    if not card.inside_window:
+        card.location_note = (card.location_note + (
+            f" Beyond the {ctx.R:.0f} km radius used where sea travel is not modelled." if ctx.sea else
+            f" Beyond the {ctx.W:.0f}-minute window for this service.")).strip()
+    if card.position_approximate and index.approx is not None:
+        card.location_note = (card.location_note + " Its map point is shared with other records or is its PIN "
+                              "code's centre, so the distance is approximate.").strip()
+    card.evidence = _merge_evidence(card.evidence)
+    ld = index.lines.get(ctx.service)
+    if ld is not None and ld.level_note is not None:
+        card.level_note = ld.level_note[pos]
+    return card
+
+
+def _v1_parts(index: Index, ctx: _V1Ctx, pos: int) -> dict:
+    g3 = _gets_allowance(index, ctx.service, pos, ctx.deny)
+    denied = _allowance_denied_by(index, ctx.service, pos, ctx.deny) \
+        if int(index.lines[ctx.service].grade[pos]) >= 3 else []
+    key = _order_key(index, ctx, pos)
+    return {"combine": "v1", "penalties": [], "allowance_denied_by": denied,
+            "minutes": None if ctx.sea else round(float(ctx.t[pos]), 2),
+            "order_minutes": None if ctx.sea else round(key[0], 2),
+            "allowance_min": 0.0 if ctx.sea else ctx.A, "allowance_applies": bool(g3 and not ctx.sea and ctx.A > 0),
+            "km": round(float(ctx.d[pos]), 2),
+            "labels": {"minutes": "estimated drive time, free-flow", "order_minutes":
+                       "minutes used for the order (minus the allowance for a corroborated record)"}}
+
+
+def _v1_card(index: Index, ctx: _V1Ctx, pos: int, loc: Mapping) -> Card:
+    ld = index.lines[ctx.service]
+    minor = ld.minor_flags.get(pos, [])
+    prec = float(index.precision_km[pos])
+    conf = (None, _evidence_note_v1(int(ld.grade[pos]), ld.strength[pos], len(minor), prec, int(ld.n_support[pos])))
+    could = _could_be_wrong(index, ctx.service, pos, ld.strength[pos], ld.missing[pos], minor, None)
+    card = _make_card(index, pos, float(ctx.d[pos]), line=ctx.service, score=None, parts=_v1_parts(index, ctx, pos),
+                      confidence=conf, evidence=ld.evidence[pos], missing=ld.missing[pos], could=could,
+                      radius=None, origin=loc)
+    return _v1_fill(card, index, ctx, pos)
+
+
+def _v1_unverified_card(index: Index, ctx: _V1Ctx, pos: int, loc: Mapping) -> Card:
+    card = _unverified_card(index, ctx.service, pos, float(ctx.d[pos]), ctx.R, "v0", origin=loc)
+    card.location_note = re.sub(r"\s*Beyond the usual \d+ km for this service\.", "", card.location_note)
+    card.confidence = None
+    return _v1_fill(card, index, ctx, pos)
+
+
+def _short_grade(c: Card) -> str:
+    return (c.grade_label or "").split(" (")[0]
+
+
+def _round_min(m: float) -> int:
+    """Minutes as ``vf.travel.fmt_minutes`` shows them (1 min under 10, else 5)."""
+    m = float(m)
+    return max(int(round(m)) if m < 10 else int(5 * round(m / 5)), 1)
+
+
+def _denied_phrase(c: Card) -> str:
+    flags = (c.parts or {}).get("allowance_denied_by") or []
+    return " and ".join(flags) + (" warning" if len(flags) == 1 else " warnings")
+
+
+def _why_here_v1(a: Card, b: Optional[Card], ctx: _V1Ctx, n_in: int) -> str:
+    """One sentence on why ``a`` is above ``b``. Times are compared as the cards
+    show them (rounded), so the stated difference matches the two shown times."""
+    if b is None:
+        if n_in <= 1:
+            return ("The only recommendable facility within the radius." if ctx.sea else
+                    f"The only recommendable facility within the {ctx.W:.0f}-minute window.")
+        return f"Last of the {min(n_in, 3)} shown; {n_in} recommendable facilities are within the window."
+    if ctx.sea or a.minutes is None or b.minutes is None:
+        return f"Listed above {b.name}: closer ({a.distance_label} against {b.distance_label})."
+    ta, tb = float(a.parts["minutes"]), float(b.parts["minutes"])
+    if ctx.too_loose:  # the cards show no minutes here: compare in km from the resolved point
+        frm = (f"from the point {ctx.place} resolved to ({_km_phrase(a)} against {_km_phrase(b)}, "
+               "straight-line)")
+        if a.parts.get("allowance_applies") and not b.parts.get("allowance_applies") and ta > tb + 0.5:
+            return (f"Listed above {b.name}: corroborated, and within the {ctx.A:.0f}-minute evidence allowance "
+                    f"measured {frm}.")
+        return f"Listed above {b.name}: closer {frm}."
+    fa, fb = T.fmt_minutes(ta), T.fmt_minutes(tb)
+    diff = _round_min(ta) - _round_min(tb)
+    a_allow, b_allow = bool(a.parts.get("allowance_applies")), bool(b.parts.get("allowance_applies"))
+    b_denied = (b.grade or 0) >= 3 and not b_allow
+    if a_allow and not b_allow and ta > tb + 0.5:
+        how_far = (f"only about {T.fmt_minutes(diff)} further (about {fa} against {fb})" if diff > 0 else
+                   f"only slightly further (both about {fa})")
+        s = f"Listed above {b.name}: corroborated, and {how_far}, within the {ctx.A:.0f}-minute evidence allowance."
+        if b_denied:
+            s += f" The allowance does not apply to {b.name}, which carries a {_denied_phrase(b)}."
+        return s
+    if abs(ta - tb) <= 0.5:
+        return f"Same estimated drive time as {b.name} (about {fa}); listed first because it is closer in straight-line km."
+    nearer = f"slightly nearer (both about {fa})" if diff == 0 else f"nearer (about {fa} against {fb})"
+    if b_denied:
+        return (f"Listed above {b.name}: {nearer}. The evidence allowance does not apply to "
+                f"{b.name}, which carries a {_denied_phrase(b)}.")
+    if b_allow and not a_allow:
+        return (f"Listed above {b.name}: more than {ctx.A:.0f} minutes nearer (about {fa} against {fb}), so the "
+                f"evidence allowance does not move the corroborated record ahead.")
+    return (f"Listed above {b.name}: slightly nearer (both about {fa} estimated drive)." if diff == 0 else
+            f"Listed above {b.name}: nearer (about {fa} against {fb} estimated drive).")
+
+
+def _km_phrase(c: Card) -> str:
+    lab = c.distance_label or ""
+    return "an approximate position" if lab == APPROX_LABEL else lab.replace(" straight-line", "")
+
+
+def _why_nearest_v1(c: Card, ctx: _V1Ctx) -> str:
+    what = (f"about {T.fmt_minutes(c.minutes)} estimated drive" if c.minutes is not None and not ctx.too_loose
+            else c.distance_label)
+    return (f"The nearest recommendable facility ({what}), always shown. The cards above it are corroborated "
+            f"records the {ctx.A:.0f}-minute evidence allowance lists first.")
+
+
+def _too_loose_text(ctx: _V1Ctx) -> str:
+    return (f"Uncertain: {ctx.place} spans about {2 * ctx.o_prec:.0f} km, more than the {ctx.W:.0f}-minute window "
+            f"reaches (about {ctx.R:.0f} km straight-line), so which facilities are inside the window depends on "
+            "where you start. Search a PIN code, post office or town for a firm answer.")
+
+
+def _hours_phrase(W: float) -> str:
+    """'2 hours'', '1 hour's', '1.5 hours'' (possessive, before "estimated drive")."""
+    h = T.fmt_hours(W)
+    if h.endswith("hours"):
+        return h + "'"
+    if h.endswith("hour"):
+        return h + "'s"
+    return h
+
+
+def _rank_v1(index: Index, service: str, resolution, k: int = 3, *, window_scale: float = 1.0,
+             allowance: Optional[float] = None, terrain: bool = True) -> Answer:
+    svc = S.SERVICES[service]
+    loc = _location_dict(resolution)
+    ctx = _v1_context(index, service, loc, window_scale=window_scale, allowance=allowance, terrain=terrain)
+    sets = _v1_sets(index, ctx)
+    ld = index.lines[service]
+    d = ctx.d
+    usable, claim, rec_mask = sets["usable"], sets["claim"], sets["rec_mask"]
+    in_reach, rec, rec_all, in_W = sets["in_reach"], sets["rec"], sets["rec_all"], sets["in_R"]
+    n_rec = _n_distinct(index, rec_all)
+    n_in = _n_distinct(index, in_W)
+    w = S.WINDOWS[service]
+    hours = _hours_phrase(ctx.W)
+    win = {**w.as_dict(), "minutes": ctx.W, "allowance": ctx.A, "km_equivalent": round(ctx.R, 1),
+           "reach_minutes": S.REACH_FACTOR_V1 * ctx.W, "reach_km": round(ctx.reach_km, 1),
+           "factor": ctx.factor.value, "factor_text": ctx.factor.text, "state": ctx.factor.state,
+           "sea_travel_not_modelled": ctx.sea, "origin_loose": ctx.loose, "origin_too_loose": ctx.too_loose,
+           "origin_precision_km": None if ctx.o_prec is None else round(float(ctx.o_prec), 1),
+           "note": S.KM_FALLBACK_NOTE if ctx.sea else S.WINDOW_NOTE}
+    if ctx.sea:
+        g3_rule = (f"within the {ctx.R:.0f} km straight-line radius: sea travel is not modelled here, so no drive "
+                   "time is estimated")
+        reach_rule = f"claims the service and is within {ctx.reach_km:.0f} km (3 x the {ctx.R:.0f} km radius)"
+    else:
+        g3_rule = (f"estimated drive time within the {ctx.W:.0f}-minute window ({w.kind}; about {ctx.R:.0f} km "
+                   f"straight-line from here at {ctx.factor.text})")
+        reach_rule = (f"claims the service and is within about {T.fmt_minutes(S.REACH_FACTOR_V1 * ctx.W)} estimated "
+                      f"drive (3 x the window), the search limit for the further-away line")
+    gates = [
+        {"gate": "usable location", "id": "G1", "rule": "the facility has a location we can use",
+         "n": int(usable.sum()), "of": int(len(d))},
+        {"gate": "within reach", "rule": reach_rule, "n": int(in_reach.sum())},
+        {"gate": "recommendable", "id": "G2",
+         "rule": f"grade 2 or 3 under recipe {index.recipe_version} (a fact in the record names the service) and no "
+                 "major warning for this service",
+         "n": int(rec.sum()), "n_distinct": n_rec, "n_blocked": int((in_reach & ld.blocked).sum()),
+         "n_scored": int(len(sets["scored"])), "max_scored": S.MAX_CANDIDATES},
+        {"gate": "within radius", "id": "G3", "rule": g3_rule, "n": int(len(in_W)), "n_distinct": n_in,
+         "window_min": None if ctx.sea else ctx.W, "km_equivalent": round(ctx.R, 1)},
+    ]
+    order_rule = S.ORDER_RULE_V1.format(allowance=ctx.A)
+    how = {
+        "mode": "v1", "rank_version": "v1", "ranker": RANK_V1_VERSION,
+        "score_status": "v1-final: gates and an order rule, no score (D048)",
+        "service": svc.label, "radius_km": round(ctx.R, 1), "reach_km": round(ctx.reach_km, 1),
+        "window": win,
+        "windows": {l: S.WINDOWS[l].as_dict() for l in S.SERVICE_LINES},
+        "allowance_min": ctx.A,
+        "travel_model": {"text": T.MODEL_TEXT, "a": T.A_MIN, "b": T.B_EXP, "log_sd": T.LOG_SD,
+                         "band_log": T.BAND_LOG, "band_coverage": T.BAND_COVERAGE, "n_trips": T.N_TRIPS,
+                         "factor": ctx.factor.value, "factor_text": ctx.factor.text, "version": T.TRAVEL_VERSION},
+        "recipe": S.recipe_text(service, index.recipe_version), "recipe_version": index.recipe_version,
+        "recipe_citations": dict(S.RECIPE_V03_CITATIONS) if index.recipe_version == "v0.3" else {},
+        "grades_method": index.grades_method, "grades_source": index.grades_source,
+        "grades_status": index.grades_status, "tagger": S.TAGGER_MEASURED,
+        "gates": gates,
+        "formula": order_rule, "order_rule": order_rule,
+        "tie_rule": "Equal estimated minutes are ties, listed by straight-line km; never by warnings.",
+        "weights": None, "penalties": None,
+        "probability": S.PROBABILITY_NOTE,
+        "flags_source": index.flags_source,
+        "limits": list(S.LIMITS_V1),
+        "notes": [],
+    }
+    if ctx.too_loose:
+        how["notes"].append(_too_loose_text(ctx))
+    elif ctx.loose:
+        how["notes"].append(f"{ctx.place} is known only to within about {ctx.o_prec:.0f} km, so each drive time is "
+                            f"a range: it depends on where in {ctx.place} you start.")
+    if ctx.factor.source.startswith("state unknown"):
+        how["notes"].append("The searched point's state is not known, so no terrain factor is applied (1.00).")
+    if index.recipe_version != "v0.3":
+        how["notes"].append(index.grades_status)
+    if index.flags_source == "none":
+        how["notes"].append("No trust checks are loaded: no record is flagged, so merged records and location conflicts are not caught.")
+
+    base = dict(service=service, service_label=svc.label, radius_km=round(ctx.R, 1), method="recipe", location=loc)
+    order = order_v1(index, ctx, sets)
+    shown, near_pos, reserved = shown_v1(index, order, in_W, k)
+    cards = [_v1_card(index, ctx, p, loc) for p in shown]
+    nxt = None
+    if not reserved and len(order) > len(shown):
+        nxt = _v1_card(index, ctx, order[len(shown)], loc)  # only for the last card's comparison
+    for i, c in enumerate(cards):
+        c.nearest_in_window = shown[i] == near_pos
+        if reserved and i == len(cards) - 1:
+            c.why_here = _why_nearest_v1(c, ctx)
+        else:
+            c.why_here = _why_here_v1(c, cards[i + 1] if i + 1 < len(cards) else nxt, ctx, n_in)
+    if reserved:
+        how["notes"].append("The nearest recommendable facility is always shown: the evidence allowance listed "
+                            "corroborated records ahead of it, so it takes the last place.")
+    capped = _cap_exception(index, ctx, sets, shown)
+    if capped:
+        how["notes"].append(f"Only the {S.MAX_CANDIDATES} nearest recommendable records are put in order. "
+                            f"{len(capped)} corroborated record(s) further out inside the window would have been "
+                            "listed under the evidence allowance, but lie beyond that limit.")
+        how["cap_exception"] = [index.fac["facility_id"].iat[p] for p in capped]
+
+    def further(shown_pos: list, n_max: int, limit_reach: bool) -> list:
+        taken = {index.dup_canon.get(p, -1 - p) for p in shown_pos}
+        m = usable & rec_mask & ~ctx.within
+        if limit_reach:
+            m &= ctx.in_reach_pt
+        far = np.flatnonzero(m)
+        far = far[np.argsort(d[far], kind="stable")]
+        out = []
+        for p in far:
+            p = int(p)
+            g_ = index.dup_canon.get(p, -1 - p)
+            if g_ in taken:
+                continue
+            taken.add(g_)
+            c = _v1_card(index, ctx, p, loc)
+            what = c.minutes_label.split(";")[0] if c.minutes is not None and not ctx.too_loose else c.distance_label
+            c.why_here = (f"Further away: {what}, beyond the " +
+                          (f"{ctx.R:.0f} km radius." if ctx.sea else f"{ctx.W:.0f}-minute window."))
+            out.append(c)
+            if len(out) >= n_max:
+                break
+        return out
+
+    unv_mask = usable & ctx.within & claim & ~rec_mask
+    unv_idx = np.flatnonzero(unv_mask)
+    unv_idx = [int(p) for p in unv_idx[np.argsort(d[unv_idx], kind="stable")]]
+
+    def unverified_for(shown_pos: list) -> list:
+        taken = {index.dup_canon.get(p, -1 - p) for p in shown_pos}
+        out = []
+        for p in unv_idx:
+            g_ = index.dup_canon.get(p, -1 - p)
+            if g_ in taken:
+                continue
+            taken.add(g_)
+            out.append(_v1_unverified_card(index, ctx, p, loc))
+            if len(out) >= S.MAX_UNVERIFIED:
+                break
+        return out
+
+    within_txt = (f"within {ctx.R:.0f} km (straight-line; sea travel is not modelled)" if ctx.sea else
+                  f"within about {hours} estimated drive (free-flow) of {ctx.place}")
+    if not shown:
+        fa = further([], k, limit_reach=False)
+        how["headline"] = (f"No reliable option nearby. No facility in this dataset shows clear evidence of "
+                           f"{_label_lc(service)} {within_txt}. This is a gap in our data, not proof that no care exists.")
+        if fa:
+            how["headline"] += f" The nearest one with evidence is further away: {fa[0].name}, " + (
+                fa[0].minutes_label.split(";")[0] if fa[0].minutes is not None and not ctx.too_loose
+                else fa[0].distance_label) + "."
+        if ctx.too_loose:
+            how["headline"] = _too_loose_text(ctx) + " " + how["headline"]
+        return Answer("no_reliable_option", results=[], beyond_radius=fa[0] if fa else None,
+                      unverified_nearby=unverified_for([]), how_we_decided=how, further_away=fa,
+                      window=win, rank_version="v1", **base)
+
+    fa = further(shown, k - len(shown), limit_reach=True) if len(shown) < k else []
+    how["headline"] = (f"{len(shown)} of {n_in} recommendable {'facility' if n_in == 1 else 'facilities'} "
+                       f"{within_txt}, nearest first" + ("" if ctx.sea else
+                                                         f" (a corroborated record may move up to {ctx.A:.0f} minutes)")
+                       + "." + (" The last card is the nearest one, always shown." if reserved else "")
+                       + (f" {len(fa)} more with evidence {'is' if len(fa) == 1 else 'are'} further away."
+                          if fa else ""))
+    if ctx.too_loose:
+        how["headline"] = _too_loose_text(ctx) + " " + how["headline"]
+    return Answer("ok", results=cards, beyond_radius=None, unverified_nearby=unverified_for(shown),
+                  how_we_decided=how, further_away=fa, window=win, rank_version="v1", **base)
+
+
+def rank(index: Index, service: str, resolution, k: int = 3, *, version: Optional[str] = None,
+         window_scale: float = 1.0, allowance: Optional[float] = None, terrain: bool = True) -> Answer:
+    """Top ``k`` recommendable facilities for ``service`` near ``resolution``,
+    or an abstention. Lines with no grades loaded fall back to ``search``.
+
+    ``version``: "v1" (score spec v1-final, D048; the index default) or "v0"
+    (the legacy additive score, or probability mode when loaded). The v1
+    sensitivity knobs (``reports/ordering_behaviour.md``): ``window_scale``
+    multiplies the window, ``allowance`` replaces the line's allowance (minutes),
+    ``terrain=False`` turns the state factor off."""
+    version = version or index.rank_version
+    if version not in RANK_VERSIONS:
+        raise ValueError(f"version must be one of {RANK_VERSIONS}, not {version!r}")
+    if version == "v0":
+        return _rank_v0(index, service, resolution, k=k)
+    if service not in S.SERVICES:
+        raise ValueError(f"unknown service line {service!r}; free text goes to search()")
+    svc = S.SERVICES[service]
+    early = _base_answer(service, svc.label, float(svc.radius_km), "recipe", resolution)
+    if early is not None:
+        early.rank_version = "v1"
+        return early
+    if service not in index.lines:
+        ans = search(index, svc.keywords, resolution, k=k, radius_km=float(svc.radius_km))
+        ans.service, ans.service_label = service, svc.label
+        ans.how_we_decided.setdefault("notes", []).insert(
+            0, f"No recipe grades are loaded for {svc.label.lower()} yet (recipe {index.recipe_version} covers "
+               f"{', '.join(S.label(l).lower() for l in index.graded_lines)}). These are keyword matches only.")
+        return ans
+    return _rank_v1(index, service, resolution, k=k, window_scale=window_scale, allowance=allowance, terrain=terrain)
+
+
+# ---------------------------------------------------------------------------
 # search: keyword fallback (D026). Confidence never above low.
 # ---------------------------------------------------------------------------
 
@@ -1157,6 +1941,7 @@ def search(index: Index, text: str, resolution, k: int = 3, radius_km: Optional[
     if early is not None:
         return early
     kw = index.ensure_keyword()
+    v1 = index.rank_version == "v1"  # D048 (6): no confidence levels or "validated" wording under v1
     loc = _location_dict(resolution)
     d = _distances(index, loc["lat"], loc["lon"])
     rows, sims = kw.matches(text, S.SEARCH_MIN_SIMILARITY)
@@ -1187,7 +1972,8 @@ def search(index: Index, text: str, resolution, k: int = 3, radius_km: Optional[
             {"gate": "no blocking warning", "rule": "no blocking warning on the whole record", "n": int(good.sum()),
              "n_distinct": _n_distinct(index, np.flatnonzero(good))},
         ],
-        "flags_source": index.flags_source, "limits": list(S.LIMITS), "notes": [],
+        "flags_source": index.flags_source,
+        "limits": list(S.LIMITS_SEARCH_V1 if v1 else S.LIMITS), "notes": [],
     }
     if index.flags_source == "none":
         how["notes"].append("No trust checks are loaded: no record is flagged, so merged records and location conflicts are not caught.")
@@ -1211,10 +1997,10 @@ def search(index: Index, text: str, resolution, k: int = 3, radius_km: Optional[
                  "labels": {"evidence": "keyword match strength", "distance": "reach"}}
         minor = index.record_minor.get(p, [])
         could = _could_be_wrong(index, None, p, "thin", [], minor, None, keyword=True)
-        reason = ("Low: keyword match, no service recipe. The quoted text matched your words; "
+        reason = ("Keyword match, no service recipe. The quoted text matched your words; "
                   "no rule checked that the service is offered.")
         return _make_card(index, p, dist, line=None, score=float(best[p]) * reach, parts=parts,
-                          confidence=("low", reason), evidence=ev, missing=[], could=could, radius=R,
+                          confidence=(None if v1 else "low", reason if v1 else "Low: " + reason), evidence=ev, missing=[], could=could, radius=R,
                           grade=None, grade_label="keyword match, no service recipe", strength="keyword",
                           origin=loc)
 
@@ -1271,7 +2057,9 @@ def search(index: Index, text: str, resolution, k: int = 3, radius_km: Optional[
             c.why_here = (f"Ranked above {index.fac.name.iat[nxt]}: closer "
                           f"({_fmt_km(dist[order[i]], _eff_precision(c.location_precision_km, loc))} against "
                           f"{_fmt_km(dist[nxt], _eff_precision(float(index.precision_km[nxt]), loc))}) with a similar match.")
-    how["headline"] = f"{len(cards)} of {len(order)} keyword matches within {R:.0f} km. Keyword matches are never more than low confidence."
+    how["headline"] = (f"{len(cards)} of {len(order)} keyword matches within {R:.0f} km. " +
+                       ("Keyword matches are not recommendations: no rule checked that the service is offered."
+                        if v1 else "Keyword matches are never more than low confidence."))
     return Answer("ok", results=cards, beyond_radius=None, unverified_nearby=unverified, how_we_decided=how, **base)
 
 

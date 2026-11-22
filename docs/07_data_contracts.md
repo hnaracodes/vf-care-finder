@@ -132,6 +132,10 @@ One row per facility per service line. WP3 writes it first with `method = regex`
 | `method` | str | |
 | `recipe_version` | str | |
 
+### Answer and Card under v1-final (D048, D058)
+
+Fields added by the v1 ranker; nothing was renamed or removed. Card: `minutes`, `minutes_low`, `minutes_high`, `minutes_label` ("about N min estimated drive, free-flow; real trips take longer", or "drive time unclear ..." for loose origins), `distance_label` ("position approximate" for shared PIN points), `nearest_in_window` (true on the card reserved for the nearest recommendable facility), `window_uncertain` (the minutes range straddles the window), `parts.allowance_denied_by` (flags that denied the evidence allowance). `confidence` is null under v1 and `confidence_reason` is a neutral evidence note. Answer: `window` (`minutes`, `allowance`, `kind`, `basis`, `origin_too_loose`), headline prefixed "Uncertain: ..." when the origin is too loose, `further_away` (recommendable beyond the window), and `how_we_decided.cap_exception` when the 50-candidate cap hid a record the allowance would have promoted.
+
 ### `gold/facility_flags.parquet` (WP11)
 
 One row per facility per flag raised; a facility with no flags has no rows.

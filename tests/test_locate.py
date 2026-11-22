@@ -393,3 +393,15 @@ def test_review_regressions(real, q, wrong):
 def test_village_district_state_after_commas(real):
     r = real.resolve("Singhwara, Darbhanga, Bihar")
     assert r.status == "ok" and r.kind == "post_office" and r.district == "DARBHANGA"
+
+
+@needs_data
+def test_city_point_only_when_tight(real):
+    """D046 city fix, tightened: a district named after its town uses the town's head post
+    office only when that point is good to under CITY_MAX_PRECISION_KM; Barmer (a town
+    point about 204 km across) keeps the district wording."""
+    j = real.resolve("Jaipur")
+    assert j.status == "ok" and "city" in j.label and j.precision_km < locate.CITY_MAX_PRECISION_KM
+    b = real.resolve("Barmer")
+    assert b.status == "ok" and " city " not in b.label
+    assert all(c["precision_km"] < locate.CITY_MAX_PRECISION_KM for c in real._city_points.values())

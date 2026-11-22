@@ -459,11 +459,15 @@ def _supported_req(line: str) -> str:
 # The ranker's gates, recomputed from the index (same rules as vf.rank.rank)
 # ---------------------------------------------------------------------------
 
-def _gates(idx, line: str, d: np.ndarray) -> dict:
+def _gates(idx, line: str, d: np.ndarray, resolution=None) -> dict:
     """Masks and the scored set exactly as ``rank.rank`` builds them.
     ``scored`` maps each scored position to its tier (0 inside the radius, 1
     beyond); it is empty when nothing recommendable is inside the radius,
-    because the ranker then scores nothing."""
+    because the ranker then scores nothing. Under score spec v1-final (D048)
+    the ranker's own ``gate_masks`` is used: the radius is the window's
+    straight-line equivalent for this origin."""
+    if hasattr(_rank, "gate_masks"):
+        return _rank.gate_masks(idx, line, d, resolution)
     ld = idx.lines[line]
     R = float(S.SERVICES[line].radius_km)
     reach = float(S.REACH_FACTOR) * R
@@ -770,7 +774,7 @@ def why_not_strip(index, service_line: str, resolution, answer_dict: Optional[Ma
     if lat is None:
         return empty
     d = haversine_km(lat, lon, index.lat, index.lon)
-    gt = _gates(index, service_line, d)
+    gt = _gates(index, service_line, d, resolution)
     lk = _lookups(index)
     cards, first = _shown(answer_dict)
     shown_ids = frozenset(str(c.get("facility_id")) for c in cards if c.get("facility_id"))
@@ -911,7 +915,10 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
         answer_dict = _rank.rank(index, service_line, resolution).to_dict()
     ld = index.lines[service_line]
     d = haversine_km(lat, lon, index.lat, index.lon)
-    gt = _gates(index, service_line, d)
+    gt = _gates(index, service_line, d, resolution)
+    R, reach = float(gt["R"]), float(gt["reach"])
+    out.update(radius_km=R, reach_km=reach)
+    lab = gt.get("labels") or {}
     usable, claim, rec_mask = gt["usable"], gt["claim"], gt["rec_mask"]
     in_reach, rec, rec_all, in_R, scored = gt["in_reach"], gt["rec"], gt["rec_all"], gt["in_R"], gt["scored"]
     prob = gt["prob"]
@@ -967,13 +974,15 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
     # claim within reach
     no_claim = np.flatnonzero(usable & ~claim)
     far = np.flatnonzero(usable & claim & (d > reach))
-    steps.append({"step": "claim_within_reach", "label": f"List or claim {label} and are within {reach:.0f} km",
+    steps.append({"step": "claim_within_reach",
+                  "label": lab.get("claim_within_reach", f"List or claim {label} and are within {reach:.0f} km"),
                   "n": int(in_reach.sum()), "n_dropped": int(len(no_claim) + len(far)),
                   "dropped": [x for x in [
                       group("no_mention", f"Our rules found no claim of {label} in the record: no matching specialty "
                                           "and no matching fact.", no_claim, "claim_within_reach"),
-                      group("beyond_reach", f"Lists or claims {label}, but more than {reach:.0f} km away "
-                                            f"(3 x the {R:.0f} km radius).", far, "claim_within_reach")] if x]})
+                      group("beyond_reach", lab.get("beyond_reach", f"Lists or claims {label}, but more than "
+                                            f"{reach:.0f} km away (3 x the {R:.0f} km radius)."), far,
+                            "claim_within_reach")] if x]})
     # recommendable
     nr = np.flatnonzero(in_reach & ~rec_mask)
     by_code: dict[str, list] = {}
@@ -996,11 +1005,12 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
                   "dropped": rec_groups})
     # within radius
     beyond = rec_all[d[rec_all] > R]
-    steps.append({"step": "within_radius", "label": f"Within the {R:.0f} km radius", "n": int(len(in_R)),
+    steps.append({"step": "within_radius", "label": lab.get("within_radius", f"Within the {R:.0f} km radius"),
+                  "n": int(len(in_R)),
                   "n_distinct": _n_distinct(index, in_R), "n_dropped": int(len(beyond)),
                   "dropped": [x for x in [
-                      group("beyond_radius", f"Recommendable, but more than {R:.0f} km away.", beyond,
-                            "within_radius")] if x]})
+                      group("beyond_radius", lab.get("beyond_radius", f"Recommendable, but more than {R:.0f} km away."),
+                            beyond, "within_radius")] if x]})
     # shown
     in_R_set = set(int(p) for p in in_R)
     shown_in_R = [int(p) for p in shown_pos if int(p) in in_R_set]

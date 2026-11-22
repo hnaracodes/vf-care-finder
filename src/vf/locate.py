@@ -75,6 +75,18 @@ DISTRICT_VOTE_K = 5
 CROSS_TIER_MIN = 90.0
 #: Offices pre-selected by plain edit ratio before the full name_score rescoring.
 FUZZY_PRESELECT = 40
+#: City centre for a district named after its town (D046 fix): the town's head
+#: post office point, with a precision from the spread of the town's PIN areas
+#: (same district, same first four PIN digits as the head office) at this
+#: quantile of their distance from it, and never below CITY_MIN_PRECISION_KM.
+CITY_PIN_PREFIX = 4
+CITY_PRECISION_Q = 0.75
+CITY_MIN_PRECISION_KM = 3.0
+#: The town point is used only when its precision is under this: a looser "city"
+#: (Barmer, about 204 km across) is no tighter in practice, so the district wording stays.
+CITY_MAX_PRECISION_KM = 15.0
+#: A typed word that asks for the district itself, not its town.
+_DISTRICT_WORD = re.compile(r"\b(DISTRICT|DISTT|DIST|ZILA|JILA)\b")
 
 KIND_ORDER = {"district": 0, "city": 1, "post_office": 2, "pin": 3}
 
@@ -199,6 +211,64 @@ class Resolver:
         self._pts_tree = BallTree(np.radians(pts[["lat", "lon"]].to_numpy()), metric="haversine")
         self._pin_rows = p[p["kind"] == "pin"].reset_index(drop=True)
         self._pin_tree = BallTree(np.radians(self._pin_rows[["lat", "lon"]].to_numpy()), metric="haversine")
+        self._city_points = self._build_city_points(p)
+
+    def _build_city_points(self, p: pd.DataFrame) -> dict:
+        """``group -> {lat, lon, precision_km, pin, office}`` for districts named after their town:
+        a post office of the district carries the district's name (or an old name of it in
+        vf.geo.CITY_ALIASES). The point is that office's PIN point (the lowest such PIN, the head
+        office's), and the precision the spread of the town's PIN areas. Used only when it is
+        tighter than the district centre."""
+        old_names: dict[str, list] = {}
+        for old, new in geo.CITY_ALIASES.items():
+            for n in new:
+                old_names.setdefault(n, []).append(old)
+        dist = p[p["kind"] == "district"]
+        wanted = set(dist["name_norm"]) | {o for n in dist["name_norm"] for o in old_names.get(n, [])}
+        offices = p[(p["kind"] == "post_office") & p["pin"].notna() & p["name_norm"].isin(wanted)]
+        heads = {}  # (group, name) -> (lowest pin, office name)
+        for g, n, pin, name in zip(offices["group"], offices["name_norm"], offices["pin"].astype(str), offices["name"]):
+            if (g, n) not in heads or pin < heads[(g, n)][0]:
+                heads[(g, n)] = (pin, str(name))
+        pins = p[(p["kind"] == "pin") & p["pin"].notna()]
+        pin_pt = pins.drop_duplicates("pin").set_index("pin")[["lat", "lon", "precision_km"]]
+        pins_by_group = {g: sub for g, sub in pins.groupby("group")}
+        out = {}
+        for r in dist.itertuples(index=False):
+            hit = None
+            for name in [r.name_norm, *old_names.get(r.name_norm, [])]:
+                if (r.group, name) in heads:
+                    hit = heads[(r.group, name)]
+                    break
+            if hit is None:
+                continue
+            head = hit[0]
+            if head not in pin_pt.index:
+                continue
+            lat0, lon0 = float(pin_pt.at[head, "lat"]), float(pin_pt.at[head, "lon"])
+            town = pins_by_group.get(r.group)
+            if town is not None:
+                town = town[town["pin"].astype(str).str[:CITY_PIN_PREFIX] == head[:CITY_PIN_PREFIX]]
+            if town is None or len(town) < 2:
+                # one PIN area: as good as that PIN's own spread
+                spread, n_pins = float(pin_pt.at[head, "precision_km"]), 1
+            else:
+                km = geo.haversine_km(lat0, lon0, town["lat"].to_numpy(float), town["lon"].to_numpy(float))
+                spread, n_pins = float(np.quantile(km, CITY_PRECISION_Q)), int(len(town))
+            prec = max(CITY_MIN_PRECISION_KM, spread)
+            if not prec < float(r.precision_km) or not prec < CITY_MAX_PRECISION_KM:
+                continue
+            out[r.group] = {"lat": lat0, "lon": lon0, "precision_km": prec, "pin": head,
+                            "office": hit[1], "n_pins": n_pins}
+        return out
+
+    def _wants_city(self, query: str) -> bool:
+        return not _DISTRICT_WORD.search(geo.norm_name(query or ""))
+
+    def city_point(self, i: int) -> Optional[dict]:
+        """The town point for district row ``i``, or None (``_build_city_points``)."""
+        r = self._row(i)
+        return self._city_points.get(r["group"]) if r["kind"] == "district" else None
 
     # ------------------------------------------------------------------ parsing
 
@@ -241,14 +311,32 @@ class Resolver:
             return f"{r['name']}, {di} district, {st}"
         return f"{r['name']} (post office area, PIN {r['pin']}), {di} district, {st}"
 
-    def _cand(self, i: int, score: float) -> dict:
+    def _city_label(self, r: pd.Series, c: dict) -> str:
+        town = nice(r["name"]) if str(r["name"]).isupper() else str(r["name"])
+        return (f"{town} city (centre at the head post office, PIN {c['pin']}), {nice(r['district'])} district, "
+                f"{nice(r['state'])}, about {2 * c['precision_km']:.0f} km across")
+
+    def _cand(self, i: int, score: float, query: Optional[str] = None) -> dict:
         r = self._row(i)
-        return {"place_id": r["place_id"], "kind": r["kind"], "name": r["name"], "state": r["state"],
-                "district": r["district"], "lat": float(r["lat"]), "lon": float(r["lon"]),
-                "precision_km": float(r["precision_km"]), "label": self._label(r), "score": float(score)}
+        out = {"place_id": r["place_id"], "kind": r["kind"], "name": r["name"], "state": r["state"],
+               "district": r["district"], "lat": float(r["lat"]), "lon": float(r["lon"]),
+               "precision_km": float(r["precision_km"]), "label": self._label(r), "score": float(score)}
+        c = self.city_point(i) if self._wants_city(query or "") else None
+        if c is not None:
+            out.update(lat=c["lat"], lon=c["lon"], precision_km=float(c["precision_km"]), label=self._city_label(r, c))
+        return out
 
     def _ok(self, i: int, how: str, query: str) -> Resolution:
         r = self._row(i)
+        c = self.city_point(i) if self._wants_city(query) else None
+        if c is not None:
+            # a district named after its town: a user typing "Jaipur" means the city (D046)
+            how = how.replace(" This is the district centre, not an exact location.", "")
+            how += (f" The district is named after its town, so the point is the town's head post office "
+                    f"({c['office']}, PIN {c['pin']}), not the district centre; type "
+                    f"\"{nice(r['district'])} district\" for the district centre.")
+            return Resolution("ok", c["lat"], c["lon"], float(c["precision_km"]), r["kind"], self._city_label(r, c),
+                              how, [], r["state"], r["district"], r["place_id"], query)
         return Resolution("ok", float(r["lat"]), float(r["lon"]), float(r["precision_km"]), r["kind"],
                           self._label(r), how, [], r["state"], r["district"], r["place_id"], query)
 
@@ -288,7 +376,7 @@ class Resolver:
             elif r["kind"] == "post_office" and r["note"]:
                 how += f" Note: {r['note']}."
             return self._ok(i, how, query)
-        cands = [self._cand(i, s) for i, s in list(groups.values())[:MAX_CANDIDATES]]
+        cands = [self._cand(i, s, query) for i, s in list(groups.values())[:MAX_CANDIDATES]]
         n = len(groups)
         more = f" Showing {MAX_CANDIDATES} of {n}." if n > MAX_CANDIDATES else ""
         if n > 1:
