@@ -135,10 +135,31 @@ def test_h24_asked_on_emergency_line_when_record_has_none():
 
 
 def test_h24_elsewhere_is_quoted_and_still_asked():
-    r = rec(tags=frozenset({"nicu", "h24"}), h24_cotags=frozenset(), h24_quote="24-hour pharmacy")
+    r = rec(tags=frozenset({"nicu", "h24", "pharmacy"}), h24_cotags=frozenset({"pharmacy"}),
+            h24_quote="24-hour pharmacy", h24_quote_cotags=frozenset({"pharmacy"}))
     qs = Q.questions_for(card(), "nicu", r)
     h = [q for q in qs if q["source"] == "h24"]
-    assert len(h) == 1 and '"24-hour pharmacy"' in h[0]["why"]
+    assert len(h) == 1
+    assert h[0]["why"] == 'The record mentions round-the-clock service only for something else: "24-hour pharmacy".'
+
+
+@pytest.mark.parametrize("quote_cotags", [frozenset(), None])
+def test_h24_facility_wide_is_not_called_something_else(quote_cotags):
+    # "Open 24/7" has no other tags: it is about the whole facility, not another service
+    r = rec(tags=frozenset({"csection", "h24"}), h24_cotags=frozenset(), h24_quote="Open 24/7",
+            h24_quote_cotags=quote_cotags)
+    h = [q for q in Q.questions_for(card(evidence=[CSECTION]), "emoc", r) if q["source"] == "h24"]
+    assert len(h) == 1
+    assert "something else" not in h[0]["why"]
+    assert h[0]["why"] == ('The record says "Open 24/7", but no fact in the record says the C-section service '
+                           "is available round the clock.")
+
+
+def test_h24_tag_without_a_quote_is_not_called_absent():
+    r = rec(tags=frozenset({"nicu", "h24"}), h24_cotags=frozenset(), h24_quote=None)
+    h = [q for q in Q.questions_for(card(), "nicu", r) if q["source"] == "h24"]
+    assert len(h) == 1 and "No fact in the record mentions round-the-clock" not in h[0]["why"]
+    assert h[0]["why"].startswith("The record mentions round-the-clock service, but")
 
 
 def test_h24_on_the_service_is_not_asked():
@@ -169,7 +190,7 @@ def test_location_conflict_asks_to_confirm_address():
     qs = Q.questions_for(c, "dialysis", rec())
     q = next(q for q in qs if q["source"] == "location")
     assert "address" in q["question"]
-    assert q["why"].startswith("The record's location is uncertain") and reason in q["why"]
+    assert q["why"] == "The record's location is uncertain: the record's scraped map point was 212 km from its PIN code's area."
 
 
 def test_fuzzy_position_without_flag_asks_address():
@@ -183,7 +204,7 @@ def test_possible_merge_asks_which_branch():
                      "reason": "The record's own text places it in Pune.", "quote": "Pune"}])
     q = next(q for q in Q.questions_for(c, "emoc", rec()) if q["source"] == "flag:possible_merge")
     assert "another branch" in q["question"]
-    assert "places it in Pune" in q["why"]
+    assert q["why"] == "The record may combine more than one facility: the record's own text places it in Pune."
 
 
 def test_implausible_claim_on_unverified_card():
@@ -432,3 +453,109 @@ def test_real_grades_blood_gap_and_counts():
     for line, d in m["lines"].items():
         assert set(d["question_counts"]) <= {"2", "3", "4"}, line
         assert d["sources"]["service"] == d["records"], line
+
+
+# ---------------------------------------------------------------------------
+# Review fixes: negated leads, numbers in quotes, foreign phones, duplicates
+# ---------------------------------------------------------------------------
+
+DIGIT_RUN = re.compile(r"\d{8,}")
+
+
+def test_grade_one_lead_skips_a_negated_fact():
+    neg = ev("trauma care", "Lacks trauma care facilities; emergencies referred to private hospitals", "description")
+    c = card(grade=1, evidence=[neg], missing=missing("trauma care"), evidence_strength="thin")
+    lead = Q.questions_for(c, "trauma", rec())[0]
+    assert "Lacks trauma" not in lead["why"] and "only claims it" not in lead["why"]
+    assert lead["why"].startswith("The record only lists a related specialty.")
+    # a positive fact next to the negated one is the one quoted
+    pos = ev("emergency service", "Casualty ward with emergency doctors", "capability")
+    lead = Q.questions_for(card(grade=1, evidence=[neg, pos], evidence_strength="thin"), "trauma", rec())[0]
+    assert lead["why"].startswith('The record only claims it: "Casualty ward with emergency doctors"')
+
+
+def test_negated_scheme_quote_on_card_is_not_a_scheme():
+    c = card(evidence=[CSECTION, ev("other", "Ayushman Bharat not available here", "description")])
+    q = next(q for q in Q.questions_for(c, "emoc", None) if q["source"] == "cost")
+    assert "mentions a scheme" not in q["why"]
+
+
+def test_mask_numbers():
+    assert Q.mask_numbers("Has a 24/7 helpline at +91 00000 00042") == "Has a 24/7 helpline at [phone number]"
+    assert Q.mask_numbers("Call 0000-0000042 or 108") == "Call [phone number] or 108"
+    assert Q.mask_numbers("Open 24x7, 365 days, since 2010-2020, on 12-05-2020") == \
+        "Open 24x7, 365 days, since 2010-2020, on 12-05-2020"
+    assert Q.mask_numbers(None) is None
+
+
+def test_phone_numbers_in_quotes_never_reach_a_why_or_the_saved_table(tmp_path, monkeypatch):
+    monkeypatch.setenv(Q.DEMO_ENV, "1")
+    ft = pd.DataFrame({"fact_id": ["1", "2"], "facility_id": ["a", "a"], "tags": [["h24"], ["scheme"]]})
+    facts = pd.DataFrame({"fact_id": ["1", "2"],
+                          "text": ["24/7 helpline " + FAKE_PHONE, "PM-JAY desk 0000000077"]})
+    infos = Q.build_record_info(ft, facts)
+    a = infos["a"]
+    assert not DIGIT_RUN.search(a.h24_quote) and not DIGIT_RUN.search(a.scheme_quote)
+    assert a.h24_quote == "24/7 helpline [phone number]"
+    p = Q.save_record_info(infos, tmp_path / "record_info.parquet")
+    assert not DIGIT_RUN.search(pd.read_parquet(p).to_json())
+    # an unmasked RecordInfo (built by hand) is still masked on save and in the why
+    raw = rec(facility_id="a", tags=frozenset({"h24", "scheme"}), h24_quote="24/7 helpline " + FAKE_PHONE,
+              h24_quote_cotags=frozenset(), scheme_quote="PM-JAY desk 0000000077")
+    p2 = Q.save_record_info({"a": raw}, tmp_path / "raw.parquet")
+    assert not DIGIT_RUN.search(pd.read_parquet(p2).to_json())
+    c = card(evidence=[ev("caesarean section", "LSCS done, call 0000000042 for appointments")])
+    qs = Q.questions_for(c, "emoc", raw) + Q.questions_for(c, "emoc", None)
+    for q in qs:
+        assert not DIGIT_RUN.search(q["why"].replace(" ", "")), q
+
+
+def test_normalize_phone_keeps_only_indian_numbers():
+    assert Q.normalize_phone("+91 0000000042") == FAKE_PHONE
+    assert Q.normalize_phone("+91 0 0000000042") == FAKE_PHONE  # trunk 0 after +91
+    assert Q.normalize_phone("00910000000042") == FAKE_PHONE
+    assert Q.normalize_phone("910000000042") == FAKE_PHONE
+    assert Q.normalize_phone("1800-000-0000") == "+9118000000000"  # toll-free without country code
+    assert Q.normalize_phone("+91 1800 000 0000") == "+9118000000000"
+    for bad in ("+1 000 000 0000", "+18000000000", "+880 0000 000000", "+961 0000000", "+0000000042",
+                "+91 00000 0000000", "000000000000", "+91000000000"):
+        assert Q.normalize_phone(bad) is None, bad
+
+
+def test_foreign_number_gets_no_call_link():
+    raw = pd.DataFrame({"unique_id": ["x", "y"], "officialPhone": ["+1 000 000 0042", "null"],
+                        "phone_numbers": [json.dumps(["+880 0000 000000"]), json.dumps(["+1 000 000 0077", FAKE_PHONE_2])]})
+    book = Q.build_phone_book(raw)
+    assert "x" not in book.phone and "x" in book.unusable
+    assert book.phone["y"] == FAKE_PHONE_2  # the first usable entry wins
+    info = Q.call_info("x", book, reveal=True)
+    assert not info["has_phone"] and info["tel"] is None and "valid Indian number" in info["note"]
+
+
+def test_duplicate_partners_are_not_a_shared_booking_line():
+    raw = pd.DataFrame({"unique_id": ["a", "b", "c"], "officialPhone": [FAKE_PHONE] * 3,
+                        "phone_numbers": ["null"] * 3})
+    dups = pd.DataFrame({"facility_id_a": ["a"], "facility_id_b": ["b"]})
+    book = Q.build_phone_book(raw, dups)
+    assert book.shared_with == {"a": 1, "b": 1, "c": 2}
+    assert book.duplicate_shared == {"a": 1, "b": 1, "c": 0}
+    assert "same facility listed twice" in Q.call_info("a", book)["note"]
+    only_dup = Q.build_phone_book(raw.iloc[:2], dups)
+    assert only_dup.shared_with == {"a": 0, "b": 0}
+    infos = Q.build_record_info(pd.DataFrame({"fact_id": ["1"], "facility_id": ["a"], "tags": [[]]}),
+                                None, only_dup)
+    assert "shared_phone" not in sources_of(Q.questions_for(card(), "emoc", infos["a"]))
+
+
+def test_record_info_prefers_a_facility_wide_h24_quote():
+    ft = pd.DataFrame({"fact_id": ["1", "2", "3"], "facility_id": ["a"] * 3,
+                       "tags": [["h24", "pharmacy"], ["h24"], ["h24"]]})
+    facts = pd.DataFrame({"fact_id": ["1", "2", "3"],
+                          "text": ["24-hour pharmacy", "Not open 24 hours on Sundays", "Open 24x7"]})
+    a = Q.build_record_info(ft, facts)["a"]
+    assert a.h24_quote == "Open 24x7" and a.h24_quote_cotags == frozenset()
+
+
+def test_reason_after_colon_is_lower_cased_but_acronyms_kept():
+    assert Q._lower_first("The record's map point") == "the record's map point"
+    assert Q._lower_first("PIN code and map point disagree") == "PIN code and map point disagree"

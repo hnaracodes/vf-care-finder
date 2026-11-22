@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from datetime import date
 from pathlib import Path
 
@@ -279,3 +280,168 @@ def test_copy_vf(tmp_path):
     n = wp12.copy_vf(ROOT / "src" / "vf", dest)
     assert n >= 3 and (dest / "io.py").exists() and (dest / "GENERATED.txt").exists()
     assert not list(dest.rglob("__pycache__"))
+
+
+# --------------------------------------------------------------------------
+# fix round: WP4's student applied on Databricks, grade source, deploy guards
+# --------------------------------------------------------------------------
+
+def _tiny_student(path: Path, use_regex: bool) -> None:
+    """A WP4-shaped blob: one fitted model, for `dialysis`, that fires on 'kidney wash'."""
+    import pickle
+
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.linear_model import LogisticRegression
+    import scipy.sparse as sp
+
+    from vf import recipes
+
+    tags = list(recipes.EVIDENCE_TAGS)
+    train = ["kidney wash center", "kidney wash daily", "general opd", "eye care clinic"] * 3
+    y = np.array([1, 1, 0, 0] * 3)
+    word = TfidfVectorizer().fit(train)
+    char = TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 3)).fit(train)
+    X = [word.transform(train), char.transform(train)]
+    if use_regex:
+        R = np.array([[t in set(s) for t in tags] for s in recipes.tag_facts(train)], dtype=float)
+        X.append(sp.csr_matrix(R))
+    m = LogisticRegression(C=10.0).fit(sp.hstack(X, format="csr"), y)
+    models = {t: None for t in tags}
+    models["dialysis"] = m
+    th = {t: 1.0 for t in tags}
+    th["dialysis"] = 0.5
+    blob = {"name": "student_1b" if use_regex else "student_1a", "tags": tags, "use_regex_features": use_regex,
+            "regex_feature_weight": 1.0, "regex_recipe_version": recipes.RECIPE_VERSION,
+            "word_vectorizer": word, "char_vectorizer": char, "models": models, "thresholds": th, "C": {}}
+    path.write_bytes(pickle.dumps(blob))
+
+
+def _tiny_silver(d: Path) -> None:
+    from vf import recipes
+
+    (d / "silver").mkdir(parents=True)
+    pd.DataFrame({
+        "facility_id": ["f1", "f2"], "name": ["One", "Two"], "facility_type": ["hospital"] * 2,
+        "row_status": ["ok"] * 2, "specialties": [["nephrology"], ["gynecologyAndObstetrics"]],
+        "official_website": [None, None], "n_source_domains": [1, 1], "page_updated": [None, None],
+        "staff_named": [None, None],
+    }).to_parquet(d / "silver" / "facilities.parquet")
+    texts = ["Kidney wash center", "Caesarean section done", "Dialysis available"]
+    pd.DataFrame({"fact_id": ["a", "b", "c"], "facility_id": ["f1", "f2", "f2"],
+                  "field": ["procedure"] * 3, "text": texts,
+                  "text_norm": [recipes.normalize_text(t) for t in texts]}).to_parquet(d / "silver" / "facts.parquet")
+
+
+@pytest.mark.parametrize("use_regex", [False, True])
+def test_apply_student_mixes_student_and_regex_tags(tmp_path, use_regex):
+    wp12 = _load_bundle_script()
+    data = tmp_path / "data"
+    _tiny_silver(data)
+    model = tmp_path / "student.pkl"
+    _tiny_student(model, use_regex)
+    out = tmp_path / "gold"
+    r = wp12.apply_student(model, ["dialysis"], data_dir=data, out_dir=out, code_root=ROOT, log=lambda s: None)
+
+    tags = pd.read_parquet(out / "fact_tags.parquet").set_index("fact_id")["tags"].map(list)
+    assert "dialysis" in tags["a"]           # the student's call on a shipped tag
+    assert "dialysis" not in tags["c"]       # the regex's dialysis hit is not used: dialysis ships from the student
+    assert "csection" in tags["b"]           # tags that do not ship keep the regex
+    grades = pd.read_parquet(out / "capability_grades.parquet")
+    assert set(grades["method"]) == {"student"}
+    g = grades.set_index(["facility_id", "service_line"])["grade"]
+    assert g[("f1", "dialysis")] >= 2 and g[("f2", "dialysis")] <= 1
+    meta = json.loads((out / "capability_grades.parquet.meta.json").read_text())
+    assert meta["method"] == "student" and meta["tags_from_student"] == ["dialysis"]
+    assert meta["inputs"]["student_model"]["sha256"] == wp12.sha256(model) == r["model_sha256"]
+    assert r["model_version"].startswith("student:s1-") and "[dialysis]" in r["model_version"]
+
+    # grade_source reads what apply_student wrote, the same way the bundle manifest does
+    src = wp12.grade_source(tmp_path)
+    assert src["method"] == "student" and src["tags_from_student"] == ["dialysis"]
+
+
+def test_apply_student_refuses_bad_ship_list(tmp_path):
+    wp12 = _load_bundle_script()
+    data = tmp_path / "data"
+    _tiny_silver(data)
+    model = tmp_path / "student.pkl"
+    _tiny_student(model, False)
+    for ship in ([], ["not_a_tag"]):
+        with pytest.raises(ValueError):
+            wp12.apply_student(model, ship, data_dir=data, out_dir=tmp_path / "g", code_root=ROOT, log=lambda s: None)
+
+
+def test_grade_source_regex_counts_and_model(tmp_path):
+    wp12 = _load_bundle_script()
+    (tmp_path / "gold").mkdir()
+    (tmp_path / "models").mkdir()
+    (tmp_path / "models" / "m.pkl").write_bytes(b"model")
+    (tmp_path / "gold" / "capability_grades.parquet.meta.json").write_text(json.dumps({
+        "script": "scripts/wp4_student.py", "method": "student", "model_version": "student:x",
+        "tags_from_student": ["icu"],
+        "facilities_per_grade_regex_v0_2": {"icu": {"none": 5, "claimed": 4, "supported": 3, "corroborated": 2}}}))
+    (tmp_path / "gold" / "fact_tags.parquet.meta.json").write_text(json.dumps(
+        {"student": "data/models/m.pkl (a model)"}))
+    src = wp12.grade_source(tmp_path)
+    assert src["regex_grade_counts"] == {"icu": {"0": 5, "1": 4, "2": 3, "3": 2}}
+    assert src["student_model"] == "data/models/m.pkl"
+    assert src["student_model_sha256"] == wp12.sha256(tmp_path / "models" / "m.pkl")
+    empty = wp12.grade_source(tmp_path / "nothing")
+    assert empty["method"] is None and empty["regex_grade_counts"] is None
+
+
+def test_vf_drift_and_stage(tmp_path):
+    wp12 = _load_bundle_script()
+    src, dest = tmp_path / "src", tmp_path / "copy"
+    (src / "sub").mkdir(parents=True)
+    (src / "a.py").write_text("a")
+    (src / "sub" / "b.py").write_text("b")
+    wp12.copy_vf(src, dest)
+    assert wp12.vf_drift(src, dest) == []
+    (src / "a.py").write_text("a2")
+    (src / "c.py").write_text("c")
+    (dest / "old.py").write_text("x")
+    assert wp12.vf_drift(src, dest) == ["missing in copy: c.py", "only in copy: old.py", "differs: a.py"]
+
+    app = tmp_path / "dbapp"
+    (app / "bundle").mkdir(parents=True)
+    (app / "server.py").write_text("s")
+    (app / "bundle" / ".gitignore").write_text("*\n")
+    (app / "bundle" / "manifest.json").write_text("{}")
+    (app / "__pycache__").mkdir()
+    (app / "__pycache__" / "x.pyc").write_bytes(b"")
+    n = wp12.stage_app(app, tmp_path / "stage")
+    staged = sorted(str(p.relative_to(tmp_path / "stage")) for p in (tmp_path / "stage").rglob("*") if p.is_file())
+    assert staged == ["bundle/manifest.json", "server.py"] and n == 2
+
+
+def test_notebook_fix_round_guards():
+    """The notebook passes --no-scenarios to WP11, keeps going past a failing step, applies the student
+    before WP11, and copies the bundle without .gitignore."""
+    nb = (ROOT / "notebooks" / "01_pipeline.py").read_text()
+    assert '("wp11", ["scripts/wp11_trust_checks.py"], ["--no-scenarios"])' in nb
+    assert "except Exception:" in nb and "traceback.print_exc()" in nb
+    steps = nb.split('dbutils.widgets.text("steps", "')[1].split('"')[0].split(",")
+    assert steps.index("wp3") < steps.index("wp4") < steps.index("wp11") < steps.index("bundle")
+    assert "ignore=shutil.ignore_patterns(*WP12.STAGE_IGNORE)" in nb
+    assert "scikit-learn==1.9.1" in nb and "pandas==3.1.1" in nb
+    req = (ROOT / "dbapp" / "requirements.txt").read_text()
+    assert "scikit-learn==1.9.1" in req  # the same version pickled the student and the keyword index
+
+
+@pytest.mark.skipif(os.environ.get("VF_SLOW") != "1" or not (paths.data_dir() / "models" / "wp4_student"
+                                                               / "student_1b.pkl").exists(),
+                    reason="slow (about 40 s); set VF_SLOW=1 with the local WP4 outputs present")
+def test_apply_student_reproduces_local_gold(tmp_path):
+    wp12 = _load_bundle_script()
+    src = wp12.grade_source(paths.data_dir())
+    if src["method"] != "student":
+        pytest.skip("local grades are not student grades")
+    wp12.apply_student(paths.data_dir() / "models" / "wp4_student" / "student_1b.pkl", src["tags_from_student"],
+                       out_dir=tmp_path, model_version=src["model_version"], log=lambda s: None)
+    for name, key in (("capability_grades.parquet", ["facility_id", "service_line"]), ("fact_tags.parquet", ["fact_id"])):
+        a = pd.read_parquet(paths.gold_dir() / name).sort_values(key).reset_index(drop=True)
+        b = pd.read_parquet(tmp_path / name).sort_values(key).reset_index(drop=True)
+        assert list(a.columns) == list(b.columns)
+        for c in a.columns:
+            assert a[c].astype(str).equals(b[c].astype(str)), c

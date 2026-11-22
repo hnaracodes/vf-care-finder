@@ -251,19 +251,24 @@ def build_trip(s: State, service: str, res: Any, ans: dict) -> dict:
     for r, c in enumerate(rec, start=1):
         pos_of[c["facility_id"]] = len(facilities)
         facilities.append({"facility_id": c["facility_id"], "name": c.get("name"), "lat": float(c["lat"]),
-                           "lon": float(c["lon"]), "kind": "recommended", "rank": r, "supported": True})
+                           "lon": float(c["lon"]), "kind": "recommended", "rank": r, "supported": True,
+                           "unsupported_reason": None})
     claim = np.flatnonzero(np.isfinite(f_lat) & np.isfinite(f_lon) & (grade >= 1))
     if len(claim):
         claim = claim[haversine_km(lat, lon, f_lat[claim], f_lon[claim]) <= S.REACH_FACTOR * radius]
     claim_supported = (grade[claim] >= 2) & ~blocked[claim]
+    # Why a claim target is not supported: it only claims the service (grade 1), or its evidence is
+    # held back by a blocking warning (grade 2 or more, blocked). The counter names the two apart.
+    claim_held_back = (grade[claim] >= 2) & blocked[claim]
     claim_fidx = []
-    for p, sup in zip(claim, claim_supported):
+    for p, sup, held in zip(claim, claim_supported, claim_held_back):
         fid = f_ids[p]
         if fid not in pos_of:
             pos_of[fid] = len(facilities)
             facilities.append({"facility_id": fid, "name": f_names[p], "lat": float(f_lat[p]),
                                "lon": float(f_lon[p]), "kind": "recommended" if sup else "claim_only",
-                               "rank": None, "supported": bool(sup)})
+                               "rank": None, "supported": bool(sup),
+                               "unsupported_reason": None if sup else ("held_back" if held else "claim_only")})
         claim_fidx.append(pos_of[fid])
     claim_fidx = np.asarray(claim_fidx, dtype=int)
     out["facilities"] = facilities
@@ -277,12 +282,14 @@ def build_trip(s: State, service: str, res: Any, ans: dict) -> dict:
     extra = np.full(n, np.nan)
     reroute = np.zeros(n, bool)
     unsupported = np.zeros(n, bool)
+    held_back = np.zeros(n, bool)
     cl_t = np.full(n, -1)
     if len(claim) and n:
         dcl = np.stack([haversine_km(plat, plon, f_lat[p], f_lon[p]) for p in claim], axis=1)
         k = dcl.argmin(axis=1)
         cl_t, cl_km = claim_fidx[k], dcl.min(axis=1)
         unsupported = ~claim_supported[k]
+        held_back = claim_held_back[k]
         extra[~unsupported] = 0.0
         reroute = unsupported & (rec_t >= 0)
         for j in np.flatnonzero(reroute):
@@ -297,6 +304,8 @@ def build_trip(s: State, service: str, res: Any, ans: dict) -> dict:
     out["summary"] = {
         "n_points": int(n),
         "n_first_unsupported": int(unsupported.sum()),
+        "n_first_claim_only": int((unsupported & ~held_back).sum()),
+        "n_first_held_back": int((unsupported & held_back).sum()),
         "n_rerouted": int(reroute.sum()),
         "extra_km_mean": float(np.mean(extra[reroute])) if reroute.any() else None,
         "n_no_recommended_target": int((rec_t < 0).sum()),

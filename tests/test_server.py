@@ -261,10 +261,35 @@ def test_trip_targets_and_detour(client, service, q):
     assert sm["n_points"] == n
     first_unsupported = sum(1 for c in t["nearest_claim"] if c >= 0 and not F[c]["supported"])
     assert sm["n_first_unsupported"] == first_unsupported
+    assert sm["n_first_unsupported"] == sm["n_first_claim_only"] + sm["n_first_held_back"]
     detours = [x for x in t["extra_km"] if x is not None and x > 0]
     if sm["n_rerouted"]:
         assert sm["extra_km_mean"] is not None and sm["extra_km_mean"] >= 0
     assert all(x >= -1e-6 for x in detours)
+
+
+@needs_data
+def test_trip_names_held_back_targets_apart_kotputli_trauma(client):
+    """A blocked grade-2 facility quotes evidence; the counter must not call it 'no evidence' (review WP8B)."""
+    t = client.get("/api/trip", params={"service": "trauma", "q": "Kotputli"}).json()
+    assert t["status"] == "ok"
+    sm, F = t["summary"], t["facilities"]
+    first = [F[c] for c in t["nearest_claim"] if c >= 0 and not F[c]["supported"]]
+    claim_only = sum(1 for f in first if f["unsupported_reason"] == "claim_only")
+    held_back = sum(1 for f in first if f["unsupported_reason"] == "held_back")
+    assert claim_only + held_back == len(first) == sm["n_first_unsupported"]
+    assert sm["n_first_claim_only"] == claim_only and sm["n_first_held_back"] == held_back
+    # the reasons agree with the grades and blocking flags the server loaded
+    ld = server.STATE.index.lines["trauma"]
+    pos = {fid: i for i, fid in enumerate(server.STATE.index.fac["facility_id"])}
+    for f in F:
+        i = pos[f["facility_id"]]
+        if f["unsupported_reason"] == "held_back":
+            assert ld.grade[i] >= 2 and ld.blocked[i]
+        elif f["unsupported_reason"] == "claim_only":
+            assert ld.grade[i] == 1
+        else:
+            assert f["supported"]
 
 
 @needs_data

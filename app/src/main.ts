@@ -5,7 +5,7 @@
 import './style.css';
 import * as api from './api';
 import { MiniMap, type TripMode } from './minimap';
-import { howHtml, locationLine, resultsHtml } from './render';
+import { howHtml, locationLine, resultsHtml, withinRadiusFirst } from './render';
 import { count, esc, pct, servicePhrase } from './text';
 import type { Answer, Candidate, Query, Resolution, Service, Simulate, Trip } from './types';
 
@@ -186,8 +186,9 @@ async function run(q: Query): Promise<void> {
       els.loc.innerHTML = locationLine(r, q.q);
       // place_id is sent only when the user picked a candidate; otherwise the server resolves q itself.
     }
-    const a = await api.answer(q);
+    const a0 = await api.answer(q);
     if (id !== runId) return;
+    const a = a0.results ? withinRadiusFirst(a0) : a0;
     if (a.status === 'needs_location_choice' || a.status === 'location_not_found') return showLocationProblem(a.location, q.q);
     els.loc.innerHTML = locationLine(a.location, q.q);
     els.results.innerHTML = resultsHtml(a) + howHtml(a);
@@ -283,7 +284,7 @@ function tripCounter(mode: 'trips' | 'claims'): string {
   const notes = (t.notes ?? []).map((x) => `<li>${esc(x)}</li>`).join('');
   if (mode === 'trips') {
     const where = sm?.recommended_beyond_radius
-      ? `the nearest reliable option, beyond ${count(t.radius_km)} km`
+      ? `the reliable option shown, beyond ${count(t.radius_km)} km`
       : 'their nearest recommended facility';
     return `<p><span class="sw sw-reached" aria-hidden="true"></span><b>${count(n)}</b> post office areas within ${count(t.radius_km)} km travel to ${where}.</p>${notes ? `<ul class="notes">${notes}</ul>` : ''}`;
   }
@@ -293,9 +294,21 @@ function tripCounter(mode: 'trips' | 'claims'): string {
     ? `, then travel <b>${esc(extra.toFixed(1))} km</b> more on average (straight line)`
     : '';
   const lead = sm.n_first_unsupported > 0
-    ? `<b>${count(sm.n_first_unsupported)}</b> of ${count(n)} post office areas would first go to a facility with no evidence of ${esc(phrase)}${tail}.`
-    : `None of the ${count(n)} post office areas would first go to a facility without evidence of ${esc(phrase)}.`;
-  return `<p><span class="sw sw-stranded" aria-hidden="true"></span>${lead}</p>${notes ? `<ul class="notes">${notes}</ul>` : ''}`;
+    ? `<b>${count(sm.n_first_unsupported)}</b> of ${count(n)} post office areas would first go to a facility without reliable evidence of ${esc(phrase)}${tail}.`
+    : `None of the ${count(n)} post office areas would first go to a facility without reliable evidence of ${esc(phrase)}.`;
+  return `<p><span class="sw sw-stranded" aria-hidden="true"></span>${lead}</p>${unsupportedSplit(sm, phrase)}${notes ? `<ul class="notes">${notes}</ul>` : ''}`;
+}
+
+/** Name the two kinds of first stop apart: a record that only claims the service has no evidence
+ * of it; a record held back by a blocking warning does quote evidence, so it must not be called
+ * "no evidence". */
+function unsupportedSplit(sm: NonNullable<Trip['summary']>, phrase: string): string {
+  const co = sm.n_first_claim_only, hb = sm.n_first_held_back;
+  if (co == null || hb == null || sm.n_first_unsupported <= 0) return '';
+  const parts: string[] = [];
+  if (co > 0) parts.push(`<b>${count(co)}</b> go to a facility that only claims it, with no evidence of ${esc(phrase)} in its record`);
+  if (hb > 0) parts.push(`<b>${count(hb)}</b> go to a facility whose evidence is held back by a blocking warning`);
+  return `<p class="muted">Of these, ${parts.join('; ')}.</p>`;
 }
 
 function renderSimPanel(): void {

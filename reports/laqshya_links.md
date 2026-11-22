@@ -1,6 +1,6 @@
 # LaQshya links: the government list beside our records
 
-Built by `scripts/wp13_laqshya_links.py` on 2026-11-22T04:07:00Z. Certificates are called current when valid on or after 2026-11-21. Source: LaQshya master list of 8 Apr 2026 (NHSRC), retrieved 2026-11-21, https://qps.nhsrcindia.org/sites/default/files/2026-04/LaQshya_Master_data-08-04-2026.pdf.
+Built by `scripts/wp13_laqshya_links.py` on 2026-11-22T04:08:05Z. Certificates are called current when valid on or after 2026-11-21. Source: LaQshya master list of 8 Apr 2026 (NHSRC), retrieved 2026-11-21, https://qps.nhsrcindia.org/sites/default/files/2026-04/LaQshya_Master_data-08-04-2026.pdf.
 
 ## Findings
 
@@ -74,6 +74,8 @@ Why the wrong ones were wrong (first clause of the reason):
 - Our record: **District Hospital, Nashik**, `6720cccc-3f42-4bf6-9bc7-33a16492741c`, operator `public`, PIN 422001, city Nashik, coord_check `moved_to_pin`.
 - Emergency obstetric care grade: **claimed** (grade 1, evidence thin); tags present: blood, ob_delivery, nicu; missing for the next grade: caesarean section.
 - A fact naming a caesarean: none in the record.
+- The record has 78 distinct facts. Those about blood, maternity and newborn care, verbatim: "Special Newborn Care Unit (SNCU) available"; "Maternity and Child Healthcare services"; "Maternal and Child Protection Program"; "Blood bank service located at District (civil) Hospital Nashik, Nashik, Maharashtra"; "Offers maternity, prenatal, postnatal and maternity care".
+- WP11 flags on the record: location_conflict (minor, moved_to_pin): The record's scraped map point was 348 km from its PIN code's area; it is shown at the PIN code's centre, so its position is approximate.
 - Candidate link: LaQshya unit `d9ac44677a8c` "District Hospital nashik" (DH, Maharastra|Nashik), scope district, core match 100/100, review **correct**: same hospital: name and town agree (District Hospital, Nashik, PIN 422001)
   - list row: page 35 row 1108, Labour Room, conditionally_certified, result 2026-01-01, valid to 2026-07-01 (expired on 2026-11-21)
   - list row: page 35 row 1109, Maternity OT, certified, result 2026-01-01, valid to 2026-12-31 (current on 2026-11-21)
@@ -82,6 +84,8 @@ Why the wrong ones were wrong (first clause of the reason):
   > Government list (LaQshya, NHSRC, 8 Apr 2026, page 35 row 1109): maternity operating theatre certified, valid to 31 Dec 2026. Outside data, not from this record.
 
   page 35, row 1109, department Maternity OT, validity 2026-12-31, retrieved 2026-11-21.
+- `rank(index, "emoc", resolve("422002"))` (PIN 422002, Nashik, Maharashtra, precision 2 km): status `ok`, cards Bagul Nursing Home & Dr. Bagul’s Hope IVF Center, Hrudayasparsh Multispeciality Hospital, Prapti Women's Hospital. District Hospital, Nashik is `unverified_nearby` #2 (claimed only (a specialty or a general statement, no fact names the service)); annotate() attaches: the line above.
+- `rank(index, "emoc", resolve("422001"))` (PIN 422001, Nashik, Maharashtra, precision 69 km): status `ok`, cards Bagul Nursing Home & Dr. Bagul’s Hope IVF Center, Hrudayasparsh Multispeciality Hospital, Prapti Women's Hospital. District Hospital, Nashik is `unverified_nearby` #2 (claimed only (a specialty or a general statement, no fact names the service)); annotate() attaches: the line above.
 
 ## Against the earlier pass
 
@@ -90,6 +94,6 @@ The stand-out brainstorm quoted a score-research pass (scratchpad, not in the re
 ## Limits
 
 - The review is one agent's reading. Hruday's spot-check of the current-certificate links is still to do before any count goes on screen.
-- A unit with no candidate is not evidence that the hospital is missing: our names may differ beyond what the matcher accepts, or the record's PIN may sit in another district.
+- A unit with no candidate is not evidence that the hospital is missing: our names may differ beyond what the matcher accepts, or the record's PIN may sit in another district. Recall is not measured. One spot-check on 21 Nov (40 random units with no candidate, in districts where our pool has a record; the best full-name match in the district read by hand) found no obvious missed link.
 - Some correct links attach to records whose own PIN points to another district (state-pass links). The line still describes the listed unit; the record's location problem is WP11's.
 - LaQshya certifies a labour room or a maternity operating theatre on a date. A current certificate is outside evidence that the unit was assessed; it is not a guarantee of service today.

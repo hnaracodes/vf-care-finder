@@ -1,7 +1,7 @@
 {
   "bundle_version": "wp12-bundle-v1",
-  "created_at_utc": "2026-11-22T04:04:15+00:00",
-  "git_commit": "3928247f2304842e0345f907fb16e2078d13f3d2",
+  "created_at_utc": "2026-11-22T04:24:59+00:00",
+  "git_commit": "0b5259243005acb343ba48facaa4886d55585469",
   "code_uncommitted": true,
   "script": "scripts/wp12_bundle.py",
   "data_dir": "vf.paths.data_dir()",
@@ -98,6 +98,93 @@
       "1": 3905,
       "2": 669,
       "3": 463
+    }
+  },
+  "grade_source": {
+    "script": "scripts/wp4_student.py",
+    "method": "student",
+    "model_version": "student:s1-1b[ob_delivery,h24,icu,ventilator]+regex:v0.2[rest]",
+    "tags_from_student": [
+      "ob_delivery",
+      "h24",
+      "icu",
+      "ventilator"
+    ],
+    "student_model": "data/models/wp4_student/student_1b.pkl",
+    "student_model_sha256": "fbc697f9d00c4a69dd8d1b4a06e73bf33b2e4050fd07088adce30964feacd85d",
+    "regex_grade_counts": {
+      "emoc": {
+        "0": 5311,
+        "1": 4246,
+        "2": 391,
+        "3": 41
+      },
+      "nicu": {
+        "0": 8513,
+        "1": 770,
+        "2": 532,
+        "3": 174
+      },
+      "dialysis": {
+        "0": 7631,
+        "1": 1322,
+        "2": 556,
+        "3": 480
+      },
+      "icu": {
+        "0": 7252,
+        "1": 685,
+        "2": 1677,
+        "3": 375
+      },
+      "cardiac_surgery": {
+        "0": 9075,
+        "1": 360,
+        "2": 442,
+        "3": 112
+      },
+      "cath_lab": {
+        "0": 6834,
+        "1": 2464,
+        "2": 235,
+        "3": 456
+      },
+      "mri": {
+        "0": 6663,
+        "1": 2392,
+        "2": 304,
+        "3": 630
+      },
+      "ct": {
+        "0": 6537,
+        "1": 2030,
+        "2": 446,
+        "3": 976
+      },
+      "trauma": {
+        "0": 4952,
+        "1": 3905,
+        "2": 698,
+        "3": 434
+      },
+      "burns": {
+        "0": 8261,
+        "1": 1583,
+        "2": 75,
+        "3": 70
+      },
+      "neurosurgery": {
+        "0": 7681,
+        "1": 1106,
+        "2": 848,
+        "3": 354
+      },
+      "oncology": {
+        "0": 7982,
+        "1": 1565,
+        "2": 277,
+        "3": 165
+      }
     }
   },
   "service_lines": [

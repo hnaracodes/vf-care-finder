@@ -110,9 +110,15 @@ function flagItem(f: Flag): string {
   return `<li><b>${head}.</b> ${esc(f.reason)}${f.quote ? quote(f.quote, 'record') : ''}</li>`;
 }
 
+function norm(s: string | null | undefined): string {
+  return (s ?? '').replace(/\s+/g, ' ').trim().replace(/[.]+$/, '').toLowerCase();
+}
+
 function cautions(c: Card): string {
   const items: string[] = (c.flags ?? []).map(flagItem);
-  if (c.could_be_wrong) items.push(`<li>${esc(c.could_be_wrong)}</li>`);
+  // could_be_wrong often repeats a flag's reason word for word: list it once.
+  const said = new Set((c.flags ?? []).map((f) => norm(f.reason)));
+  if (c.could_be_wrong && !said.has(norm(c.could_be_wrong))) items.push(`<li>${esc(c.could_be_wrong)}</li>`);
   const also = (c.sources?.also_listed_as ?? []).map((x) => typeof x === 'string' ? x : x.name ?? x.facility_id ?? '').filter(Boolean);
   if (also.length) items.push(`<li><b>Also listed as</b> ${also.map(esc).join(', ')}. We show it once.</li>`);
   if (!items.length) return '';
@@ -136,6 +142,20 @@ function evidenceList(c: Card): string {
   }).join('');
 }
 
+/** A card further than the service radius from the searched point (the ranker may still return it). */
+export function beyondRadius(c: Card, a: Answer): boolean {
+  return c.distance_km != null && Number.isFinite(c.distance_km) && a.radius_km != null && c.distance_km > a.radius_km;
+}
+
+/** The answer with its cards inside the radius first, each group still best first. main.ts applies
+ * this before the cards and the map are drawn, so card numbers and map markers stay in step. */
+export function withinRadiusFirst(a: Answer): Answer {
+  const results = a.results ?? [];
+  const inside = results.filter((c) => !beyondRadius(c, a));
+  const outside = results.filter((c) => beyondRadius(c, a));
+  return { ...a, results: [...inside, ...outside] };
+}
+
 export function cardHtml(c: Card, a: Answer, rankLabel: string, idx: number): string {
   const place = [c.city, c.state].filter(Boolean).join(', ');
   const name = serviceName(a);
@@ -150,7 +170,7 @@ export function cardHtml(c: Card, a: Answer, rankLabel: string, idx: number): st
         <h3 id="card-${idx}-name">${esc(c.name)}</h3>
         <div class="meta">${esc(typeWord(c.type))} <span class="dot">·</span> ${esc(operatorWord(c.operator))}${place ? ` <span class="dot">·</span> ${esc(place)}` : ''}</div>
       </div>
-      <div class="dist"><b>${esc(kmText(c.distance_km, c.location_precision_km ?? 1))}</b><span>straight line from the searched place</span></div>
+      <div class="dist"><b>${esc(kmText(c.distance_km, c.location_precision_km ?? 1))}</b><span>straight line from the searched place${beyondRadius(c, a) ? `, beyond the usual ${count(a.radius_km)} km` : ''}</span></div>
     </header>
     <div class="conf conf-${esc(conf)}">${confBars(conf)}<div><b>${esc(CONFIDENCE_WORDS[conf] ?? conf)}.</b> ${esc(plainReason(c.confidence_reason))}</div></div>
     ${c.why_here ? `<p class="why-here">${esc(c.why_here)}</p>` : ''}
@@ -200,8 +220,21 @@ export function resultsHtml(a: Answer): string {
       out.push(cardHtml(a.beyond_radius, a, '1', 0));
     }
   } else if (a.results.length) {
-    out.push(`<h3 class="list-h">${a.results.length === 1 ? 'One facility' : `${a.results.length} facilities`} with ${a.method === 'keyword' ? 'matching records' : `evidence of ${esc(name)}`}, best first</h3>`);
-    a.results.forEach((c, i) => out.push(cardHtml(c, a, String(i + 1), i)));
+    // Cards are numbered in the order given (main.ts puts those inside the radius first), so the
+    // numbers match the map markers. Cards beyond the radius go under their own heading.
+    const what = a.method === 'keyword' ? 'matching records' : `evidence of ${esc(name)}`;
+    const nIn = a.results.filter((c) => !beyondRadius(c, a)).length;
+    let further = false;
+    if (nIn > 0) out.push(`<h3 class="list-h">${nIn === 1 ? 'One facility' : `${count(nIn)} facilities`} with ${what} within ${count(a.radius_km)} km, best first</h3>`);
+    a.results.forEach((c, i) => {
+      if (beyondRadius(c, a) && !further) {
+        further = true;
+        const nOut = a.results.length - nIn;
+        out.push(`<h3 class="list-h list-h-further">Further away, beyond ${count(a.radius_km)} km</h3>
+          <p class="sub">${nOut === 1 ? 'This facility is' : 'These facilities are'} outside the usual radius for ${esc(name)}.</p>`);
+      }
+      out.push(cardHtml(c, a, String(i + 1), i));
+    });
   }
   out.push(unverifiedList(a.unverified_nearby ?? []));
   if (a.status !== 'no_reliable_option') out.push(`<p class="coverage">${COVERAGE}</p>`);

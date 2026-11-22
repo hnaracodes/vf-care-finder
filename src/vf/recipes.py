@@ -44,6 +44,17 @@ This is ``docs/06_capability_recipes.md`` as code, recipe version ``v0.2``
 ``source_confidence`` is a separate 0 to 1 score for how much to trust the pages
 a facility's facts came from. It never changes a grade.
 
+Recipe v0.3 (D048) is a rule-level regrade only: same tags, same taggers, new
+grade rules for nicu, emoc, cath_lab and dialysis, aligned to WHO 2009 Table 4,
+FRU 2025 s2.2, FBNC 2025, the PM-JAY Cardiology/CTVS and Nephrology criteria
+and PMNDP. Some v0.3 requirements look at the wording of a tagged fact
+("a ``nicu`` fact that says NICU, not only SNCU"). Those are ``QUALIFIERS_V03``:
+derived per-fact markers computed from the fact's own tags and text, never new
+tags. ``facility_line_grades(..., version="v0.3")`` adds them itself; callers of
+``grade_line`` or ``grade_facility`` with v0.3 must pass tags from
+``qualify_tags``. ``RECIPE_VERSION`` stays ``v0.2`` (the tagger version), and
+``tag_fact`` has no v0.3.
+
 Typical use::
 
     from vf import recipes
@@ -67,8 +78,13 @@ from .clean import normalize_text
 RECIPE_VERSION = "v0.2"
 #: Versions ``tag_fact`` can reproduce.
 TAGGER_VERSIONS: tuple[str, ...] = ("v0", "v0.1", "v0.2")
-#: Versions the grade rules can reproduce.
+#: Versions the grade rules can reproduce with a matching tagger (the regex
+#: baseline's ``--version`` choices).
 RULE_VERSIONS: tuple[str, ...] = ("v0.1", "v0.2")
+#: v0.3 is a rule-level regrade of v0.2 tags (D048): grade rules only, no tagger.
+RULE_VERSION_V03 = "v0.3"
+#: Every grade-rule version ``facility_line_grades`` accepts.
+GRADE_RULE_VERSIONS: tuple[str, ...] = RULE_VERSIONS + (RULE_VERSION_V03,)
 
 # ---------------------------------------------------------------------------
 # Tag taxonomy
@@ -654,11 +670,30 @@ class LineRule:
     min_distinct_facts: int = 1
     min_distinct_fields: int = 0
     repeat_name: str = ""
+    #: v0.3: other ways to reach corroborated, each a (groups, names) pair read
+    #: like ``corroborated``. Grade 3 holds when ``corroborated`` or any of these
+    #: holds; the first that holds is the one quoted. Empty in v0.1 and v0.2.
+    corroborated_alts: tuple = ()
+    #: v0.3: what grade 0 is missing, when the default "a related specialty
+    #: listed or a <claim_name> mention" would read badly.
+    claim_next_name: str = ""
+    #: v0.3: a note on a grade-3 record when these groups also hold (emoc: the
+    #: FRU pieces). Never changes the grade.
+    note_groups: tuple = ()
+    note_names: tuple = ()
+    note_text: str = ""
+
+    @property
+    def corroborated_options(self) -> tuple:
+        """((groups, names), ...): ``corroborated`` first, then the alternatives."""
+        return ((self.corroborated, self.corroborated_names),) + tuple(self.corroborated_alts)
 
     @property
     def rule_tags(self) -> tuple:
         """Tags that the grade rule uses (claim, supported, corroborated), in priority order."""
         used = set(self.claim_tags).union(*self.supported, *self.corroborated)
+        for groups, _ in self.corroborated_alts:
+            used = used.union(*groups)
         return tuple(t for t in self.tags if t in used)
 
     @property
@@ -831,13 +866,203 @@ GRADE_RULES: dict[str, LineRule] = {
     ),
 }
 
-RULES_BY_VERSION: dict[str, dict[str, LineRule]] = {"v0.1": GRADE_RULES_V01, "v0.2": GRADE_RULES}
-SERVICE_LINES_BY_VERSION: dict[str, tuple[str, ...]] = {"v0.1": SERVICE_LINES_V01, "v0.2": SERVICE_LINES}
+# ---------------------------------------------------------------------------
+# Recipe v0.3: a rule-level regrade of the v0.2 tags (D048)
+# ---------------------------------------------------------------------------
+
+
+class Qualifier(NamedTuple):
+    """A v0.3 marker on one fact: the fact carries tag ``base`` and its
+    normalized text matches ``pattern`` and not ``veto``. Not a tag: the tag
+    definitions and taggers are unchanged, the rule just reads the wording of a
+    fact the tagger already tagged."""
+
+    base: str
+    pattern: str
+    veto: Optional[str]
+    meaning: str
+    #: removed from the text before ``pattern`` runs
+    mask: Optional[str] = None
+
+
+#: A nicu fact that names a NICU (level III), not only an SNCU (level II).
+#: Within the v0.2 nicu tag (regex ``\bnicu\b|\bsncu\b|neonatal intensive``)
+#: the complement is exactly the SNCU-only facts.
+NICU_NAMED_PATTERN = r"\bnicu\b|neonatal intensive"
+#: A level III (tertiary) newborn care mention.
+LEVEL3_PATTERN = r"\blevel[- ]?(iii|3|three)\b|\btertiary (level |care )?(nicu|neonatal intensive)"
+#: Newborn context for a ventilator fact. SNCU alone is not newborn intensive
+#: context: FBNC 2025, "Simply adding ventilators to SNCU does not qualify the unit as NICU".
+NEWBORN_CONTEXT_PATTERN = r"neonat|new[- ]?born|\bnicu\b|\bnnicu\b|preterm|prematur|\binfants?\b"
+SNCU_ONLY_VETO = r"^(?!.*(\bnicu\b|neonatal intensive|newborn intensive)).*\bsncu\b"
+#: A dialysis_unit fact that names a unit, machines or haemodialysis, so a
+#: nephrologist alone (staffing) does not corroborate dialysis.
+DIALYSIS_UNIT_NAMED_PATTERN = (
+    r"dialysis (unit|machine|cent(re|er)|ward|room|department|dept|bed|station)|\bh(a)?emo[- ]?dialysis"
+)
+
+#: Transfusion to a fetus or newborn is not WHO signal function 9 (blood
+#: transfusion for the mother). Found by reading the v0.3 emoc promotions:
+#: "Fetal Blood Transfusion", "Intrauterine blood transfusion".
+FETAL_TRANSFUSION_MASK = (
+    r"(intra[- ]?uterine|fetal|foetal|in[- ]?utero|neonatal|exchange)( \w+){0,2} (blood )?transfusions?"
+)
+
+QUALIFIERS_V03: dict[str, Qualifier] = {
+    "blood_maternal": Qualifier("blood", TAG_PATTERNS["blood"], None,
+                                "a blood fact that still names a blood bank, storage or transfusion once fetal, "
+                                "intrauterine, neonatal and exchange transfusion wording is removed",
+                                FETAL_TRANSFUSION_MASK),
+    "nicu_named": Qualifier("nicu", NICU_NAMED_PATTERN, None,
+                            "a nicu fact naming a NICU or neonatal intensive care, not only an SNCU"),
+    "nicu_level3": Qualifier("nicu", rf"^(?=.*({NICU_NAMED_PATTERN})).*({LEVEL3_PATTERN})", None,
+                             "a NICU fact that says level III (or tertiary)"),
+    "ventilator_newborn": Qualifier("ventilator", NEWBORN_CONTEXT_PATTERN, SNCU_ONLY_VETO,
+                                    "a ventilator fact that is about newborns (not an SNCU-only fact)"),
+    "neonatal_resp_not_sncu": Qualifier("neonatal_resp", r".", SNCU_ONLY_VETO,
+                                        "a neonatal_resp fact that is not about an SNCU alone"),
+    "dialysis_unit_named": Qualifier("dialysis_unit", DIALYSIS_UNIT_NAMED_PATTERN, None,
+                                     "a dialysis_unit fact naming a unit, machines or haemodialysis, "
+                                     "not a nephrologist alone"),
+}
+QUALIFIERS_BY_VERSION: dict[str, dict[str, Qualifier]] = {RULE_VERSION_V03: QUALIFIERS_V03}
+
+_QUAL_RX: dict[str, dict[str, tuple]] = {
+    v: {n: (q.base, re.compile(q.pattern), re.compile(q.veto) if q.veto else None,
+            re.compile(q.mask) if q.mask else None) for n, q in qs.items()}
+    for v, qs in QUALIFIERS_BY_VERSION.items()
+}
+
+
+def qualify_tags(text: Optional[str], tags: Iterable[str], version: str = RULE_VERSION_V03) -> frozenset:
+    """A fact's tags plus the ``version`` qualifiers that hold on it. Versions
+    without qualifiers return the tags unchanged."""
+    out = set(tags)
+    rx = _QUAL_RX.get(version)
+    if not rx or text is None:
+        return frozenset(out)
+    s = normalize_text(str(text))
+    for name, (base, pat, veto, mask) in rx.items():
+        if base not in out or (veto and veto.search(s)):
+            continue
+        if pat.search(mask.sub(" ", s) if mask else s):
+            out.add(name)
+    return frozenset(out)
+
+
+def base_tag(tag: str, version: str = RULE_VERSION_V03) -> str:
+    """The real tag behind a qualifier (``nicu_named`` gives ``nicu``); tags pass through."""
+    q = QUALIFIERS_BY_VERSION.get(version, {}).get(tag)
+    return q.base if q else tag
+
+
+#: Plain citations, used in the requirement names below (docs/06, "v0.3").
+_WHO8 = "WHO 2009 Table 4, signal function 8"
+_WHO9 = "WHO 2009 Table 4, signal function 9"
+_FBNC = "FBNC 2025: NICU is level III, SNCU is level II"
+_PMJAY_C = "PM-JAY Cardiology/CTVS criteria"
+_PMJAY_N = "PM-JAY Nephrology criteria item 1; PMNDP"
+
+_NICU_SUPPORTED_V03 = f"NICU or neonatal intensive care named ({_FBNC})"
+
+#: v0.3 rules: the v0.2 rules with nicu, emoc, cath_lab and dialysis replaced.
+GRADE_RULES_V03: dict[str, LineRule] = {
+    **GRADE_RULES,
+    "emoc": LineRule(
+        # WHO 2009 Table 4: comprehensive EmOC is signal functions 1-7 "plus:
+        # (8) Perform surgery (e.g., caesarean section) (9) Perform blood
+        # transfusion". Anaesthesia and OT are no longer required for grade 3;
+        # anaesthesia and a 24-hour service give an FRU-level note (FRU 2025 s2.2).
+        # Fetal, intrauterine, neonatal and exchange transfusion do not count as
+        # signal function 9 (blood_maternal).
+        line="emoc",
+        claim_specialties=_EMOC.claim_specialties,
+        claim_tags=frozenset({"ob_delivery"}),
+        supported=_groups({"csection"}),
+        corroborated=_groups({"csection"}, {"blood_maternal"}),
+        bonus_tags=("blood", "anesthesia", "ot", "nicu", "h24"),
+        tags=("csection", "blood_maternal", "blood", "anesthesia", "ot", "ob_delivery", "nicu", "h24"),
+        supported_names=(f"caesarean section ({_WHO8})",),
+        corroborated_names=(f"caesarean section ({_WHO8})", f"blood bank or transfusion ({_WHO9})"),
+        claim_name="maternity or delivery service",
+        note_groups=_groups({"anesthesia"}, {"h24"}),
+        note_names=("anaesthesia (FRU 2025 s2.2 criterion 4)", "24-hour service (FRU 2025 s2.2 criterion 1)"),
+        note_text=("FRU-level: anaesthesia and a 24-hour service are also named, two more of the FRU 2025 s2.2 "
+                   "criteria; the 24-hour fact may not be about obstetric care"),
+    ),
+    "nicu": LineRule(
+        # FBNC 2025: SNCU "delivers level II care"; NICU is "Tertiary Care-NICU
+        # (Level III)"; "Simply adding ventilators to SNCU does not qualify the
+        # unit as NICU". A generic ventilator elsewhere in the record no longer
+        # corroborates.
+        line="nicu",
+        claim_specialties=frozenset({"neonatologyPerinatalMedicine"}),
+        claim_tags=frozenset({"nicu"}),
+        supported=_groups({"nicu_named"}),
+        corroborated=_groups({"nicu_named"}, {"neonatal_resp_not_sncu", "ventilator_newborn", "nicu_level3"}),
+        bonus_tags=("neonatal_resp", "ventilator"),
+        tags=("nicu_named", "neonatal_resp_not_sncu", "ventilator_newborn", "nicu_level3", "nicu", "neonatal_resp",
+              "ventilator"),
+        supported_names=(_NICU_SUPPORTED_V03,),
+        corroborated_names=(_NICU_SUPPORTED_V03,
+                            "newborn breathing support, a ventilator in a newborn fact, or a level III mention "
+                            "(FBNC 2025)"),
+        claim_name="names an SNCU (level II), not a NICU",
+        claim_next_name="a related specialty listed, or an SNCU or NICU mention",
+    ),
+    "cath_lab": LineRule(
+        # PM-JAY Cardiology/CTVS: "6. Fully equipped Catheterization Laboratory
+        # Unit", "3. ICU Facility with cardiac monitoring and ventilator
+        # support"; advanced criteria: "fully equipped with ICCU/SICU/ NICU/
+        # relevant Intensive Care Unit". h24 and emergency are no longer required.
+        line="cath_lab",
+        claim_specialties=frozenset({"cardiology", "interventionalRadiology"}),
+        claim_tags=frozenset(),
+        supported=_groups({"cath_lab"}),
+        corroborated=_groups({"cath_lab"}, {"ccu"}),
+        corroborated_alts=((
+            _groups({"cath_lab"}, {"icu"}, {"ventilator"}),
+            (f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",
+             f"intensive care unit ({_PMJAY_C} item 3)", f"ventilator support ({_PMJAY_C} item 3)"),
+        ),),
+        bonus_tags=("h24", "emergency"),
+        tags=("cath_lab", "ccu", "icu", "ventilator", "h24", "emergency"),
+        supported_names=(f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",),
+        corroborated_names=(f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",
+                            "cardiac care unit (CCU or ICCU; PM-JAY advanced criteria)"),
+    ),
+    "dialysis": LineRule(
+        # PM-JAY Nephrology: "1. Dialysis unit"; PMNDP: "Haemodialysis requires
+        # a dialysis machine"; PMNDP has the nephrologist "visit the dialysis
+        # facility fortnightly/monthly", so a nephrologist is staffing, not a unit.
+        line="dialysis",
+        claim_specialties=frozenset({"nephrology"}),
+        claim_tags=frozenset(),
+        supported=_groups({"dialysis"}),
+        corroborated=_groups({"dialysis"}, {"dialysis_unit_named"}),
+        bonus_tags=("dialysis_unit",),
+        tags=("dialysis", "dialysis_unit_named", "dialysis_unit"),
+        supported_names=("dialysis",),
+        corroborated_names=("dialysis", f"dialysis unit, machines or haemodialysis named, not a nephrologist alone "
+                                        f"({_PMJAY_N})"),
+    ),
+}
+GRADE_RULES_V03 = {line: GRADE_RULES_V03[line] for line in SERVICE_LINES}
+
+#: The v0.3 lines whose rules differ from v0.2.
+CHANGED_LINES_V03: tuple[str, ...] = ("emoc", "nicu", "dialysis", "cath_lab")
+
+RULES_BY_VERSION: dict[str, dict[str, LineRule]] = {
+    "v0.1": GRADE_RULES_V01, "v0.2": GRADE_RULES, RULE_VERSION_V03: GRADE_RULES_V03,
+}
+SERVICE_LINES_BY_VERSION: dict[str, tuple[str, ...]] = {
+    "v0.1": SERVICE_LINES_V01, "v0.2": SERVICE_LINES, RULE_VERSION_V03: SERVICE_LINES,
+}
 
 
 def _rules(version: str) -> dict[str, LineRule]:
     if version not in RULES_BY_VERSION:
-        raise ValueError(f"unknown recipe version {version!r}; expected one of {RULE_VERSIONS}")
+        raise ValueError(f"unknown recipe version {version!r}; expected one of {GRADE_RULE_VERSIONS}")
     return RULES_BY_VERSION[version]
 
 
@@ -850,6 +1075,14 @@ def _rule(line: str, version: str) -> LineRule:
 
 def _holds(groups: tuple, tags: set) -> bool:
     return all(g & tags for g in groups)
+
+
+def _corroborated_option(rule: LineRule, tags: set) -> Optional[tuple]:
+    """(groups, names) of the first corroborated option that holds on ``tags``, else None."""
+    for groups, names in rule.corroborated_options:
+        if _holds(groups, tags):
+            return groups, names
+    return None
 
 
 def _repeat_holds(rule: LineRule, tag_support: Optional[Mapping[str, tuple]]) -> bool:
@@ -902,7 +1135,7 @@ def grade_line(
     """
     rule = _rule(line, version)
     t = set(tags)
-    if _holds(rule.corroborated, t) and _repeat_holds(rule, tag_support):
+    if _corroborated_option(rule, t) is not None and _repeat_holds(rule, tag_support):
         return 3
     if _holds(rule.supported, t):
         return 2
@@ -923,9 +1156,10 @@ def grade_facility(
     return {line: grade_line(line, t, s, version, tag_support) for line in SERVICE_LINES_BY_VERSION[version]}
 
 
-def _required_groups(rule: LineRule, grade: int) -> tuple:
+def _required_groups(rule: LineRule, grade: int, tags: Optional[set] = None) -> tuple:
     if grade == 3:
-        return rule.corroborated
+        opt = _corroborated_option(rule, tags) if tags is not None else None
+        return opt[0] if opt else rule.corroborated
     if grade == 2:
         return rule.supported
     if grade == 1 and rule.claim_tags:
@@ -933,9 +1167,10 @@ def _required_groups(rule: LineRule, grade: int) -> tuple:
     return ()
 
 
-def _required_names(rule: LineRule, grade: int) -> tuple:
+def _required_names(rule: LineRule, grade: int, tags: Optional[set] = None) -> tuple:
     if grade == 3:
-        return rule.corroborated_names
+        opt = _corroborated_option(rule, tags) if tags is not None else None
+        return opt[1] if opt else rule.corroborated_names
     if grade == 2:
         return rule.supported_names
     if grade == 1 and rule.claim_tags:
@@ -961,6 +1196,13 @@ def _as_facts(facts: Sequence) -> list[Fact]:
         fid = rest[1] if len(rest) > 1 else None
         out.append(Fact(text, frozenset(tags), fld, fid))
     return out
+
+
+def _qualify(facts: Sequence[Fact], version: str) -> list[Fact]:
+    """Add the ``version`` qualifiers to each fact's tags (v0.3); a no-op otherwise."""
+    if version not in QUALIFIERS_BY_VERSION:
+        return list(facts)
+    return [f._replace(tags=qualify_tags(f.text, f.tags, version)) for f in facts]
 
 
 def _tag_support(facts: Sequence[Fact], tags: Iterable[str]) -> dict[str, tuple]:
@@ -1047,7 +1289,8 @@ def _select(facts: Sequence[Fact], rule: LineRule, grade: int, k: int):
         return [], {}, None
     rule_tags = rule.rule_tags
     cands = _candidates(facts, set(rule_tags))
-    groups = _required_groups(rule, grade)
+    all_tags = set().union(*(f.tags for f in facts)) if facts else set()
+    groups = _required_groups(rule, grade, all_tags)
     chosen, group_of = _cover(cands, groups, k)
     group_fact = {gi: cands[j][0] for gi, j in group_of.items()}
 
@@ -1095,7 +1338,7 @@ def select_evidence(
     round-robin across the rule's tags in priority order, so the list stays
     varied. Grade 0 has no evidence.
     """
-    fs = _as_facts(facts)
+    fs = _qualify(_as_facts(facts), version)
     idx, _, _ = _select(fs, _rule(line, version), grade, k)
     return [fs[i].text for i in idx]
 
@@ -1148,25 +1391,53 @@ class LineGrade:
     n_supporting_facts: int = 0
     #: v0.2: none, thin, moderate, strong
     evidence_strength: str = "none"
+    #: v0.3: a note that never changes the grade (emoc: FRU-level pieces named)
+    level_note: Optional[str] = None
+    #: v0.3: one evidence item per requirement of the note
+    level_note_items: list = dc_field(default_factory=list)
 
 
-def _item(requirement: str, group: frozenset, rule: LineRule, f: Fact) -> dict:
+def _item(requirement: str, group: frozenset, rule: LineRule, f: Fact, version: str = RECIPE_VERSION) -> dict:
     tag = next(t for t in rule.tags if t in group and t in f.tags)
-    return {"requirement": requirement, "tag": tag, "fact_id": f.fact_id, "field": f.field, "text": f.text}
+    return {"requirement": requirement, "tag": base_tag(tag, version), "fact_id": f.fact_id, "field": f.field,
+            "text": f.text}
 
 
 def _missing_for_next(rule: LineRule, grade: int, tags: set, tag_support: Mapping) -> list[str]:
     if grade >= 3:
         return []
     if grade == 2:
-        out = [n for g, n in zip(rule.corroborated, rule.corroborated_names) if not (g & tags)]
-        if rule.has_repeat and _holds(rule.corroborated, tags) and not _repeat_holds(rule, tag_support):
-            out.append(rule.repeat_name)
-        return out
+        if not rule.corroborated_alts:
+            out = [n for g, n in zip(rule.corroborated, rule.corroborated_names) if not (g & tags)]
+            if rule.has_repeat and _holds(rule.corroborated, tags) and not _repeat_holds(rule, tag_support):
+                out.append(rule.repeat_name)
+            return out
+        # v0.3: the option with the fewest missing groups; tied options are offered together
+        missing = [[n for g, n in zip(groups, names) if not (g & tags)] for groups, names in rule.corroborated_options]
+        fewest = min(len(m) for m in missing)
+        best = [m for m in missing if len(m) == fewest]
+        if len(best) == 1:
+            return best[0]
+        return [", or ".join(" and ".join(m) for m in best)]
     if grade == 1:
         return [n for g, n in zip(rule.supported, rule.supported_names) if not (g & tags)]
+    if rule.claim_next_name:
+        return [rule.claim_next_name]
     claim = "a related specialty listed"
     return [claim + (f" or a {rule.claim_name} mention" if rule.claim_tags else "")]
+
+
+def _note(rule: LineRule, grade: int, facts: Sequence[Fact], version: str) -> tuple[Optional[str], list]:
+    """(note text, items) when the rule has a note, the grade is 3 and every note group holds."""
+    if grade != 3 or not rule.note_groups:
+        return None, []
+    items = []
+    for group, name in zip(rule.note_groups, rule.note_names):
+        f = next((f for f in facts if f.tags & group), None)
+        if f is None:
+            return None, []
+        items.append(_item(name, group, rule, f, version))
+    return rule.note_text, items
 
 
 def _n_supporting(facts: Sequence[Fact], groups: tuple) -> int:
@@ -1192,7 +1463,9 @@ def facility_line_grades(
     rule's priority order. ``n_source_domains`` and ``official_website`` are
     the facility's, for ``evidence_strength``.
     """
-    fs = _as_facts(facts)
+    _rules(version)
+    fs = _qualify(_as_facts(facts), version)
+    quals = QUALIFIERS_BY_VERSION.get(version, {})
     all_tags: set = set().union(*(f.tags for f in fs)) if fs else set()
     spec = set(specialties)
     support = _tag_support(fs, all_tags)
@@ -1201,22 +1474,26 @@ def facility_line_grades(
         rule = _rule(line, version)
         g = grade_line(line, all_tags, spec, version, support)
         idx, group_fact, repeat = _select(fs, rule, g, k)
-        groups, names = _required_groups(rule, g), _required_names(rule, g)
-        items = [_item(names[gi], groups[gi], rule, fs[group_fact[gi]]) for gi in range(len(groups))
+        groups, names = _required_groups(rule, g, all_tags), _required_names(rule, g, all_tags)
+        items = [_item(names[gi], groups[gi], rule, fs[group_fact[gi]], version) for gi in range(len(groups))
                  if gi in group_fact]
         if repeat is not None:
-            items.append(_item(rule.repeat_name, rule.corroborated[0], rule, fs[repeat]))
+            items.append(_item(rule.repeat_name, rule.corroborated[0], rule, fs[repeat], version))
         n_sup = _n_supporting(fs, groups)
+        note, note_items = _note(rule, g, fs, version)
         out.append(LineGrade(
             service_line=line,
             grade=g,
             grade_label=GRADE_LABELS[g],
-            tags_present=[t for t in rule.tags if t in all_tags],
+            # real tags only: qualifiers are rule-internal (v0.3)
+            tags_present=[t for t in rule.tags if t in all_tags and t not in quals],
             evidence=[fs[i].text for i in idx],
             evidence_items=items,
             missing_for_next=_missing_for_next(rule, g, all_tags, support),
             n_supporting_facts=n_sup,
             evidence_strength=evidence_strength(g, n_sup, n_source_domains, official_website),
+            level_note=note,
+            level_note_items=note_items,
         ))
     return out
 
@@ -1334,20 +1611,28 @@ def _check_rules() -> None:
     """Invariants every rule set must keep. Runs at import."""
     assert set(TAG_DEFINITIONS) == set(ALL_TAGS) and len(set(ALL_TAGS)) == len(ALL_TAGS)
     assert set(NEW_TAG_RULES) == set(NEW_TAGS_V02) and set(TAG_PATTERNS) == set(EVIDENCE_TAGS_V01)
+    assert set(RULES_BY_VERSION) == set(GRADE_RULE_VERSIONS) == set(SERVICE_LINES_BY_VERSION)
+    for qs in QUALIFIERS_BY_VERSION.values():
+        assert all(q.base in EVIDENCE_TAGS for q in qs.values()) and not set(qs) & set(ALL_TAGS)
     for version, rules in RULES_BY_VERSION.items():
         assert tuple(rules) == SERVICE_LINES_BY_VERSION[version], version
-        known = set(EVIDENCE_TAGS_BY_VERSION[version])
+        known = set(EVIDENCE_TAGS_BY_VERSION.get(version, EVIDENCE_TAGS)) | set(QUALIFIERS_BY_VERSION.get(version, {}))
         for rule in rules.values():
             assert set(rule.tags) <= known, rule.line
             assert set(rule.bonus_tags) <= set(rule.tags), rule.line
             assert set(rule.claim_tags).union(*rule.supported, *rule.corroborated) <= set(rule.tags), rule.line
             assert len(rule.supported_names) == len(rule.supported), rule.line
-            assert len(rule.corroborated_names) == len(rule.corroborated), rule.line
             assert bool(rule.claim_tags) == bool(rule.claim_name), rule.line
             assert rule.has_repeat == bool(rule.repeat_name), rule.line
-            # corroborated must imply supported, so grades are monotone
-            for g in rule.supported:
-                assert any(c <= g for c in rule.corroborated), rule.line
+            assert not (rule.has_repeat and rule.corroborated_alts), rule.line
+            assert len(rule.note_groups) == len(rule.note_names) and bool(rule.note_groups) == bool(rule.note_text)
+            assert set().union(*rule.note_groups) <= set(rule.tags) if rule.note_groups else True, rule.line
+            for groups, names in rule.corroborated_options:
+                assert len(names) == len(groups), rule.line
+                assert set().union(*groups) <= set(rule.tags), rule.line
+                # every corroborated option must imply supported, so grades are monotone
+                for g in rule.supported:
+                    assert any(c <= g for c in groups), rule.line
     assert abs(sum(CONFIDENCE_WEIGHTS.values()) - 1.0) < 1e-9
     assert not math.isclose(RECENCY_FULL_YEARS, RECENCY_ZERO_YEARS)
 

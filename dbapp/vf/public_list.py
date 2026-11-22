@@ -118,7 +118,7 @@ PUBLIC_MARKER = re.compile(
     r"mother child hospital|district women hospital)\b"
 )
 STRONG_PUBLIC = re.compile(
-    r"\b(?:government|district hospital|civil hospital|sub divisional|sub district|"
+    r"\b(?:government|medical college|district hospital|civil hospital|sub divisional|sub district|"
     r"community health centre|taluk hospital|taluka hospital|sadar hospital|area hospital|"
     r"district women hospital)\b"
 )
@@ -171,7 +171,10 @@ def type_compatible(lq_type: Optional[str], ours: Optional[str]) -> Optional[boo
     our name does not say. DH and SDH are allowed together (list spellings mix
     "district" and "sub-district" for the same building), MC and DH too (many
     district hospitals are the teaching hospital of a college)."""
-    if not lq_type or not ours:
+    def blank(v) -> bool:
+        return v is None or (isinstance(v, float) and pd.isna(v)) or v == ""
+
+    if blank(lq_type) or blank(ours):
         return None
     if lq_type == ours:
         return True
@@ -227,7 +230,9 @@ def public_pool(facilities: pd.DataFrame) -> pd.DataFrame:
     """Records that may be public units: operator type ``public``; or missing
     operator type with a public-system name; or labelled ``private`` but named
     as a government unit (STRONG_PUBLIC), kept so a mislabelled district hospital
-    can still be reviewed. ``pool_reason`` says which."""
+    can still be reviewed. Private-labelled medical colleges are let in too: some
+    state-society colleges (GMERS in Gujarat) are labelled private in the data.
+    ``pool_reason`` says which."""
     f = facilities.copy()
     norm = f["name"].map(normalise_name)
     op = f["operator_type"]
@@ -330,7 +335,11 @@ def candidate_links(lq: pd.DataFrame, facilities: pd.DataFrame, pin_districts: M
                 "n_candidates": len(cands), "n_pool_in_district": len(in_d),
                 "certs": u.certs,
             })
-    return pd.DataFrame(out)
+    df = pd.DataFrame(out)
+    if len(df):
+        # keep "our name does not say" distinct from "types conflict"
+        df["type_compatible"] = pd.array([x for x in (o["type_compatible"] for o in out)], dtype="boolean")
+    return df
 
 
 # ---------------------------------------------------------------------------

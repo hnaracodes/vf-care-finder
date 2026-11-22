@@ -151,6 +151,10 @@ export interface TripFacility {
   lon: number;
   kind: 'recommended' | 'claim_only';
   rank?: number | null;
+  supported?: boolean;
+  /** Why a claim target is not supported: it only claims the service (grade 1), or its evidence is
+   * held back by a blocking warning (grade 2 or more). Null when supported. */
+  unsupported_reason?: 'claim_only' | 'held_back' | null;
 }
 
 export interface Trip {
@@ -169,6 +173,9 @@ export interface Trip {
   summary?: {
     n_points: number;
     n_first_unsupported: number;
+    /** n_first_unsupported = n_first_claim_only + n_first_held_back */
+    n_first_claim_only?: number;
+    n_first_held_back?: number;
     extra_km_mean: number | null;
     n_rerouted?: number;
     recommended_beyond_radius?: boolean;

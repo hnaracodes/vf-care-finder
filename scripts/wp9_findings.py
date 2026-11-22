@@ -29,17 +29,33 @@ Groups:
   extra.*      any JSON passed with --extra GROUP=FILE (numeric leaves)
 
 Check mode scans text files (a script, a caption list, story JSON) for
-numbers and fails, listing every number that is not in findings.json. Years,
-PIN codes, clock times, durations, dates, list markers and identifiers such
-as WP11 or v0.2, file paths, citations such as "page 35, row 1109" and the
-emergency numbers 102, 108 and 112 are allowed. A line containing ``findings:skip`` is skipped
-(for example a verbatim quote of a facility's own text).
+numbers and fails, listing every number that is not in findings.json. It is a
+token guard, not a context check:
+
+- a number passes when some finding has the same value; a unit in the text
+  must match the finding's kind ("73 km" needs a km finding, "86%" a share);
+- "X of Y" and "X/Y/Z" runs pass only when all their numbers come from one
+  group of findings (one parent key, or one query's gate funnel), so "1 of 13"
+  cannot borrow two unrelated findings;
+- it cannot tell which finding a sentence means ("0.93" passes if any finding
+  shows 0.93). Captions that matter should name their finding as
+  ``{{key}}`` (see ``render``) and be checked with ``--strict``, where every
+  bare number fails.
+
+Allowed without a finding: years, PIN codes, clock times, dates, list markers,
+identifiers such as WP11 or v0.2, commit hashes, real paths and URLs,
+citations such as "page 35, row 1109", demo ordinals such as "card 3" (no unit
+after), and the emergency numbers 102, 108 and 112. Durations, money and glued
+units (45 minutes, Rs.2000, 250mg) are scanned. A line containing
+``findings:skip`` is skipped (for example a verbatim quote of a facility's
+own text).
 
     python scripts/wp9_findings.py                          # writes reports/findings.json
     python scripts/wp9_findings.py --bundle dbapp/bundle --out reports/findings.json
     python scripts/wp9_findings.py --laqshya-links data/labels/laqshya_public_links_handlabeled.csv
     python scripts/wp9_findings.py --extra sealed_eval=reports/sealed_eval.json
     python scripts/wp9_findings.py --check reports/demo_script.md [more files]
+    python scripts/wp9_findings.py --check captions.json --strict   # every number must be a {{key}}
 """
 from __future__ import annotations
 
@@ -133,24 +149,50 @@ def fmt_display(value, kind: str, digits: Optional[int] = None) -> Optional[str]
     return f"{float(value):,.{d}f}"
 
 
-_NUM_RE = re.compile(r"(?<![\w.])(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(?!\d)")
-_PCT_AFTER = re.compile(r"\s*(%|percent\b|per cent\b)")
+#: a number: not glued to a letter or digit before it, and not the fraction of "0.2" (so "v0.2" is one
+#: identifier) but scanned after a period that ends a word ("Rs.2000")
+_NUM_RE = re.compile(r"(?<![\w])(?<!\d\.)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(?!\d)")
+_PCT_AFTER = re.compile(r"\s*(%|percent\b|per cent\b)", re.I)
+#: units that tie a number to a finding's kind: "73 km" must match a km finding, "12 ms" an ms finding
+_UNIT_AFTER = {
+    "km": re.compile(r"\s*(?:km|kms|kilomet(?:er|re)s?)\b", re.I),
+    "ms": re.compile(r"\s*(?:ms|milliseconds?)\b", re.I),
+}
+_KIND_UNIT = {"km": "km", "ms": "ms"}
+_CURRENCY_BEFORE = re.compile(r"(?:\b(?:rs|inr|usd)\.?|[₹$])\s*$", re.I)
+_CURRENCY_AFTER = re.compile(r"\s*(?:rupees|rs\b|inr\b|crores?|lakhs?|dollars|usd\b)", re.I)
 _MONTH = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|"
           r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)")
+_NO_MEASURE_AFTER = r"(?![\d]|[.,]\d|\s*(?:%|percent|km|kms|kilomet|ms\b|minutes?|mins?|hours?|hrs?|days?|seconds?))"
+_EXT = r"(?:py|md|csv|json|parquet|txt|ipynb|html?|js|ts|css|png|jpe?g|svg|gif|ya?ml|toml|npz|pdf|sh|mp4|mov|tsv|xlsx?)"
 _ALLOW_SPANS = {
     "time": re.compile(r"(?<![\d.])\d{1,2}:\d{2}(?::\d{2})?(?![\d])"),
-    "date": re.compile(rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s+{_MONTH}\b|\b{_MONTH}\.?\s+\d{{1,2}}(?:st|nd|rd|th)?\b"),
-    "duration": re.compile(r"(?<![\w.])\d+(?:\.\d+)?\s*-?\s*(?:seconds?|secs?|minutes?|mins?|hours?|hrs?|days?)\b",
-                           re.I),
+    "date": re.compile(rf"\b\d{{1,2}}(?:st|nd|rd|th)?\s+{_MONTH}\b|\b{_MONTH}\.?\s+\d{{1,2}}(?:st|nd|rd|th)?\b"
+                       r"|\b\d{4}-\d{2}-\d{2}(?:T[\d:.]*Z?)?(?!\d)|\b\d{1,2}/\d{1,2}/\d{4}\b"),
     "list_marker": re.compile(r"^\s*\d+[.)]\s"),
-    # file paths and URLs: any whitespace-free run with a slash in it
-    "path": re.compile(r"\S*/\S*"),
-    # citations and ordinals: "page 35, row 1109", "card 3", "step 2"; the number names a place, not a measure
-    "citation": re.compile(r"\b(?:page|pages|p\.|row|rows|table|figure|fig\.|section|line|item|step|case|rank|"
-                           r"card|beat|option|no\.|#)\s*\d+(?:\s*(?:to|-|and)\s*\d+)?", re.I),
+    # real paths and URLs only: a URL, a token starting with /, ./, ../ or ~/, or one ending in a file
+    # extension. "1/13" and "9,989/9,671/118" are ratios and funnels, and are scanned
+    "path": re.compile(rf"https?://\S+|(?:^|(?<=[\s(\[{{<\"'`]))(?:\.{{1,2}}/|~/|/)\S*"
+                       rf"|(?<![\w/])[\w.\-]*[A-Za-z][\w.\-]*/\S*\.{_EXT}\b"),
+    # citations: "page 35, row 1109", "table 2"; an integer that names a place, never a measured number
+    "citation": re.compile(rf"\b(?:page|pages|p\.|row|rows|table|figure|fig\.|section|no\.|#)\s*\d+{_NO_MEASURE_AFTER}"
+                           rf"(?:\s*(?:to|-|and)\s*\d+{_NO_MEASURE_AFTER})?", re.I),
+    # ordinals of the demo: "card 3", "step 2", "beat 4", "option 1"; one or two digits, no unit after
+    "ordinal": re.compile(rf"\b(?:card|step|beat|option|rank)\s+\d{{1,2}}{_NO_MEASURE_AFTER}", re.I),
+    # commit hashes and other hex identifiers (letters and digits mixed, 7 or more characters)
+    "hex_id": re.compile(r"\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,64}\b"),
 }
+#: a caption may name its finding: "{{laqshya.correct_with_current_maternity_ot}} of ..."
+_PLACEHOLDER = re.compile(r"\{\{\s*([\w.\-]+)\s*\}\}")
+#: "X of Y", "X out of Y", "X of the Y", "X/Y/Z" (plain counts, no unit): the numbers must come from one
+#: group of findings (see _scope)
+_RATIO_JOIN = re.compile(r"^\s*(?:(?:out\s+)?of(?:\s+the)?|/)\s*$", re.I)
 #: emergency phone numbers in India (ambulance 108, maternal transport 102, police/all 112)
 EMERGENCY_NUMBERS = {"102", "108", "112"}
+CHECK_NOTE = ("--check is a token guard, not a context check: a number passes when some finding with the same "
+              "value and unit (km, ms, %) exists, and an 'X of Y' or 'X/Y' ratio passes when both numbers come "
+              "from one group. It cannot tell which finding a sentence means; name it with {{key}} and use "
+              "--strict for captions that matter")
 
 
 def extract_numbers(text: str) -> list[tuple[str, bool, int, str]]:
@@ -161,6 +203,15 @@ def extract_numbers(text: str) -> list[tuple[str, bool, int, str]]:
         pct = bool(_PCT_AFTER.match(text, m.end()))
         out.append((canon(raw), pct, m.start(), raw))
     return out
+
+
+def _unit_after(text: str, end: int) -> Optional[str]:
+    if _PCT_AFTER.match(text, end):
+        return "%"
+    for u, rx in _UNIT_AFTER.items():
+        if rx.match(text, end):
+            return u
+    return None
 
 
 def _allowed_reason(raw: str, tok: str) -> Optional[str]:
@@ -176,43 +227,94 @@ def _allowed_reason(raw: str, tok: str) -> Optional[str]:
     return None
 
 
+_GLUED = re.compile(r"[A-Za-z]+")
+#: letters glued after a number that make it an ordinal or a model name ("3rd", "student 1b"); any other
+#: letters ("250mg", "45min", "50km", "3x") leave it a measure that is scanned
+_IDENT_SUFFIXES = {"st", "nd", "rd", "th", "b"}
+
+
+def _mask(text: str, rx: re.Pattern) -> str:
+    return rx.sub(lambda m: " " * len(m.group(0)), text)
+
+
 def scan_line(line: str) -> list[dict]:
-    """Numbers in one line that need a finding, with the allowlist applied."""
-    masked = line
+    """Numbers in one line that need a finding, with the allowlist applied.
+
+    Each item: token (canonical), pct, unit ("%", "km", "ms" or None), raw, col, and ratio (an id shared
+    by the numbers of one "X of Y" or "X/Y/Z" run, else None)."""
+    masked = _mask(line, _PLACEHOLDER)
     for rx in _ALLOW_SPANS.values():
-        masked = rx.sub(lambda m: " " * len(m.group(0)), masked)
+        masked = _mask(masked, rx)
     out = []
     for tok, pct, start, raw in extract_numbers(masked):
-        if _allowed_reason(raw, tok):
+        end = start + len(raw)
+        money = bool(_CURRENCY_BEFORE.search(masked[:start]) or _CURRENCY_AFTER.match(masked, end))
+        if not money and _allowed_reason(raw, tok):
             continue
-        out.append({"token": tok, "pct": pct, "raw": raw + ("%" if pct else ""), "col": start})
+        glued = _GLUED.match(masked, end)
+        if glued and glued.group(0).lower() in _IDENT_SUFFIXES:
+            continue
+        unit = _unit_after(masked, end)
+        out.append({"token": tok, "pct": unit == "%", "unit": unit, "raw": raw + ("%" if unit == "%" else ""),
+                    "col": start, "end": end, "ratio": None})
+    rid = 0
+    for a, b in zip(out, out[1:]):
+        if a["unit"] is None and b["unit"] is None and _RATIO_JOIN.match(masked[a["end"]:b["col"]]):
+            if a["ratio"] is None:
+                rid += 1
+                a["ratio"] = rid
+            b["ratio"] = a["ratio"]
     return out
 
 
-def accepted_tokens(f: dict) -> set[tuple[str, bool]]:
-    """What a finding allows a text to say: every number in its display, and
-    its value rounded half-up (shares also as percentages)."""
+def accepted_tokens(f: dict) -> set[tuple[str, Optional[str]]]:
+    """What a finding allows a text to say, as (token, unit): every number in its display, and its value
+    rounded half-up (shares also as percentages). unit is "%" for a percentage, "km" or "ms" for findings of
+    that kind, else None."""
     v = f.get("value")
     if v is None or isinstance(v, bool):
         return set()
-    out = {(t, p) for t, p, _, _ in extract_numbers(f.get("display") or "")}
     kind = f.get("kind", "number")
+    ku = _KIND_UNIT.get(kind)
+    out = {(t, "%" if p else ku) for t, p, _, _ in extract_numbers(f.get("display") or "")}
     if isinstance(v, int):
-        out.add((canon(v), False))
+        out.add((canon(v), ku))
         if kind == "share":
-            out.add((canon(v * 100), True))
+            out.add((canon(v * 100), "%"))
         return out
     v = float(v)
     if math.isnan(v) or math.isinf(v):
         return out
     for places in (1, 2, 3):
-        out.add((_round_half_up(abs(v), places), False))
+        out.add((_round_half_up(abs(v), places), ku))
     if abs(v) >= 10:
-        out.add((_round_half_up(abs(v), 0), False))
+        out.add((_round_half_up(abs(v), 0), ku))
     if kind == "share":
         for places in (0, 1):
-            out.add((_round_half_up(abs(v) * 100, places), True))
+            out.add((_round_half_up(abs(v) * 100, places), "%"))
     return out
+
+
+def _scope(key: str) -> str:
+    """The group a ratio's numbers must share: the key's parent ("emoc.records_naming_csection" ->
+    "emoc"), except that one query's gate counts and its results count form one funnel
+    ("query.X.gate.within_reach.n", "query.X.results" -> "query.X.gate")."""
+    parts = key.split(".")
+    if parts[0] == "query" and len(parts) >= 3 and parts[2] in ("gate", "results"):
+        return ".".join(parts[:2] + ["gate"])
+    return ".".join(parts[:-1]) or key
+
+
+def render(text: str, findings: dict) -> str:
+    """Replace each {{key}} with that finding's display. Raises KeyError for a missing or null key."""
+    d = {f["key"]: f for f in findings.get("findings", [])}
+
+    def sub(m):
+        f = d.get(m.group(1))
+        if f is None or f.get("value") is None:
+            raise KeyError(f"finding {m.group(1)!r} is missing or null")
+        return f["display"]
+    return _PLACEHOLDER.sub(sub, text)
 
 
 # ---------------------------------------------------------------------------
@@ -225,6 +327,7 @@ class Findings:
         self.keys: set[str] = set()
         self.sources: dict[str, Optional[str]] = {}
         self.warnings: list[str] = []
+        self.caveats: list[str] = []
         self.data_dir = data_dir
 
     def rel(self, p) -> str:
@@ -460,7 +563,6 @@ def tagger_section(F: Findings, data_dir: Path) -> None:
 
 
 def trust_section(F: Findings, b: Path, flags, dups, grades, idx, data_dir: Path) -> None:
-    import numpy as np
     import pandas as pd
 
     src = b / "flags.parquet"
@@ -629,6 +731,18 @@ def queries_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> list
         ans = rank.rank(idx, q["service"], res)
         loc = ans.location or {}
         base = f"live vf.rank.rank on the bundle for {what}, resolved by vf.locate on the bundle's places"
+        prec = loc.get("precision_km")
+        below = []
+
+        def cav(c, label):
+            """Caveat for a distance smaller than the searched location's own precision."""
+            if prec is None or c.distance_km is None or c.distance_km >= prec:
+                return ""
+            below.append(label)
+            F.caveats.append(f"{k}: {label} distance {c.distance_km} km is smaller than the location's precision "
+                             f"(about {_round_half_up(prec, 0)} km)")
+            return (f". CAVEAT: the distance is smaller than the location's own precision (about "
+                    f"{_round_half_up(prec, 0)} km), so it is not a measured gap; do not caption it as one")
         summary.append({"id": q["id"], "status": ans.status, "cards": [c.name for c in ans.results]})
         if loc.get("precision_km") is not None:
             F.add(f"{k}.location_precision_km", float(loc["precision_km"]), source=src, kind="km",
@@ -646,7 +760,7 @@ def queries_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> list
             ck = f"{k}.card{i}"
             F.add(f"{ck}.distance_km", c.distance_km, source=src, kind="km", display=_km_display(c, loc),
                   how=f"{base}: card {i}, {c.name}, {c.confidence} confidence, {c.grade_label}; straight-line km "
-                      "rounded to the location precision")
+                      "rounded to the location precision" + cav(c, f"card {i}"))
             nd = (c.sources or {}).get("n_domains")
             if nd is not None:
                 F.add(f"{ck}.n_source_domains", nd, source=b / "facilities.parquet", kind="count",
@@ -656,14 +770,41 @@ def queries_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> list
         if ans.beyond_radius is not None:
             c = ans.beyond_radius
             F.add(f"{k}.beyond_radius.distance_km", c.distance_km, source=src, kind="km", display=_km_display(c, loc),
-                  how=f"{base}: nearest recommendable record beyond the radius, {c.name}, {c.confidence} confidence")
+                  how=f"{base}: nearest recommendable record beyond the radius, {c.name}, {c.confidence} confidence"
+                      + cav(c, "beyond_radius"))
         unv = ans.unverified_nearby or []
         F.add(f"{k}.unverified_nearby", len(unv), source=src, kind="count",
               how=f"{base}: claim-only or blocked records inside the radius shown as 'also nearby, not verified'")
         for i, c in enumerate(unv, 1):
             F.add(f"{k}.unverified{i}.distance_km", c.distance_km, source=src, kind="km", display=_km_display(c, loc),
-                  how=f"{base}: unverified record {i}, {c.name}, {c.grade_label}")
+                  how=f"{base}: unverified record {i}, record {c.facility_id} (name left out of this file), "
+                      f"{c.grade_label}" + cav(c, f"unverified {i}"))
+        if prec is not None:
+            F.add(f"{k}.distances_below_precision", len(below), source=src, kind="count",
+                  how=f"{base}: distances on this answer (cards, further-away line, unverified) that are smaller "
+                      f"than the location's own precision" + (f" ({', '.join(below)})" if below else ""))
     return summary
+
+
+def typicality_counts(tied: list, low) -> dict:
+    """Tie rule for "the nearest listing names no caesarean". ``tied[i]`` holds the record positions tied at
+    point i's nearest distance; ``low[pos]`` is True when that record is graded below 2 on emoc.
+
+    points_all counts points where every tied record is low (the stated rule); records_all is the set of all
+    tied records at those points. points_any and records_any are the upper bound (at least one tied record
+    is low; only the low records counted). points_tied counts points with two or more tied records."""
+    out = {"points_all": 0, "points_any": 0, "points_tied": 0, "records_all": set(), "records_any": set()}
+    for recs in tied:
+        recs = list(recs)
+        lo = [r for r in recs if low[r]]
+        out["points_tied"] += int(len(recs) > 1)
+        if recs and len(lo) == len(recs):
+            out["points_all"] += 1
+            out["records_all"] |= set(recs)
+        if lo:
+            out["points_any"] += 1
+            out["records_any"] |= set(lo)
+    return out
 
 
 def cold_open_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> None:
@@ -704,7 +845,8 @@ def cold_open_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> No
         for i, (_, r) in enumerate(top.iterrows(), 1):
             k = f"cold_open.foil.row{i}"
             F.add(f"{k}.distance_km", float(r["km"]), source=raw_src, kind="km", digits=2,
-                  how=f"{sql}: row {i}, {r['name']} (record city {r.get('address_city')!r}); blur the name on screen")
+                  how=f"{sql}: row {i}, record {r['unique_id']} (record city {r.get('address_city')!r}); name left "
+                      "out of this file" + ("; blur it on screen" if i == 1 else ""))
             if facts is not None:
                 ff = facts[facts["facility_id"] == r["unique_id"]]
                 F.add(f"{k}.facts", len(ff), source=facts_p, kind="count",
@@ -731,17 +873,29 @@ def cold_open_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> No
     bt = BallTree(np.radians(np.c_[idx.lat[ok], idx.lon[ok]]), metric="haversine")
     pts = po[["lat", "lon"]].drop_duplicates()
     near = pts[geo.haversine_km(res.lat, res.lon, pts["lat"].to_numpy(), pts["lon"].to_numpy()) <= 50]
-    _, ii = bt.query(np.radians(near.to_numpy()), k=1)
-    nearest = pos[ii[:, 0]]
-    bad = idx.lines["emoc"].grade[nearest] < 2
+    P = np.radians(near.to_numpy())
+    d, _ = bt.query(P, k=1)
+    # every listing as near as the nearest one: records that share a coordinate tie exactly, and BallTree's
+    # pick among them is arbitrary, so the rule below looks at all of them
+    tied = bt.query_radius(P, r=d[:, 0] + 1e-9)  # 1e-9 rad is about 6 mm
+    tc = typicality_counts([pos[t] for t in tied], idx.lines["emoc"].grade < 2)
+    all_bad, any_bad, n_tied = tc["points_all"], tc["points_any"], tc["points_tied"]
+    rec_all, rec_any = tc["records_all"], tc["records_any"]
+    src = b / "post_offices.parquet"
     how = (f"distinct post-office points in the bundle within 50 km of PIN {COLD_OPEN_PIN}'s point; for each, "
-           f"the nearest record listing {OBS_SPECIALTY!r}; 'no caesarean' = that record is graded below 2 on emoc "
-           "(no fact names a caesarean)")
-    F.add("cold_open.typicality.points_within_50km", len(near), source=b / "post_offices.parquet", kind="count", how=how)
-    F.add("cold_open.typicality.points_nearest_listing_no_caesarean", int(bad.sum()), source=b / "post_offices.parquet",
-          kind="count", how=how)
-    F.add("cold_open.typicality.distinct_records", int(len(set(nearest[bad].tolist()))),
-          source=b / "post_offices.parquet", kind="count", how=how + "; distinct such records")
+           f"the nearest records listing {OBS_SPECIALTY!r} (all records tied at the nearest distance, about 6 mm "
+           "tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point "
+           "counts only if every tied nearest record names no caesarean")
+    F.add("cold_open.typicality.points_within_50km", len(near), source=src, kind="count", how=how)
+    F.add("cold_open.typicality.points_nearest_listing_no_caesarean", all_bad, source=src, kind="count", how=how)
+    F.add("cold_open.typicality.distinct_records", len(rec_all), source=src, kind="count",
+          how=how + "; distinct records among the tied nearest records of the counted points")
+    F.add("cold_open.typicality.points_with_tied_nearest", n_tied, source=src, kind="count",
+          how=how + "; points whose nearest distance is shared by two or more records")
+    F.add("cold_open.typicality.points_upper_bound", any_bad, source=src, kind="count",
+          how=how + "; upper bound under the other tie rule: at least one tied nearest record names no caesarean")
+    F.add("cold_open.typicality.distinct_records_upper_bound", len(rec_any), source=src, kind="count",
+          how=how + "; distinct records graded below 2 among the tied nearest records under the upper-bound rule")
 
 
 def laqshya_section(F: Findings, b: Path, grades, data_dir: Path, path: Optional[Path]) -> None:
@@ -838,6 +992,29 @@ def _git_commit() -> Optional[str]:
         return None
 
 
+#: the code a findings file depends on: this script and the shared package
+CODE_PATHS = ("scripts/wp9_findings.py", "src/vf")
+
+
+def _code_uncommitted() -> Optional[bool]:
+    """True when this script or src/vf differs from HEAD (or is untracked); None when git is unavailable."""
+    try:
+        out = subprocess.run(["git", "status", "--porcelain", "--", *CODE_PATHS], cwd=ROOT, capture_output=True,
+                             text=True, check=True).stdout
+    except Exception:
+        return None
+    return bool(out.strip())
+
+
+def public_view(obj: dict) -> dict:
+    """What an app may serve (for example /api/findings): key, value, display and kind only. how_computed
+    names facilities and source_file names local paths, so both stay in the report file."""
+    return {"version": obj.get("meta", {}).get("version"),
+            "created_at_utc": obj.get("meta", {}).get("created_at_utc"),
+            "findings": {f["key"]: {"value": f["value"], "display": f["display"], "kind": f["kind"]}
+                         for f in obj.get("findings", [])}}
+
+
 def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laqshya: Optional[Path] = None,
           sealed: Optional[Path] = None, extras: Optional[dict] = None, cold_open: bool = True,
           queries: bool = True) -> dict:
@@ -896,6 +1073,8 @@ def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laq
             "script": "scripts/wp9_findings.py",
             "created_at_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "git_commit": _git_commit(),
+            "code_uncommitted": _code_uncommitted(),
+            "script_sha256": _sha256(Path(__file__)),
             "bundle_dir": F.rel(bundle),
             "bundle_created_at_utc": manifest.get("created_at_utc"),
             "bundle_git_commit": manifest.get("git_commit"),
@@ -907,12 +1086,18 @@ def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laq
             "null_keys": [x["key"] for x in nulls],
             "sources": F.sources,
             "warnings": F.warnings,
+            "caveats": F.caveats,
             "queries": summary,
-            "check_allowlist": "years 1900 to 2100, 6-digit PIN codes, clock times (H:MM), durations "
-                               "(N seconds/minutes/hours/days), dates next to a month name, list markers at a "
-                               "line start, numbers glued to letters (WP11, v0.2, D044), file paths and URLs, "
-                               "citations and ordinals (page 35, row 1109, card 3), emergency numbers 102, 108 "
-                               "and 112; lines with findings:skip",
+            "check_allowlist": "years 1900 to 2100 and 6-digit PIN codes (not after Rs, INR or a currency "
+                               "sign), clock times (H:MM), dates (next to a month name, 2026-11-21, 21/11/2026), "
+                               "list markers at a line start, identifiers (a letter before the number: WP11, "
+                               "v0.2, D044; ordinal or model suffix: 3rd, 1b), commit hashes, real paths and URLs "
+                               "(http(s)://, /, ./, ../, ~/, or a file extension), citations (page, row, table, "
+                               "figure, section, no. or # with an integer and no unit), demo ordinals (card, "
+                               "step, beat, option or rank with one or two digits and no unit), emergency numbers "
+                               "102, 108 and 112; lines with findings:skip. Durations, money and glued units "
+                               "(45 minutes, Rs.2000, 250mg) are scanned",
+            "check_note": CHECK_NOTE,
             "build_s": round(time.time() - t0, 1),
         },
         "findings": F.items,
@@ -927,11 +1112,13 @@ def write_atomic(obj: dict, out: Path) -> None:
                                      encoding="utf-8") as fh:
         fh.write(text)
         tmp = fh.name
+    os.chmod(tmp, 0o644)
     os.replace(tmp, out)
     m = obj.get("meta", {})
     meta = {
         "script": m.get("script"), "version": m.get("version"), "created_at_utc": m.get("created_at_utc"),
-        "git_commit": m.get("git_commit"), "code_uncommitted": True, "output": str(out.name),
+        "git_commit": m.get("git_commit"), "code_uncommitted": m.get("code_uncommitted"),
+        "script_sha256": m.get("script_sha256"), "output": str(out.name),
         "rows": len(obj.get("findings", [])), "null_rows": m.get("n_null"), "bundle_dir": m.get("bundle_dir"),
         "bundle_created_at_utc": m.get("bundle_created_at_utc"), "inputs": m.get("sources"),
         "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
@@ -941,6 +1128,7 @@ def write_atomic(obj: dict, out: Path) -> None:
                                      encoding="utf-8") as fh:
         fh.write(json.dumps(meta, indent=2) + "\n")
         tmp = fh.name
+    os.chmod(tmp, 0o644)
     os.replace(tmp, mp)
 
 
@@ -948,12 +1136,31 @@ def write_atomic(obj: dict, out: Path) -> None:
 # check
 # ---------------------------------------------------------------------------
 
-def known_tokens(findings: dict) -> dict[tuple[str, bool], list[str]]:
-    out: dict[tuple[str, bool], list[str]] = {}
+def known_tokens(findings: dict) -> dict[tuple[str, Optional[str]], list[str]]:
+    out: dict[tuple[str, Optional[str]], list[str]] = {}
     for f in findings.get("findings", []):
         for t in accepted_tokens(f):
             out.setdefault(t, []).append(f["key"])
     return out
+
+
+def _matches(known: dict, tok: str, unit: Optional[str]) -> list[str]:
+    """Finding keys a scanned number can stand for: same value, and the same unit when the text gives one
+    (a bare number may match a km or ms finding, never a percentage)."""
+    if unit is not None:
+        return known.get((tok, unit), [])
+    return [k for u in (None, "km", "ms") for k in known.get((tok, u), [])]
+
+
+def _ratio_ok(member_keys: list[Optional[list[str]]]) -> bool:
+    """One group of findings holds every number of the ratio. A facilities.* finding (a whole-dataset
+    denominator such as 9,989 records) and an --allow number pair with anything."""
+    scopes = []
+    for keys in member_keys:
+        if keys is None or any(k.split(".")[0] == "facilities" for k in keys):
+            continue
+        scopes.append({_scope(k) for k in keys})
+    return not scopes or bool(set.intersection(*scopes))
 
 
 def _json_strings(obj, path: str = "$") -> Iterable[tuple[str, str]]:
@@ -968,32 +1175,69 @@ def _json_strings(obj, path: str = "$") -> Iterable[tuple[str, str]]:
             yield (path if j == 0 else f"{path} line {j + 1}"), line
 
 
-def check_text(lines: Iterable[tuple[str, str]], findings: dict, allow: Iterable[str] = ()) -> dict:
-    """Numbers in (where, line) pairs that no finding covers."""
+def check_text(lines: Iterable[tuple[str, str]], findings: dict, allow: Iterable[str] = (),
+               strict: bool = False) -> dict:
+    """Numbers in (where, line) pairs that no finding covers (see CHECK_NOTE for what this can and cannot
+    catch). A {{key}} placeholder passes when the key exists and is not null. With strict, every bare
+    number fails unless it is in allow: captions must name their findings."""
     known = known_tokens(findings)
+    by_key = {f["key"]: f for f in findings.get("findings", [])}
     extra = {canon(a.rstrip("%")) for a in allow if a.strip()}
     unknown, n_checked, n_ok = [], 0, 0
+
+    def miss(where, number, line, reason):
+        unknown.append({"where": where, "number": number, "line": line.strip()[:160], "reason": reason})
+
     for where, line in lines:
         if "findings:skip" in line:
             continue
-        for t in scan_line(line):
+        for m in _PLACEHOLDER.finditer(line):
             n_checked += 1
-            hit = (t["token"], t["pct"]) in known or t["token"] in extra
-            if hit:
+            f = by_key.get(m.group(1))
+            if f is not None and f.get("value") is not None:
                 n_ok += 1
             else:
-                unknown.append({"where": where, "number": t["raw"], "line": line.strip()[:160]})
+                miss(where, m.group(0), line, "no such finding" if f is None else "finding is null")
+        toks = scan_line(line)
+        keys: list[Optional[list[str]]] = []
+        for t in toks:
+            n_checked += 1
+            if t["token"] in extra:
+                keys.append(None)
+                n_ok += 1
+                continue
+            ks = _matches(known, t["token"], t["unit"])
+            keys.append(ks)
+            if strict:
+                miss(where, t["raw"], line, "strict: bare number; name its finding with {{key}}")
+            elif ks:
+                n_ok += 1
+            else:
+                miss(where, t["raw"] + (f" {t['unit']}" if t["unit"] not in (None, "%") else ""), line,
+                     "no finding with this value" + (f" and unit {t['unit']}" if t["unit"] else ""))
+        if strict:
+            continue
+        groups: dict[int, list[int]] = {}
+        for i, t in enumerate(toks):
+            if t["ratio"] is not None:
+                groups.setdefault(t["ratio"], []).append(i)
+        for ids in groups.values():
+            if all(keys[i] != [] for i in ids) and not _ratio_ok([keys[i] for i in ids]):
+                n_ok -= len(ids)
+                sep = line[toks[ids[0]]["col"]:toks[ids[-1]]["end"]]
+                miss(where, sep, line, "ratio: its numbers exist, but not in one group of findings; "
+                                       "name them with {{key}}")
     return {"checked": n_checked, "found": n_ok, "unknown": unknown}
 
 
-def check_file(path: Path, findings: dict, allow: Iterable[str] = ()) -> dict:
+def check_file(path: Path, findings: dict, allow: Iterable[str] = (), strict: bool = False) -> dict:
     path = Path(path)
     text = path.read_text(encoding="utf-8")
     if path.suffix == ".json":
         lines = list(_json_strings(json.loads(text)))
     else:
         lines = [(f"line {i}", ln) for i, ln in enumerate(text.splitlines(), 1)]
-    return check_text(lines, findings, allow)
+    return check_text(lines, findings, allow, strict=strict)
 
 
 # ---------------------------------------------------------------------------
@@ -1023,6 +1267,11 @@ def _print_summary(obj: dict, out: Path) -> None:
             print(f"  {k} = {d[k]['display']}")
     for w in m["warnings"]:
         print(f"  WARNING {w}")
+    if m.get("caveats"):
+        print(f"  {len(m['caveats'])} distances are smaller than their location's precision (meta.caveats), e.g.")
+        for c in [c for c in m["caveats"] if "beyond_radius" in c][:3] or m["caveats"][:1]:
+            print(f"    {c}")
+    print(f"  code_uncommitted={m.get('code_uncommitted')} script_sha256={str(m.get('script_sha256'))[:12]}")
 
 
 def main(argv=None) -> int:
@@ -1036,6 +1285,8 @@ def main(argv=None) -> int:
     ap.add_argument("--no-cold-open", action="store_true", help="skip the raw-data foil and typicality")
     ap.add_argument("--check", nargs="+", type=Path, metavar="FILE")
     ap.add_argument("--allow", default="", help="comma-separated extra numbers to allow in --check")
+    ap.add_argument("--strict", action="store_true",
+                    help="with --check: every bare number fails; captions must name findings as {{key}}")
     a = ap.parse_args(argv)
 
     if a.check:
@@ -1046,11 +1297,12 @@ def main(argv=None) -> int:
         allow = [x for x in a.allow.split(",") if x.strip()]
         bad = 0
         for p in a.check:
-            r = check_file(p, fnd, allow)
+            r = check_file(p, fnd, allow, strict=a.strict)
             print(f"{p}: {r['checked']} numbers, {r['found']} in findings, {len(r['unknown'])} not")
             for u in r["unknown"]:
-                print(f"  NOT IN FINDINGS {u['number']!r} at {u['where']}: {u['line']}")
+                print(f"  NOT IN FINDINGS {u['number']!r} at {u['where']} ({u['reason']}): {u['line']}")
             bad += len(r["unknown"])
+        print(f"note: {CHECK_NOTE}")
         return 1 if bad else 0
 
     extras = {}

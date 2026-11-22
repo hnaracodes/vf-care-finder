@@ -154,6 +154,89 @@ Computed over the facts that satisfied the grade's required groups.
 
 `description`-only support (no capability, procedure or equipment fact) caps strength at `thin`. Add the description as a fact source with `field = description` only if WP3 finds it adds real support; log the choice.
 
+## v0.3: grade rules aligned to published standards (Nov 21, D048)
+
+Status: implemented as `vf.recipes.GRADE_RULES_V03` and written by `scripts/wp3_regrade_v03.py` to `gold/capability_grades_v03.parquet`. v0.3 is a rule-level regrade only:
+
+- It reads the frozen `gold/fact_tags.parquet` (sha256 `6fa461a5...`). No regex or student rerun, no tag definition changes.
+- `gold/capability_grades.parquet` (v0.2) is not rewritten. Regrading the frozen tags under v0.2 reproduces it cell for cell.
+- `RECIPE_VERSION` stays `v0.2` (the tagger version), and `tag_fact` has no v0.3.
+- Four lines change: `emoc`, `nicu`, `dialysis`, `cath_lab`. The other eight keep their v0.2 rules (the same objects).
+- The hand-read of every changed record is in `reports/recipe_v03_changes.md`.
+
+### Qualifiers
+
+Some v0.3 requirements depend on the wording of a fact the tagger already tagged. They are qualifiers: per-fact markers computed from the fact's own tags and normalized text (`vf.recipes.QUALIFIERS_V03`).
+
+- They are never written as tags. `tags_present` and every `evidence_items[].tag` keep the real tag names.
+- `facility_line_grades(..., version="v0.3")` adds them itself.
+- Callers of `grade_line` or `grade_facility` with v0.3 must pass tags from `qualify_tags`.
+
+| Qualifier | Base tag on the same fact | Holds when the text | Used by |
+| --- | --- | --- | --- |
+| `nicu_named` | `nicu` | matches `\bnicu\b\|neonatal intensive` (so not an SNCU-only fact) | nicu 2, 3 |
+| `nicu_level3` | `nicu` | names a NICU and matches `\blevel[- ]?(iii\|3\|three)\b\|\btertiary (level \|care )?(nicu\|neonatal intensive)` | nicu 3 |
+| `ventilator_newborn` | `ventilator` | matches `neonat\|new[- ]?born\|\bnicu\b\|\bnnicu\b\|preterm\|prematur\|\binfants?\b`, and is not an SNCU-only fact | nicu 3 |
+| `neonatal_resp_not_sncu` | `neonatal_resp` | is not an SNCU-only fact (veto `^(?!.*(\bnicu\b\|neonatal intensive\|newborn intensive)).*\bsncu\b`) | nicu 3 |
+| `blood_maternal` | `blood` | still matches the `blood` pattern after removing `(intra[- ]?uterine\|fetal\|foetal\|in[- ]?utero\|neonatal\|exchange)( \w+){0,2} (blood )?transfusions?` | emoc 3 |
+| `dialysis_unit_named` | `dialysis_unit` | matches `dialysis (unit\|machine\|cent(re\|er)\|ward\|room\|department\|dept\|bed\|station)\|\bh(a)?emo[- ]?dialysis` (so not a nephrologist alone) | dialysis 3 |
+
+### Rules
+
+| Line | Claimed | Supported | Corroborated | Change from v0.2 |
+| --- | --- | --- | --- | --- |
+| `emoc` | unchanged | `csection` | `csection` and `blood_maternal` | anaesthesia or OT no longer required; fetal, intrauterine, neonatal and exchange transfusion do not count as blood |
+| `nicu` | `neonatologyPerinatalMedicine`, or a `nicu` fact that names only an SNCU | `nicu_named` | `nicu_named` and (`neonatal_resp_not_sncu` or `ventilator_newborn` or `nicu_level3`) | SNCU-only drops to grade 1; a generic ventilator no longer corroborates; a level III mention does |
+| `cath_lab` | unchanged | `cath_lab` | `cath_lab` and (`ccu`, or `icu` and `ventilator`) | `h24` or `emergency` no longer required; a generic ICU needs ventilators |
+| `dialysis` | unchanged | `dialysis` | `dialysis` and `dialysis_unit_named` | a nephrologist alone no longer corroborates |
+
+Two new output fields:
+
+- `level_note` and `level_note_items`, for `emoc` only. When a grade 3 record also has `anesthesia` and `h24` facts, `level_note` says "FRU-level: anaesthesia and a 24-hour service are also named, two more of the FRU 2025 s2.2 criteria; the 24-hour fact may not be about obstetric care". The two facts are quoted in `level_note_items`. The note never changes a grade.
+- A grade 1 `nicu` record whose only nicu evidence is an SNCU gets an evidence item with the requirement "names an SNCU (level II), not a NICU".
+
+Requirement names on the cards cite the standard, for example "caesarean section (WHO 2009 Table 4, signal function 8)".
+
+### Basis, with the standards' own words
+
+All five documents were fetched again on Nov 21 (23:13 to 23:16 ET). Each quote below was checked against the fetched text. Page numbers are PDF pages.
+
+- **emoc, WHO 2009.** *Monitoring emergency obstetric care: a handbook* (WHO, UNFPA, UNICEF, AMDD), Table 4, "Signal functions used to identify basic and comprehensive emergency obstetric care services" (p. 17). Comprehensive services are "Perform signal functions 1–7, plus: (8) Perform surgery (e.g., caesarean section) (9) Perform blood transfusion". The text adds that a facility "is classified as functioning at the comprehensive level when it offers the seven signal functions plus surgery (e.g. caesarean) and blood transfusion". Copy used: https://aa.unfpa.org/sites/default/files/pub-pdf/obstetric_monitoring.pdf (WHO record: https://www.who.int/publications-detail-redirect/9789241547734).
+  - Caveat: grade 3 names signal functions 8 and 9 only. The data cannot show the seven basic functions or the 3-month performance window, so grade 3 is not "a comprehensive EmOC facility".
+- **emoc note, FRU 2025.** NHM, *Revised Guidelines for Operationalizing First Referral Units*, November 2025, s2.2 "Essential Criteria for Designation and Functionality" (pp. 27 to 28):
+  - "1. 24/7 Availability of Emergency Services: The facility must be equipped and staffed to handle emergencies round the clock."
+  - "3. ... performing Caesarean sections and managing major obstetric complications 24/7."
+  - "4. Anaesthesia Services: Anaesthesia services are available 24/7, either by a qualified Anaesthetist or an MBBS Medical Officer trained and certified in Life-Saving Anaesthesia Skills (LSAS)."
+  - "7. Functional Blood Storage Unit (BSU): An operational BSU licensed as per Drugs and Cosmetics Rules, with 24/7 availability of blood and capability for safe blood transfusion."
+  - Source: https://www.nhsrcindia.org/sites/default/files/2025-12/FRU%20guidenline%202%201.pdf
+  - Caveat: our `h24` tag is any round-the-clock wording, not 24-hour obstetric care, so the note is a pointer and never a grade.
+- **nicu, FBNC 2025.** MoHFW Child Health Division, *Facility Based Newborn Care Operational Guidelines 2025*:
+  - SNCU care is "comprehensive secondary level of newborn care to small and sick neonates not requiring surgical intervention and mechanical ventilation" (p. 21).
+  - "Special newborn care unit and Mother Newborn Care Unit delivers level II care to sick and small newborns" (p. 49).
+  - NICU care is for newborns "who require constant nursing, complex surgical procedures, ongoing respiratory support, or other intensive monitoring" (p. 22).
+  - The levels figure places "NICU(Level III)" at tertiary care, and the guidelines add: "Simply adding ventilators to SNCU does not qualify the unit as NICU" (p. 23).
+  - Source: https://nhm.gov.in/images/pdf/programmes/CH-Programmes/FBNC/FBNC%20Operational%20Guidelines%202025.pdf
+- **cath_lab, PM-JAY.** NHA *Hospital Empanelment Criteria*, Category 2 advanced criteria. Hospitals "should be fully equipped with ICCU/SICU/ NICU/ relevant Intensive Care Unit in addition to and in support of the OT facilities that they have" (p. 3). "A. Specific criteria for Cardiology/ CTVS" (p. 4) includes "3. ICU Facility with cardiac monitoring and ventilator support" and "6. Fully equipped Catheterization Laboratory Unit with qualified and trained Paramedics". Source: https://cdnbbsr.s3waas.gov.in/s3169779d3852b32ce8b1a1724dbf5217d/uploads/2022/04/2022072941.pdf
+  - Caveat: "cardiac monitoring" is not checked, and the ICU and ventilator facts need not be the same fact.
+- **dialysis, PM-JAY and PMNDP.** PM-JAY "H. Specific criteria for Nephrology and Urology Surgery" starts with "1. Dialysis unit" (p. 6). MoHFW *Operational Guidelines for Pradhan Mantri National Dialysis Programme*:
+  - "Haemodialysis requires a dialysis machine and pure water and is typically done in a health facility (Dialysis centre)" (p. 13).
+  - The nephrologist is a visiting role: "A Qualified Nephrologist ... shall visit the dialysis facility fortnightly/monthly" (p. 18).
+  - Source: https://nhsrcindia.org/sites/default/files/2026-07/Operational%20Guidelines%20for%20PMNDP.pdf
+  - Caveat: a fact that says only "haemodialysis" is still the procedure, not an enabling piece (v0.1 change 3). Haemodialysis counts only inside a fact the tagger already marked `dialysis_unit`. On the frozen tags this branch moves no record.
+
+These are standards for what a service needs, applied to web text. A grade says what the web text names. It does not certify that a facility meets the standard.
+
+### Counts (facilities, grades 0/1/2/3, v0.2 to v0.3)
+
+| Line | v0.2 | v0.3 | Moves |
+| --- | --- | --- | --- |
+| `emoc` | 5,325 / 4,232 / 391 / 41 | 5,325 / 4,232 / 378 / 54 | 15 up (2 to 3), 2 down (3 to 2); FRU note on 14 |
+| `nicu` | 8,513 / 770 / 528 / 178 | 8,513 / 782 / 576 / 118 | 12 down (2 to 1), 98 down (3 to 2), 38 up (2 to 3) |
+| `dialysis` | 7,631 / 1,322 / 556 / 480 | 7,631 / 1,322 / 580 / 456 | 24 down (3 to 2) |
+| `cath_lab` | 6,834 / 2,464 / 210 / 481 | 6,834 / 2,464 / 471 / 220 | 271 down (3 to 2), 10 up (2 to 3) |
+
+Grade 2 or higher, the D048 gate, moves only for `nicu` (706 to 694, the 12 SNCU-only records).
+
 ## Source confidence (separate from the grade)
 
 A grade says how complete the evidence is. Confidence says how much to trust the page it came from. Keep them as two fields.

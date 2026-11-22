@@ -17,9 +17,12 @@ Two entry points for the app:
 * ``call_info(facility_id, phone_book=None, reveal=False)``: the record's phone
   for a Call button, masked unless ``reveal`` is set and demo mode is off.
 
-Phone numbers never enter ``RecordInfo`` (it holds only a sharing count), so a
-record-info table can sit in the app bundle without carrying a single number.
-``python -m vf.questions`` prints the measurement on the real grades.
+Phone numbers never enter ``RecordInfo`` (it holds only a sharing count, and
+any run of 8 or more digits in a stored quote is replaced by ``[phone number]``),
+so a record-info table can sit in the app bundle without carrying a single
+number. Every quote in a ``why`` is masked the same way. Call numbers are kept
+only when they are Indian (+91 with 10 national digits, or a 1800/1860 toll-free
+number). ``python -m vf.questions`` prints the measurement on the real grades.
 """
 from __future__ import annotations
 
@@ -35,7 +38,7 @@ from typing import Any, Iterable, Mapping, Optional
 from . import recipes as R
 from . import services as S
 
-QUESTIONS_VERSION = "questions_v1"
+QUESTIONS_VERSION = "questions_v2"
 MIN_QUESTIONS = 2
 MAX_QUESTIONS = 4
 #: Longest quote shown in a ``why`` before it is cut at a word boundary with "...".
@@ -89,7 +92,7 @@ REQUIREMENT_ASK: dict[Any, str] = {
     "24-hour service": "Is the trauma team there round the clock, including at night?",
     "MRI named in a second fact or a second field": "Is the MRI machine working, and is it here rather than at a partner centre?",
     "CT named in a second fact or a second field": "Is the CT scanner working, and is it here rather than at a partner centre?",
-    "operating theatre": "Is an operating theatre and a surgeon free right now?",
+    "operating theatre": "Are a surgeon and an operating theatre free right now?",
     "blood bank or intensive care unit": "Do you have blood for transfusion and an ICU bed free?",
     "intensive care unit": "Is an ICU bed free for this patient?",
     "CT scan": "Do you have a working CT scanner here for head scans?",
@@ -101,6 +104,26 @@ REQUIREMENT_WHY: dict[str, str] = {
     "MRI named in a second fact or a second field": "Only one fact in the record names MRI.",
     "CT named in a second fact or a second field": "Only one fact in the record names a CT scan.",
 }
+#: Requirement name -> the phrase used after "mentions", with its article.
+REQUIREMENT_PHRASE: dict[str, str] = {
+    "caesarean section": "a caesarean section",
+    "blood bank or transfusion": "a blood bank or blood transfusion",
+    "anaesthesia or operating theatre": "anaesthesia or an operating theatre",
+    "newborn intensive care unit": "a newborn intensive care unit",
+    "newborn breathing support or ventilator": "newborn breathing support or a ventilator",
+    "dialysis unit, machines or nephrologist": "a dialysis unit, dialysis machines or a nephrologist",
+    "intensive care unit": "an intensive care unit",
+    "ventilator": "a ventilator",
+    "intensive or cardiac care unit": "an intensive or cardiac care unit",
+    "cath lab, angiography or angioplasty": "a cath lab, angiography or angioplasty",
+    "cardiac or intensive care unit": "a cardiac or intensive care unit",
+    "24-hour or emergency service": "round-the-clock or emergency service",
+    "MRI scan": "an MRI scan",
+    "CT scan": "a CT scan",
+    "operating theatre": "an operating theatre",
+    "blood bank or intensive care unit": "a blood bank or an intensive care unit",
+    "24-hour service": "round-the-clock (24-hour) service",
+}
 #: Requirement names that are about round-the-clock service (share the ``h24`` key).
 H24_REQUIREMENTS = frozenset({"24-hour or emergency service", "24-hour service"})
 #: Requirements the lead question already asks, besides each line's own service names.
@@ -110,6 +133,13 @@ LEAD_COVERS_EXTRA: dict[str, frozenset] = {"icu": frozenset({"ventilator"})}
 SCHEME_PATTERN = r"ayushman|\bpm[- ]?jay\b|\bab[- ]?pmjay\b|\bcghs\b|jan arogya"
 _SCHEME_RX = re.compile(SCHEME_PATTERN)
 SCHEME_NAMES = "Ayushman Bharat, PM-JAY or CGHS"
+
+#: Absence cues the recipe's ``NEGATION_PATTERN`` misses ("Lacks trauma care facilities", "Not open 24 hours").
+_EXTRA_NEG_RX = re.compile(r"\black(s|ing)?\b|\bnot (open|working|running|functioning)\b")
+#: A digit run with phone separators; masked when it holds 8 or more digits.
+_NUMBER_RX = re.compile(r"\+?\d[\d \-().]{6,}\d")
+_DATE_RX = re.compile(r"^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$|^(19|20)\d\d ?- ?(19|20)\d\d$")
+PHONE_MASK = "[phone number]"
 
 #: Selection priority (lower first). The output keeps this order, lead first.
 PRIORITY: dict[str, int] = {
@@ -137,9 +167,14 @@ class RecordInfo:
 
     ``tags``: every evidence tag on any of the record's facts (``gold/fact_tags``).
     ``h24_cotags``: the other tags on facts that also carry ``h24``, so "24x7
-    pharmacy" does not count as a round-the-clock ICU. ``h24_quote`` and
-    ``scheme_quote``: the first such fact, verbatim. ``phone_shared_with``: how
-    many other records list the same call number (0 if unique or no phone).
+    pharmacy" does not count as a round-the-clock ICU. ``h24_quote``: one
+    round-the-clock fact, preferring a facility-wide one ("Open 24x7", no other
+    tags) over one about another service. ``h24_quote_cotags``: the other tags
+    on that quoted fact (empty for a facility-wide fact, None if unknown).
+    ``scheme_quote``: the first scheme fact. Quotes are verbatim except that
+    digit runs of 8 or more become ``[phone number]``. ``phone_shared_with``:
+    how many other records list the same call number, leaving out records the
+    duplicate check pairs with this one (0 if unique or no phone).
     """
 
     facility_id: str
@@ -149,11 +184,15 @@ class RecordInfo:
     scheme_quote: Optional[str] = None
     has_phone: bool = False
     phone_shared_with: int = 0
+    h24_quote_cotags: Optional[frozenset] = None
 
     def to_row(self) -> dict:
         d = asdict(self)
         d["tags"] = sorted(self.tags)
         d["h24_cotags"] = sorted(self.h24_cotags)
+        d["h24_quote_cotags"] = None if self.h24_quote_cotags is None else sorted(self.h24_quote_cotags)
+        d["h24_quote"] = mask_numbers(self.h24_quote)
+        d["scheme_quote"] = mask_numbers(self.scheme_quote)
         return d
 
 
@@ -161,16 +200,48 @@ def _as_record(record) -> Optional[RecordInfo]:
     if record is None or isinstance(record, RecordInfo):
         return record
     if isinstance(record, Mapping):
+        qc = record.get("h24_quote_cotags")
+        qc_missing = qc is None or (isinstance(qc, float) and math.isnan(qc))
         return RecordInfo(
             facility_id=str(record.get("facility_id", "")),
             tags=frozenset(_as_list(record.get("tags"))),
             h24_cotags=frozenset(_as_list(record.get("h24_cotags"))),
-            h24_quote=_str_or_none(record.get("h24_quote")),
-            scheme_quote=_str_or_none(record.get("scheme_quote")),
+            h24_quote=mask_numbers(_str_or_none(record.get("h24_quote"))),
+            scheme_quote=mask_numbers(_str_or_none(record.get("scheme_quote"))),
             has_phone=bool(record.get("has_phone", False)),
             phone_shared_with=int(record.get("phone_shared_with") or 0),
+            h24_quote_cotags=None if qc_missing else frozenset(str(x) for x in _as_list(qc)),
         )
     raise TypeError(f"record must be a RecordInfo or a mapping, not {type(record).__name__}")
+
+
+def mask_numbers(text: Optional[str]) -> Optional[str]:
+    """Replace every run of 8 or more digits (spaces, dashes, dots, brackets and
+    a leading + allowed inside) with ``[phone number]``. Dates and year ranges
+    are left alone. None stays None."""
+    if text is None:
+        return None
+
+    def sub(m: re.Match) -> str:
+        s = m.group(0)
+        if sum(ch.isdigit() for ch in s) < 8 or _DATE_RX.match(s.strip()):
+            return s
+        return PHONE_MASK
+
+    return _NUMBER_RX.sub(sub, str(text))
+
+
+def is_negative(text: Optional[str]) -> bool:
+    """``vf.recipes.is_negated`` plus absence cues it misses ("Lacks ...")."""
+    return R.is_negated(text) or bool(text and _EXTRA_NEG_RX.search(R.normalize_text(str(text))))
+
+
+def _lower_first(reason: str) -> str:
+    """Lower-case the first letter of a reason that follows a colon ("The" ->
+    "the"), leaving acronyms ("PIN code") alone."""
+    if len(reason) >= 2 and reason[0].isupper() and reason[1].islower():
+        return reason[0].lower() + reason[1:]
+    return reason
 
 
 def _as_list(v) -> list:
@@ -230,7 +301,7 @@ def _missing_requirements(card: Mapping) -> list[str]:
 
 
 def _quote(text: Optional[str], limit: int = MAX_QUOTE_CHARS) -> str:
-    t = " ".join(str(text or "").split())
+    t = mask_numbers(" ".join(str(text or "").split()))
     if len(t) <= limit:
         return t
     cut = t[:limit].rsplit(" ", 1)[0].rstrip(",;:")
@@ -261,7 +332,7 @@ def _line_core_tags(line: str) -> frozenset:
 
 
 def _plain_missing_why(name: str) -> str:
-    return REQUIREMENT_WHY.get(name) or f"No fact in the record mentions {name}."
+    return REQUIREMENT_WHY.get(name) or f"No fact in the record mentions {REQUIREMENT_PHRASE.get(name, name)}."
 
 
 def _requirement_question(line: str, name: str) -> str:
@@ -280,7 +351,7 @@ def _quoted_tags(card: Mapping) -> set:
 def _quoted_text_has_scheme(card: Mapping) -> Optional[str]:
     for ev in _as_list(card.get("evidence")):
         q = ev.get("quote") if isinstance(ev, Mapping) else None
-        if q and _SCHEME_RX.search(R.normalize_text(q)):
+        if q and not is_negative(q) and _SCHEME_RX.search(R.normalize_text(q)):
             return q
     return None
 
@@ -310,6 +381,8 @@ def _lead(card: Mapping, line: str, missing: list[str], service_text: Optional[s
     covers = _lead_covers(line)
     grade = card.get("grade")
     grade = int(grade) if grade is not None else 0
+    # A fact that says the service is absent is never framed as the record's claim.
+    evidence = [e for e in evidence if not is_negative(e["quote"])]
     first = next((e for e in evidence if e.get("requirement") in covers), evidence[0] if evidence else None)
     absent = [m for m in missing if m in covers or _is_claim_requirement(m)]
     if grade >= 2 and first is not None:
@@ -319,6 +392,8 @@ def _lead(card: Mapping, line: str, missing: list[str], service_text: Optional[s
         why = f'The record only claims it: "{_quote(first["quote"])}".'
     elif grade == 1:
         why = "The record only lists a related specialty."
+    elif grade >= 2:
+        why = "The record names the service, but web pages can be out of date."
     else:
         why = "No fact in the record mentions this service."
     for m in absent:
@@ -369,12 +444,13 @@ def questions_for(card, service_line: str, record=None, *, service_text: Optiona
         if f.get("service_line") in (None, line) or not graded:
             add("flag:implausible_claim", "implausible",
                 "Do you do this yourselves, or do you refer patients to another hospital for it?",
-                f.get("reason") or "A trust check found the claim unusual for this kind of facility.")
+                mask_numbers(f.get("reason")) or "A trust check found the claim unusual for this kind of facility.")
     loc = by_flag.get("location_conflict", [])
     prec = c.get("location_precision_km")
     if loc:
         add("location", "location", "Can you confirm your full address and a landmark near you?",
-            "The record's location is uncertain: " + (loc[0].get("reason") or "its map point and PIN code disagree."))
+            "The record's location is uncertain: "
+            + _lower_first(mask_numbers(loc[0].get("reason")) or "its map point and PIN code disagree."))
     elif prec is not None and float(prec) > FUZZY_POSITION_KM:
         add("location", "location", "Can you confirm your full address and a landmark near you?",
             f"The record's position is known only to within about {float(prec):.0f} km.")
@@ -382,7 +458,8 @@ def questions_for(card, service_line: str, record=None, *, service_text: Optiona
         noun = SERVICE_NOUN.get(line, "this service")
         add("flag:possible_merge", "merge",
             f"Is {noun} at this address, and not at another branch or a hospital with a similar name?",
-            "The record may combine more than one facility: " + (f.get("reason") or "a trust check flagged it."))
+            "The record may combine more than one facility: "
+            + _lower_first(mask_numbers(f.get("reason")) or "a trust check flagged it."))
 
     # recipe requirements the record does not show
     covers = _lead_covers(line)
@@ -403,9 +480,18 @@ def questions_for(card, service_line: str, record=None, *, service_text: Optiona
     if graded and line in EMERGENCY_LINES and not any(k == "h24" for _, k, _ in cands):
         if rec is not None:
             if not (rec.h24_cotags & _line_core_tags(line)):
-                if "h24" in rec.tags and rec.h24_quote:
+                noun = SERVICE_NOUN.get(line, "this service")
+                if "h24" in rec.tags and rec.h24_quote and rec.h24_quote_cotags:
+                    # the quoted fact is tagged with another service, and no h24 fact is facility-wide
                     why = ("The record mentions round-the-clock service only for something else: "
                            f'"{_quote(rec.h24_quote)}".')
+                elif "h24" in rec.tags and rec.h24_quote:
+                    # facility-wide ("Open 24x7"), or a saved table that does not say
+                    why = (f'The record says "{_quote(rec.h24_quote)}", but no fact in the record says '
+                           f"{noun} is available round the clock.")
+                elif "h24" in rec.tags:
+                    why = ("The record mentions round-the-clock service, but no fact in the record says "
+                           f"{noun} is available round the clock.")
                 else:
                     why = "No fact in the record mentions round-the-clock (24-hour) service."
                 add("h24", "h24", "Is this available round the clock, including at night and on Sundays?", why)
@@ -429,7 +515,10 @@ def questions_for(card, service_line: str, record=None, *, service_text: Optiona
             why = f'The record mentions a scheme ("{_quote(scheme_q)}"), but not which treatments it covers.'
         else:
             why = "The record mentions a public insurance scheme, but not which treatments it covers."
-        add("cost", "cost", "Will Ayushman Bharat (PM-JAY) cover this treatment for this patient?", why)
+        names_pmjay = bool(scheme_q and re.search(r"ayushman|pm[- ]?jay|jan arogya", R.normalize_text(scheme_q)))
+        ask = ("Will Ayushman Bharat (PM-JAY) cover this treatment for this patient?" if names_pmjay or not scheme_q
+               else "Will the scheme the record names cover this treatment, and do you accept Ayushman Bharat (PM-JAY)?")
+        add("cost", "cost", ask, why)
     else:
         scope = "No fact in the record" if rec is not None else "None of the facts quoted here"
         verb = "mentions" if rec is not None else "mention"
@@ -468,20 +557,41 @@ def questions_for(card, service_line: str, record=None, *, service_text: Optiona
 # Phones
 # ---------------------------------------------------------------------------
 
+_TOLL_FREE = ("1800", "1860")
+
+
 def normalize_phone(raw) -> Optional[str]:
-    """``+<digits>``, or None for a missing or too-short value. Indian numbers
-    written without a country code (10 digits, or 0 + 10) get +91."""
+    """``+91`` and the national digits, or None.
+
+    Kept: +91 with 10 national digits (a trunk 0 after +91 is dropped), or +91
+    with a 1800/1860 toll-free number of 10 or 11 digits. Numbers written
+    without a country code get +91 when they are 10 digits, 0 + 10 digits, or a
+    1800/1860 number. A leading + (or 00) means the digits carry a country
+    code, which must be 91: anything else (+1..., +880..., +961...), and any
+    malformed value, returns None so no ``tel:`` link points abroad."""
     s = _str_or_none(raw)
     if s is None:
         return None
+    s = s.strip()
     d = re.sub(r"\D", "", s)
-    if len(d) == 11 and d.startswith("0"):
-        d = "91" + d[1:]
-    elif len(d) == 10:
-        d = "91" + d
-    if len(d) < 10:
+    has_cc = s.startswith("+")
+    if not has_cc and d.startswith("00") and len(d) > 11:
+        d, has_cc = d[2:], True
+    if not has_cc:
+        if len(d) == 11 and d.startswith("0"):
+            d = "91" + d[1:]
+        elif len(d) == 10 or (len(d) == 11 and d.startswith(_TOLL_FREE)):
+            d = "91" + d
+        elif not (len(d) == 12 and d.startswith("91")):
+            return None
+    if not d.startswith("91"):
         return None
-    return "+" + d
+    nat = d[2:]
+    if len(nat) == 11 and nat.startswith("0"):
+        nat = nat[1:]
+    if len(nat) == 10 or (len(nat) == 11 and nat.startswith(_TOLL_FREE)):
+        return "+91" + nat
+    return None
 
 
 def mask_phone(phone: Optional[str], keep_last: int = 2) -> Optional[str]:
@@ -502,11 +612,17 @@ def mask_phone(phone: Optional[str], keep_last: int = 2) -> Optional[str]:
 
 @dataclass
 class PhoneBook:
-    """facility_id -> call number, its field, and how many other records share it."""
+    """facility_id -> call number, its field, and how many other records share it.
+
+    ``shared_with`` leaves out records the duplicate check pairs with this one;
+    ``duplicate_shared`` counts those. ``unusable``: ids whose record lists a
+    phone value but none that is a usable Indian number."""
 
     phone: dict = field(default_factory=dict)
     source: dict = field(default_factory=dict)
     shared_with: dict = field(default_factory=dict)
+    duplicate_shared: dict = field(default_factory=dict)
+    unusable: set = field(default_factory=set)
 
     def __repr__(self) -> str:  # never print numbers
         return f"PhoneBook({len(self.phone)} numbers)"
@@ -515,32 +631,66 @@ class PhoneBook:
         return len(self.phone)
 
 
-def build_phone_book(raw) -> PhoneBook:
+def _duplicate_partners(duplicates) -> dict:
+    """facility_id -> ids the duplicate check pairs with it. Accepts the
+    ``gold/facility_duplicates.parquet`` frame (``facility_id_a``,
+    ``facility_id_b``) or an iterable of ``(a, b)`` pairs."""
+    partners: dict = {}
+    if duplicates is None:
+        return partners
+    if hasattr(duplicates, "columns"):
+        pairs = zip(duplicates["facility_id_a"], duplicates["facility_id_b"])
+    else:
+        pairs = duplicates
+    for a, b in pairs:
+        a, b = str(a), str(b)
+        partners.setdefault(a, set()).add(b)
+        partners.setdefault(b, set()).add(a)
+    return partners
+
+
+def build_phone_book(raw, duplicates=None) -> PhoneBook:
     """From raw facility rows (``vf.io.read_facilities()``: ``unique_id``,
     ``officialPhone``, ``phone_numbers``). The call number is ``officialPhone``,
-    else the first entry of ``phone_numbers``. Repeated ``unique_id`` rows count
-    once. Sharing is counted over call numbers of distinct facility ids."""
+    else the first usable entry of ``phone_numbers`` (see ``normalize_phone``).
+    Repeated ``unique_id`` rows count once. Sharing is counted over call numbers
+    of distinct facility ids; ``duplicates`` (the WP duplicate pairs) are left
+    out of ``shared_with`` and counted in ``duplicate_shared`` instead, so the
+    same facility listed twice is not called a shared booking line."""
     from . import io
 
     book = PhoneBook()
     cols = set(raw.columns)
+    seen: set = set()
     for r in raw.itertuples(index=False):
         fid = _str_or_none(getattr(r, "unique_id", None) if "unique_id" in cols else getattr(r, "facility_id", None))
-        if fid is None or fid in book.phone:
+        if fid is None or fid in seen:
             continue
-        num, src = normalize_phone(getattr(r, "officialPhone", None) if "officialPhone" in cols else None), "officialPhone"
+        seen.add(fid)
+        official = _str_or_none(getattr(r, "officialPhone", None)) if "officialPhone" in cols else None
+        num, src = normalize_phone(official), "officialPhone"
+        lst: list = []
         if num is None and "phone_numbers" in cols:
             src = "phone_numbers"
             try:
-                lst = io.parse_list(r.phone_numbers)
+                lst = [x for x in io.parse_list(r.phone_numbers) if _str_or_none(x)]
             except Exception:
                 lst = []
             num = next((n for n in (normalize_phone(x) for x in lst) if n), None)
         if num is not None:
             book.phone[fid] = num
             book.source[fid] = src
-    counts = Counter(book.phone.values())
-    book.shared_with = {fid: counts[n] - 1 for fid, n in book.phone.items()}
+        elif official or lst:
+            book.unusable.add(fid)
+    partners = _duplicate_partners(duplicates)
+    by_num: dict = {}
+    for fid, n in book.phone.items():
+        by_num.setdefault(n, set()).add(fid)
+    for fid, n in book.phone.items():
+        others = by_num[n] - {fid}
+        dup = others & partners.get(fid, set())
+        book.shared_with[fid] = len(others - dup)
+        book.duplicate_shared[fid] = len(dup)
     return book
 
 
@@ -548,12 +698,16 @@ _DEFAULT_BOOK: Optional[PhoneBook] = None
 
 
 def load_phone_book() -> PhoneBook:
-    """The phone book from the raw facilities file (cached). Raw data stays
-    local: never write numbers into the repo or a published file."""
+    """The phone book from the raw facilities file (cached), with the duplicate
+    pairs from ``gold/facility_duplicates.parquet`` when it exists. Raw data
+    stays local: never write numbers into the repo or a published file."""
     global _DEFAULT_BOOK
     if _DEFAULT_BOOK is None:
-        from . import io
-        _DEFAULT_BOOK = build_phone_book(io.read_facilities())
+        import pandas as pd
+        from . import io, paths
+        dp = paths.gold_dir() / "facility_duplicates.parquet"
+        dups = pd.read_parquet(dp, columns=["facility_id_a", "facility_id_b"]) if dp.exists() else None
+        _DEFAULT_BOOK = build_phone_book(io.read_facilities(), dups)
     return _DEFAULT_BOOK
 
 
@@ -572,14 +726,22 @@ def call_info(facility_id: str, phone_book: Optional[PhoneBook] = None, *, revea
     book = phone_book if phone_book is not None else load_phone_book()
     num = book.phone.get(facility_id)
     if num is None:
+        if facility_id in book.unusable:
+            note = ("The record's phone number does not look like a valid Indian number, so no Call link is "
+                    "offered. Check the number another way.")
+        else:
+            note = "The record lists no phone number. No phone in the record does not mean the facility has none."
         return {"facility_id": facility_id, "has_phone": False, "phone": None, "masked": True, "tel": None,
-                "source": None, "shared_with": 0,
-                "note": "The record lists no phone number. No phone in the record does not mean the facility has none."}
+                "source": None, "shared_with": 0, "note": note}
     show = bool(reveal) and not demo_mode()
     shared = int(book.shared_with.get(facility_id, 0))
+    dup = int(book.duplicate_shared.get(facility_id, 0))
     note = f"From this facility's record ({book.source.get(facility_id)}). Numbers on web pages can be out of date."
     if shared:
         note += f" The same number is listed on {shared} other record{'' if shared == 1 else 's'}."
+    if dup:
+        note += (f" It is also on {dup} record{'' if dup == 1 else 's'} that may be this same facility "
+                 "listed twice.")
     return {"facility_id": facility_id, "has_phone": True, "phone": num if show else mask_phone(num),
             "masked": not show, "tel": f"tel:{num}" if show else None,
             "source": book.source.get(facility_id), "shared_with": shared, "note": note}
@@ -606,28 +768,32 @@ def build_record_info(fact_tags, facts=None, phone_book: Optional[PhoneBook] = N
     ids = list(dict.fromkeys(facility_ids)) if facility_ids is not None else list(dict.fromkeys(t["facility_id"]))
     tags: dict = {}
     h24_co: dict = {}
-    h24_q: dict = {}
+    h24_q: dict = {}  # fid -> (quote, its other tags); a facility-wide fact wins
     scheme_q: dict = {}
     for fid, tg, txt in zip(t["facility_id"], t["tags"], t["text"]):
         if tg:
             tags.setdefault(fid, set()).update(tg)
             if "h24" in tg:
-                h24_co.setdefault(fid, set()).update(x for x in tg if x != "h24")
-                if fid not in h24_q and isinstance(txt, str):
-                    h24_q[fid] = txt
-        if fid not in scheme_q and isinstance(txt, str) and not R.is_negated(txt) and (
+                other = frozenset(x for x in tg if x != "h24")
+                h24_co.setdefault(fid, set()).update(other)
+                if isinstance(txt, str) and not is_negative(txt) and (
+                        fid not in h24_q or (h24_q[fid][1] and not other)):
+                    h24_q[fid] = (mask_numbers(txt), other)
+        if fid not in scheme_q and isinstance(txt, str) and not is_negative(txt) and (
                 "scheme" in tg or _SCHEME_RX.search(R.normalize_text(txt))):
-            scheme_q[fid] = txt
+            scheme_q[fid] = mask_numbers(txt)
     out = {}
     for fid in ids:
         tg = set(tags.get(fid, ()))
         if fid in scheme_q:
             tg.add("scheme")
+        hq = h24_q.get(fid)
         out[fid] = RecordInfo(
             facility_id=fid, tags=frozenset(tg), h24_cotags=frozenset(h24_co.get(fid, ())),
-            h24_quote=h24_q.get(fid), scheme_quote=scheme_q.get(fid),
+            h24_quote=hq[0] if hq else None, scheme_quote=scheme_q.get(fid),
             has_phone=bool(phone_book and fid in phone_book.phone),
             phone_shared_with=int(phone_book.shared_with.get(fid, 0)) if phone_book else 0,
+            h24_quote_cotags=hq[1] if hq else None,
         )
     return out
 
@@ -657,7 +823,7 @@ def record_info_frame(infos: Mapping[str, RecordInfo]):
     import pandas as pd
     return pd.DataFrame([i.to_row() for i in infos.values()],
                         columns=["facility_id", "tags", "h24_cotags", "h24_quote", "scheme_quote",
-                                 "has_phone", "phone_shared_with"])
+                                 "has_phone", "phone_shared_with", "h24_quote_cotags"])
 
 
 def record_info_from_frame(df) -> dict[str, RecordInfo]:
@@ -671,6 +837,9 @@ def save_record_info(infos: Mapping[str, RecordInfo], path, meta: Optional[Mappi
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     df = record_info_frame(infos)
+    for col in ("h24_quote", "scheme_quote"):
+        if df[col].map(lambda v: isinstance(v, str) and mask_numbers(v) != v).any():
+            raise ValueError(f"{col} still holds a digit run that looks like a phone number")
     tmp = p.with_name(f".{p.name}.{os.getpid()}.tmp")
     try:
         df.to_parquet(tmp, index=False)

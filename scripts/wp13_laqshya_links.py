@@ -273,7 +273,10 @@ def build_report(lq, fac, pool, links, summ, as_of, grades) -> str:
     L.append("- The review is one agent's reading. Hruday's spot-check of the current-certificate links is still "
              "to do before any count goes on screen.\n")
     L.append("- A unit with no candidate is not evidence that the hospital is missing: our names may differ "
-             "beyond what the matcher accepts, or the record's PIN may sit in another district.\n")
+             "beyond what the matcher accepts, or the record's PIN may sit in another district. Recall is not "
+             "measured. One spot-check on 21 Nov (40 random units with no candidate, in districts where our "
+             "pool has a record; the best full-name match in the district read by hand) found no obvious "
+             "missed link.\n")
     L.append("- Some correct links attach to records whose own PIN points to another district (state-pass "
              "links). The line still describes the listed unit; the record's location problem is WP11's.\n")
     L.append("- LaQshya certifies a labour room or a maternity operating theatre on a date. A current "
@@ -296,6 +299,21 @@ def nashik_section(fac, links, grades, pl_obj, as_of) -> list[str]:
                    f"{g.evidence_strength}); tags present: {', '.join(g.tags_present)}; missing for the next "
                    f"grade: {', '.join(g.missing_for_next)}.\n")
         out.append(f"- A fact naming a caesarean: {'yes' if 'csection' in list(g.tags_present) else 'none in the record'}.\n")
+    silver, gold = paths.silver_dir(), paths.gold_dir()
+    facts = pd.read_parquet(silver / "facts.parquet", columns=["facility_id", "text"])
+    ft = facts[facts.facility_id == NASHIK_FID]["text"].drop_duplicates()
+    quotes = ft[ft.str.contains(r"blood bank|matern|SNCU|caesar|c-section|lscs", case=False, regex=True)]
+    out.append(f"- The record has {len(ft)} distinct facts. Those about blood, maternity and newborn care, verbatim: "
+               + "; ".join(f"\"{q}\"" for q in quotes.head(6)) + ".\n")
+    fl_path = gold / "facility_flags.parquet"
+    if fl_path.exists():
+        fl = pd.read_parquet(fl_path)
+        fl = fl[fl.facility_id == NASHIK_FID]
+        if len(fl):
+            out.append("- WP11 flags on the record: " + "; ".join(
+                f"{r.flag} ({r.severity}, {r.signal}): {r.reason}" for r in fl.itertuples()) + "\n")
+        else:
+            out.append("- WP11 flags on the record: none.\n")
     lk = links[links.facility_id == NASHIK_FID]
     for x in lk.itertuples():
         out.append(f"- Candidate link: LaQshya unit `{x.facility_uid}` \"{x.lq_name}\" ({x.lq_type}, "
@@ -311,6 +329,42 @@ def nashik_section(fac, links, grades, pl_obj, as_of) -> list[str]:
     if line:
         out.append(f"\n  page {line['page']}, row {line['row']}, department {line['department']}, "
                    f"validity {line['validity']}, retrieved {line['retrieved']}.\n")
+    out.extend(nashik_rank_check(pl_obj, as_of))
+    return out
+
+
+def nashik_rank_check(pl_obj, as_of) -> list[str]:
+    """Where the record lands in the live ranker for the brief's Maharashtra
+    query, with the line attached by ``PublicList.annotate``. Read-only; skipped
+    (with a note) if the ranker cannot load."""
+    try:
+        from vf import locate, rank
+        idx = rank.load_index(load_post_offices=False)
+    except Exception as e:  # the ranker is owned by another package
+        return [f"- Ranker check skipped: {type(e).__name__}: {e}\n"]
+    out = []
+    for q in ("422002", "422001"):
+        res = locate.resolve(q)
+        a = pl_obj.annotate(rank.rank(idx, "emoc", res).to_dict(), as_of=as_of)
+        where = None
+        for sec in ("results", "unverified_nearby"):
+            for i, c in enumerate(a.get(sec) or [], start=1):
+                if c.get("facility_id") == NASHIK_FID:
+                    where = (sec, i, c)
+        b = a.get("beyond_radius")
+        if where is None and b and b.get("facility_id") == NASHIK_FID:
+            where = ("beyond_radius", 1, b)
+        loc = a["location"]
+        head = (f"- `rank(index, \"emoc\", resolve(\"{q}\"))` ({loc.get('label')}, precision "
+                f"{loc.get('precision_km') or 0:.0f} km): status `{a['status']}`, cards "
+                f"{', '.join(c['name'] for c in a.get('results') or []) or 'none'}. ")
+        if where:
+            sec, i, c = where
+            pl_line = c.get("public_list")
+            out.append(head + f"District Hospital, Nashik is `{sec}` #{i} ({c.get('grade_label')}); "
+                       f"annotate() attaches: {'the line above' if pl_line else 'no line'}.\n")
+        else:
+            out.append(head + "District Hospital, Nashik is not on this answer.\n")
     return out
 
 

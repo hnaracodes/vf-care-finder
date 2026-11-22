@@ -213,7 +213,7 @@ button, input, select { font: inherit; color: inherit; }
 
 .sources { margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--rule-2); font-size: 14.5px; color: var(--ink-2); }
 .loc-note { margin-top: 4px; }
-.dom { font-family: var(--mono); font-size: 13.5px; color: var(--ink); background: #f1ede4; padding: 0 5px; border-radius: 3px; }
+.dom { font-family: var(--mono); font-size: 13.5px; color: var(--ink); background: #f1ede4; padding: 0 5px; border-radius: 3px; overflow-wrap: anywhere; }
 
 /* unverified */
 .unverified { margin-top: 26px; }

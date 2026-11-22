@@ -1,0 +1,4428 @@
+{
+ "meta": {
+  "version": "wp9-findings-v1",
+  "script": "scripts/wp9_findings.py",
+  "created_at_utc": "2026-11-22T04:22:39Z",
+  "git_commit": "0b5259243005acb343ba48facaa4886d55585469",
+  "code_uncommitted": true,
+  "script_sha256": "4f29ba97243e3faa97d112621651aa5fa9fee2f5020c331c566c4d3b35be8bbd",
+  "bundle_dir": "dbapp/bundle",
+  "bundle_created_at_utc": "2026-11-22T04:22:17+00:00",
+  "bundle_git_commit": "0b5259243005acb343ba48facaa4886d55585469",
+  "bundle_versions": {
+   "silver_facilities": "wp1-silver-v3",
+   "recipes": [
+    "v0.2"
+   ],
+   "grade_method": [
+    "student"
+   ],
+   "checks": [
+    "wp11_v2"
+   ],
+   "places": "places-v2",
+   "probability_model": null
+  },
+  "score_status": "provisional (v0 score, D039)",
+  "n_findings": 475,
+  "n_null": 2,
+  "null_keys": [
+   "laqshya.link_candidates",
+   "sealed_eval.results"
+  ],
+  "sources": {
+   "dbapp/bundle/facilities.parquet": "3d0db5db0ffc90554f6d44c6bf5093cb5f5732bec3ea742ab5a80766b1e65aca",
+   "dbapp/bundle/grades.parquet": "f46d0ce67abacc0e8cf8986c56b5e5be2a004d19c1b0741d955b45f511a0a571",
+   "data/silver/facilities.parquet": "37cbc779d27dc44798feb9dc492a7d73e6458194353efbaac71b2819e35fd8ac",
+   "dbapp/bundle/post_offices.parquet": "2dcb227e72b13f13534e82c0e313bccb0d74f13c522a6ecc621ed763cb98b013",
+   "data/gold/model_a_report.json": "049d0f740ef9c9a59122d5077795f8873a013e967a32fcc05abb6722bead9918",
+   "dbapp/bundle/flags.parquet": "8ca7ff602d109d533cc8ac40fec7e3380ac69625df8ff7f26588dda890d9338f",
+   "dbapp/bundle/duplicates.parquet": "a17f24b375e9d400828545104e33c65201864752872cb045dc21306213c00f7b",
+   "data/labels/flag_review.csv": "a2c503074633e84e6ef05f9c9f871b288181fbb3ffe9b78553d3c38b760a33c9",
+   "data/labels/resolver_cases.csv": "122725677e54656b7f06ea2c851db1b5c991a104aa44f6c46980110223b66220",
+   "reports/ranking_scenarios_raw.json": "64013146f34fb2989c9a07c05e4c070e13e67af73159db9399c7c454996fe49f",
+   "data/labels/scenario_judgments.csv": "13cd98a77c2cb5c51049a0ba6326dc63b4cd1b1d1a8785b1eb2bfbeec52a1668",
+   "data/raw/facilities.csv": "47bb1aad11f84a68aed3025d2887665bb164bc38c535c39e59eddb436c556691",
+   "data/silver/facts.parquet": "4650f6be54ec66689a94da7616655184c3b7b71791fbc112e557753c3be95a88"
+  },
+  "warnings": [],
+  "caveats": [
+   "query.brief_dialysis_jaipur: card 1 distance 3.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_dialysis_jaipur: card 2 distance 2.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_dialysis_jaipur: card 3 distance 5.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_dialysis_jaipur: unverified 1 distance 2.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_dialysis_jaipur: unverified 2 distance 2.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_dialysis_jaipur: unverified 3 distance 3.0 km is smaller than the location's precision (about 72 km)",
+   "query.brief_csection_lucknow: card 1 distance 3.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_csection_lucknow: card 2 distance 5.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_csection_lucknow: card 3 distance 5.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_csection_lucknow: unverified 1 distance 0.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_csection_lucknow: unverified 2 distance 1.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_csection_lucknow: unverified 3 distance 1.0 km is smaller than the location's precision (about 19 km)",
+   "query.brief_highrisk_maharashtra: card 1 distance 26.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_highrisk_maharashtra: card 2 distance 18.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_highrisk_maharashtra: card 3 distance 21.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_highrisk_maharashtra: unverified 1 distance 12.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_highrisk_maharashtra: unverified 2 distance 16.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_highrisk_maharashtra: unverified 3 distance 16.0 km is smaller than the location's precision (about 69 km)",
+   "query.brief_trauma_highway: card 1 distance 1.0 km is smaller than the location's precision (about 163 km)",
+   "query.brief_trauma_highway: card 2 distance 40.0 km is smaller than the location's precision (about 163 km)",
+   "query.brief_trauma_highway: card 3 distance 36.0 km is smaller than the location's precision (about 163 km)",
+   "query.brief_trauma_highway: unverified 1 distance 23.0 km is smaller than the location's precision (about 163 km)",
+   "query.brief_trauma_highway: unverified 2 distance 40.0 km is smaller than the location's precision (about 163 km)",
+   "query.brief_trauma_highway: unverified 3 distance 41.0 km is smaller than the location's precision (about 163 km)",
+   "query.cold_open_226001: unverified 1 distance 0.2 km is smaller than the location's precision (about 2 km)",
+   "query.cold_open_226001: unverified 2 distance 0.2 km is smaller than the location's precision (about 2 km)",
+   "query.cold_open_226001: unverified 3 distance 1.0 km is smaller than the location's precision (about 2 km)",
+   "query.remote_emoc_gadchiroli: beyond_radius distance 73.0 km is smaller than the location's precision (about 97 km)"
+  ],
+  "queries": [
+   {
+    "id": "brief_dialysis_jaipur",
+    "status": "ok",
+    "cards": [
+     "Soni Hospital",
+     "NAV Imperial Hospital and Research Centre",
+     "Monilek Hospital and Research Center"
+    ]
+   },
+   {
+    "id": "brief_csection_lucknow",
+    "status": "ok",
+    "cards": [
+     "BNK Hospital",
+     "Elite Hospital",
+     "Krishna Medical Centre"
+    ]
+   },
+   {
+    "id": "brief_dialysis_rural_bihar",
+    "status": "no_reliable_option",
+    "cards": []
+   },
+   {
+    "id": "brief_highrisk_maharashtra",
+    "status": "ok",
+    "cards": [
+     "Bagul Nursing Home & Dr. Bagul’s Hope IVF Center",
+     "Hrudayasparsh Multispeciality Hospital",
+     "Prapti Women's Hospital"
+    ]
+   },
+   {
+    "id": "brief_trauma_highway",
+    "status": "ok",
+    "cards": [
+     "Shri Shyam Hospital",
+     "Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul",
+     "Sachkhand Hospital"
+    ]
+   },
+   {
+    "id": "cold_open_226001",
+    "status": "ok",
+    "cards": [
+     "BNK Hospital",
+     "Elite Hospital",
+     "Krishna Medical Centre"
+    ]
+   },
+   {
+    "id": "highrisk_422002",
+    "status": "ok",
+    "cards": [
+     "Bagul Nursing Home & Dr. Bagul’s Hope IVF Center",
+     "Hrudayasparsh Multispeciality Hospital",
+     "Prapti Women's Hospital"
+    ]
+   },
+   {
+    "id": "remote_emoc_gadchiroli",
+    "status": "no_reliable_option",
+    "cards": []
+   }
+  ],
+  "check_allowlist": "years 1900 to 2100 and 6-digit PIN codes (not after Rs, INR or a currency sign), clock times (H:MM), dates (next to a month name, 2026-11-21, 21/11/2026), list markers at a line start, identifiers (a letter before the number: WP11, v0.2, D044; ordinal or model suffix: 3rd, 1b), commit hashes, real paths and URLs (http(s)://, /, ./, ../, ~/, or a file extension), citations (page, row, table, figure, section, no. or # with an integer and no unit), demo ordinals (card, step, beat, option or rank with one or two digits and no unit), emergency numbers 102, 108 and 112; lines with findings:skip. Durations, money and glued units (45 minutes, Rs.2000, 250mg) are scanned",
+  "check_note": "--check is a token guard, not a context check: a number passes when some finding with the same value and unit (km, ms, %) exists, and an 'X of Y' or 'X/Y' ratio passes when both numbers come from one group. It cannot tell which finding a sentence means; name it with {{key}} and use --strict for captions that matter",
+  "build_s": 3.2
+ },
+ "findings": [
+  {
+   "key": "facilities.records",
+   "group": "facilities",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "rows of the bundle's facilities.parquet: one per real facility after WP1 removed duplicate ids"
+  },
+  {
+   "key": "facilities.usable_locations",
+   "group": "facilities",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "records with both lat and lon set in the bundle (null when missing, outside India, or excluded_unresolved by the WP1 location check)"
+  },
+  {
+   "key": "facilities.no_usable_location",
+   "group": "facilities",
+   "value": 318,
+   "kind": "count",
+   "display": "318",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "records with lat or lon null in the bundle"
+  },
+  {
+   "key": "facilities.operator.private",
+   "group": "facilities",
+   "value": 8835,
+   "kind": "count",
+   "display": "8,835",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "records whose operator_type is 'private' ('unknown' = null in the record)"
+  },
+  {
+   "key": "facilities.operator.public",
+   "group": "facilities",
+   "value": 467,
+   "kind": "count",
+   "display": "467",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "records whose operator_type is 'public' ('unknown' = null in the record)"
+  },
+  {
+   "key": "facilities.operator.unknown",
+   "group": "facilities",
+   "value": 687,
+   "kind": "count",
+   "display": "687",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "records whose operator_type is 'unknown' ('unknown' = null in the record)"
+  },
+  {
+   "key": "facilities.private_share",
+   "group": "facilities",
+   "value": 0.884473,
+   "kind": "share",
+   "display": "88%",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "private records / all bundle records (records with no operator_type count as not private)"
+  },
+  {
+   "key": "facilities.private_share_of_known_operator",
+   "group": "facilities",
+   "value": 0.949796,
+   "kind": "share",
+   "display": "95%",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "private records / records with a known operator_type"
+  },
+  {
+   "key": "grades.emoc.grade_0",
+   "group": "grades",
+   "value": 5325,
+   "kind": "count",
+   "display": "5,325",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: records graded 0 (none)"
+  },
+  {
+   "key": "grades.emoc.grade_1",
+   "group": "grades",
+   "value": 4232,
+   "kind": "count",
+   "display": "4,232",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.emoc.grade_2",
+   "group": "grades",
+   "value": 391,
+   "kind": "count",
+   "display": "391",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.emoc.grade_3",
+   "group": "grades",
+   "value": 41,
+   "kind": "count",
+   "display": "41",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.emoc.grade_2plus",
+   "group": "grades",
+   "value": 432,
+   "kind": "count",
+   "display": "432",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.emoc.recommendable",
+   "group": "grades",
+   "value": 413,
+   "kind": "count",
+   "display": "413",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Emergency C-section and high-risk delivery: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.nicu.grade_0",
+   "group": "grades",
+   "value": 8513,
+   "kind": "count",
+   "display": "8,513",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): records graded 0 (none)"
+  },
+  {
+   "key": "grades.nicu.grade_1",
+   "group": "grades",
+   "value": 770,
+   "kind": "count",
+   "display": "770",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.nicu.grade_2",
+   "group": "grades",
+   "value": 528,
+   "kind": "count",
+   "display": "528",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): records graded 2 (supported)"
+  },
+  {
+   "key": "grades.nicu.grade_3",
+   "group": "grades",
+   "value": 178,
+   "kind": "count",
+   "display": "178",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.nicu.grade_2plus",
+   "group": "grades",
+   "value": 706,
+   "kind": "count",
+   "display": "706",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.nicu.recommendable",
+   "group": "grades",
+   "value": 643,
+   "kind": "count",
+   "display": "643",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Newborn intensive care (NICU): graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.dialysis.grade_0",
+   "group": "grades",
+   "value": 7631,
+   "kind": "count",
+   "display": "7,631",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: records graded 0 (none)"
+  },
+  {
+   "key": "grades.dialysis.grade_1",
+   "group": "grades",
+   "value": 1322,
+   "kind": "count",
+   "display": "1,322",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.dialysis.grade_2",
+   "group": "grades",
+   "value": 556,
+   "kind": "count",
+   "display": "556",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.dialysis.grade_3",
+   "group": "grades",
+   "value": 480,
+   "kind": "count",
+   "display": "480",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.dialysis.grade_2plus",
+   "group": "grades",
+   "value": 1036,
+   "kind": "count",
+   "display": "1,036",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.dialysis.recommendable",
+   "group": "grades",
+   "value": 982,
+   "kind": "count",
+   "display": "982",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Dialysis: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.icu.grade_0",
+   "group": "grades",
+   "value": 7173,
+   "kind": "count",
+   "display": "7,173",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: records graded 0 (none)"
+  },
+  {
+   "key": "grades.icu.grade_1",
+   "group": "grades",
+   "value": 543,
+   "kind": "count",
+   "display": "543",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.icu.grade_2",
+   "group": "grades",
+   "value": 1850,
+   "kind": "count",
+   "display": "1,850",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.icu.grade_3",
+   "group": "grades",
+   "value": 423,
+   "kind": "count",
+   "display": "423",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.icu.grade_2plus",
+   "group": "grades",
+   "value": 2273,
+   "kind": "count",
+   "display": "2,273",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.icu.recommendable",
+   "group": "grades",
+   "value": 2046,
+   "kind": "count",
+   "display": "2,046",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Intensive care with ventilator: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.cardiac_surgery.grade_0",
+   "group": "grades",
+   "value": 9075,
+   "kind": "count",
+   "display": "9,075",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): records graded 0 (none)"
+  },
+  {
+   "key": "grades.cardiac_surgery.grade_1",
+   "group": "grades",
+   "value": 360,
+   "kind": "count",
+   "display": "360",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.cardiac_surgery.grade_2",
+   "group": "grades",
+   "value": 435,
+   "kind": "count",
+   "display": "435",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): records graded 2 (supported)"
+  },
+  {
+   "key": "grades.cardiac_surgery.grade_3",
+   "group": "grades",
+   "value": 119,
+   "kind": "count",
+   "display": "119",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.cardiac_surgery.grade_2plus",
+   "group": "grades",
+   "value": 554,
+   "kind": "count",
+   "display": "554",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.cardiac_surgery.recommendable",
+   "group": "grades",
+   "value": 506,
+   "kind": "count",
+   "display": "506",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart surgery (bypass, valve): graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.cath_lab.grade_0",
+   "group": "grades",
+   "value": 6834,
+   "kind": "count",
+   "display": "6,834",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): records graded 0 (none)"
+  },
+  {
+   "key": "grades.cath_lab.grade_1",
+   "group": "grades",
+   "value": 2464,
+   "kind": "count",
+   "display": "2,464",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.cath_lab.grade_2",
+   "group": "grades",
+   "value": 210,
+   "kind": "count",
+   "display": "210",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): records graded 2 (supported)"
+  },
+  {
+   "key": "grades.cath_lab.grade_3",
+   "group": "grades",
+   "value": 481,
+   "kind": "count",
+   "display": "481",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.cath_lab.grade_2plus",
+   "group": "grades",
+   "value": 691,
+   "kind": "count",
+   "display": "691",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.cath_lab.recommendable",
+   "group": "grades",
+   "value": 607,
+   "kind": "count",
+   "display": "607",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Heart attack care (angiography, angioplasty): graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.mri.grade_0",
+   "group": "grades",
+   "value": 6663,
+   "kind": "count",
+   "display": "6,663",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: records graded 0 (none)"
+  },
+  {
+   "key": "grades.mri.grade_1",
+   "group": "grades",
+   "value": 2392,
+   "kind": "count",
+   "display": "2,392",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.mri.grade_2",
+   "group": "grades",
+   "value": 304,
+   "kind": "count",
+   "display": "304",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.mri.grade_3",
+   "group": "grades",
+   "value": 630,
+   "kind": "count",
+   "display": "630",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.mri.grade_2plus",
+   "group": "grades",
+   "value": 934,
+   "kind": "count",
+   "display": "934",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.mri.recommendable",
+   "group": "grades",
+   "value": 889,
+   "kind": "count",
+   "display": "889",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "MRI scan: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.ct.grade_0",
+   "group": "grades",
+   "value": 6537,
+   "kind": "count",
+   "display": "6,537",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: records graded 0 (none)"
+  },
+  {
+   "key": "grades.ct.grade_1",
+   "group": "grades",
+   "value": 2030,
+   "kind": "count",
+   "display": "2,030",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.ct.grade_2",
+   "group": "grades",
+   "value": 446,
+   "kind": "count",
+   "display": "446",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.ct.grade_3",
+   "group": "grades",
+   "value": 976,
+   "kind": "count",
+   "display": "976",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.ct.grade_2plus",
+   "group": "grades",
+   "value": 1422,
+   "kind": "count",
+   "display": "1,422",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.ct.recommendable",
+   "group": "grades",
+   "value": 1330,
+   "kind": "count",
+   "display": "1,330",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "CT scan: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.trauma.grade_0",
+   "group": "grades",
+   "value": 4952,
+   "kind": "count",
+   "display": "4,952",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: records graded 0 (none)"
+  },
+  {
+   "key": "grades.trauma.grade_1",
+   "group": "grades",
+   "value": 3905,
+   "kind": "count",
+   "display": "3,905",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.trauma.grade_2",
+   "group": "grades",
+   "value": 669,
+   "kind": "count",
+   "display": "669",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.trauma.grade_3",
+   "group": "grades",
+   "value": 463,
+   "kind": "count",
+   "display": "463",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.trauma.grade_2plus",
+   "group": "grades",
+   "value": 1132,
+   "kind": "count",
+   "display": "1,132",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.trauma.recommendable",
+   "group": "grades",
+   "value": 1056,
+   "kind": "count",
+   "display": "1,056",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Trauma and accident care: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.burns.grade_0",
+   "group": "grades",
+   "value": 8261,
+   "kind": "count",
+   "display": "8,261",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: records graded 0 (none)"
+  },
+  {
+   "key": "grades.burns.grade_1",
+   "group": "grades",
+   "value": 1583,
+   "kind": "count",
+   "display": "1,583",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.burns.grade_2",
+   "group": "grades",
+   "value": 71,
+   "kind": "count",
+   "display": "71",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.burns.grade_3",
+   "group": "grades",
+   "value": 74,
+   "kind": "count",
+   "display": "74",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.burns.grade_2plus",
+   "group": "grades",
+   "value": 145,
+   "kind": "count",
+   "display": "145",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.burns.recommendable",
+   "group": "grades",
+   "value": 130,
+   "kind": "count",
+   "display": "130",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Burn care: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.neurosurgery.grade_0",
+   "group": "grades",
+   "value": 7681,
+   "kind": "count",
+   "display": "7,681",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: records graded 0 (none)"
+  },
+  {
+   "key": "grades.neurosurgery.grade_1",
+   "group": "grades",
+   "value": 1106,
+   "kind": "count",
+   "display": "1,106",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.neurosurgery.grade_2",
+   "group": "grades",
+   "value": 805,
+   "kind": "count",
+   "display": "805",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: records graded 2 (supported)"
+  },
+  {
+   "key": "grades.neurosurgery.grade_3",
+   "group": "grades",
+   "value": 397,
+   "kind": "count",
+   "display": "397",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.neurosurgery.grade_2plus",
+   "group": "grades",
+   "value": 1202,
+   "kind": "count",
+   "display": "1,202",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.neurosurgery.recommendable",
+   "group": "grades",
+   "value": 1045,
+   "kind": "count",
+   "display": "1,045",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Head injury and brain surgery: graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.oncology.grade_0",
+   "group": "grades",
+   "value": 7982,
+   "kind": "count",
+   "display": "7,982",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): records graded 0 (none)"
+  },
+  {
+   "key": "grades.oncology.grade_1",
+   "group": "grades",
+   "value": 1565,
+   "kind": "count",
+   "display": "1,565",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): records graded 1 (claimed)"
+  },
+  {
+   "key": "grades.oncology.grade_2",
+   "group": "grades",
+   "value": 277,
+   "kind": "count",
+   "display": "277",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): records graded 2 (supported)"
+  },
+  {
+   "key": "grades.oncology.grade_3",
+   "group": "grades",
+   "value": 165,
+   "kind": "count",
+   "display": "165",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): records graded 3 (corroborated)"
+  },
+  {
+   "key": "grades.oncology.grade_2plus",
+   "group": "grades",
+   "value": 442,
+   "kind": "count",
+   "display": "442",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): records graded 2 or 3 (supported or corroborated by facts in the record)"
+  },
+  {
+   "key": "grades.oncology.recommendable",
+   "group": "grades",
+   "value": 417,
+   "kind": "count",
+   "display": "417",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "Cancer treatment (chemotherapy, radiotherapy): graded 2+ and no blocking (major) WP11 flag for this line, as vf.rank.load_index builds it from the bundle; location not required"
+  },
+  {
+   "key": "grades.pairs_grade_2plus",
+   "group": "grades",
+   "value": 10969,
+   "kind": "count",
+   "display": "10,969",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "facility-line pairs graded 2 or 3, over all 12 lines"
+  },
+  {
+   "key": "emoc.grade_2plus",
+   "group": "emoc",
+   "value": 432,
+   "kind": "count",
+   "display": "432",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "emergency C-section line graded 2+; under recipe v0.2 grade 2 needs a fact tagged csection (a caesarean named in the record)"
+  },
+  {
+   "key": "emoc.records_naming_csection",
+   "group": "emoc",
+   "value": 432,
+   "kind": "count",
+   "display": "432",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "emoc rows whose tags_present includes csection: the record has a fact naming a caesarean"
+  },
+  {
+   "key": "emoc.csection_records_without_blood",
+   "group": "emoc",
+   "value": 373,
+   "kind": "count",
+   "display": "373",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "of the records naming a caesarean, those with no fact tagged blood (blood bank or transfusion)"
+  },
+  {
+   "key": "emoc.csection_records_without_blood_share",
+   "group": "emoc",
+   "value": 0.863426,
+   "kind": "share",
+   "display": "86%",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "csection records without a blood fact / csection records"
+  },
+  {
+   "key": "emoc.specialty_label_records",
+   "group": "emoc",
+   "value": 4489,
+   "kind": "count",
+   "display": "4,489",
+   "source_file": "data/silver/facilities.parquet",
+   "how_computed": "bundle records whose deduped specialties list (silver/facilities.parquet) contains 'gynecologyAndObstetrics'. One definition: a specialty label is a claim, not a service"
+  },
+  {
+   "key": "emoc.specialty_label_records_grade_2plus",
+   "group": "emoc",
+   "value": 418,
+   "kind": "count",
+   "display": "418",
+   "source_file": "data/silver/facilities.parquet",
+   "how_computed": "records listing 'gynecologyAndObstetrics' that are also graded 2+ on the emoc line"
+  },
+  {
+   "key": "emoc.post_office_points",
+   "group": "emoc",
+   "value": 114202,
+   "kind": "count",
+   "display": "114,202",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct (lat, lon) points in the bundle's post_offices.parquet (non-suspect geocoded offices, one row per placeholder point)"
+  },
+  {
+   "key": "emoc.coverage_50km_specialty_label",
+   "group": "emoc",
+   "value": 0.81277,
+   "kind": "share",
+   "display": "81.3%",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "share of those post-office points within 50 km straight-line of a record listing 'gynecologyAndObstetrics' with a usable location. A fact about records, not about care"
+  },
+  {
+   "key": "emoc.coverage_50km_grade_2plus",
+   "group": "emoc",
+   "value": 0.401762,
+   "kind": "share",
+   "display": "40.2%",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "share of those post-office points within 50 km straight-line of a record graded 2+ on emoc (names a caesarean) with a usable location. A fact about records, not about care"
+  },
+  {
+   "key": "tagger.shipped.macro_f1",
+   "group": "tagger",
+   "value": 0.9132,
+   "kind": "score",
+   "display": "0.91 (0.90 to 0.93)",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest): macro F1 over 24 evidence tags on 777 agent-labeled gold facts; 95% interval from a stratified bootstrap (2,000 resamples)"
+  },
+  {
+   "key": "tagger.shipped.macro_f1_ci_low",
+   "group": "tagger",
+   "value": 0.8956,
+   "kind": "score",
+   "display": "0.90",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest): lower end of the 95% interval"
+  },
+  {
+   "key": "tagger.shipped.macro_f1_ci_high",
+   "group": "tagger",
+   "value": 0.9281,
+   "kind": "score",
+   "display": "0.93",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest): upper end of the 95% interval"
+  },
+  {
+   "key": "tagger.shipped.macro_precision",
+   "group": "tagger",
+   "value": 0.9404,
+   "kind": "score",
+   "display": "0.94",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest): macro precision on gold"
+  },
+  {
+   "key": "tagger.shipped.macro_recall",
+   "group": "tagger",
+   "value": 0.9023,
+   "kind": "score",
+   "display": "0.90",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest): macro recall on gold"
+  },
+  {
+   "key": "tagger.regex.macro_f1",
+   "group": "tagger",
+   "value": 0.8903,
+   "kind": "score",
+   "display": "0.89 (0.87 to 0.91)",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "regex v0.2: macro F1 over 24 evidence tags on 777 agent-labeled gold facts; 95% interval from a stratified bootstrap (2,000 resamples)"
+  },
+  {
+   "key": "tagger.regex.macro_f1_ci_low",
+   "group": "tagger",
+   "value": 0.8719,
+   "kind": "score",
+   "display": "0.87",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "regex v0.2: lower end of the 95% interval"
+  },
+  {
+   "key": "tagger.regex.macro_f1_ci_high",
+   "group": "tagger",
+   "value": 0.9066,
+   "kind": "score",
+   "display": "0.91",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "regex v0.2: upper end of the 95% interval"
+  },
+  {
+   "key": "tagger.regex.macro_precision",
+   "group": "tagger",
+   "value": 0.9334,
+   "kind": "score",
+   "display": "0.93",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "regex v0.2: macro precision on gold"
+  },
+  {
+   "key": "tagger.regex.macro_recall",
+   "group": "tagger",
+   "value": 0.8676,
+   "kind": "score",
+   "display": "0.87",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "regex v0.2: macro recall on gold"
+  },
+  {
+   "key": "tagger.teacher.macro_f1",
+   "group": "tagger",
+   "value": 0.8885,
+   "kind": "score",
+   "display": "0.89 (0.87 to 0.90)",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "LLM teacher labels: macro F1 over 24 evidence tags on 777 agent-labeled gold facts; 95% interval from a stratified bootstrap (2,000 resamples)"
+  },
+  {
+   "key": "tagger.teacher.macro_f1_ci_low",
+   "group": "tagger",
+   "value": 0.8698,
+   "kind": "score",
+   "display": "0.87",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "LLM teacher labels: lower end of the 95% interval"
+  },
+  {
+   "key": "tagger.teacher.macro_f1_ci_high",
+   "group": "tagger",
+   "value": 0.9042,
+   "kind": "score",
+   "display": "0.90",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "LLM teacher labels: upper end of the 95% interval"
+  },
+  {
+   "key": "tagger.teacher.macro_precision",
+   "group": "tagger",
+   "value": 0.8921,
+   "kind": "score",
+   "display": "0.89",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "LLM teacher labels: macro precision on gold"
+  },
+  {
+   "key": "tagger.teacher.macro_recall",
+   "group": "tagger",
+   "value": 0.8952,
+   "kind": "score",
+   "display": "0.90",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "LLM teacher labels: macro recall on gold"
+  },
+  {
+   "key": "tagger.student_1b.macro_f1",
+   "group": "tagger",
+   "value": 0.9065,
+   "kind": "score",
+   "display": "0.91 (0.89 to 0.92)",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "student 1b alone: macro F1 over 24 evidence tags on 777 agent-labeled gold facts; 95% interval from a stratified bootstrap (2,000 resamples)"
+  },
+  {
+   "key": "tagger.student_1b.macro_f1_ci_low",
+   "group": "tagger",
+   "value": 0.8888,
+   "kind": "score",
+   "display": "0.89",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "student 1b alone: lower end of the 95% interval"
+  },
+  {
+   "key": "tagger.student_1b.macro_f1_ci_high",
+   "group": "tagger",
+   "value": 0.9205,
+   "kind": "score",
+   "display": "0.92",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "student 1b alone: upper end of the 95% interval"
+  },
+  {
+   "key": "tagger.student_1b.macro_precision",
+   "group": "tagger",
+   "value": 0.9082,
+   "kind": "score",
+   "display": "0.91",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "student 1b alone: macro precision on gold"
+  },
+  {
+   "key": "tagger.student_1b.macro_recall",
+   "group": "tagger",
+   "value": 0.9112,
+   "kind": "score",
+   "display": "0.91",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "student 1b alone: macro recall on gold"
+  },
+  {
+   "key": "tagger.gold_rows",
+   "group": "tagger",
+   "value": 777,
+   "kind": "count",
+   "display": "777",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "distinct fact texts in the gold set (labels/gold_facts.csv), labeled by agents, never used for training"
+  },
+  {
+   "key": "tagger.tags",
+   "group": "tagger",
+   "value": 24,
+   "kind": "count",
+   "display": "24",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "evidence tags scored (recipe v0.2)"
+  },
+  {
+   "key": "tagger.shipped_minus_regex_ci_low",
+   "group": "tagger",
+   "value": 0.0165,
+   "kind": "score",
+   "display": "0.017",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "paired bootstrap 95% interval of shipped minus regex macro F1 on gold: lower end"
+  },
+  {
+   "key": "tagger.shipped_minus_regex_ci_high",
+   "group": "tagger",
+   "value": 0.0293,
+   "kind": "score",
+   "display": "0.029",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "paired bootstrap 95% interval of shipped minus regex macro F1 on gold: upper end"
+  },
+  {
+   "key": "tagger.student_tags_shipped",
+   "group": "tagger",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "tags the student model ships on (ob_delivery, h24, icu, ventilator); regex v0.2 on the rest"
+  },
+  {
+   "key": "tagger.teacher_texts_train",
+   "group": "tagger",
+   "value": 23441,
+   "kind": "count",
+   "display": "23,441",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "teacher-labeled texts in the student's train split"
+  },
+  {
+   "key": "tagger.teacher_texts_val",
+   "group": "tagger",
+   "value": 5859,
+   "kind": "count",
+   "display": "5,859",
+   "source_file": "data/gold/model_a_report.json",
+   "how_computed": "teacher-labeled texts in the student's val split"
+  },
+  {
+   "key": "trust.flag_rows",
+   "group": "trust",
+   "value": 3350,
+   "kind": "count",
+   "display": "3,350",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "rows in the bundle's flags.parquet (WP11)"
+  },
+  {
+   "key": "trust.facilities_flagged",
+   "group": "trust",
+   "value": 2471,
+   "kind": "count",
+   "display": "2,471",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with at least one WP11 flag"
+  },
+  {
+   "key": "trust.facilities_flagged_share",
+   "group": "trust",
+   "value": 0.247372,
+   "kind": "share",
+   "display": "25%",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "records with a flag / bundle records"
+  },
+  {
+   "key": "trust.implausible_claim.major.rows",
+   "group": "trust",
+   "value": 1039,
+   "kind": "count",
+   "display": "1,039",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "implausible_claim flags of severity major"
+  },
+  {
+   "key": "trust.implausible_claim.major.facilities",
+   "group": "trust",
+   "value": 783,
+   "kind": "count",
+   "display": "783",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with a major implausible_claim flag"
+  },
+  {
+   "key": "trust.location_conflict.major.rows",
+   "group": "trust",
+   "value": 405,
+   "kind": "count",
+   "display": "405",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "location_conflict flags of severity major"
+  },
+  {
+   "key": "trust.location_conflict.major.facilities",
+   "group": "trust",
+   "value": 405,
+   "kind": "count",
+   "display": "405",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with a major location_conflict flag"
+  },
+  {
+   "key": "trust.location_conflict.minor.rows",
+   "group": "trust",
+   "value": 970,
+   "kind": "count",
+   "display": "970",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "location_conflict flags of severity minor"
+  },
+  {
+   "key": "trust.location_conflict.minor.facilities",
+   "group": "trust",
+   "value": 970,
+   "kind": "count",
+   "display": "970",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with a minor location_conflict flag"
+  },
+  {
+   "key": "trust.possible_merge.major.rows",
+   "group": "trust",
+   "value": 81,
+   "kind": "count",
+   "display": "81",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "possible_merge flags of severity major"
+  },
+  {
+   "key": "trust.possible_merge.major.facilities",
+   "group": "trust",
+   "value": 81,
+   "kind": "count",
+   "display": "81",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with a major possible_merge flag"
+  },
+  {
+   "key": "trust.possible_merge.minor.rows",
+   "group": "trust",
+   "value": 855,
+   "kind": "count",
+   "display": "855",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "possible_merge flags of severity minor"
+  },
+  {
+   "key": "trust.possible_merge.minor.facilities",
+   "group": "trust",
+   "value": 855,
+   "kind": "count",
+   "display": "855",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with a minor possible_merge flag"
+  },
+  {
+   "key": "trust.signal.city_mismatch",
+   "group": "trust",
+   "value": 180,
+   "kind": "count",
+   "display": "180",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'city_mismatch'"
+  },
+  {
+   "key": "trust.signal.coord_excluded",
+   "group": "trust",
+   "value": 282,
+   "kind": "count",
+   "display": "282",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'coord_excluded'"
+  },
+  {
+   "key": "trust.signal.coord_unresolved",
+   "group": "trust",
+   "value": 123,
+   "kind": "count",
+   "display": "123",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'coord_unresolved'"
+  },
+  {
+   "key": "trust.signal.moved_to_pin",
+   "group": "trust",
+   "value": 785,
+   "kind": "count",
+   "display": "785",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'moved_to_pin'"
+  },
+  {
+   "key": "trust.signal.name_joins_two",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'name_joins_two'"
+  },
+  {
+   "key": "trust.signal.state_mismatch_city_mismatch",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'state_mismatch+city_mismatch'"
+  },
+  {
+   "key": "trust.signal.text_other_address",
+   "group": "trust",
+   "value": 850,
+   "kind": "count",
+   "display": "850",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'text_other_address'"
+  },
+  {
+   "key": "trust.signal.text_other_address_shared_website",
+   "group": "trust",
+   "value": 81,
+   "kind": "count",
+   "display": "81",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'text_other_address+shared_website'"
+  },
+  {
+   "key": "trust.signal.type_cannot_offer",
+   "group": "trust",
+   "value": 1039,
+   "kind": "count",
+   "display": "1,039",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "flag rows whose signal is 'type_cannot_offer'"
+  },
+  {
+   "key": "trust.blocked_pairs",
+   "group": "trust",
+   "value": 905,
+   "kind": "count",
+   "display": "905",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "facility-line pairs graded 2+ that a major flag blocks from recommendation (the record's own major flags, or a major implausible_claim on that line), as vf.rank.load_index builds them"
+  },
+  {
+   "key": "trust.blocked_facilities",
+   "group": "trust",
+   "value": 441,
+   "kind": "count",
+   "display": "441",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "distinct records with at least one blocked graded 2+ line"
+  },
+  {
+   "key": "trust.duplicate_pairs",
+   "group": "trust",
+   "value": 75,
+   "kind": "count",
+   "display": "75",
+   "source_file": "dbapp/bundle/duplicates.parquet",
+   "how_computed": "likely-duplicate record pairs (WP11); the app shows one card and 'also listed as'"
+  },
+  {
+   "key": "trust.review.rows",
+   "group": "trust",
+   "value": 322,
+   "kind": "count",
+   "display": "322",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "rows in the WP11 hand review, read by an agent (not by Hruday or a clinician)"
+  },
+  {
+   "key": "trust.review.correct",
+   "group": "trust",
+   "value": 245,
+   "kind": "count",
+   "display": "245",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "review rows marked 'correct'"
+  },
+  {
+   "key": "trust.review.unsure",
+   "group": "trust",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "review rows marked 'unsure'"
+  },
+  {
+   "key": "trust.review.wrong",
+   "group": "trust",
+   "value": 76,
+   "kind": "count",
+   "display": "76",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "review rows marked 'wrong'"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.near_same_name.flagged.correct",
+   "group": "trust",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal near_same_name, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.near_same_name.flagged.reviewed",
+   "group": "trust",
+   "value": 22,
+   "kind": "count",
+   "display": "22",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal near_same_name, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.near_same_name.flagged.precision",
+   "group": "trust",
+   "value": 0.636364,
+   "kind": "share",
+   "display": "64%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal near_same_name, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.same_site_and_pin.flagged.correct",
+   "group": "trust",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal same_site_and_pin, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.same_site_and_pin.flagged.reviewed",
+   "group": "trust",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal same_site_and_pin, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.duplicate_of.same_site_and_pin.flagged.precision",
+   "group": "trust",
+   "value": 0.0,
+   "kind": "share",
+   "display": "0%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check duplicate_of, signal same_site_and_pin, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.moderate.graded.correct",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal moderate, sample graded: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.moderate.graded.reviewed",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal moderate, sample graded: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.moderate.graded.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal moderate, sample graded: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.strong.graded.correct",
+   "group": "trust",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal strong, sample graded: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.strong.graded.reviewed",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal strong, sample graded: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.strong.graded.precision",
+   "group": "trust",
+   "value": 0.8,
+   "kind": "share",
+   "display": "80%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal strong, sample graded: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.thin.graded.correct",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal thin, sample graded: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.thin.graded.reviewed",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal thin, sample graded: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.evidence_strength.thin.graded.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check evidence_strength, signal thin, sample graded: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.few_beds.flagged.correct",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal few_beds, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.few_beds.flagged.reviewed",
+   "group": "trust",
+   "value": 11,
+   "kind": "count",
+   "display": "11",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal few_beds, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.few_beds.flagged.precision",
+   "group": "trust",
+   "value": 0.454545,
+   "kind": "share",
+   "display": "45%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal few_beds, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged.correct",
+   "group": "trust",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged.precision",
+   "group": "trust",
+   "value": 0.933333,
+   "kind": "share",
+   "display": "93%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged_grade2.correct",
+   "group": "trust",
+   "value": 13,
+   "kind": "count",
+   "display": "13",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged_grade2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged_grade2.reviewed",
+   "group": "trust",
+   "value": 20,
+   "kind": "count",
+   "display": "20",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged_grade2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.implausible_claim.type_cannot_offer.flagged_grade2.precision",
+   "group": "trust",
+   "value": 0.65,
+   "kind": "share",
+   "display": "65%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check implausible_claim, signal type_cannot_offer, sample flagged_grade2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.city_mismatch.flagged.correct",
+   "group": "trust",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal city_mismatch, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.city_mismatch.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal city_mismatch, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.city_mismatch.flagged.precision",
+   "group": "trust",
+   "value": 0.933333,
+   "kind": "share",
+   "display": "93%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal city_mismatch, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_excluded.flagged.correct",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_excluded, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_excluded.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_excluded, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_excluded.flagged.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_excluded, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_unresolved.flagged.correct",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_unresolved, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_unresolved.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_unresolved, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.coord_unresolved.flagged.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal coord_unresolved, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.moved_to_pin.flagged.correct",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal moved_to_pin, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.moved_to_pin.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal moved_to_pin, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.moved_to_pin.flagged.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal moved_to_pin, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.state_mismatch_city_mismatch.flagged.correct",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal state_mismatch+city_mismatch, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.state_mismatch_city_mismatch.flagged.reviewed",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal state_mismatch+city_mismatch, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.location_conflict.state_mismatch_city_mismatch.flagged.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check location_conflict, signal state_mismatch+city_mismatch, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.name_joins_two.flagged.correct",
+   "group": "trust",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal name_joins_two, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.name_joins_two.flagged.reviewed",
+   "group": "trust",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal name_joins_two, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.name_joins_two.flagged.precision",
+   "group": "trust",
+   "value": 0.555556,
+   "kind": "share",
+   "display": "56%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal name_joins_two, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.shared_website.flagged.correct",
+   "group": "trust",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal shared_website, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.shared_website.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal shared_website, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.shared_website.flagged.precision",
+   "group": "trust",
+   "value": 0.533333,
+   "kind": "share",
+   "display": "53%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal shared_website, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.specialty_breadth.flagged.correct",
+   "group": "trust",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal specialty_breadth, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.specialty_breadth.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal specialty_breadth, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.specialty_breadth.flagged.precision",
+   "group": "trust",
+   "value": 0.0,
+   "kind": "share",
+   "display": "0%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal specialty_breadth, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.text_other_address.flagged.correct",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal text_other_address, sample flagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.text_other_address.flagged.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal text_other_address, sample flagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.possible_merge.text_other_address.flagged.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check possible_merge, signal text_other_address, sample flagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r1.unflagged.none.unflagged.correct",
+   "group": "trust",
+   "value": 17,
+   "kind": "count",
+   "display": "17",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check unflagged, signal (none), sample unflagged: rows marked correct"
+  },
+  {
+   "key": "trust.review.r1.unflagged.none.unflagged.reviewed",
+   "group": "trust",
+   "value": 20,
+   "kind": "count",
+   "display": "20",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check unflagged, signal (none), sample unflagged: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r1.unflagged.none.unflagged.precision",
+   "group": "trust",
+   "value": 0.85,
+   "kind": "share",
+   "display": "85%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 1, check unflagged, signal (none), sample unflagged: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name.flagged_r2.correct",
+   "group": "trust",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name, sample flagged_r2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name.flagged_r2.reviewed",
+   "group": "trust",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name, sample flagged_r2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name.flagged_r2.precision",
+   "group": "trust",
+   "value": 0.7,
+   "kind": "share",
+   "display": "70%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name, sample flagged_r2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name_same_site_and_pin.flagged_r2.correct",
+   "group": "trust",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name+same_site_and_pin, sample flagged_r2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name_same_site_and_pin.flagged_r2.reviewed",
+   "group": "trust",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name+same_site_and_pin, sample flagged_r2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.near_same_name_same_site_and_pin.flagged_r2.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal near_same_name+same_site_and_pin, sample flagged_r2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.same_site_and_pin.flagged_r2.correct",
+   "group": "trust",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal same_site_and_pin, sample flagged_r2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.same_site_and_pin.flagged_r2.reviewed",
+   "group": "trust",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal same_site_and_pin, sample flagged_r2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r2.duplicate_of.same_site_and_pin.flagged_r2.precision",
+   "group": "trust",
+   "value": 0.857143,
+   "kind": "share",
+   "display": "86%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check duplicate_of, signal same_site_and_pin, sample flagged_r2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r2.implausible_claim.type_cannot_offer.flagged_grade2_r2.correct",
+   "group": "trust",
+   "value": 17,
+   "kind": "count",
+   "display": "17",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check implausible_claim, signal type_cannot_offer, sample flagged_grade2_r2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r2.implausible_claim.type_cannot_offer.flagged_grade2_r2.reviewed",
+   "group": "trust",
+   "value": 20,
+   "kind": "count",
+   "display": "20",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check implausible_claim, signal type_cannot_offer, sample flagged_grade2_r2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r2.implausible_claim.type_cannot_offer.flagged_grade2_r2.precision",
+   "group": "trust",
+   "value": 0.85,
+   "kind": "share",
+   "display": "85%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check implausible_claim, signal type_cannot_offer, sample flagged_grade2_r2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r2.possible_merge_major.text_other_address_shared_website.flagged_r2.correct",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check possible_merge_major, signal text_other_address+shared_website, sample flagged_r2: rows marked correct"
+  },
+  {
+   "key": "trust.review.r2.possible_merge_major.text_other_address_shared_website.flagged_r2.reviewed",
+   "group": "trust",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check possible_merge_major, signal text_other_address+shared_website, sample flagged_r2: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r2.possible_merge_major.text_other_address_shared_website.flagged_r2.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 2, check possible_merge_major, signal text_other_address+shared_website, sample flagged_r2: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address.new_after_state_fix.correct",
+   "group": "trust",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address, sample new_after_state_fix: rows marked correct"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address.new_after_state_fix.reviewed",
+   "group": "trust",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address, sample new_after_state_fix: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address.new_after_state_fix.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address, sample new_after_state_fix: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address_shared_website.new_after_state_fix.correct",
+   "group": "trust",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address+shared_website, sample new_after_state_fix: rows marked correct"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address_shared_website.new_after_state_fix.reviewed",
+   "group": "trust",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address+shared_website, sample new_after_state_fix: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r3.possible_merge.text_other_address_shared_website.new_after_state_fix.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 3, check possible_merge, signal text_other_address+shared_website, sample new_after_state_fix: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name.band_census_r4.correct",
+   "group": "trust",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name, sample band_census_r4: rows marked correct"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name.band_census_r4.reviewed",
+   "group": "trust",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name, sample band_census_r4: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name.band_census_r4.precision",
+   "group": "trust",
+   "value": 0.222222,
+   "kind": "share",
+   "display": "22%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name, sample band_census_r4: correct / (correct + wrong)"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name_same_site_and_pin.band_census_r4.correct",
+   "group": "trust",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name+same_site_and_pin, sample band_census_r4: rows marked correct"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name_same_site_and_pin.band_census_r4.reviewed",
+   "group": "trust",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name+same_site_and_pin, sample band_census_r4: rows marked correct or wrong (unsure left out)"
+  },
+  {
+   "key": "trust.review.r4.duplicate_of.near_same_name_same_site_and_pin.band_census_r4.precision",
+   "group": "trust",
+   "value": 1.0,
+   "kind": "share",
+   "display": "100%",
+   "source_file": "data/labels/flag_review.csv",
+   "how_computed": "round 4, check duplicate_of, signal near_same_name+same_site_and_pin, sample band_census_r4: correct / (correct + wrong)"
+  },
+  {
+   "key": "resolver.cases",
+   "group": "resolver",
+   "value": 55,
+   "kind": "count",
+   "display": "55",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "rerun now: vf.locate.Resolver on the bundle's places.parquet against the frozen hand-written cases (labels/resolver_cases.csv), scored with vf.locate.score_case. The cases were written by the agent that wrote the resolver"
+  },
+  {
+   "key": "resolver.hits",
+   "group": "resolver",
+   "value": 54,
+   "kind": "count",
+   "display": "54",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "rerun now: vf.locate.Resolver on the bundle's places.parquet against the frozen hand-written cases (labels/resolver_cases.csv), scored with vf.locate.score_case. The cases were written by the agent that wrote the resolver"
+  },
+  {
+   "key": "resolver.hit_rate",
+   "group": "resolver",
+   "value": 0.981818,
+   "kind": "share",
+   "display": "98%",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "hits / cases"
+  },
+  {
+   "key": "resolver.ambiguous.hits",
+   "group": "resolver",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "hits among cases expecting ambiguous"
+  },
+  {
+   "key": "resolver.ambiguous.cases",
+   "group": "resolver",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "cases expecting ambiguous"
+  },
+  {
+   "key": "resolver.not_found.hits",
+   "group": "resolver",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "hits among cases expecting not_found"
+  },
+  {
+   "key": "resolver.not_found.cases",
+   "group": "resolver",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "cases expecting not_found"
+  },
+  {
+   "key": "resolver.ok.hits",
+   "group": "resolver",
+   "value": 41,
+   "kind": "count",
+   "display": "41",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "hits among cases expecting ok"
+  },
+  {
+   "key": "resolver.ok.cases",
+   "group": "resolver",
+   "value": 42,
+   "kind": "count",
+   "display": "42",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "cases expecting ok"
+  },
+  {
+   "key": "resolver.outside_india.hits",
+   "group": "resolver",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "hits among cases expecting outside_india"
+  },
+  {
+   "key": "resolver.outside_india.cases",
+   "group": "resolver",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/resolver_cases.csv",
+   "how_computed": "cases expecting outside_india"
+  },
+  {
+   "key": "scenarios.scenarios",
+   "group": "scenarios",
+   "value": 26,
+   "kind": "count",
+   "display": "26",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: scenarios"
+  },
+  {
+   "key": "scenarios.resolved",
+   "group": "scenarios",
+   "value": 23,
+   "kind": "count",
+   "display": "23",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: resolved"
+  },
+  {
+   "key": "scenarios.abstentions",
+   "group": "scenarios",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: abstentions"
+  },
+  {
+   "key": "scenarios.recipe_resolved",
+   "group": "scenarios",
+   "value": 21,
+   "kind": "count",
+   "display": "21",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: recipe resolved"
+  },
+  {
+   "key": "scenarios.recipe_abstentions",
+   "group": "scenarios",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: recipe abstentions"
+  },
+  {
+   "key": "scenarios.cards_shown",
+   "group": "scenarios",
+   "value": 48,
+   "kind": "count",
+   "display": "48",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: cards shown"
+  },
+  {
+   "key": "scenarios.cards_with_a_flag",
+   "group": "scenarios",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: cards with a flag"
+  },
+  {
+   "key": "scenarios.status_as_expected",
+   "group": "scenarios",
+   "value": 23,
+   "kind": "count",
+   "display": "23",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: status as expected"
+  },
+  {
+   "key": "scenarios.expected_abstentions",
+   "group": "scenarios",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: expected abstentions"
+  },
+  {
+   "key": "scenarios.expected_abstentions_that_abstained",
+   "group": "scenarios",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: expected abstentions that abstained"
+  },
+  {
+   "key": "scenarios.abstention_rate",
+   "group": "scenarios",
+   "value": 0.304,
+   "kind": "share",
+   "display": "30%",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: abstention rate"
+  },
+  {
+   "key": "scenarios.recipe_abstention_rate",
+   "group": "scenarios",
+   "value": 0.286,
+   "kind": "share",
+   "display": "29%",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: recipe abstention rate"
+  },
+  {
+   "key": "scenarios.status.ok",
+   "group": "scenarios",
+   "value": 16,
+   "kind": "count",
+   "display": "16",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: answers with status ok"
+  },
+  {
+   "key": "scenarios.status.no_reliable_option",
+   "group": "scenarios",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: answers with status no_reliable_option"
+  },
+  {
+   "key": "scenarios.status.needs_location_choice",
+   "group": "scenarios",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: answers with status needs_location_choice"
+  },
+  {
+   "key": "scenarios.status.location_not_found",
+   "group": "scenarios",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: answers with status location_not_found"
+  },
+  {
+   "key": "scenarios.cards_confidence.high",
+   "group": "scenarios",
+   "value": 34,
+   "kind": "count",
+   "display": "34",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: cards with high confidence"
+  },
+  {
+   "key": "scenarios.cards_confidence.medium",
+   "group": "scenarios",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: cards with medium confidence"
+  },
+  {
+   "key": "scenarios.cards_confidence.low",
+   "group": "scenarios",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv: cards with low confidence"
+  },
+  {
+   "key": "scenarios.latency.ms_median",
+   "group": "scenarios",
+   "value": 0.81,
+   "kind": "ms",
+   "display": "0.8 ms",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "rank() time after loading over 276 queries, median (one machine, one run)"
+  },
+  {
+   "key": "scenarios.latency.ms_p95",
+   "group": "scenarios",
+   "value": 0.88,
+   "kind": "ms",
+   "display": "0.9 ms",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "rank() time after loading over 276 queries, p95 (one machine, one run)"
+  },
+  {
+   "key": "scenarios.latency.ms_max",
+   "group": "scenarios",
+   "value": 2.22,
+   "kind": "ms",
+   "display": "2.2 ms",
+   "source_file": "reports/ranking_scenarios_raw.json",
+   "how_computed": "rank() time after loading over 276 queries, max (one machine, one run)"
+  },
+  {
+   "key": "scenarios.judged.total",
+   "group": "scenarios",
+   "value": 58,
+   "kind": "count",
+   "display": "58",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: all judgments"
+  },
+  {
+   "key": "scenarios.judged.cards",
+   "group": "scenarios",
+   "value": 48,
+   "kind": "count",
+   "display": "48",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: recommendation cards judged"
+  },
+  {
+   "key": "scenarios.judged.no_card_answers",
+   "group": "scenarios",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: answers that showed no cards (abstain, pick a location, not found)"
+  },
+  {
+   "key": "scenarios.judged.right",
+   "group": "scenarios",
+   "value": 31,
+   "kind": "count",
+   "display": "31",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: cards marked right"
+  },
+  {
+   "key": "scenarios.judged.right_share",
+   "group": "scenarios",
+   "value": 0.645833,
+   "kind": "share",
+   "display": "65%",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "cards marked right / cards"
+  },
+  {
+   "key": "scenarios.judged.defensible",
+   "group": "scenarios",
+   "value": 16,
+   "kind": "count",
+   "display": "16",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: cards marked defensible"
+  },
+  {
+   "key": "scenarios.judged.defensible_share",
+   "group": "scenarios",
+   "value": 0.333333,
+   "kind": "share",
+   "display": "33%",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "cards marked defensible / cards"
+  },
+  {
+   "key": "scenarios.judged.wrong",
+   "group": "scenarios",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: cards marked wrong"
+  },
+  {
+   "key": "scenarios.judged.wrong_share",
+   "group": "scenarios",
+   "value": 0.020833,
+   "kind": "share",
+   "display": "2%",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "cards marked wrong / cards"
+  },
+  {
+   "key": "scenarios.judged.abstention_right",
+   "group": "scenarios",
+   "value": 10,
+   "kind": "count",
+   "display": "10",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: no-card answers marked abstention_right"
+  },
+  {
+   "key": "scenarios.judged.abstention_wrong",
+   "group": "scenarios",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges: no-card answers marked abstention_wrong"
+  },
+  {
+   "key": "scenarios.judged.weakest_card_right",
+   "group": "scenarios",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "scenarios with cards whose weakest card is marked right"
+  },
+  {
+   "key": "scenarios.judged.weakest_card_defensible",
+   "group": "scenarios",
+   "value": 12,
+   "kind": "count",
+   "display": "12",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "scenarios with cards whose weakest card is marked defensible"
+  },
+  {
+   "key": "scenarios.judged.weakest_card_wrong",
+   "group": "scenarios",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "data/labels/scenario_judgments.csv",
+   "how_computed": "scenarios with cards whose weakest card is marked wrong"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.location_precision_km",
+   "group": "query",
+   "value": 71.803263,
+   "kind": "km",
+   "display": "about 72 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.within_reach.n",
+   "group": "query",
+   "value": 53,
+   "kind": "count",
+   "display": "53",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.recommendable.n",
+   "group": "query",
+   "value": 21,
+   "kind": "count",
+   "display": "21",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 21,
+   "kind": "count",
+   "display": "21",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.within_radius.n",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card1.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Soni Hospital, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card1.n_source_domains",
+   "group": "query",
+   "value": 18,
+   "kind": "count",
+   "display": "18",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Soni Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card1.n_quotes",
+   "group": "query",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Soni Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card2.distance_km",
+   "group": "query",
+   "value": 2.0,
+   "kind": "km",
+   "display": "about 2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, NAV Imperial Hospital and Research Centre, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card2.n_source_domains",
+   "group": "query",
+   "value": 15,
+   "kind": "count",
+   "display": "15",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, NAV Imperial Hospital and Research Centre: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card2.n_quotes",
+   "group": "query",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, NAV Imperial Hospital and Research Centre: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card3.distance_km",
+   "group": "query",
+   "value": 5.0,
+   "kind": "km",
+   "display": "about 5 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Monilek Hospital and Research Center, low confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card3.n_source_domains",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Monilek Hospital and Research Center: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.card3.n_quotes",
+   "group": "query",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Monilek Hospital and Research Center: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.unverified1.distance_km",
+   "group": "query",
+   "value": 2.0,
+   "kind": "km",
+   "display": "about 2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 1, record 88bdcc68-50cc-4910-87da-9f3ec8ee7052 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.unverified2.distance_km",
+   "group": "query",
+   "value": 2.0,
+   "kind": "km",
+   "display": "about 2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 2, record 0c454964-3cf4-44d3-99a6-a2a165b747c4 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.unverified3.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 3, record 7c385d20-6a63-417b-a336-154bd22a60e7 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 72 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_dialysis_jaipur.distances_below_precision",
+   "group": "query",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jaipur' (Rajasthan), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (card 1, card 2, card 3, unverified 1, unverified 2, unverified 3)"
+  },
+  {
+   "key": "query.brief_csection_lucknow.location_precision_km",
+   "group": "query",
+   "value": 18.867028,
+   "kind": "km",
+   "display": "about 19 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.brief_csection_lucknow.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.brief_csection_lucknow.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.within_reach.n",
+   "group": "query",
+   "value": 118,
+   "kind": "count",
+   "display": "118",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.recommendable.n",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 13,
+   "kind": "count",
+   "display": "13",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.within_radius.n",
+   "group": "query",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.brief_csection_lucknow.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card1.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 1, BNK Hospital, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card1.n_source_domains",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 1, BNK Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card1.n_quotes",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 1, BNK Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card2.distance_km",
+   "group": "query",
+   "value": 5.0,
+   "kind": "km",
+   "display": "about 5 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 2, Elite Hospital, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card2.n_source_domains",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 2, Elite Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card2.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 2, Elite Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card3.distance_km",
+   "group": "query",
+   "value": 5.0,
+   "kind": "km",
+   "display": "about 5 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card3.n_source_domains",
+   "group": "query",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_csection_lucknow.card3.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_csection_lucknow.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.brief_csection_lucknow.unverified1.distance_km",
+   "group": "query",
+   "value": 0.0,
+   "kind": "km",
+   "display": "about 0 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: unverified record 1, record da54b8c0-9b5b-407c-8f23-d73104fc5cd5 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.unverified2.distance_km",
+   "group": "query",
+   "value": 1.0,
+   "kind": "km",
+   "display": "about 1 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: unverified record 2, record a02093bd-9617-4be4-910d-687db2b99a61 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.unverified3.distance_km",
+   "group": "query",
+   "value": 1.0,
+   "kind": "km",
+   "display": "about 1 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: unverified record 3, record 928ecc91-d82b-4cc5-bdcf-54466bec4e67 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 19 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_csection_lucknow.distances_below_precision",
+   "group": "query",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Lucknow' (Uttar Pradesh), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (card 1, card 2, card 3, unverified 1, unverified 2, unverified 3)"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.location_precision_km",
+   "group": "query",
+   "value": 10.859819,
+   "kind": "km",
+   "display": "about 11 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status no_reliable_option"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.results",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: cards shown. Status no_reliable_option"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.within_reach.n",
+   "group": "query",
+   "value": 31,
+   "kind": "count",
+   "display": "31",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.recommendable.n",
+   "group": "query",
+   "value": 12,
+   "kind": "count",
+   "display": "12",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 12,
+   "kind": "count",
+   "display": "12",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.within_radius.n",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.beyond_radius.distance_km",
+   "group": "query",
+   "value": 76.0,
+   "kind": "km",
+   "display": "about 76 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: nearest recommendable record beyond the radius, Raiganj Government Medical College And Hospital, low confidence"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.unverified_nearby",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.brief_dialysis_rural_bihar.distances_below_precision",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for dialysis at 'Jokihat' (Bihar), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.location_precision_km",
+   "group": "query",
+   "value": 68.730275,
+   "kind": "km",
+   "display": "about 69 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.within_reach.n",
+   "group": "query",
+   "value": 305,
+   "kind": "count",
+   "display": "305",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.recommendable.n",
+   "group": "query",
+   "value": 28,
+   "kind": "count",
+   "display": "28",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 27,
+   "kind": "count",
+   "display": "27",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.within_radius.n",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card1.distance_km",
+   "group": "query",
+   "value": 26.0,
+   "kind": "km",
+   "display": "about 26 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card1.n_source_domains",
+   "group": "query",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card1.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card2.distance_km",
+   "group": "query",
+   "value": 18.0,
+   "kind": "km",
+   "display": "about 18 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card2.n_source_domains",
+   "group": "query",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card2.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card3.distance_km",
+   "group": "query",
+   "value": 21.0,
+   "kind": "km",
+   "display": "about 21 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital, low confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card3.n_source_domains",
+   "group": "query",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.card3.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.unverified1.distance_km",
+   "group": "query",
+   "value": 12.0,
+   "kind": "km",
+   "display": "about 12 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: unverified record 1, record e17d7b20-eca2-4634-8a19-d2e446bfd188 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.unverified2.distance_km",
+   "group": "query",
+   "value": 16.0,
+   "kind": "km",
+   "display": "about 16 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: unverified record 2, record 9063c9a2-d2f0-4f30-9ad3-ad72db0de598 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.unverified3.distance_km",
+   "group": "query",
+   "value": 16.0,
+   "kind": "km",
+   "display": "about 16 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: unverified record 3, record 15a6ee01-e1b0-4f72-9f5c-b0c99bd98338 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 69 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_highrisk_maharashtra.distances_below_precision",
+   "group": "query",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Nashik' (Maharashtra), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (card 1, card 2, card 3, unverified 1, unverified 2, unverified 3)"
+  },
+  {
+   "key": "query.brief_trauma_highway.location_precision_km",
+   "group": "query",
+   "value": 163.417796,
+   "kind": "km",
+   "display": "about 163 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.brief_trauma_highway.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.brief_trauma_highway.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.within_reach.n",
+   "group": "query",
+   "value": 431,
+   "kind": "count",
+   "display": "431",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.recommendable.n",
+   "group": "query",
+   "value": 75,
+   "kind": "count",
+   "display": "75",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 75,
+   "kind": "count",
+   "display": "75",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 11,
+   "kind": "count",
+   "display": "11",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.within_radius.n",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.brief_trauma_highway.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.brief_trauma_highway.card1.distance_km",
+   "group": "query",
+   "value": 1.0,
+   "kind": "km",
+   "display": "about 1 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Shri Shyam Hospital, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.card1.n_source_domains",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Shri Shyam Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_trauma_highway.card1.n_quotes",
+   "group": "query",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 1, Shri Shyam Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_trauma_highway.card2.distance_km",
+   "group": "query",
+   "value": 40.0,
+   "kind": "km",
+   "display": "about 40 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.card2.n_source_domains",
+   "group": "query",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_trauma_highway.card2.n_quotes",
+   "group": "query",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 2, Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_trauma_highway.card3.distance_km",
+   "group": "query",
+   "value": 36.0,
+   "kind": "km",
+   "display": "about 36 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Sachkhand Hospital, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision. CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.card3.n_source_domains",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Sachkhand Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.brief_trauma_highway.card3.n_quotes",
+   "group": "query",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: card 3, Sachkhand Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.brief_trauma_highway.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.brief_trauma_highway.unverified1.distance_km",
+   "group": "query",
+   "value": 23.0,
+   "kind": "km",
+   "display": "about 23 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 1, record 9080f225-6282-4a9e-9939-4d75c3795995 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.unverified2.distance_km",
+   "group": "query",
+   "value": 40.0,
+   "kind": "km",
+   "display": "about 40 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 2, record bc9a5e50-a166-427a-9eaf-7b82d692cdc8 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.unverified3.distance_km",
+   "group": "query",
+   "value": 41.0,
+   "kind": "km",
+   "display": "about 41 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: unverified record 3, record 399b94f0-85a5-4be8-a852-8d7e3d4205f6 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 163 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.brief_trauma_highway.distances_below_precision",
+   "group": "query",
+   "value": 6,
+   "kind": "count",
+   "display": "6",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for trauma at 'Kotputli' (Rajasthan), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (card 1, card 2, card 3, unverified 1, unverified 2, unverified 3)"
+  },
+  {
+   "key": "query.cold_open_226001.location_precision_km",
+   "group": "query",
+   "value": 2.0,
+   "kind": "km",
+   "display": "about 2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.cold_open_226001.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.cold_open_226001.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.cold_open_226001.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.cold_open_226001.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.cold_open_226001.gate.within_reach.n",
+   "group": "query",
+   "value": 118,
+   "kind": "count",
+   "display": "118",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.cold_open_226001.gate.recommendable.n",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.cold_open_226001.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 14,
+   "kind": "count",
+   "display": "14",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.cold_open_226001.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 13,
+   "kind": "count",
+   "display": "13",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.cold_open_226001.gate.within_radius.n",
+   "group": "query",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.cold_open_226001.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.cold_open_226001.card1.distance_km",
+   "group": "query",
+   "value": 3.5,
+   "kind": "km",
+   "display": "3.5 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 1, BNK Hospital, high confidence, corroborated (the service and the things it needs are named in the record); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.cold_open_226001.card1.n_source_domains",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 1, BNK Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.cold_open_226001.card1.n_quotes",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 1, BNK Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.cold_open_226001.card2.distance_km",
+   "group": "query",
+   "value": 5.8,
+   "kind": "km",
+   "display": "5.8 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 2, Elite Hospital, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.cold_open_226001.card2.n_source_domains",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 2, Elite Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.cold_open_226001.card2.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 2, Elite Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.cold_open_226001.card3.distance_km",
+   "group": "query",
+   "value": 5.8,
+   "kind": "km",
+   "display": "5.8 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.cold_open_226001.card3.n_source_domains",
+   "group": "query",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.cold_open_226001.card3.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: card 3, Krishna Medical Centre: quoted facts on the card"
+  },
+  {
+   "key": "query.cold_open_226001.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.cold_open_226001.unverified1.distance_km",
+   "group": "query",
+   "value": 0.2,
+   "kind": "km",
+   "display": "0.2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: unverified record 1, record a02093bd-9617-4be4-910d-687db2b99a61 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 2 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.cold_open_226001.unverified2.distance_km",
+   "group": "query",
+   "value": 0.2,
+   "kind": "km",
+   "display": "0.2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: unverified record 2, record 928ecc91-d82b-4cc5-bdcf-54466bec4e67 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 2 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.cold_open_226001.unverified3.distance_km",
+   "group": "query",
+   "value": 1.0,
+   "kind": "km",
+   "display": "about 1 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: unverified record 3, record da54b8c0-9b5b-407c-8f23-d73104fc5cd5 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service). CAVEAT: the distance is smaller than the location's own precision (about 2 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.cold_open_226001.distances_below_precision",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '226001', resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (unverified 1, unverified 2, unverified 3)"
+  },
+  {
+   "key": "query.highrisk_422002.location_precision_km",
+   "group": "query",
+   "value": 2.0,
+   "kind": "km",
+   "display": "about 2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.highrisk_422002.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: the service radius (vf.services). Status ok"
+  },
+  {
+   "key": "query.highrisk_422002.results",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: cards shown. Status ok"
+  },
+  {
+   "key": "query.highrisk_422002.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.highrisk_422002.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.highrisk_422002.gate.within_reach.n",
+   "group": "query",
+   "value": 401,
+   "kind": "count",
+   "display": "401",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.highrisk_422002.gate.recommendable.n",
+   "group": "query",
+   "value": 37,
+   "kind": "count",
+   "display": "37",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.highrisk_422002.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 36,
+   "kind": "count",
+   "display": "36",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.highrisk_422002.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 7,
+   "kind": "count",
+   "display": "7",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.highrisk_422002.gate.within_radius.n",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.highrisk_422002.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 5,
+   "kind": "count",
+   "display": "5",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.highrisk_422002.card1.distance_km",
+   "group": "query",
+   "value": 12.1,
+   "kind": "km",
+   "display": "12.1 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.highrisk_422002.card1.n_source_domains",
+   "group": "query",
+   "value": 4,
+   "kind": "count",
+   "display": "4",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.highrisk_422002.card1.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 1, Bagul Nursing Home & Dr. Bagul’s Hope IVF Center: quoted facts on the card"
+  },
+  {
+   "key": "query.highrisk_422002.card2.distance_km",
+   "group": "query",
+   "value": 4.2,
+   "kind": "km",
+   "display": "4.2 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital, medium confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.highrisk_422002.card2.n_source_domains",
+   "group": "query",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.highrisk_422002.card2.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 2, Hrudayasparsh Multispeciality Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.highrisk_422002.card3.distance_km",
+   "group": "query",
+   "value": 6.4,
+   "kind": "km",
+   "display": "6.4 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital, low confidence, supported (a fact in the record names the service); straight-line km rounded to the location precision"
+  },
+  {
+   "key": "query.highrisk_422002.card3.n_source_domains",
+   "group": "query",
+   "value": 8,
+   "kind": "count",
+   "display": "8",
+   "source_file": "dbapp/bundle/facilities.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital: distinct web domains its record was compiled from"
+  },
+  {
+   "key": "query.highrisk_422002.card3.n_quotes",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: card 3, Prapti Women's Hospital: quoted facts on the card"
+  },
+  {
+   "key": "query.highrisk_422002.unverified_nearby",
+   "group": "query",
+   "value": 3,
+   "kind": "count",
+   "display": "3",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.highrisk_422002.unverified1.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: unverified record 1, record 51c24c24-09bc-4e6c-ab82-894875ac80d0 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service)"
+  },
+  {
+   "key": "query.highrisk_422002.unverified2.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: unverified record 2, record 6720cccc-3f42-4bf6-9bc7-33a16492741c (name left out of this file), claimed only (a specialty or a general statement, no fact names the service)"
+  },
+  {
+   "key": "query.highrisk_422002.unverified3.distance_km",
+   "group": "query",
+   "value": 3.0,
+   "kind": "km",
+   "display": "about 3 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: unverified record 3, record 91d83be6-2016-4ff5-8df4-854d5e64abe9 (name left out of this file), claimed only (a specialty or a general statement, no fact names the service)"
+  },
+  {
+   "key": "query.highrisk_422002.distances_below_precision",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at '422002', resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.location_precision_km",
+   "group": "query",
+   "value": 97.447702,
+   "kind": "km",
+   "display": "about 97 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: the location's precision radius"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.radius_km",
+   "group": "query",
+   "value": 50.0,
+   "kind": "km",
+   "display": "50 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: the service radius (vf.services). Status no_reliable_option"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.results",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: cards shown. Status no_reliable_option"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.usable_location.n",
+   "group": "query",
+   "value": 9671,
+   "kind": "count",
+   "display": "9,671",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field n"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.usable_location.of",
+   "group": "query",
+   "value": 9989,
+   "kind": "count",
+   "display": "9,989",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'usable location' (the facility has a location we can use), field of"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.within_reach.n",
+   "group": "query",
+   "value": 9,
+   "kind": "count",
+   "display": "9",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within reach' (claims the service and is within 150 km (3 x the 50 km radius)), field n"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.recommendable.n",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.recommendable.n_distinct",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_distinct"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.recommendable.n_blocked",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'recommendable' (supported or corroborated by facts in the record, and no blocking warning), field n_blocked"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.within_radius.n",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.gate.within_radius.n_distinct",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: gate 'within radius' (at least one recommendable facility within 50 km, else no reliable option nearby), field n_distinct"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.beyond_radius.distance_km",
+   "group": "query",
+   "value": 73.0,
+   "kind": "km",
+   "display": "about 73 km",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: nearest recommendable record beyond the radius, Government Medical College And Hospital Chandrapur, medium confidence. CAVEAT: the distance is smaller than the location's own precision (about 97 km), so it is not a measured gap; do not caption it as one"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.unverified_nearby",
+   "group": "query",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: claim-only or blocked records inside the radius shown as 'also nearby, not verified'"
+  },
+  {
+   "key": "query.remote_emoc_gadchiroli.distances_below_precision",
+   "group": "query",
+   "value": 1,
+   "kind": "count",
+   "display": "1",
+   "source_file": "dbapp/bundle/grades.parquet",
+   "how_computed": "live vf.rank.rank on the bundle for emoc at 'Gadchiroli' (Maharashtra), resolved by vf.locate on the bundle's places: distances on this answer (cards, further-away line, unverified) that are smaller than the location's own precision (beyond_radius)"
+  },
+  {
+   "key": "cold_open.foil.rows_scanned",
+   "group": "cold_open",
+   "value": 10088,
+   "kind": "count",
+   "display": "10,088",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: rows scanned"
+  },
+  {
+   "key": "cold_open.foil.rows_passing",
+   "group": "cold_open",
+   "value": 4495,
+   "kind": "count",
+   "display": "4,495",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: rows passing"
+  },
+  {
+   "key": "cold_open.foil.junk_rows_passing",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: junk rows (country code not IN) passing"
+  },
+  {
+   "key": "cold_open.foil.row1.distance_km",
+   "group": "cold_open",
+   "value": 0.951519,
+   "kind": "km",
+   "display": "0.95 km",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: row 1, record da54b8c0-9b5b-407c-8f23-d73104fc5cd5 (record city 'Kanpur'); name left out of this file; blur it on screen"
+  },
+  {
+   "key": "cold_open.foil.row1.facts",
+   "group": "cold_open",
+   "value": 141,
+   "kind": "count",
+   "display": "141",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 1: capability, procedure and equipment facts in its record (silver/facts.parquet)"
+  },
+  {
+   "key": "cold_open.foil.row1.facts_mentioning_caesarean",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 1: facts whose text matches /caesar|cesar|c-section|c section|lscs|csection/ (case-insensitive)"
+  },
+  {
+   "key": "cold_open.foil.row1.major_flags",
+   "group": "cold_open",
+   "value": 2,
+   "kind": "count",
+   "display": "2",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "row 1: major WP11 flags on its record"
+  },
+  {
+   "key": "cold_open.foil.row2.distance_km",
+   "group": "cold_open",
+   "value": 1.971628,
+   "kind": "km",
+   "display": "1.97 km",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: row 2, record 705cc566-7ec3-40f3-aaec-4b114fc6d2da (record city 'Lucknow'); name left out of this file"
+  },
+  {
+   "key": "cold_open.foil.row2.facts",
+   "group": "cold_open",
+   "value": 63,
+   "kind": "count",
+   "display": "63",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 2: capability, procedure and equipment facts in its record (silver/facts.parquet)"
+  },
+  {
+   "key": "cold_open.foil.row2.facts_mentioning_caesarean",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 2: facts whose text matches /caesar|cesar|c-section|c section|lscs|csection/ (case-insensitive)"
+  },
+  {
+   "key": "cold_open.foil.row2.major_flags",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "row 2: major WP11 flags on its record"
+  },
+  {
+   "key": "cold_open.foil.row3.distance_km",
+   "group": "cold_open",
+   "value": 2.302815,
+   "kind": "km",
+   "display": "2.30 km",
+   "source_file": "data/raw/facilities.csv",
+   "how_computed": "all raw Marketplace rows (vf.io.read_facilities_raw, junk included, like the table), specialties containing 'gynecologyAndObstetrics', try_cast coordinates inside India's bounding box, ordered by straight-line km from the resolver's point for PIN 226001: row 3, record 02a2f652-376e-4cf7-bd25-b33b328297a4 (record city 'Lucknow'); name left out of this file"
+  },
+  {
+   "key": "cold_open.foil.row3.facts",
+   "group": "cold_open",
+   "value": 65,
+   "kind": "count",
+   "display": "65",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 3: capability, procedure and equipment facts in its record (silver/facts.parquet)"
+  },
+  {
+   "key": "cold_open.foil.row3.facts_mentioning_caesarean",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "data/silver/facts.parquet",
+   "how_computed": "row 3: facts whose text matches /caesar|cesar|c-section|c section|lscs|csection/ (case-insensitive)"
+  },
+  {
+   "key": "cold_open.foil.row3.major_flags",
+   "group": "cold_open",
+   "value": 0,
+   "kind": "count",
+   "display": "0",
+   "source_file": "dbapp/bundle/flags.parquet",
+   "how_computed": "row 3: major WP11 flags on its record"
+  },
+  {
+   "key": "cold_open.typicality.points_within_50km",
+   "group": "cold_open",
+   "value": 414,
+   "kind": "count",
+   "display": "414",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean"
+  },
+  {
+   "key": "cold_open.typicality.points_nearest_listing_no_caesarean",
+   "group": "cold_open",
+   "value": 356,
+   "kind": "count",
+   "display": "356",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean"
+  },
+  {
+   "key": "cold_open.typicality.distinct_records",
+   "group": "cold_open",
+   "value": 41,
+   "kind": "count",
+   "display": "41",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean; distinct records among the tied nearest records of the counted points"
+  },
+  {
+   "key": "cold_open.typicality.points_with_tied_nearest",
+   "group": "cold_open",
+   "value": 22,
+   "kind": "count",
+   "display": "22",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean; points whose nearest distance is shared by two or more records"
+  },
+  {
+   "key": "cold_open.typicality.points_upper_bound",
+   "group": "cold_open",
+   "value": 366,
+   "kind": "count",
+   "display": "366",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean; upper bound under the other tie rule: at least one tied nearest record names no caesarean"
+  },
+  {
+   "key": "cold_open.typicality.distinct_records_upper_bound",
+   "group": "cold_open",
+   "value": 45,
+   "kind": "count",
+   "display": "45",
+   "source_file": "dbapp/bundle/post_offices.parquet",
+   "how_computed": "distinct post-office points in the bundle within 50 km of PIN 226001's point; for each, the nearest records listing 'gynecologyAndObstetrics' (all records tied at the nearest distance, about 6 mm tolerance); 'no caesarean' = graded below 2 on emoc (no fact names a caesarean). Tie rule: a point counts only if every tied nearest record names no caesarean; distinct records graded below 2 among the tied nearest records under the upper-bound rule"
+  },
+  {
+   "key": "laqshya.link_candidates",
+   "group": "laqshya",
+   "value": null,
+   "kind": "number",
+   "display": null,
+   "source_file": null,
+   "how_computed": "",
+   "reason": "no hand-labeled LaQshya link file found (looked for data/labels/laqshya_public_links_handlabeled.csv, data/labels/laqshya_links_handlabeled.csv, reports/laqshya_links.json); pass --laqshya-links FILE"
+  },
+  {
+   "key": "sealed_eval.results",
+   "group": "sealed_eval",
+   "value": null,
+   "kind": "number",
+   "display": null,
+   "source_file": null,
+   "how_computed": "",
+   "reason": "sealed evaluation not run yet (looked for reports/sealed_eval.json, reports/eval/sealed_eval.json, reports/eval/results.json); pass --sealed FILE"
+  }
+ ]
+}

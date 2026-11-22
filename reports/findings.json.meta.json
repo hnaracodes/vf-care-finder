@@ -1,0 +1,29 @@
+{
+  "script": "scripts/wp9_findings.py",
+  "version": "wp9-findings-v1",
+  "created_at_utc": "2026-11-22T04:22:39Z",
+  "git_commit": "0b5259243005acb343ba48facaa4886d55585469",
+  "code_uncommitted": true,
+  "script_sha256": "4f29ba97243e3faa97d112621651aa5fa9fee2f5020c331c566c4d3b35be8bbd",
+  "output": "findings.json",
+  "rows": 475,
+  "null_rows": 2,
+  "bundle_dir": "dbapp/bundle",
+  "bundle_created_at_utc": "2026-11-22T04:22:17+00:00",
+  "inputs": {
+    "dbapp/bundle/facilities.parquet": "3d0db5db0ffc90554f6d44c6bf5093cb5f5732bec3ea742ab5a80766b1e65aca",
+    "dbapp/bundle/grades.parquet": "f46d0ce67abacc0e8cf8986c56b5e5be2a004d19c1b0741d955b45f511a0a571",
+    "data/silver/facilities.parquet": "37cbc779d27dc44798feb9dc492a7d73e6458194353efbaac71b2819e35fd8ac",
+    "dbapp/bundle/post_offices.parquet": "2dcb227e72b13f13534e82c0e313bccb0d74f13c522a6ecc621ed763cb98b013",
+    "data/gold/model_a_report.json": "049d0f740ef9c9a59122d5077795f8873a013e967a32fcc05abb6722bead9918",
+    "dbapp/bundle/flags.parquet": "8ca7ff602d109d533cc8ac40fec7e3380ac69625df8ff7f26588dda890d9338f",
+    "dbapp/bundle/duplicates.parquet": "a17f24b375e9d400828545104e33c65201864752872cb045dc21306213c00f7b",
+    "data/labels/flag_review.csv": "a2c503074633e84e6ef05f9c9f871b288181fbb3ffe9b78553d3c38b760a33c9",
+    "data/labels/resolver_cases.csv": "122725677e54656b7f06ea2c851db1b5c991a104aa44f6c46980110223b66220",
+    "reports/ranking_scenarios_raw.json": "64013146f34fb2989c9a07c05e4c070e13e67af73159db9399c7c454996fe49f",
+    "data/labels/scenario_judgments.csv": "13cd98a77c2cb5c51049a0ba6326dc63b4cd1b1d1a8785b1eb2bfbeec52a1668",
+    "data/raw/facilities.csv": "47bb1aad11f84a68aed3025d2887665bb164bc38c535c39e59eddb436c556691",
+    "data/silver/facts.parquet": "4650f6be54ec66689a94da7616655184c3b7b71791fbc112e557753c3be95a88"
+  },
+  "sha256": "e84e416a08df9032bb003f0d4a75caf858c0648a6b2b756ec73cd958effebc5a"
+}
