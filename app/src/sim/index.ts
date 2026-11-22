@@ -170,6 +170,7 @@ export class Simulator {
     const e = this.engine;
     if (!e) return;
     if (e.done) e.replay();
+    (this.map as unknown as { hideHint?: () => void }).hideHint?.();
     this.playing = true;
     this.lastFrame = performance.now();
     this.panel?.setPlaying(true, false);
@@ -280,7 +281,8 @@ export class Simulator {
     const r = verifyFirst(this.world);
     console.info(`[sim] verify-first sweep: ${r.n_candidates} candidates in ${r.ms.toFixed(1)} ms`);
     this.vf = r;
-    this.panel?.setVerifyFirst(r, (fid) => this.applyEdit({ type: 'verify', facility_id: fid }), this.world.edits.length);
+    // "Try it" plays the run on the changed map, as Add does, so the map and the counters agree
+    this.panel?.setVerifyFirst(r, (fid) => { this.applyEdit({ type: 'verify', facility_id: fid }); if (this.panel && !this.playing) this.replay(); }, this.world.edits.length);
     return r;
   }
 

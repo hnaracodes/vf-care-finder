@@ -605,7 +605,7 @@ export class MapHost {
     if (ht) {
       if (this.isAbstention()) {
         const phrase = this.sim?.service_phrase ?? (a.service_label ? lowerFirst(a.service_label) : 'it');
-        return `${ht}: no record here shows ${phrase}`;
+        return `${ht}: no real record here shows ${phrase}`;
       }
       return `${ht} estimated drive`;
     }
@@ -762,6 +762,8 @@ export class MapHost {
     const vp = this.viewport;
     const b = vp.getBounds() as [number, number, number, number];
     this.inset.update(b, this.origin() ?? (this.markers.length === 1 ? [this.markers[0].lon, this.markers[0].lat] : null));
+    // the locator inset adds nothing when the map itself shows all of India, and crowds a phone-sized map
+    this.inset.el.style.display = this.vs.zoom < this.indiaView().zoom + 0.8 || this.size().w < 420 ? 'none' : '';
     // Scale bar
     const mpp = metersPerPixel(this.vs.latitude, this.vs.zoom);
     const maxM = mpp * 90;
@@ -777,6 +779,12 @@ export class MapHost {
       const lz = LADDER[i].zoom === 'india' ? iz : (LADDER[i].zoom as number);
       b2.classList.toggle('on', Math.abs(lz - z) < 0.6);
     });
+  }
+
+  /** The simulator calls this on Play: the hint would sit over the centre while dots move. */
+  hideHint(): void {
+    this.hinted = true;
+    this.hint.classList.remove('on');
   }
 
   private showHint(): void {
@@ -871,7 +879,8 @@ export class MapHost {
       for (const m of this.markers) { const [x, y] = vp.project([m.lon, m.lat]); box(x, y, 9); }
 
       const fixed: LabelOut[] = [];
-      const extra: LabelOut[] = [...this.overlayLabels];
+      // the simulator's counts mean nothing at country scale and only pile up on the place: hide them there
+      const extra: LabelOut[] = z < 6 ? [] : [...this.overlayLabels];
       let search: { text: string; lon: number; lat: number } | null = null;
       if (this.mode === 'answer' && this.answer && o) {
         if (collapsed) {

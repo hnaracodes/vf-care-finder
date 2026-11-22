@@ -1,7 +1,7 @@
 {
   "bundle_version": "wp12-bundle-v1",
-  "created_at_utc": "2026-11-22T07:48:00+00:00",
-  "git_commit": "8890572bc9f46ac72ed542d381c773f2c0912ff9",
+  "created_at_utc": "2026-11-22T09:22:18+00:00",
+  "git_commit": "e1f02f100f573492905ca85c4e28a0136c2f0733",
   "code_uncommitted": true,
   "script": "scripts/wp12_bundle.py",
   "data_dir": "vf.paths.data_dir()",
@@ -398,9 +398,9 @@
       "input_created_at_utc": "2026-11-22T07:40:40Z",
       "input_git_commit": "8890572bc9f46ac72ed542d381c773f2c0912ff9",
       "status": "recipe v0.3 (gold/capability_grades_v03.parquet, D048)",
-      "cells_number_masked": 13,
-      "bytes": 1659422,
-      "sha256": "16a032dcbdf95b1a0d8ef376425acf907c7f81fe93c1f4d6e3d26af9ac43e41d"
+      "cells_number_masked": 10,
+      "bytes": 1659425,
+      "sha256": "44298ad921ea6884e8826d5f557a78d53d3e31007d703b27789c110a37f329ac"
     },
     "flags.parquet": {
       "rows": 3654,
@@ -463,8 +463,8 @@
       "phone_numbers": 9697,
       "served_by": "vf.questions.call_info via the server's /api answers: masked unless reveal=1 and demo mode off",
       "phones_skipped": null,
-      "bytes": 581999,
-      "sha256": "12753a0772cfff8a8d09ad76882510e8777392819356790e96cf35d80039d30b"
+      "bytes": 581994,
+      "sha256": "1e3b7b1770b0e1c51448f52d83c42476f0fdddc3614e52f5f0589a4c22bcd483"
     },
     "laqshya_links.parquet": {
       "rows": 121,
@@ -482,8 +482,8 @@
         "ncg": 54
       },
       "outside_version": "public_list_v2",
-      "bytes": 10551,
-      "sha256": "e1bad96df2abc038c067474920362354865fe5ecf64b0a3978efb04c31c1b243"
+      "bytes": 10537,
+      "sha256": "1ca23b3eec29ade5ae044c029de58e5a3242bcb8f65b561fd034d1fbbc87144b"
     },
     "outside_lane.parquet": {
       "rows": 1204,
@@ -493,8 +493,8 @@
         "laqshya": 779
       },
       "outside_version": "public_list_v2",
-      "bytes": 86495,
-      "sha256": "6fa4e732bb43f54e2a578751db7c030eb931d028fa987c3dfc429075813cc4f1"
+      "bytes": 86458,
+      "sha256": "b310cd4ca487ae1b624f943bc31ad7d3d655fbbb39eb8dc87d5184c295b749b6"
     },
     "outside_meta.json": {
       "from": "vf.public_list.write_bundle",
@@ -520,7 +520,7 @@
         }
       },
       "bytes": 20261,
-      "sha256": "fdcada7c7d656eff7cf4a1ab89350decac582f3420f7455b29926f03fb4d0932"
+      "sha256": "a173fe23687a8675e3b68cb416f494f473455f2658394b72421d5aeba3b3b23b"
     },
     "keyword_index/": {
       "files": [
@@ -534,14 +534,14 @@
         "vectorizer.pkl"
       ],
       "version": "kw_v1",
-      "docs_cells_number_masked": 842
+      "docs_cells_number_masked": 672
     }
   },
   "missing": {
     "service_probability.parquet": "gold/service_probability.parquet not found (WP13 has not written it yet); skipped"
   },
   "sizes": {
-    "total_bytes": 48776073,
+    "total_bytes": 48777457,
     "largest": [
       "places.parquet",
       7207577
@@ -554,7 +554,7 @@
     "policy": "built at deploy time by scripts/wp12_bundle.py; only manifest.json is versioned",
     "rule": "docs/07: commit only under about 50 MB and with no raw text dump beyond quoted evidence",
     "rule_allows_commit_of_this_build": false,
-    "total_bytes": 48776073,
+    "total_bytes": 48777457,
     "keyword_index_present": true,
     "why": "the final bundle holds the keyword index (all distinct fact texts, a text dump), it changes on every upstream rerun, and the facilities table's reuse terms are unchecked"
   }

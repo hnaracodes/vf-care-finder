@@ -2,10 +2,10 @@
 // further away, the two folds, the trip teaser, the abstention, landing and ambiguous
 // screens. Every claim is a quote or a server field; every other word comes from text.ts.
 
-import type { Answer, Card, Candidate, OutsideNearby, Quote, Resolution, SimPayload, WhyNotItem } from './types';
+import type { Answer, Card, Candidate, CallInfo, OutsideLine, OutsideNearby, Quote, Resolution, SimPayload, WhyNotItem } from './types';
 import {
   CITATION_LINE, FOOTER_LINE, HONESTY_LINE, INTRO_LINE, WHYNOT_CLOSING,
-  abstainHeadline, abstainNextStep, careChip, cautions, count, distanceLine, esc, fieldWords, fixName,
+  abstainHeadline, abstainNextStep, careChip, emergencyLine, isIsland, cautions, count, distanceLine, esc, fieldWords, fixName,
   funnelLabel, gapLine, headline, hoursText, leadQuote, looksLikeCoords, normCard, operatorWord, orderSentence,
   originText, otherQuotes, placeChip, reachText, plainQuestion, plainServer, quoteHtml, ruleParagraph, serviceName, shortPlace, sourcesLine,
   strongerNearby, sureLevel, sureLine, teaserSentence, topOrderLine, typeWord, windowLine, type CardView,
@@ -29,7 +29,19 @@ function bars(n: number): string {
   return `<span class="bars" aria-hidden="true">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 }
 
+/** "poisoningSnakeBite" -> "poisoning snake bite": a taxonomy label, not record text. */
+function humanLabel(t: string): string {
+  return t.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
+}
+
 function quoteBlock(q: Quote, lead = false): string {
+  // a listed specialty is a label from a taxonomy, not a sentence: no quote marks
+  if ((q.field === 'specialties' || q.field === 'specialty') && /^[a-z]+[A-Z][A-Za-z]*$/.test(q.text.trim())) {
+    return `<p class="q-label${lead ? ' lead' : ''}">Listed specialty: <b>${esc(humanLabel(q.text))}</b> <span class="qf">(a category label, not text from the record)</span></p>`;
+  }
+  if (q.negated) {
+    return `<blockquote class="q${lead ? ' lead' : ''} neg"><span class="qt">Its record says: &ldquo;${quoteHtml(q)}&rdquo;</span><span class="qf">${esc(fieldWords(q.field))}. This names your words only to exclude them.</span></blockquote>`;
+  }
   return `<blockquote class="q${lead ? ' lead' : ''}"><span class="qt">&ldquo;${quoteHtml(q)}&rdquo;</span><span class="qf">${esc(fieldWords(q.field))}</span></blockquote>`;
 }
 
@@ -45,7 +57,7 @@ function sureHtml(a: Answer, v: CardView, big = false): string {
   return `<p class="conf ${lv.cls}${big ? ' big' : ''}">${bars(lv.bars)}<span><b>${esc(lv.word)}</b> ${esc(sureLine(a, v))}</span></p>`;
 }
 
-function publicLines(c: Card): string {
+function publicLines(c: { public_list?: { text: string } | null; outside_lines?: OutsideLine[] }): string {
   const out: string[] = [];
   // public_list (LaQshya) and outside_lines can carry the same LaQshya line: show each text once.
   const seen = new Set<string>();
@@ -66,27 +78,25 @@ function telText(tel: string): string {
   return m ? `+91 ${m[1]} ${m[2]}` : d;
 }
 
-function callBlock(a: Answer, c: Card, compact = false): string {
-  const call = c.call;
-  let callHtml = '';
-  const name = normCard(c, a).nameShort;
-  if (call) {
-    if (call.has_phone && call.phone) {
-      if (call.tel) {
-        callHtml = `<div class="call"><a class="btn-call" href="${esc(call.tel)}" data-call="${esc(c.facility_id)}" aria-label="Call ${esc(name)} on ${esc(telText(call.tel))}">${phoneIcon()}Call ${esc(telText(call.tel))}</a>`
-          + `<span class="fine">Number from its record. It may be out of date.</span></div>`;
-      } else if (a.demo_masked) {
-        // demo: the digits stay hidden and nothing here looks tappable
-        callHtml = `<div class="call"><p class="phone-off">${phoneIcon()}<span>Phone in its record: <b>${esc(call.phone)}</b></span></p>`
-          + `<span class="fine">Digits hidden for this demo.</span></div>`;
-      } else {
-        callHtml = `<div class="call"><button type="button" class="btn-call" data-reveal="${esc(c.facility_id)}" aria-label="Show the phone number of ${esc(name)}">${phoneIcon()}Show number to call</button>`
-          + `<span class="fine">Number from its record (ends ${esc(call.phone.slice(-2))}). It may be out of date.</span></div>`;
-      }
-    } else {
-      callHtml = `<div class="call"><span class="fine nophone">No phone number in its record.</span></div>`;
+function callHtmlFor(a: Answer, fid: string, name: string, call: CallInfo | null | undefined): string {
+  if (!call) return '';
+  if (call.has_phone && call.phone) {
+    if (call.tel) {
+      return `<div class="call"><a class="btn-call" href="${esc(call.tel)}" data-call="${esc(fid)}" aria-label="Call ${esc(telText(call.tel))}: ${esc(name)}">${phoneIcon()}Call ${esc(telText(call.tel))}</a>`
+        + `<span class="fine">Number from its record. It may be out of date.</span></div>`;
     }
+    if (a.demo_masked) {
+      return `<div class="call"><p class="phone-off">${phoneIcon()}<span>Phone in its record: <b>${esc(call.phone)}</b></span></p>`
+        + `<span class="fine">Digits hidden for this demo.</span></div>`;
+    }
+    return `<div class="call"><button type="button" class="btn-call" data-reveal="${esc(fid)}" aria-label="Show number to call: ${esc(name)}">${phoneIcon()}Show number to call</button>`
+      + `<span class="fine">Number from its record (ends ${esc(call.phone.slice(-2))}). It may be out of date.</span></div>`;
   }
+  return `<div class="call"><span class="fine nophone">No phone number in its record.</span></div>`;
+}
+
+function callBlock(a: Answer, c: Card, compact = false): string {
+  const callHtml = callHtmlFor(a, c.facility_id, normCard(c, a).nameShort, c.call);
   const qs = (c.questions ?? []).slice(0, 3);
   const ask = qs.length
     ? `<div class="ask"><p class="ask-h">Before you go, ask:</p><ol class="asks">${qs.map((q) => `<li>${esc(plainQuestion(q.question))}${q.why ? `<span class="why">Why ask: ${esc(plainQuestion(q.why))}</span>` : ''}</li>`).join('')}</ol></div>`
@@ -113,7 +123,9 @@ function cardBody(a: Answer, v: CardView, top = false): string {
   const src = sourcesLine(v.c);
   const order = top ? topOrderLine(a, v) : '';
   const more = also + (src ? `<details class="more phone-only"><summary>Sources</summary><p class="fine src">${esc(src)}</p></details>` : '');
+  const emerg = top ? emergencyLine(a) : '';
   return `<p class="d-line">${d.lead ? `<b>${esc(d.lead)}</b>` : ''}${esc(d.rest)}</p>`
+    + (emerg ? `<p class="emerg">${esc(emerg)}</p>` : '')
     + (order ? `<p class="tie">${esc(order)}</p>` : '')
     + (lead ? quoteBlock(lead, true) : '')
     + more
@@ -132,7 +144,7 @@ export function noteHtml(a: Answer): string {
   const h = headline(a, v).replace(v.nameShort, '\u0000');
   const [h1, h2] = h.split('\u0000');
   return `<section class="note" aria-labelledby="note-h" data-idx="0">
-    <h1 id="note-h" tabindex="-1">${esc(h1)}<button type="button" class="fac" data-focus-result="0" aria-label="${esc(v.nameShort)}: show it on the map" title="Show it on the map">${esc(v.nameShort)}</button>${esc(h2)}</h1>
+    <h1 id="note-h" tabindex="-1">${esc(h1)}<button type="button" class="fac" data-focus-result="0" aria-label="${esc(v.nameShort)}: show it on the map" title="Show it on the map">${esc(v.nameShort)}${esc((/^[,.]/.exec(h2 ?? '') ?? [''])[0])}</button>${esc((h2 ?? '').replace(/^[,.]/, ''))}</h1>
     ${v.nameRest ? `<p class="name-rest">${esc(v.nameRest)}</p>` : ''}
     ${cardBody(a, v, true)}
   </section>`;
@@ -150,9 +162,13 @@ function backupRow(a: Answer, c: Card, i: number, prev: Card | null, kind: 'resu
     : v.time?.loose ? `from the middle; ${v.time.range} across ${shortPlace(a)}` : v.distanceLabel;
   const order = p && kind === 'result' ? `<p class="tie">${esc(orderSentence(a, p, v))}</p>` : '';
   const src = sourcesLine(c);
-  const callQ = callBlock(a, c, true);
-  const fold = callQ || src
-    ? `<details class="more"><summary>Call, questions and sources</summary>${callQ}${src ? `<p class="fine src">${esc(src)}</p>` : ''}</details>` : '';
+  // the call button stays visible; the questions and sources fold away
+  const callVis = callHtmlFor(a, c.facility_id, v.nameShort, c.call);
+  const qs = (c.questions ?? []).slice(0, 3);
+  const askQ = qs.length ? `<div class="ask"><p class="ask-h">Before you go, ask:</p><ol class="asks">${qs.map((q) => `<li>${esc(plainQuestion(q.question))}${q.why ? `<span class="why">Why ask: ${esc(plainQuestion(q.why))}</span>` : ''}</li>`).join('')}</ol></div>` : '';
+  const fold = askQ || src
+    ? `<details class="more"><summary>Questions to ask, and sources</summary>${askQ}${src ? `<p class="fine src">${esc(src)}</p>` : ''}</details>` : '';
+  const callRow = callVis ? `<div class="next compact">${callVis}</div>` : '';
   const num = kind === 'result' ? String(i + 1) : '';
   const attr = kind === 'result' ? `data-idx="${i}"` : `data-further="${i}"`;
   return `<li class="bk" ${attr}>
@@ -161,7 +177,7 @@ function backupRow(a: Answer, c: Card, i: number, prev: Card | null, kind: 'resu
       <div class="bk-top">
         <div class="bk-name"><h3><button type="button" class="fac-link" data-focus-${kind}="${i}" aria-label="${esc(v.nameShort)}: show it on the map" title="Show it on the map">${esc(v.nameShort)}</button></h3>
           ${v.nameRest ? `<p class="name-rest">${esc(v.nameRest)}</p>` : ''}
-          <p class="meta">${esc(where)}${v.crossesState && v.stateDisplay ? `. In ${esc(v.stateDisplay)}: across the state border` : ''}</p></div>
+          <p class="meta">${esc(where)}${v.crossesState && v.stateDisplay ? (isIsland(a) ? `. In ${esc(v.stateDisplay)}: across the sea, and sea or air travel is not modelled` : `. In ${esc(v.stateDisplay)}: across the state border`) : ''}</p></div>
         <div class="d">${time ? `<b>${esc(time)}</b>` : ''}<span>${esc(sub)}</span></div>
       </div>
       ${order}
@@ -169,6 +185,7 @@ function backupRow(a: Answer, c: Card, i: number, prev: Card | null, kind: 'resu
       ${sureHtml(a, v)}
       ${publicLines(c)}
       ${cautionsHtml(v)}
+      ${callRow}
       ${fold}
     </div>
   </li>`;
@@ -204,8 +221,9 @@ function whyItem(a: Answer, it: WhyNotItem, simOk: boolean): string {
   } else if (qa?.kind === 'absence' && !/found no fact/i.test(it.reason_plain)) {
     ev = `<p class="absence"><em>${esc(qa.text)}</em></p>`;
   }
+  const nm = fixName(it.name);
   const wi = it.in_sim && simOk
-    ? `<button type="button" class="wi-link" data-verify="${esc(it.facility_id)}">What if it were verified?</button>` : '';
+    ? `<button type="button" class="wi-link" data-verify="${esc(it.facility_id)}" aria-label="For planners: what if ${esc(nm)} were verified?">For planners: what if it were verified?</button>` : '';
   // the strip speaks in minutes like the cards when the server sent them; approximate positions say so
   const d = it.time_short ? `${it.time_short}${a.origin?.loose ? ' from the middle' : ''}` : it.distance_label;
   const pub = (it.operator ?? '').toLowerCase() === 'public' || it.reason_code === 'public_record_silent';
@@ -214,10 +232,12 @@ function whyItem(a: Answer, it: WhyNotItem, simOk: boolean): string {
     ? `<p class="wn-act"><b>Public hospital nearby:</b> call and ask whether they can provide ${esc(serviceName(a))} today.</p>`
     : pub ? `<p class="wn-act"><b>Public hospital nearby:</b> call and ask.</p>` : '';
   const capped = it.reason_code === 'ranked_lower' ? `<p class="wn-act">Not shown above only because we list at most 3.</p>` : '';
+  const gov = publicLines({ outside_lines: it.outside_lines });
+  const call = pub && it.call ? `<div class="next compact">${callHtmlFor(a, it.facility_id, nm, it.call)}</div>` : '';
   return `<li data-whynot="${esc(it.letter)}">
     <span class="dia" aria-hidden="true"><b>${esc(it.letter)}</b></span>
-    <div><p class="wn-top"><b>${esc(fixName(it.name))}</b> <span class="wn-d">${esc(d)}</span></p>
-      <p class="wn-why">${esc(reason)}</p>${ev}${act}${capped}${wi}</div>
+    <div><p class="wn-top"><b>${esc(nm)}</b> <span class="wn-d">${esc(d)}</span></p>
+      <p class="wn-why">${esc(reason)}</p>${ev}${gov}${act}${call}${capped}${wi}</div>
   </li>`;
 }
 
@@ -231,8 +251,30 @@ function whyNotHeading(a: Answer, items: WhyNotItem[]): string {
   const parts: string[] = [];
   if (exact) parts.push(`${count(exact)} ${exact === 1 ? 'is' : 'are'} closer than ${first}`);
   if (approx) parts.push(`${count(approx)} ${approx === 1 ? 'has' : 'have'} an approximate map position that looks closer`);
-  const more = hidden ? ` ${count(hidden)} more with an approximate position are not listed.` : '';
+  let more = '';
+  if (hidden) {
+    // name them from unverified_nearby (records that list the service nearby but were not recommended)
+    const shown = new Set(items.map((it) => it.facility_id));
+    const res = new Set(a.results.map((c) => c.facility_id));
+    const names = (a.unverified_nearby ?? []).filter((c) => !shown.has(c.facility_id) && !res.has(c.facility_id))
+      .slice(0, hidden).map((c) => {
+        const n = fixName(c.name.split(',')[0]);
+        const p = c.location_precision_km ?? 0;
+        const d = c.distance_km != null ? `${c.distance_km < 10 ? c.distance_km.toFixed(1) : count(c.distance_km)} km` : '';
+        return p >= 10 && d ? `${n} (its map point is ${d} away, but its position is known only to about ${count(p)} km)` : `${n} (position approximate)`;
+      });
+    more = ` ${count(hidden)} more with an approximate position ${hidden === 1 ? 'is' : 'are'} not listed${names.length ? `, among them ${names.join('; ')}` : ''}.`;
+  }
   return `Showing ${count(items.length)} ${items.length === 1 ? 'record' : 'records'} that list or claim ${serviceName(a)}, or are public hospitals, but were not recommended: ${parts.join('; ')}.${more}`;
+}
+
+/** Public hospitals in the why-not strip, named once under the options: for many patients the public
+ * hospital is the default referral (free delivery under JSSK), even when its web record is silent. */
+export function publicNearbyHtml(a: Answer): string {
+  const pubs = (a.why_not?.items ?? []).filter((it) => (it.operator ?? '').toLowerCase() === 'public' || it.reason_code === 'public_record_silent');
+  if (!pubs.length) return '';
+  const parts = pubs.slice(0, 3).map((it) => `${fixName(it.name)}${it.time_short ? `, ${it.time_short}` : it.position_approximate ? ' (position approximate)' : ''}`);
+  return `<p class="pubnear"><b>Public hospitals nearby:</b> ${esc(parts.join('; '))}. Their records do not name ${esc(serviceName(a))}, so they are not listed above; call and ask. <button type="button" class="fac-link" data-open-whynot="1">Numbers and details</button></p>`;
 }
 
 export function whyNotHtml(a: Answer, simOk: boolean): string {
@@ -253,7 +295,8 @@ function techPlain(t: string): string {
     .replace(/\s*\([^)]*(?:\.csv|\.py|\.parquet|\/)[^)]*\)/g, '')
     .replace(/\b[\w./-]+\.(?:csv|py|parquet|json)\b/g, 'a reference table')
     .replace(/\bOSRM\b/g, 'a road-routing comparison')
-    .replace(/\bFRU 20\d\d s[\d.]+/g, 'the government first-referral-unit guidance')
+    .replace(/\b(?:the )?FRU 20\d\d s[\d.]+/g, 'the government first-referral-unit guidance')
+    .replace(/\bno-traffic \(no traffic, no waiting\)/g, 'no traffic and no waiting')
     .replace(/\b([Gg])rades\b/g, (_m, g: string) => (g === 'G' ? 'Record levels' : 'record levels'))
     .replace(/\b([Gg])rade\b/g, (_m, g: string) => (g === 'G' ? 'Record level' : 'record level'));
 }
@@ -267,10 +310,29 @@ function plainMethod(text: string): string {
   return [...lead, ...keep].join(' ');
 }
 
+function keywordHow(a: Answer): string {
+  const h = a.how_we_decided ?? {};
+  const gates = (h.gates ?? []).filter((g) => g.n != null);
+  const glist = gates.length
+    ? `<ol class="funnel" style="--n:${gates.length}">${gates.map((g) => `<li><b>${esc(count(g.n))}</b><span>${esc(plainServer(g.rule ?? g.gate))}</span></li>`).join('')}</ol>` : '';
+  const sim = Math.max(0, ...(a.results.concat(a.beyond_radius ? [a.beyond_radius] : []))
+    .flatMap((c) => (c.evidence ?? []).map((e) => Number((e as { similarity?: number }).similarity ?? 0))));
+  const limits = h.limits ?? [];
+  return `<details class="fold how"><summary><b>How we decided</b></summary>
+    ${glist}
+    <p>${esc(ruleParagraph(a))}</p>
+    <p>${esc(windowLine(a))}</p>
+    ${sim > 0 ? `<p>The best match shown has a text similarity of ${esc(sim.toFixed(2))} (1 would be the same words).</p>` : ''}
+    <p>${esc(CITATION_LINE)}</p>
+    <details class="tech"><summary>Technical detail</summary>${h.formula ? `<p>${esc(plainServer(String(h.formula)))}</p>` : ''}${limits.length ? `<p class="t-k">Limits</p><ul>${limits.map((r) => `<li>${esc(techPlain(r))}</li>`).join('')}</ul>` : ''}</details>
+  </details>`;
+}
+
 export function howHtml(a: Answer): string {
+  if (a.method === 'keyword') return keywordHow(a);
   const steps = a.funnel?.steps ?? [];
   const funnel = steps.length
-    ? `<ol class="funnel" style="--n:${steps.length}">${steps.map((s, i) => `<li><b>${esc(count(s.n))}</b><span>${esc(funnelLabel(s, a, i === steps.length - 1))}</span></li>`).join('')}</ol>`
+    ? `<ol class="funnel" style="--n:${steps.length}">${steps.map((s, i) => `<li><b>${esc(count(s.n))}</b><span>${esc(funnelLabel(s, a, i === steps.length - 1))}${s.n_distinct != null && s.n_distinct !== s.n ? ` (${esc(count(s.n_distinct))} distinct facilities; some records are duplicates)` : ''}</span></li>`).join('')}</ol>`
     : '';
   const w = a.window;
   const h = a.how_we_decided ?? {};
@@ -324,10 +386,28 @@ export function plannersHtml(teaser: string, whatIf: string): string {
 
 // ------------------------------------------------------------------ abstention (SPEC 4.9)
 
-function outsideLane(list: OutsideNearby[] | undefined): string {
+/** One lane row: name, what the list says, the list and its page and row, and where it is (D057 derived facts). */
+function outsideRow(o: OutsideNearby): string {
+  const ref = /\((Government list, [^)]*?page \d+ row \d+)\)/.exec(o.text)?.[1]
+    ?? /\(([^()]*(?:page|row)[^()]*)\)/.exec(o.text)?.[1] ?? '';
+  const name = o.name ? `${o.name}${o.district ? `, ${titleCaseName(o.district)}` : ''}` : '';
+  const what = o.what ?? '';
+  const districtOnly = /district/i.test(o.position_note ?? '');
+  const where = districtOnly ? 'Position: district only, so no distance is given.'
+    : o.km != null ? `About ${count(o.km)} km in a straight line${o.position_note ? ` (position approximate: ${o.position_note})` : ''}.` : '';
+  if (!name || !what) return `<li><span class="gov-tag">${esc(o.source_name ?? 'Government list')}</span> ${esc(o.text)}</li>`;
+  return `<li><span class="gov-tag">${esc(o.source_name ?? 'Government list')}</span> <b>${esc(name)}</b>: ${esc(what)}.${ref ? ` <span class="fine">${esc(ref)}.</span>` : ''} <span class="fine">${esc(where)}</span></li>`;
+}
+
+function titleCaseName(s: string): string {
+  return s.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase());
+}
+
+export function outsideLane(list: OutsideNearby[] | undefined): string {
   if (!list?.length) return '';
-  return `<section class="outside"><h2>Also on government or registry lists nearby (not in this dataset)</h2>
-    <ul>${list.map((o) => `<li><span class="gov-tag">${esc(o.source_name ?? 'Government list')}</span> ${esc(o.text)}${o.position_note && !/position approximate/i.test(o.text) ? ' <span class="fine">position approximate (PIN area)</span>' : ''}</li>`).join('')}</ul></section>`;
+  return `<section class="outside"><h2>Also on government or registry lists nearby (not matched to a record in this dataset)</h2>
+    <p class="fine">Outside data, cited to the list. Not checked against our records' text, and never used to pick the options above.</p>
+    <ul>${list.map(outsideRow).join('')}</ul></section>`;
 }
 
 export function abstainHtml(a: Answer): string {
@@ -340,7 +420,7 @@ export function abstainHtml(a: Answer): string {
   if (b) {
     const v = normCard(b, a);
     nested = `<section class="nearest" data-idx="0">
-      <h2 class="nest-k">Nearest place whose record names ${esc(serviceName(a))}</h2>
+      <h2 class="nest-k">${a.method === 'keyword' ? `Nearest record with a word match for ${esc(serviceName(a))} (not checked)` : `Nearest place whose record names ${esc(serviceName(a))}`}${isIsland(a) && v.crossesState ? ': on the mainland, across the sea (sea or air travel is not modelled)' : ''}</h2>
       <div class="nest-head"><span class="num${v.approx ? ' approx' : ''}" aria-hidden="true">1</span>
         <h3><button type="button" class="fac-link" data-focus-result="0">${esc(v.nameShort)}</button></h3></div>
       ${v.nameRest ? `<p class="name-rest">${esc(v.nameRest)}</p>` : ''}
@@ -388,8 +468,9 @@ export function ambiguousHtml(r: Resolution, typed: string): string {
 
 export function problemHtml(r: Resolution, typed: string): string {
   if (r.status === 'outside_india') return outsideIndia(r.how);
-  if (looksLikeCoords(typed)) return outsideIndia('Those numbers are not a latitude and longitude inside India.');
-  const hint = /\btry\b/i.test(r.how ?? '') ? '' : ' Try a 6-digit PIN code, a district, a city, or coordinates such as 26.91, 75.79.';
+  const script = /[^\u0000-\u024f]/.test(typed) ? ' Please type the place name in English letters (for example Jokihat), or a 6-digit PIN code.' : '';
+  const coords = looksLikeCoords(typed) ? ' Those numbers were not read as a place in India: check them, or write them as latitude, longitude (for example 26.91, 75.79).' : '';
+  const hint = script || coords || (/\btry\b/i.test(r.how ?? '') ? '' : ' Try a 6-digit PIN code, a district, a city, or coordinates such as 26.91, 75.79.');
   return `<div class="problem" role="alert"><h1 tabindex="-1">We could not find "${esc(typed)}".</h1><p>${esc(plainServer(r.how ?? ''))}${hint}</p></div>`;
 }
 
@@ -398,8 +479,20 @@ function outsideIndia(how: string | null | undefined): string {
   return `<div class="problem" role="alert"><h1 tabindex="-1">That place is outside India.</h1><p>${h}This tool only covers facilities in India. Check the coordinates, or type a PIN code, district or city.</p></div>`;
 }
 
-export function errorHtml(msg: string): string {
-  return `<div class="problem" role="alert"><p><b>No answer.</b> ${esc(msg)}</p></div>`;
+export function errorHtml(msg: string, retry = false): string {
+  return `<div class="problem" role="alert"><p><b>No answer.</b> ${esc(msg)}</p>${retry ? '<p><button type="button" class="btn-ghost" data-retry="1">Try again</button></p>' : ''}</div>`;
+}
+
+/** Keyword answers whose words name a listed service: offer the checked answer. */
+export function didYouMeanHtml(a: Answer): string {
+  const d = a.did_you_mean;
+  if (a.method !== 'keyword' || !d) return '';
+  return `<p class="dym">Your words name a service we check record by record. <button type="button" class="btn-ghost" data-service="${esc(d.service)}">Show the checked answer for ${esc(d.label)}</button></p>`;
+}
+
+/** Shown while names and phone digits are masked, so a recording can be checked before it starts. */
+export function demoBadgeHtml(a: Answer): string {
+  return a.demo_masked ? '<span class="qchip demo"><em>Demo</em>names and phone digits hidden</span>' : '';
 }
 
 export { shortPlace };

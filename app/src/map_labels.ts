@@ -70,9 +70,10 @@ interface Cand { out: LabelOut; prio: number; force: boolean }
 
 function boxOf(x: number, y: number, o: LabelOut): [number, number, number, number] {
   const size = LABEL_SIZE[o.style];
-  const per = UPPER.has(o.style) ? 0.7 : o.style === 'search' ? 0.6 : 0.56;
-  const w = o.text.length * size * per + 4;
-  const h = size * 1.25;
+  // bold labels with a halo are wider than plain text: the estimate errs wide so names never touch
+  const per = UPPER.has(o.style) ? 0.72 : o.style === 'search' ? 0.66 : 0.62;
+  const w = o.text.length * size * per + 8;
+  const h = size * 1.4;
   const cx = x + o.offset[0], cy = y + o.offset[1];
   const x0 = o.anchor === 'start' ? cx : o.anchor === 'end' ? cx - w : cx - w / 2;
   return [x0, cy - h / 2, x0 + w, cy + h / 2];

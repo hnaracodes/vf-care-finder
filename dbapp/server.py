@@ -236,7 +236,7 @@ class State:
 
     def service(self, sid: str) -> S.Service:
         if sid not in S.SERVICES:
-            raise ApiError(400, f"Unknown service '{sid}'. Pick one of the listed services, or 'other' with text.",
+            raise ApiError(400, "That service is not in the list. Pick one, or choose Something else and type it.",
                            services=list(S.SERVICES))
         return S.SERVICES[sid]
 
@@ -281,11 +281,72 @@ def do_answer(s: State, service: str, res: Any, text: Optional[str]) -> dict:
     if service == FALLBACK_ID:
         if not text or not text.strip():
             raise ApiError(400, "For 'Something else', type the care needed.")
+        if not keyword_words(text):
+            raise ApiError(400, f"We could not match \"{text.strip()[:40]}\" to any record. Type at least one word "
+                                "of 3 or more letters (for example \"snake bite\"), or pick one of the listed services.")
         ans = rank.search(s.index, text.strip(), res, k=3)
     else:
         s.service(service)
         ans = rank.rank(s.index, service, res, k=3)
     return to_jsonable(ans)
+
+
+#: Words that carry no meaning for the keyword search; a query made only of these (or of words under
+#: 3 letters) is refused rather than answered with a confident match on "a" or "the".
+KEYWORD_STOPWORDS = frozenset("""a an and are at be by can do for from has have in is it its me my near need no
+nor not of on or our the to too was we what where which who with you your any some this that there here care
+hospital hospitals clinic facility facilities treatment service services centre center""".split())
+
+#: Free text that names one of the graded services: the answer offers the checked answer for it
+#: ("Did you mean Dialysis?"). Whole words or phrases, lower case.
+SERVICE_WORDS: dict[str, tuple[str, ...]] = {
+    "dialysis": ("dialysis", "haemodialysis", "hemodialysis", "kidney dialysis"),
+    "emoc": ("c-section", "c section", "csection", "caesarean", "cesarean", "caesarian", "lscs"),
+    "cath_lab": ("heart attack", "angioplasty", "angiography", "cath lab", "cathlab", "stemi", "stent"),
+    "cardiac_surgery": ("heart surgery", "cardiac surgery", "bypass surgery", "cabg", "open heart"),
+    "mri": ("mri", "mri scan"),
+    "ct": ("ct scan", "ct-scan", "cat scan", "ct"),
+    "burns": ("burn", "burns", "burn unit", "burn care"),
+    "oncology": ("cancer", "chemo", "chemotherapy", "radiotherapy", "oncology"),
+    "nicu": ("nicu", "newborn icu", "neonatal icu", "neonatal intensive care"),
+    "icu": ("icu", "intensive care"),
+    "trauma": ("trauma", "road accident", "accident"),
+    "neurosurgery": ("neurosurgery", "brain surgery", "spine surgery"),
+}
+
+
+def keyword_words(text: Optional[str]) -> list[str]:
+    """The words of a free-text query that can match anything: 3 or more letters, not a stopword."""
+    return [w for w in re.findall(r"[a-z0-9]+", (text or "").lower()) if len(w) >= 3 and w not in KEYWORD_STOPWORDS]
+
+
+def did_you_mean(text: Optional[str]) -> Optional[dict]:
+    """The graded service the free text names, if exactly one does."""
+    t = " " + re.sub(r"[^a-z0-9-]+", " ", (text or "").lower()).strip() + " "
+    hits = [sid for sid, words in SERVICE_WORDS.items() if any(f" {w} " in t for w in words)]
+    hits = [h for h in dict.fromkeys(hits) if h in S.SERVICES]
+    if len(hits) != 1:
+        return None
+    return {"service": hits[0], "label": S.SERVICES[hits[0]].label}
+
+
+_NEG_CUE = re.compile(r"\b(excluding|exclude[sd]?|except|other than|not|no|non|without|unavailable|nor)\b[^.;:()]*$")
+
+
+def negated_match(text: Optional[str], query: Optional[str]) -> bool:
+    """True when the query's words appear in this text only inside a negation: "Animal bites (Excluding
+    Snake Bite)" for "snake bite". The cue must come before the word, in the same clause or bracket."""
+    low = (text or "").lower()
+    words = keyword_words(query)
+    if not low or not words:
+        return False
+    # the whole phrase first ("snake bite"): "Animal bites (Excluding Snake Bite)" names bites, but
+    # excludes the snake bites asked about
+    phrase = list(re.finditer(r"\b" + r"\W+".join(re.escape(w) for w in words), low)) if len(words) > 1 else []
+    hits = phrase or [m for w in words for m in re.finditer(rf"\b{re.escape(w)}", low)]
+    if not hits:
+        return False
+    return all(_NEG_CUE.search(low[max(0, m.start() - 60):m.start()]) for m in hits)
 
 
 def _targets(ans: dict) -> list[dict]:
@@ -818,6 +879,10 @@ def _enrich_card(s: State, c: dict, *, service: str, line: Optional[str], text: 
     else:
         c["crosses_state"] = False
     put("quotes", lambda: _quotes(c, line, names, rx))
+    if service == FALLBACK_ID and isinstance(c.get("quotes"), list):
+        for q in c["quotes"]:
+            q["negated"] = negated_match(q.get("text"), text)
+        c["match_negated"] = bool(c["quotes"]) and bool(c["quotes"][0].get("negated"))
     put("missing_phrases", lambda: _missing_phrases(c, names))
     if Q is not None:
         def qs():
@@ -903,6 +968,39 @@ def _mask_unverified(s: State, ans: dict) -> None:
                 c["name_masked"] = True
 
 
+def _why_not_extras(s: State, ans: dict, line: Optional[str], *, demo: bool, reveal: bool) -> None:
+    """Why-not rows carry the same outside-list lines the cards carry (a LaQshya certificate on a public
+    district hospital the rule did not pick), and public hospitals get the same masked Call button, so
+    "call and ask" can be done. Nothing here changes which rows are listed or their order."""
+    items = (ans.get("why_not") or {}).get("items") or []
+    if not items:
+        return
+    from datetime import date
+    for it in items:
+        fid = str(it.get("facility_id") or "")
+        if not fid:
+            continue
+        try:
+            lines = []
+            if s.outside is not None and hasattr(s.outside, "lines_for"):
+                lines = list(s.outside.lines_for(fid, line, as_of=date.today()) or [])
+            if line == "emoc" and s.public is not None:
+                pl = s.public.line(fid)
+                if pl and isinstance(pl, dict) and pl.get("text") and not any(
+                        (x.get("text") or "").strip().lower() == pl["text"].strip().lower() for x in lines):
+                    lines.insert(0, pl)
+            it["outside_lines"] = to_jsonable(lines)
+        except Exception as e:
+            s.note_error("why_not.outside_lines", e)
+        public = (str(it.get("operator") or "").lower() in ("public", "government")
+                  or it.get("reason_code") == "public_record_silent")
+        if public and Q is not None and s.book is not None:
+            try:
+                it["call"] = _call(s, fid, reveal, demo)
+            except Exception as e:
+                s.note_error("why_not.call", e)
+
+
 def enrich_answer(s: State, service: str, res: Any, core: dict, *, text: Optional[str] = None,
                   demo: bool = False, reveal: bool = False) -> dict:
     """/api/answer = do_answer plus the SPEC 3.1 fields. Everything already there keeps its name and value
@@ -972,6 +1070,9 @@ def enrich_answer(s: State, service: str, res: Any, core: dict, *, text: Optiona
                 ans = to_jsonable(ans)
             except Exception as e:
                 s.note_error("answer.outside_lists", e)
+        _why_not_extras(s, ans, line, demo=demo, reveal=reveal)
+        if service == FALLBACK_ID:
+            ans["did_you_mean"] = did_you_mean(text)
         names = _requirement_names(line)
         rx = None
         if WN is not None and line is not None:

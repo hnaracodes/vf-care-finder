@@ -1689,7 +1689,14 @@ def _why_here_v1(a: Card, b: Optional[Card], ctx: _V1Ctx, n_in: int) -> str:
             s += f" The allowance does not apply to {b.name}, which carries a {_denied_phrase(b)}."
         return s
     if abs(ta - tb) <= 0.5:
-        return f"Same estimated drive time as {b.name} (about {fa}); listed first because it is closer in straight-line km."
+        if a_allow and not b_allow and ta > tb:
+            return (f"Same estimated drive time as {b.name} (about {fa}); listed first because its record is "
+                    f"corroborated, within the {ctx.A:.0f}-minute evidence allowance.")
+        if a.distance_km is not None and b.distance_km is not None and a.distance_km <= b.distance_km:
+            return f"Same estimated drive time as {b.name} (about {fa}); listed first because it is closer in straight-line km."
+        if ta <= tb:
+            return f"Same estimated drive time as {b.name} (about {fa}); listed first because it is slightly nearer."
+        return f"Same estimated drive time as {b.name} (about {fa}); listed first by the order rule."
     nearer = f"slightly nearer (both about {fa})" if diff == 0 else f"nearer (about {fa} against {fb})"
     if b_denied:
         return (f"Listed above {b.name}: {nearer}. The evidence allowance does not apply to "

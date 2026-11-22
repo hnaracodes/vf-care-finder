@@ -112,6 +112,10 @@ STATE_ALIASES: dict[str, str] = {
     "DAMAN AND DIU": "THE DADRA AND NAGAR HAVELI AND DAMAN AND DIU",
 }
 
+#: Resolver-only names (not used for matching facility records): "Delhi" means the capital, not the
+#: same-named village offices in Rewa (Madhya Pradesh) or one office in North Delhi.
+QUERY_ALIASES: dict[str, tuple[str, ...]] = {"DELHI": ("NEW DELHI",)}
+
 _NUM = r"[-+]?\d{1,3}(?:\.\d+)?"
 _COORD = re.compile(
     rf"^\s*\(?\s*({_NUM})\s*°?\s*([NSEW])?\s*[,;/\s]\s*({_NUM})\s*°?\s*([NSEW])?\s*\)?\s*$", re.I
@@ -300,7 +304,8 @@ class Resolver:
         return self.places.iloc[int(i)]
 
     def _label(self, r: pd.Series) -> str:
-        st, di = nice(r["state"]), nice(r["district"])
+        # "Lakshadweep District" + " district" reads twice: drop a trailing "District" from the name
+        st, di = nice(r["state"]), re.sub(r"\s+District$", "", nice(r["district"]))
         if r["kind"] == "pin":
             note = r["note"] or ""
             where = f"mostly in {di}" if "mostly in" in note else di
@@ -400,7 +405,10 @@ class Resolver:
             return None
         a, ha, b, hb = m.group(1), (m.group(2) or "").upper(), m.group(3), (m.group(4) or "").upper()
         if "." not in a + b and not (ha or hb):
-            return None  # two bare integers are not coordinates
+            # Two bare integers are coordinates only when written as a pair with a comma or semicolon
+            # ("30,79", "26;80"); "30 79" stays a place-name search. Points outside India are then said so.
+            if not re.search(r"[,;]", text):
+                return None
         x, y = float(a), float(b)
         if ha in "SW" and ha:
             x = -x
@@ -454,7 +462,8 @@ class Resolver:
             return None
         qkey = geo.place_key(q)
         literal_d, literal_o = [q], [k for k in dict.fromkeys([qkey, q]) if k]
-        aliases = [k for k in dict.fromkeys([*geo.CITY_ALIASES.get(q, ()), *geo.CITY_ALIASES.get(qkey, ())])
+        aliases = [k for k in dict.fromkeys([*geo.CITY_ALIASES.get(q, ()), *geo.CITY_ALIASES.get(qkey, ()),
+                                             *QUERY_ALIASES.get(q, ()), *QUERY_ALIASES.get(qkey, ())])
                    if k not in (q, qkey)]
         for kind in ("district", "city", "post_office"):
             literal = self._filter([i for k in (literal_d if kind == "district" else literal_o)

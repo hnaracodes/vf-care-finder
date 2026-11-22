@@ -246,3 +246,21 @@ details[open] > summary::before { content: "\25BE"; content: "\25BE" / ""; }
   .funnel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .bk .d b { font-size: 15px; }
 }
+
+/* ------------------------------------------------------------ overnight fix round */
+.emerg { font-size: 13.5px; color: var(--ink); background: var(--paper); border-radius: 5px; padding: 5px 9px; }
+.pubnear { margin-top: 12px; font-size: 13.5px; color: var(--ink-2); background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; }
+.dym { margin-top: 12px; font-size: 13.5px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.q-label { font-size: 13.5px; color: var(--ink-2); }
+.q.neg { border-left-color: var(--claim); }
+.qchip.demo { border-color: var(--wi); color: var(--wi); }
+.asks .why { font-size: 13.5px; color: var(--ink-2); }
+.tech p, .how > p { margin: 0 0 6px; }
+.how[open] { display: flex; flex-direction: column; gap: 8px; }
+.outside li .fine { color: var(--ink-3); }
+.whynot li .gov { margin-top: 4px; }
+.whynot li .next { margin-top: 6px; }
+@media (max-width: 760px) {
+  details.more > summary, .fold > summary, .wi-link, .fac-link[data-open-whynot] { min-height: 44px; display: flex; align-items: center; }
+  .btn-call { min-height: 44px; }
+}

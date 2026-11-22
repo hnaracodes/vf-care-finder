@@ -141,7 +141,8 @@ SCHEME_NAMES = "Ayushman Bharat, PM-JAY or CGHS"
 _EXTRA_NEG_RX = re.compile(r"\black(s|ing)?\b|\bnot (open|working|running|functioning)\b")
 #: A digit run with phone separators; masked when it holds 8 or more digits.
 _NUMBER_RX = re.compile(r"\+?\d[\d \-().]{6,}\d")
-_DATE_RX = re.compile(r"^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$|^(19|20)\d\d ?- ?(19|20)\d\d$")
+_DATE_RX = re.compile(r"^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$|^(19|20)\d\d ?- ?(19|20)\d\d$"
+                      r"|^(19|20)\d\d[-./](0?[1-9]|1[0-2])[-./](0?[1-9]|[12]\d|3[01])$")  # ISO dates: "retrieved 2026-11-21"
 PHONE_MASK = "[phone number]"
 
 #: Selection priority (lower first). The output keeps this order, lead first.

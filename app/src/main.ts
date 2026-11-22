@@ -11,8 +11,8 @@ import './style.css';
 import * as api from './api';
 import * as minimap from './minimap';
 import {
-  abstainHtml, ambiguousHtml, backupsHtml, chipsHtml, errorHtml, footerHtml, furtherLine, howHtml,
-  noteHtml, originHtml, plannersHtml, problemHtml, teaserHtml, whatIfTeaserHtml, whyNotHtml,
+  abstainHtml, ambiguousHtml, backupsHtml, chipsHtml, demoBadgeHtml, didYouMeanHtml, errorHtml, footerHtml, furtherLine, howHtml,
+  noteHtml, originHtml, outsideLane, plannersHtml, problemHtml, publicNearbyHtml, teaserHtml, whatIfTeaserHtml, whyNotHtml,
 } from './render';
 import { bannedIn, esc, previewAddSentence, servicePhrase, shortPlace } from './text';
 import type {
@@ -150,6 +150,10 @@ async function boot(): Promise<void> {
   // opens the large map again with its controls; the swarm never runs in the small map.
   (map as MapHostLike & { onExpandChange?: (on: boolean) => void }).onExpandChange = (on: boolean) => {
     if (!on && simulator) simulator.close();
+    // the large map is a step the browser's Back can undo
+    const st = history.state as { map?: number } | null;
+    if (on && !st?.map) history.pushState({ vf: 1, map: 1 }, '', `${location.search}#map`);
+    else if (!on && st?.map && !closingFromHistory) history.back();
   };
   SimCtor = await loadSimCtor();
   if (import.meta.env.DEV) showFixtureBadge(api.usingFixtures());
@@ -161,7 +165,9 @@ async function boot(): Promise<void> {
     els.go.disabled = true;
     return;
   }
-  els.service.innerHTML = services.map((s) => `<option value="${esc(s.id)}">${esc(s.label)}</option>`).join('')
+  // long labels truncate in the select on a narrow screen: the short form shows, the full one is the title
+  const shortLabel = (l: string) => l.replace(/\s+and high-risk delivery$/i, ' (high-risk birth)');
+  els.service.innerHTML = services.map((s) => `<option value="${esc(s.id)}" title="${esc(s.label)}">${esc(shortLabel(s.label))}</option>`).join('')
     + `<option value="${OTHER}">Something else (type it)</option>`;
   renderExamples();
   wire();
@@ -213,6 +219,21 @@ function wire(): void {
     if (f) { map.focus('further', Number(f.dataset.focusFurther)); showMapOnPhone(); return; }
     const rv = t.closest('button[data-reveal]') as HTMLButtonElement | null;
     if (rv) { revealPhones(rv.dataset.reveal!); return; }
+    if (t.closest('button[data-retry]')) { if (lastQuery) run(lastQuery); return; }
+    const ow = t.closest('button[data-open-whynot]') as HTMLButtonElement | null;
+    if (ow) {
+      const d = els.folds.querySelector<HTMLDetailsElement>('details.whynot');
+      if (d) { d.open = true; d.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' }); d.querySelector<HTMLElement>('summary')?.focus({ preventScroll: true }); }
+      return;
+    }
+    const sv = t.closest('button[data-service]') as HTMLButtonElement | null;
+    if (sv && lastQuery) {
+      els.service.value = sv.dataset.service!;
+      els.other.value = '';
+      syncOther();
+      run({ ...lastQuery, service: sv.dataset.service!, text: undefined });
+      return;
+    }
     const v = t.closest('button[data-verify]') as HTMLButtonElement | null;
     if (v) { openSim({ mode: 'evidence', edit: { type: 'verify', facility_id: v.dataset.verify! } }); return; }
     const s = t.closest('button[data-sim]') as HTMLButtonElement | null;
@@ -247,13 +268,12 @@ async function revealPhones(fid: string): Promise<void> {
   btns.forEach((b) => { b.disabled = true; });
   try {
     const r = normAnswer(await api.answer({ ...lastQuery, reveal: '1' }));
-    const tel = new Map<string, Card['call']>();
-    for (const c of [...r.results, ...(r.beyond_radius ? [r.beyond_radius] : []), ...(r.further_away ?? [])]) if (c.call) tel.set(c.facility_id, c.call);
+    // only the number that was tapped is shown; the others stay masked
+    const all = (x: Answer) => [...x.results, ...(x.beyond_radius ? [x.beyond_radius] : []), ...(x.further_away ?? []),
+      ...(x.why_not?.items ?? [])] as { facility_id: string; call?: Card['call'] | null }[];
+    const got = all(r).find((c) => c.facility_id === fid && c.call);
     const a = current.answer;
-    for (const c of [...a.results, ...(a.beyond_radius ? [a.beyond_radius] : []), ...(a.further_away ?? [])]) {
-      const t = tel.get(c.facility_id);
-      if (t) c.call = t;
-    }
+    for (const c of all(a)) if (c.facility_id === fid && got?.call) c.call = got.call;
     renderAnswer(a, current.sim);
     els.layout.querySelector<HTMLElement>(`a[data-call="${CSS.escape(fid)}"]`)?.focus();
   } catch (e) {
@@ -326,8 +346,43 @@ function setUrl(q: Query): void {
   p.set('q', q.q);
   if (q.text) p.set('text', q.text);
   if (q.place_id) p.set('place_id', q.place_id);
-  history.replaceState(null, '', `?${p.toString()}`);
+  const url = `?${p.toString()}`;
+  if ((url === location.search && !location.hash) || fromHistory) history.replaceState({ vf: 1 }, '', url);
+  else history.pushState({ vf: 1 }, '', url);
 }
+
+/** True while a Back or Forward is being replayed, so it does not push a new entry. */
+let fromHistory = false;
+
+let closingFromHistory = false;
+
+window.addEventListener('popstate', () => {
+  if (map?.isExpanded?.()) {
+    closingFromHistory = true;
+    try { map.collapse(); } finally { closingFromHistory = false; }
+    if ((history.state as { map?: number } | null)?.map) return;
+    // Back from the large map lands on the same search: nothing more to redraw
+    const p0 = new URLSearchParams(location.search);
+    if (lastQuery && p0.get('service') === lastQuery.service && p0.get('q') === lastQuery.q) return;
+  }
+  const p = new URLSearchParams(location.search);
+  const svc = p.get('service'), q = p.get('q');
+  fromHistory = true;
+  try {
+    if (svc && q) {
+      els.service.value = svc;
+      els.other.value = p.get('text') ?? '';
+      els.place.value = q;
+      syncOther();
+      run({ service: svc, q, text: p.get('text') ?? undefined, place_id: p.get('place_id'), demo: DEMO });
+    } else {
+      simulator?.close();
+      showLanding();
+    }
+  } finally {
+    fromHistory = false;
+  }
+});
 
 function serviceLabel(q: Query): string {
   return q.service === OTHER ? `"${q.text ?? ''}"` : servicePhrase(services.find((s) => s.id === q.service)?.label ?? '');
@@ -346,6 +401,7 @@ async function run(q: Query): Promise<void> {
   simulator?.close();
   simulator = null;
   current = null;
+  simTried = false;
   els.go.disabled = true;
   els.layout.className = 'layout is-results';
   els.ask.hidden = true;
@@ -378,6 +434,8 @@ async function run(q: Query): Promise<void> {
     const s = await simP;
     if (id !== runId) return;
     current = { answer: a, sim: s };
+    simTried = true;
+    if (!s) renderAnswer(a, null);
     if (s) {
       if (SimCtor) {
         try {
@@ -393,7 +451,8 @@ async function run(q: Query): Promise<void> {
     }
   } catch (e) {
     if (id !== runId) return;
-    els.note.innerHTML = errorHtml((e as Error).message);
+    els.note.innerHTML = errorHtml((e as Error).message, true);
+    els.ask.hidden = false;
     map.showLanding([], () => {});
   } finally {
     if (id === runId) {
@@ -410,23 +469,28 @@ function normAnswer(a: Answer): Answer {
   return { ...a, results: a.results ?? [], further_away: further };
 }
 
+/** Set once the /api/sim request for the current answer has finished (ok or not). */
+let simTried = false;
+
 function renderAnswer(a: Answer, s: SimPayload | null): void {
   const canRun = !!simulator;
-  els.chips.innerHTML = chipsHtml(a);
+  els.chips.innerHTML = chipsHtml(a) + demoBadgeHtml(a);
   els.origin.innerHTML = originHtml(a);
   if (a.status === 'no_reliable_option' || !a.results.length) {
     els.layout.classList.add('is-abstain');
-    els.note.innerHTML = abstainHtml(a);
+    els.note.innerHTML = didYouMeanHtml(a) + abstainHtml(a);
     els.backups.innerHTML = '';
   } else {
     els.layout.classList.remove('is-abstain');
-    els.note.innerHTML = noteHtml(a);
-    els.backups.innerHTML = backupsHtml(a) + furtherLine(a, a.further_away ?? []);
+    els.note.innerHTML = didYouMeanHtml(a) + noteHtml(a);
+    els.backups.innerHTML = backupsHtml(a) + furtherLine(a, a.further_away ?? []) + publicNearbyHtml(a) + outsideLane(a.outside_nearby);
   }
   els.folds.innerHTML = whyNotHtml(a, canRun) + howHtml(a);
   els.footer.innerHTML = footerHtml();
   const isAbstain = a.status === 'no_reliable_option' || !a.results.length;
-  els.teaser.innerHTML = plannersHtml(teaserHtml(s, canRun), isAbstain ? whatIfTeaser(a, s) : '');
+  const simGone = !s && simTried && a.method !== 'keyword'
+    ? '<p class="fine">The village view could not load for this place.</p>' : '';
+  els.teaser.innerHTML = plannersHtml(teaserHtml(s, canRun) || simGone, isAbstain ? whatIfTeaser(a, s) : '');
 }
 
 /** SPEC 4.9 item 8: only when the simulator says a unit at the origin would bring villages within the window. */

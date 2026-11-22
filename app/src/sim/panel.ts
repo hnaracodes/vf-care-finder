@@ -304,7 +304,7 @@ export class Panel {
       tk.append(num(String(cur.within), changed(real.within, cur.within)),
         ` of ${cur.n} nearby villages are within ${p.window.hours_text} of a place whose record shows ${p.service_phrase}.`);
       if (cur.avg_minutes !== null) {
-        tk.append(' Averaged over all those villages, the drive to the nearest one is about ', num(String(Math.round(cur.avg_minutes)), changed(real.avg_minutes, cur.avg_minutes)),
+        tk.append(` Averaged over all ${cur.n} nearby villages (here a village is one India Post office area within about ${Math.round(p.villages.radius_km)} km), the drive to the nearest one is about `, num(String(Math.round(cur.avg_minutes)), changed(real.avg_minutes, cur.avg_minutes)),
           ` min (the cards give the time from ${p.origin.short_name} itself).`);
       } else {
         tk.append(` We found no place in this dataset whose record shows ${p.service_phrase} in reach.`);
@@ -316,9 +316,9 @@ export class Panel {
     const rows: [string, string, string | null, string | null][] = [];
     const wn = (c: Counters) => `${c.within} of ${c.n}`;
     rows.push([`Villages within ${p.window.hours_text} of a place with evidence`, wn(real), now ? wn(now) : null, now ? signed(now.within - real.within) : null]);
-    const avgD = now && real.avg_minutes !== null && now.avg_minutes !== null ? Math.round(now.avg_minutes) - Math.round(real.avg_minutes) : null;
+    const avgD = now && real.avg_minutes !== null && now.avg_minutes !== null ? Math.round(now.avg_minutes - real.avg_minutes) : null;  // from unrounded values
     rows.push(['Average estimated drive to the nearest one', fmtMin(real.avg_minutes), now ? fmtMin(now.avg_minutes) : null, now ? (avgD === null ? '' : signed(avgD, ' min')) : null]);
-    rows.push(['Villages whose first stop has no evidence (if they trust listed specialties)', String(real.first_no_evidence), now ? String(now.first_no_evidence) : null, now ? signed(now.first_no_evidence - real.first_no_evidence) : null]);
+    rows.push(['Villages whose first stop has no usable evidence (none in its record, or held back by a warning), if they trust listed specialties', String(real.first_no_evidence), now ? String(now.first_no_evidence) : null, now ? signed(now.first_no_evidence - real.first_no_evidence) : null]);
     const t = h('table', { class: 'sim-counters' });
     const head = h('tr', {}, h('th', {}, ''), h('th', {}, 'Real data'));
     if (now) head.append(h('th', { class: 'sim-hot' }, 'What-if'), h('th', { class: 'sim-hot' }, 'Change'));

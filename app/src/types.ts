@@ -130,6 +130,8 @@ export interface Card {
   public_list?: PublicLine | null;
   outside_lines?: OutsideLine[];
   sim_index?: number | null;
+  /** keyword search: the best-matching text names the words only inside a negation */
+  match_negated?: boolean;
 }
 
 export interface Gate {
@@ -179,6 +181,8 @@ export interface Answer {
   funnel?: { steps: FunnelStep[]; consistency?: unknown };
   outside_nearby?: OutsideNearby[];
   demo_masked?: boolean;
+  /** keyword search: the graded service the typed words name, if one does */
+  did_you_mean?: { service: string; label: string } | null;
   /** set only on dev fixtures (app/src/fixtures/make_fixtures_v2.py); the UI shows a FIXTURE badge */
   fixture?: boolean;
   timing_ms?: number;
@@ -260,7 +264,9 @@ export interface Query {
 // =====================================================================================
 
 export interface TimeText { short: string; range: string; loose: boolean }
-export interface Quote { text: string; field: string; requirement_keys: string[]; marks: [number, number][] }
+export interface Quote { text: string; field: string; requirement_keys: string[]; marks: [number, number][];
+  /** keyword search: the query's words appear in this text only inside a negation ("Excluding Snake Bite") */
+  negated?: boolean }
 export interface CallInfo { has_phone: boolean; phone?: string | null; tel?: string | null; note?: string | null }
 export interface Question { question: string; why?: string }
 export interface PublicLine { text: string; source?: string; validity?: string; current?: boolean; outside_data?: boolean }
@@ -278,9 +284,11 @@ export interface WhyNotItem {
   quote_or_absence?: { kind: 'quote' | 'absence'; text: string; field?: string; negated?: boolean } | null;
   /** server.py: estimated drive from the searched place (the middle of it, for a loose place) */
   minutes?: number | null; time_short?: string | null;
+  /** server.py _why_not_extras: outside-list lines on this record, and the masked Call for public hospitals */
+  outside_lines?: OutsideLine[]; call?: CallInfo | null;
 }
 export interface WhyNot { items: WhyNotItem[]; n_nearer: number; n_approx_nearer: number; heading: string; masked: boolean }
-export interface FunnelStep { step: string; label: string; n: number }
+export interface FunnelStep { step: string; label: string; n: number; n_distinct?: number }
 export interface Origin { short_name: string; label: string; precision_km: number | null; loose: boolean; too_coarse: boolean; state_display: string }
 export interface Window { minutes: number; allowance: number; hours_text?: string; reach_text?: string; km_equivalent?: number;
   reach_km?: number; basis?: string; note?: string; origin_loose?: boolean; kind?: string;

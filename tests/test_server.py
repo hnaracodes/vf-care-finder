@@ -138,7 +138,7 @@ def test_resolve_statuses(client, q, status):
 @needs_data
 def test_errors_are_plain_sentences(client):
     r = client.get("/api/answer", params={"service": "nope", "q": "Jaipur"})
-    assert r.status_code == 400 and "Unknown service" in r.json()["detail"]
+    assert r.status_code == 400 and "not in the list" in r.json()["detail"]
     r = client.get("/api/answer", params={"service": "dialysis", "q": ""})
     assert r.status_code == 400 and "Type a place" in r.json()["detail"]
     r = client.get("/api/answer", params={"service": "other", "q": "Jaipur"})
@@ -583,7 +583,7 @@ def test_sim_unavailable_for_other_ambiguous_and_unknown(client):
         r = client.get("/api/sim", params=params)
         assert r.status_code == 200 and r.json()["status"] == "unavailable" and r.json()["reason"], params
     r = client.get("/api/sim", params={"service": "nope", "q": "Jaipur"})
-    assert r.status_code == 400 and "Unknown service" in r.json()["detail"]
+    assert r.status_code == 400 and "not in the list" in r.json()["detail"]
     r = client.get("/api/sim", params={"service": "dialysis", "q": ""})
     assert r.status_code == 400
 

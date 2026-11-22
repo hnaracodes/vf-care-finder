@@ -199,7 +199,9 @@ const QUESTION_PLAIN: [RegExp, string][] = [
 ];
 
 export function plainQuestion(q: string): string {
-  const t = q.replace(/\s*\((WHO|PM-JAY|FBNC|FRU|ESC|PMNDP|NHM)[^)]*\)/g, '');
+  const t = q.replace(/\s*\((WHO|PM-JAY|FBNC|FRU|ESC|PMNDP|NHM)[^)]*\)/g, '')
+    .replace(/\bmentions blood bank or transfusion, not necessarily for obstetric patients\b/i, 'mentions a blood bank or transfusion. A C-section can need blood')
+    .replace(/,\s*not necessarily for obstetric patients\b/gi, '');
   for (const [rx, to] of QUESTION_PLAIN) if (rx.test(t)) return to;
   // "Do you have blood bank or transfusion, not necessarily for obstetric patients?" names a
   // recipe requirement verbatim; ask it in the plain word the rest of the card uses.
@@ -259,8 +261,9 @@ export function normCard(c: Card, a: Answer): CardView {
   if (c.minutes != null && Number.isFinite(c.minutes)) {
     const lo = c.minutes_low, hi = c.minutes_high;
     // "1 min" as the low end of a spread reads as a real figure: anything under 5 minutes is "under 5 min"
-    const loTxt = lo != null ? (lo < 5 ? 'under 5 min' : fmtMinutes(lo)) : '';
-    const range = lo != null && hi != null ? (hi < 5 ? 'under 5 min' : `${loTxt} to ${fmtMinutes(hi)}`) : (c.time?.range ?? '');
+    // a low end under 5 minutes says nothing ("1 min" reads as a real figure): the range is "up to X"
+    const range = lo != null && hi != null ? (hi < 5 ? 'under 5 min' : lo < 5 ? `up to ${fmtMinutes(hi)}` : `${fmtMinutes(lo)} to ${fmtMinutes(hi)}`)
+      : (c.time?.range ?? '');
     const point = `about ${fmtMinutes(c.minutes)}`;
     const isLoose = loose && !!range;
     time = { short: isLoose ? point : (c.time?.short ?? point), range, loose: isLoose, point };
@@ -321,7 +324,11 @@ const CLAIM_SENTENCE: Record<string, string> = {
 };
 
 export function claimSentence(a: Answer, v: CardView): string {
-  if (a.method === 'keyword') return `Its record mentions ${serviceName(a)}`;
+  if (a.method === 'keyword') {
+    return v.c.match_negated
+      ? `Its best-matching text names ${serviceName(a)} only to exclude it, so call before going`
+      : `No rule checked that it offers ${serviceName(a)}: call first`;
+  }
   if (!v.quotes.length) return `Its record lists ${serviceName(a)}`;
   if (CLAIM_SENTENCE[a.service]) return CLAIM_SENTENCE[a.service];
   const k = leadQuote(a, v)?.requirement_keys[0];
@@ -330,10 +337,20 @@ export function claimSentence(a: Answer, v: CardView): string {
 
 export function headline(a: Answer, v: CardView): string {
   const claim = claimSentence(a, v);
+  // keyword search is a word match, not a recipe check: never "Go to"
+  if (a.method === 'keyword') {
+    const coarse = (a.origin?.precision_km ?? 0) > (a.radius_km || 100) / 2;
+    if (coarse) return `Closest word match: ${v.nameShort}, ${kmShort(v.c)} in a straight line from the middle of ${shortPlace(a)}, which is itself known only to about ${count(a.origin!.precision_km)} km. ${claim}.`;
+    return `Closest word match: ${v.nameShort}, ${kmShort(v.c)} away in a straight line. ${claim}.`;
+  }
   if (v.time && v.time.loose) return `Go to ${v.nameShort}, ${v.time.point} from the middle of ${shortPlace(a)}. ${claim}.`;
   if (v.time) return `Go to ${v.nameShort}, ${v.time.short} away. ${claim}.`;
   if (v.approx) return `Go to ${v.nameShort}. ${claim}.`;
-  if (a.origin?.too_coarse) return `Go to ${v.nameShort}, ${kmShort(v.c)} in a straight line from the middle of ${a.origin.short_name}. ${claim}.`;
+  if (a.origin?.too_coarse) {
+    const from = a.origin.short_name === 'the point you gave'
+      ? `from the point you gave (read to about ${count(a.origin.precision_km)} km)` : `from the middle of ${a.origin.short_name}`;
+    return `Go to ${v.nameShort}, ${kmShort(v.c)} in a straight line ${from}. ${claim}.`;
+  }
   return `Go to ${v.nameShort}, ${kmShort(v.c)} away in a straight line. ${claim}.`;
 }
 
@@ -342,7 +359,8 @@ export function headline(a: Answer, v: CardView): string {
 export function distanceLine(v: CardView, a?: Answer): { lead: string; rest: string } {
   const c = v.c;
   const where = [typeWord(c.type), operatorWord(c.operator), c.city].filter(Boolean).join(', ');
-  const cross = v.crossesState && v.stateDisplay ? ` In ${v.stateDisplay}: across the state border.` : '';
+  const cross = v.crossesState && v.stateDisplay
+    ? (a && isIsland(a) ? ` In ${v.stateDisplay}: across the sea; sea or air travel is not modelled.` : ` In ${v.stateDisplay}: across the state border.`) : '';
   if (!v.time) {
     const d = v.approx ? 'position approximate' : `${kmShort(c)} in a straight line`;
     return { lead: '', rest: `${capital(d)}. ${where}.${cross}` };
@@ -354,9 +372,13 @@ export function distanceLine(v: CardView, a?: Answer): { lead: string; rest: str
   }
   // "range 1 min to 1 min" says nothing: show a range only when its two ends differ.
   const ends = v.time.range ? v.time.range.split(' to ') : [];
-  const range = v.time.range && !(ends.length === 2 && ends[0] === ends[1]) ? `; it could be ${v.time.range}` : '';
-  if (v.approx) return { lead: '', rest: `Estimated drive${range}. Its map position is approximate, so the time is rough. ${where}.${cross}` };
-  return { lead: '', rest: `Estimated drive${range}. ${capital(v.distanceLabel)}. ${where}.${cross}` };
+  const range = v.time.range && !(ends.length === 2 && ends[0] === ends[1]) && v.time.range !== v.time.point ? `; it could be ${v.time.range}` : '';
+  const point = ` ${v.time.point}`;
+  // a PIN or post office area known only to several km: the time is from its middle (the circle on the map)
+  const prec = a?.origin?.precision_km ?? 0;
+  const fromMid = a && prec >= 5 ? ` Times are from the middle of ${shortPlace(a)}, which is known to about ${count(prec)} km, so the patient's own trip may differ.` : '';
+  if (v.approx) return { lead: '', rest: `Estimated drive${point}${range}. Its map position is approximate, so the time is rough.${fromMid} ${where}.${cross}` };
+  return { lead: '', rest: `Estimated drive${point}${range}. ${capital(v.distanceLabel)}.${fromMid} ${where}.${cross}` };
 }
 
 export function mainKey(a: Answer): string | null {
@@ -438,8 +460,9 @@ function firstSentence(s: string): string {
 }
 
 /** Runs of 8 or more digits become "[phone number]" (vf.questions.mask_numbers). */
+const DATE_RX = /^\d{1,2}[-./]\d{1,2}[-./]\d{2,4}$|^(19|20)\d\d ?- ?(19|20)\d\d$|^(19|20)\d\d[-./](0?[1-9]|1[0-2])[-./](0?[1-9]|[12]\d|3[01])$/;
 export function maskNumbers(s: string): string {
-  return s.replace(/\+?\d[\d \-().]{6,}\d/g, (m) => (m.replace(/\D/g, '').length >= 8 ? '[phone number]' : m));
+  return s.replace(/\+?\d[\d \-().]{6,}\d/g, (m) => (m.replace(/\D/g, '').length >= 8 && !DATE_RX.test(m.trim()) ? '[phone number]' : m));
 }
 
 /** What the card's quotes name, in plain words, the service first: ["dialysis", "a dialysis unit"]. */
@@ -499,7 +522,8 @@ export function sourcesLine(c: Card): string {
   if (!n) return '';
   const sites = n === 1 ? '1 website' : `${count(n)} websites`;
   const dom = c.official_domain !== undefined ? c.official_domain : officialDomain(c.sources?.official_website);
-  return dom ? `Found on ${sites}, including its own (${dom}).` : `Found on ${sites}.`;
+  const caveat = n > 1 ? ' Directories and listing sites count, so this is not independent confirmation.' : '';
+  return dom ? `Found on ${sites}, including its own (${dom}).${caveat}` : `Found on ${sites}.${caveat}`;
 }
 
 /** Fallback for official_domain: the host without www., null for link shorteners and maps. */
@@ -545,6 +569,8 @@ export function originText(a: Answer): { text: string; tint: boolean } {
     tint: true,
   };
   const good = prec != null && Number.isFinite(prec) ? ` (location accurate to about ${count(Math.max(1, prec))} km)` : '';
+  const m = /^Centre of (.+?), about (\d[\d,]*) km across$/.exec(label);
+  if (m) return { text: `From the centre of ${m[1]} (about ${m[2]} km across; location accurate to about ${count(Math.max(1, prec ?? 0))} km).`, tint: false };
   return { text: `From the middle of ${label}${good}.`, tint: false };
 }
 
@@ -582,7 +608,7 @@ export function topOrderLine(a: Answer, v: CardView): string {
   const allow = a.window?.allowance;
   const nearer = nearerAfter(a, v.c);
   if (!nearer.length || !allows(v.c) || allow == null) return '';
-  return `Listed first, though ${joinAnd(nearer)} ${nearer.length === 1 ? 'is' : 'are'} nearer: its record names ${joinAnd(namedWords(a, v))}, and it is at most ${count(allow)} minutes further.`;
+  return `Listed first, though ${joinAnd(nearer)} ${nearer.length === 1 ? 'is' : 'are'} nearer: ${possessive(v.nameShort)} record names ${joinAnd(namedWords(a, v))}, and it is at most ${count(allow)} minutes further.`;
 }
 
 export function orderSentence(a: Answer, prev: CardView, v: CardView): string {
@@ -590,7 +616,7 @@ export function orderSentence(a: Answer, prev: CardView, v: CardView): string {
   const allow = a.window?.allowance;
   const nearer = nearerAfter(a, c);
   if (allows(c) && nearer.length && allow != null) {
-    return `Listed before ${joinAnd(nearer)}, which ${nearer.length === 1 ? 'is' : 'are'} nearer: its record names ${joinAnd(namedWords(a, v))}, and it is at most ${count(allow)} minutes further.`;
+    return `Listed before ${joinAnd(nearer)}, which ${nearer.length === 1 ? 'is' : 'are'} nearer: ${possessive(v.nameShort)} record names ${joinAnd(namedWords(a, v))}, and it is at most ${count(allow)} minutes further.`;
   }
   // every earlier card that is further than this one and came first by the allowance
   const i = a.results.indexOf(c);
@@ -599,7 +625,14 @@ export function orderSentence(a: Answer, prev: CardView, v: CardView): string {
   if (before.length && allow != null) {
     const names = before.map((x) => normCard(x, a).nameShort);
     const one = names.length === 1;
-    return `Nearer than ${joinAnd(names)}, but listed after ${one ? 'it' : 'them'}: ${one ? 'its record names' : 'their records name'} more of what the care needs (such as ${joinAnd(namedWords(a, normCard(before[0], a)).slice(1, 3)) || serviceName(a)}), and ${one ? 'it is' : 'they are'} at most ${count(allow)} minutes further.`;
+    // a record whose position is approximate or disputed is only maybe nearer
+    const unsure = v.approx || (c.flags ?? []).some((f) => /location|merge|place/.test(f.flag));
+    const lead = unsure ? `Listed after ${joinAnd(names)}, and may be nearer (its position or record is uncertain)`
+      : `Listed after ${joinAnd(names)}, though nearer`;
+    const such = joinAnd(namedWords(a, normCard(before[0], a)).slice(1, 3)) || serviceName(a);
+    return one
+      ? `${lead}: ${possessive(names[0])} record names more of what the care needs (such as ${such}), and ${names[0]} is at most ${count(allow)} minutes further.`
+      : `${lead}: their records name more of what the care needs (such as ${such}), and they are at most ${count(allow)} minutes further.`;
   }
   const same = (c.minutes != null && p.minutes != null && Math.round(c.minutes) === Math.round(p.minutes))
     || (c.minutes == null && c.distance_km != null && p.distance_km != null && Math.round(c.distance_km) === Math.round(p.distance_km));
@@ -612,6 +645,11 @@ export function orderSentence(a: Answer, prev: CardView, v: CardView): string {
   return 'Next nearest with evidence in its record.';
 }
 
+/** "BNK Hospital's", "Pawar's Clinic's". */
+export function possessive(name: string): string {
+  return /s$/i.test(name) ? `${name}'` : `${name}'s`;
+}
+
 /** Abstention: when a card a little further has stronger record evidence than the nearest one, say so. */
 export function strongerNearby(a: Answer, near: CardView, others: Card[]): string {
   const rank = (c: Card) => ({ high: 3, medium: 2, low: 1 }[recordLevel(c)]);
@@ -620,7 +658,9 @@ export function strongerNearby(a: Answer, near: CardView, others: Card[]): strin
     && c.minutes - near.c.minutes <= allow);
   if (!better) return '';
   const b = normCard(better, a);
-  const dt = Math.round(better.minutes! - near.c.minutes!);
+  // from the unrounded minutes (parts.minutes), not the rounded card values
+  const um = (c: Card) => Number(((c.parts ?? {}) as { minutes?: number }).minutes ?? c.minutes);
+  const dt = Math.round(um(better) - um(near.c));
   const gapTxt = dt <= 1 ? 'about the same drive' : `about ${dt} min further`;
   return `${b.nameShort} is about as far (${gapTxt}) and has stronger record evidence. If you can, call both and send the patient to the one that confirms it can help.`;
 }
@@ -647,6 +687,9 @@ export function reachText(a: Answer): string {
 // ------------------------------------------------------------------ how we decided (SPEC 4.7)
 
 export function ruleParagraph(a: Answer): string {
+  if (a.method === 'keyword') {
+    return 'Word match only: we look for facts and listed specialties whose words match yours (a text similarity of at least 0.25; a listed specialty counts half as much as a fact), then weigh the match by straight-line distance, so a closer place with a slightly weaker match can come first. No rule checked that the service is offered.';
+  }
   const allow = a.window?.allowance;
   const one = allow != null
     ? ` One exception: a record that names both the service and what it needs (for example the equipment or the unit) can go first if it is at most ${count(allow)} minutes further.`
@@ -655,6 +698,7 @@ export function ruleParagraph(a: Answer): string {
 }
 
 export function windowLine(a: Answer): string {
+  if (a.method === 'keyword') return `Search radius: ${count(a.radius_km || 100)} km in a straight line (a design choice). Word search gives no drive time.`;
   const w = a.window;
   if (!w) return '';
   const basis = w.basis ? ` ${firstSentenceKeepCite(w.basis)}` : '';
@@ -675,7 +719,7 @@ function firstSentenceKeepCite(s: string): string {
   return s;
 }
 
-export const CITATION_LINE = 'Every quote is the exact text of a fact in the facility\'s record, with the list it came from. The data does not say which web page each fact came from.';
+export const CITATION_LINE = 'Every quote is exact text from a fact in the facility\'s record, with the list it came from; long facts are trimmed where you see "...". The data does not say which web page each fact came from.';
 export const FOOTER_LINE = 'Times are estimated drive times from straight-line distance, with no traffic: real trips take longer. Records come from web pages, which can be out of date. Most records here are private facilities; public hospitals are often thinly described online.';
 export const WHYNOT_CLOSING = 'Grey means only that our rule did not pick it from its record. It does not mean the place is unable to help.';
 export const INTRO_LINE = 'Pick the care and the place. We show up to 3 facilities, quote their own records, and say when nothing reliable is near.';
@@ -704,16 +748,42 @@ export function funnelN(a: Answer, step: string): number | null {
 // ------------------------------------------------------------------ abstention (SPEC 4.9)
 
 export function abstainHeadline(a: Answer): string {
+  const prec = a.origin?.precision_km ?? 0;
+  if (a.method === 'keyword') {
+    const r = a.radius_km || 100;
+    // D058 (3) for word search: a place wider than the search radius makes the negative uncertain
+    if (prec > r / 2) return `Uncertain: ${shortPlace(a)} spans about ${count(2 * prec)} km, and no record with a word match for ${serviceName(a)} is within ${count(r)} km of its middle in this dataset.`;
+    return `No record with a word match for ${serviceName(a)} within ${count(r)} km of ${shortPlace(a)} in this dataset.`;
+  }
   return `No clear evidence of ${serviceName(a)} within ${hoursText(a)} of ${shortPlace(a)} in this dataset.`;
 }
 
+export function isIsland(a: Answer): boolean {
+  return !!a.window && (a.window as { sea_travel_not_modelled?: boolean }).sea_travel_not_modelled === true;
+}
+
 export function abstainNextStep(a: Answer): string {
-  return `Ask the district hospital or the ASHA supervisor about ${serviceName(a)} nearer to ${shortPlace(a)}.`;
+  if (isIsland(a)) return `On the islands, ask the nearest public hospital or the district health office how patients needing ${serviceName(a)} are referred or moved to the mainland.`;
+  return `Call the district hospital, or your ANM or block health officer, and ask where ${serviceName(a)} is available nearer to ${shortPlace(a)}.`;
+}
+
+/** The free emergency transport numbers, for the emergency services. */
+export function emergencyLine(a: Answer): string {
+  if (a.method === 'keyword') return '';
+  if (a.service === 'emoc' || a.service === 'nicu') return 'In an emergency, call 108 for an ambulance. For a pregnant woman or a sick newborn, 102 is free transport in most states.';
+  if (['trauma', 'burns', 'cath_lab', 'neurosurgery', 'icu'].includes(a.service)) return 'In an emergency, call 108 for an ambulance (free in most states).';
+  return '';
 }
 
 export function gapLine(a: Answer): string {
   const nReach = funnelN(a, 'claim_within_reach'), nRec = funnelN(a, 'recommendable'), nIn = funnelN(a, 'within_radius');
   if (nReach == null || nRec == null || nIn == null) return '';
+  const b = a.beyond_radius;
+  if (nReach === 0 && b) {
+    const v = normCard(b, a);
+    const where = isIsland(a) && v.crossesState ? `, across the sea in ${v.stateDisplay}` : v.crossesState && v.stateDisplay ? `, in ${v.stateDisplay}` : '';
+    return `No record within about ${reachText(a)} lists or claims ${serviceName(a)}. The nearest record that names it is ${kmShort(b)} away in a straight line${where}.`;
+  }
   return `In a wider search, up to about ${reachText(a)} away, ${count(nReach)} ${nReach === 1 ? 'record lists or claims' : 'records list or claim'} ${serviceName(a)}; ${count(nRec)} ${nRec === 1 ? 'has' : 'have'} a sentence naming it; ${nIn === 0 ? 'none' : count(nIn)} ${nIn === 1 ? 'is' : 'are'} within ${hoursText(a)}.`;
 }
 
@@ -721,6 +791,9 @@ export function gapLine(a: Answer): string {
 
 export function teaserSentence(s: SimPayload): string {
   const m = s.summary;
+  if (m.first_no_evidence > 0 && m.first_held_back > 0) {
+    return `${count(m.within)} of ${count(m.n_villages)} nearby villages are within ${s.window.hours_text} of a place whose record shows ${s.service_phrase}. But if people went by a hospital's listed specialties alone, ${count(m.first_no_evidence)} villages would go first to a place with no usable evidence of it (no evidence in its record, or evidence held back by a warning).`;
+  }
   if (m.first_no_evidence === 0) {
     return `${count(m.within)} of ${count(m.n_villages)} nearby villages are within ${s.window.hours_text} of a place whose record shows ${s.service_phrase}.`;
   }
