@@ -1,8 +1,8 @@
 {
   "bundle_version": "wp12-bundle-v1",
-  "created_at_utc": "2026-11-22T04:24:59+00:00",
-  "git_commit": "0b5259243005acb343ba48facaa4886d55585469",
-  "code_uncommitted": true,
+  "created_at_utc": "2026-11-22T04:57:15+00:00",
+  "git_commit": "d597c74516af623acd8b441b157de9deaee91d16",
+  "code_uncommitted": false,
   "script": "scripts/wp12_bundle.py",
   "data_dir": "vf.paths.data_dir()",
   "pipeline_source": "csv",
@@ -315,16 +315,16 @@
     "flags.parquet": {
       "rows": 3350,
       "from": "gold/facility_flags.parquet",
-      "input_created_at_utc": "2026-11-22T03:40:57Z",
-      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "input_created_at_utc": "2026-11-22T04:56:32Z",
+      "input_git_commit": "d597c74516af623acd8b441b157de9deaee91d16",
       "bytes": 113321,
       "sha256": "8ca7ff602d109d533cc8ac40fec7e3380ac69625df8ff7f26588dda890d9338f"
     },
     "duplicates.parquet": {
       "rows": 75,
       "from": "gold/facility_duplicates.parquet",
-      "input_created_at_utc": "2026-11-22T03:40:57Z",
-      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "input_created_at_utc": "2026-11-22T04:56:32Z",
+      "input_git_commit": "d597c74516af623acd8b441b157de9deaee91d16",
       "bytes": 9945,
       "sha256": "a17f24b375e9d400828545104e33c65201864752872cb045dc21306213c00f7b"
     },

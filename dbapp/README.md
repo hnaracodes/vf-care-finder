@@ -6,11 +6,13 @@ This folder is what gets deployed. `server.py`, `app.yaml`, `requirements.txt` a
 - `vf/`: a copy of `src/vf`, so the app runs the tested code. Regenerate it with the bundle script after any change to `src/vf`. Before any deploy, `.venv/bin/python scripts/wp12_bundle.py --check` exits 1 if `dbapp/vf` differs from `src/vf` or the bundle was built from older gold grades.
 - Grades: the app serves WP4's student grades (`method: student`, model `student_1b`, on `ob_delivery`, `h24`, `icu`, `ventilator`; regex v0.2 on the other tags). The Databricks notebook makes the same grades by applying the same saved model, not by retraining it (see "Deploy: pipeline on Databricks").
 
-**Deployed URL:** not deployed yet. Write it here after step 6.
+**Deployed URL:** https://vf-care-finder-7474645226493940.aws.databricksapps.com (app `vf-care-finder`, workspace users only; a request without a workspace login gets 401).
+
+Deployed Nov 21, 23:42 ET (04:42 UTC Nov 22; deployment `01f1e62f2b8c127e8419dea8e4d889c8`, "App started successfully") from `/Workspace/Users/$ME/cmu-datathon/dbapp`, with the bundle the notebook built on Databricks (one-time serverless run `919695724668037`: every step ok, 0 of 114 counts different from the local run). `/api/health` on the URL: `mode: bundle`, `vf_from: dbapp/vf`, 9,989 facilities, 12 graded lines, `grades_method: student`, `flags_source: wp11_v2`, manifest `pipeline_source: databricks`, load 5.8 s. The five brief scenarios gave the same status and top three as the local app: dialysis Jaipur ok (Soni, NAV Imperial, Monilek, all grade 3); emoc Lucknow ok (BNK g3, Elite g2, Krishna g2); dialysis Jokihat, Bihar `no_reliable_option`; emoc Nashik ok (Bagul, Hrudayasparsh, Prapti, all g2); trauma Kotputli ok (Shri Shyam, Rainbow, Sachkhand, all g3). The app restarts its 24-hour clock on each deploy (see "Restart before judging").
 
 ## Before you start (Hruday, once): done Nov 21 (D042)
 
-Checked again Nov 21 late evening: `databricks auth profiles` shows `DEFAULT` at `https://dbc-96b6f0b2-f8fd.cloud.databricks.com` as valid, `databricks current-user me` answers, and `databricks apps list` is empty (no app created yet). Nothing below needs a new login unless the token expires.
+Checked again Nov 21 late evening: `databricks auth profiles` shows `DEFAULT` at `https://dbc-96b6f0b2-f8fd.cloud.databricks.com` as valid, `databricks current-user me` answers, and `databricks apps list` was empty. The app `vf-care-finder` was created later that night. Nothing below needs a new login unless the token expires.
 
 1. Workspace: `https://dbc-96b6f0b2-f8fd.cloud.databricks.com` (Free Edition), with the Marketplace listing "Virtue Foundation Dataset (DAIS 2026)" added as catalog `databricks_virtue_foundation_dataset_dais_2026`, schema `virtue_foundation_dataset`. These are the notebook's widget defaults and `vf.io.DEFAULT_DATABRICKS_SCHEMA`.
 2. CLI login, if it ever expires. Run this yourself; agents never handle the password:

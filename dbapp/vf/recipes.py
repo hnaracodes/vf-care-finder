@@ -908,6 +908,40 @@ FETAL_TRANSFUSION_MASK = (
     r"(intra[- ]?uterine|fetal|foetal|in[- ]?utero|neonatal|exchange)( \w+){0,2} (blood )?transfusions?"
 )
 
+#: Breathing support for newborns that is mechanical ventilation, not CPAP
+#: alone: FBNC 2025 has "CPAP facilities at SNCU", so CPAP is level II care.
+NEONATAL_VENTILATION_PATTERN = r"ventilat|\bhfov\b|oscillat|intubat|surfactant"
+#: A ventilator fact that also names an adult unit (ICU, CCU, HDU) is a
+#: multi-unit list, not a newborn ventilator ("ICU, CCU and NICU with ventilators").
+ADULT_UNIT_IN_LIST_VETO = (
+    r"(?<!neonatal )(?<!newborn )(?<!paediatric )(?<!pediatric )(?<!level 3 )(?<!level iii )"
+    r"\b(icus?|ccus?|iccus?|hdus?|micus?|sicus?)\b"
+)
+
+#: cath_lab, PM-JAY Cardiology/CTVS item 3, "ICU Facility with cardiac
+#: monitoring and ventilator support": the ICU is an adult ICU and the
+#: ventilator belongs to it. Removed from an icu fact before the ICU wording is
+#: looked for: neonatal, paediatric, obstetric, Covid and mobile (ambulance)
+#: ICUs, and negated mentions ("excluding ICU and Emergency").
+NON_ADULT_ICU_MASK = (
+    r"\b(neonatal|neo[- ]?natal|newborn|paediatric|pediatric|obstetrics?|covid(-19)?|mobile( unit)?|onboard)"
+    r"( \w+)? (intensive care|icus?|critical care)( units?)?"
+    r"|\bicus? on wheels\b"
+    r"|\b(exclud\w*|except|without|no)( the| an| any)? (icus?|intensive care|critical care)( units?)?"
+    r"|negative pressure( room)? ventilation"
+)
+#: ICU wording left once the mask has run.
+ADULT_ICU_PATTERN = r"\bicus?\b|intensive care|critical care"
+#: A ventilator fact about newborns or children (unless it also says adult), an
+#: ambulance or transport ventilator, an operating-theatre or anaesthesia
+#: ventilator, or a Covid ventilator: not ICU ventilator support.
+NON_ICU_VENTILATOR_VETO = (
+    r"^(?!.*\badults?\b).*(neonat|new[- ]?born|\bn?nicu\b|\bpicu\b|paediatric|pediatric|\binfants?\b|preterm"
+    r"|prematur|fetal|foetal)"
+    r"|ambulance|transport|\bmobile\b|wheels|operat(ing|ion) (room|theat)|\bots?\b|theat(re|er)s?|anaesth|anesth"
+    r"|covid"
+)
+
 QUALIFIERS_V03: dict[str, Qualifier] = {
     "blood_maternal": Qualifier("blood", TAG_PATTERNS["blood"], None,
                                 "a blood fact that still names a blood bank, storage or transfusion once fetal, "
@@ -917,8 +951,29 @@ QUALIFIERS_V03: dict[str, Qualifier] = {
                             "a nicu fact naming a NICU or neonatal intensive care, not only an SNCU"),
     "nicu_level3": Qualifier("nicu", rf"^(?=.*({NICU_NAMED_PATTERN})).*({LEVEL3_PATTERN})", None,
                              "a NICU fact that says level III (or tertiary)"),
-    "ventilator_newborn": Qualifier("ventilator", NEWBORN_CONTEXT_PATTERN, SNCU_ONLY_VETO,
-                                    "a ventilator fact that is about newborns (not an SNCU-only fact)"),
+    "ventilator_newborn": Qualifier("ventilator", NEWBORN_CONTEXT_PATTERN,
+                                    rf"{SNCU_ONLY_VETO}|{ADULT_UNIT_IN_LIST_VETO}",
+                                    "a ventilator fact that is about newborns (not an SNCU-only fact, and not a "
+                                    "list that also names an adult ICU, CCU or HDU)"),
+    "neonatal_resp_ventilation": Qualifier("neonatal_resp", NEONATAL_VENTILATION_PATTERN,
+                                           rf"{SNCU_ONLY_VETO}|{ADULT_UNIT_IN_LIST_VETO}",
+                                           "a neonatal_resp fact naming mechanical ventilation (ventilation, HFOV, "
+                                           "oscillation, intubation or surfactant), not CPAP alone, not about an "
+                                           "SNCU alone, and not a list that also names an adult ICU, CCU or HDU"),
+    "icu_adult": Qualifier("icu", ADULT_ICU_PATTERN, None,
+                           "an icu fact that still names an ICU, intensive care or critical care once neonatal, "
+                           "paediatric, obstetric, Covid, mobile and negated ICU wording is removed",
+                           NON_ADULT_ICU_MASK),
+    "ventilator_icu": Qualifier("ventilator", r"ventilat", NON_ICU_VENTILATOR_VETO,
+                                "a ventilator fact that is not about newborns or children (unless it says adult), "
+                                "an ambulance or transport, an operating theatre or anaesthesia machine, or Covid",
+                                r"negative pressure( room)? ventilation"),
+    "icu_with_ventilator": Qualifier("icu", rf"^(?=.*({ADULT_ICU_PATTERN})).*ventilat",
+                                     r"covid|ambulance|transport|\bmobile\b|wheels"
+                                     r"|(neonatal|newborn|paediatric|pediatric|infant) ventilat",
+                                     "an icu fact that names an adult ICU and ventilators in the same fact (not "
+                                     "Covid, ambulance or transport, and not a newborn or paediatric ventilator)",
+                                     NON_ADULT_ICU_MASK),
     "dialysis_unit_named": Qualifier("dialysis_unit", DIALYSIS_UNIT_NAMED_PATTERN, None,
                                      "a dialysis_unit fact naming a unit, machines or haemodialysis, "
                                      "not a nephrologist alone"),
@@ -971,6 +1026,8 @@ GRADE_RULES_V03: dict[str, LineRule] = {
         # (8) Perform surgery (e.g., caesarean section) (9) Perform blood
         # transfusion". Anaesthesia and OT are no longer required for grade 3;
         # anaesthesia and a 24-hour service give an FRU-level note (FRU 2025 s2.2).
+        # Fetal, intrauterine, neonatal and exchange transfusion do not count as
+        # signal function 9 (blood_maternal).
         line="emoc",
         claim_specialties=_EMOC.claim_specialties,
         claim_tags=frozenset({"ob_delivery"}),
@@ -979,7 +1036,8 @@ GRADE_RULES_V03: dict[str, LineRule] = {
         bonus_tags=("blood", "anesthesia", "ot", "nicu", "h24"),
         tags=("csection", "blood_maternal", "blood", "anesthesia", "ot", "ob_delivery", "nicu", "h24"),
         supported_names=(f"caesarean section ({_WHO8})",),
-        corroborated_names=(f"caesarean section ({_WHO8})", f"blood bank or transfusion ({_WHO9})"),
+        corroborated_names=(f"caesarean section ({_WHO8})",
+                            f"blood bank or transfusion, not necessarily for obstetric patients ({_WHO9})"),
         claim_name="maternity or delivery service",
         note_groups=_groups({"anesthesia"}, {"h24"}),
         note_names=("anaesthesia (FRU 2025 s2.2 criterion 4)", "24-hour service (FRU 2025 s2.2 criterion 1)"),
@@ -995,13 +1053,14 @@ GRADE_RULES_V03: dict[str, LineRule] = {
         claim_specialties=frozenset({"neonatologyPerinatalMedicine"}),
         claim_tags=frozenset({"nicu"}),
         supported=_groups({"nicu_named"}),
-        corroborated=_groups({"nicu_named"}, {"neonatal_resp", "ventilator_newborn", "nicu_level3"}),
-        bonus_tags=("ventilator",),
-        tags=("nicu_named", "neonatal_resp", "ventilator_newborn", "nicu_level3", "nicu", "ventilator"),
+        corroborated=_groups({"nicu_named"}, {"neonatal_resp_ventilation", "ventilator_newborn", "nicu_level3"}),
+        bonus_tags=("neonatal_resp", "ventilator"),
+        tags=("nicu_named", "neonatal_resp_ventilation", "ventilator_newborn", "nicu_level3", "nicu",
+              "neonatal_resp", "ventilator"),
         supported_names=(_NICU_SUPPORTED_V03,),
         corroborated_names=(_NICU_SUPPORTED_V03,
-                            "newborn breathing support, a ventilator in a newborn fact, or a level III mention "
-                            "(FBNC 2025)"),
+                            "newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a "
+                            "self-declared level III NICU (FBNC 2025)"),
         claim_name="names an SNCU (level II), not a NICU",
         claim_next_name="a related specialty listed, or an SNCU or NICU mention",
     ),
@@ -1009,19 +1068,25 @@ GRADE_RULES_V03: dict[str, LineRule] = {
         # PM-JAY Cardiology/CTVS: "6. Fully equipped Catheterization Laboratory
         # Unit", "3. ICU Facility with cardiac monitoring and ventilator
         # support"; advanced criteria: "fully equipped with ICCU/SICU/ NICU/
-        # relevant Intensive Care Unit". h24 and emergency are no longer required.
+        # relevant Intensive Care Unit". The ICU route needs an adult ICU and a
+        # ventilator that belongs to an ICU (icu_adult, ventilator_icu or
+        # icu_with_ventilator). Declared design choices, not PM-JAY text: item 4
+        # (round-the-clock cardiologist) is not required, so h24 and emergency
+        # are no longer required; the CCU route needs no ventilator.
         line="cath_lab",
         claim_specialties=frozenset({"cardiology", "interventionalRadiology"}),
         claim_tags=frozenset(),
         supported=_groups({"cath_lab"}),
         corroborated=_groups({"cath_lab"}, {"ccu"}),
         corroborated_alts=((
-            _groups({"cath_lab"}, {"icu"}, {"ventilator"}),
+            _groups({"cath_lab"}, {"icu_adult"}, {"ventilator_icu", "icu_with_ventilator"}),
             (f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",
-             f"intensive care unit ({_PMJAY_C} item 3)", f"ventilator support ({_PMJAY_C} item 3)"),
+             f"adult intensive care unit, not neonatal, paediatric or obstetric ({_PMJAY_C} item 3)",
+             f"ventilator support, not a newborn, ambulance, theatre or Covid ventilator ({_PMJAY_C} item 3)"),
         ),),
-        bonus_tags=("h24", "emergency"),
-        tags=("cath_lab", "ccu", "icu", "ventilator", "h24", "emergency"),
+        bonus_tags=("icu", "ventilator", "h24", "emergency"),
+        tags=("cath_lab", "ccu", "icu_adult", "ventilator_icu", "icu_with_ventilator", "icu", "ventilator", "h24",
+              "emergency"),
         supported_names=(f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",),
         corroborated_names=(f"cath lab, angiography or angioplasty ({_PMJAY_C} item 6)",
                             "cardiac care unit (CCU or ICCU; PM-JAY advanced criteria)"),

@@ -1,9 +1,9 @@
 {
  "meta": {
   "script": "scripts/wp5_scenarios.py",
-  "created_at_utc": "2026-11-22T03:49:50Z",
-  "git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
-  "code_uncommitted": true,
+  "created_at_utc": "2026-11-22T04:56:46Z",
+  "git_commit": "d597c74516af623acd8b441b157de9deaee91d16",
+  "code_uncommitted": false,
   "rows": 26,
   "scenarios_csv": "labels/scenarios.csv",
   "recipe_version": "v0.2",
@@ -36,14 +36,14 @@
     "rows": 119868
    },
    "facility_flags": {
-    "created_at_utc": "2026-11-22T03:40:57Z",
+    "created_at_utc": "2026-11-22T04:56:32Z",
     "script": "scripts/wp11_trust_checks.py",
     "check_version": "wp11_v2",
     "recipe_version": "v0.2",
     "rows": 3350
    },
    "facility_duplicates": {
-    "created_at_utc": "2026-11-22T03:40:57Z",
+    "created_at_utc": "2026-11-22T04:56:32Z",
     "script": "scripts/wp11_trust_checks.py",
     "check_version": "wp11_v2",
     "recipe_version": "v0.2",
@@ -97,17 +97,17 @@
   "expected_abstentions": 4,
   "cards_shown": 48,
   "cards_by_confidence": {
-   "high": 34,
+   "high": 32,
    "medium": 9,
-   "low": 5
+   "low": 7
   },
   "cards_with_a_flag": 4,
-  "load_s": 0.6,
-  "keyword_index_build_s": 1.9,
-  "scenario_recipe_ms_median": 0.9,
-  "scenario_recipe_ms_max": 2.01,
-  "scenario_keyword_ms_median": 7.67,
-  "scenario_keyword_ms_max": 8.6,
+  "load_s": 0.7,
+  "keyword_index_build_s": 2.1,
+  "scenario_recipe_ms_median": 0.99,
+  "scenario_recipe_ms_max": 2.2,
+  "scenario_keyword_ms_median": 9.38,
+  "scenario_keyword_ms_max": 11.66,
   "latency_check": {
    "n_queries": 276,
    "n_points": 23,
@@ -125,9 +125,9 @@
     "neurosurgery",
     "oncology"
    ],
-   "ms_median": 0.81,
-   "ms_p95": 0.88,
-   "ms_max": 2.22,
+   "ms_median": 0.85,
+   "ms_p95": 0.95,
+   "ms_max": 2.79,
    "limit_ms": 100.0,
    "passed": true
   }
@@ -162,7 +162,7 @@
    "service": "dialysis",
    "service_label": "Dialysis",
    "radius_km": 50.0,
-   "headline": "3 of 21 recommendable facilities within 150 km, best first.",
+   "headline": "3 of 21 recommendable facilities within 150 km, best first; 14 of them are inside the 50 km radius and come first.",
    "cards": [
     {
      "facility_id": "ebb4d2d3-4c1d-436d-b270-2e0f4498cfaa",
@@ -173,9 +173,9 @@
      "state": "Rajasthan",
      "lat": 26.895626068115234,
      "lon": 75.8149642944336,
-     "distance_km": 3.4,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -257,9 +257,9 @@
      "state": "Rajasthan",
      "lat": 26.939151763916016,
      "lon": 75.79365539550781,
-     "distance_km": 2.2,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -338,9 +338,9 @@
      "state": "Rajasthan",
      "lat": 26.887001037597656,
      "lon": 75.8341064453125,
-     "distance_km": 5.4,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "low",
@@ -421,9 +421,9 @@
      "state": "Rajasthan",
      "lat": 26.91794445,
      "lon": 75.80844445,
-     "distance_km": 1.5,
+     "distance_km": 2.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -495,9 +495,9 @@
      "state": "Rajasthan",
      "lat": 26.91794445,
      "lon": 75.80844445,
-     "distance_km": 1.5,
+     "distance_km": 2.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -560,9 +560,9 @@
      "state": "Rajasthan",
      "lat": 26.892560958862305,
      "lon": 75.80455017089844,
-     "distance_km": 3.2,
+     "distance_km": 3.0,
      "location_precision_km": 2.0,
-     "location_note": "Location from the record; it could not be checked against a PIN code. Straight-line distance.",
+     "location_note": "Location from the record; it could not be checked against a PIN code. Straight-line distance. Measured from the centre of Jaipur district, Rajasthan, about 144 km across, which is itself known only to within about 72 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -638,6 +638,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 21,
+      "n_distinct": 21,
       "n_blocked": 1,
       "n_scored": 21,
       "max_scored": 50
@@ -645,7 +646,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 14
+      "n": 14,
+      "n_distinct": 14
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -659,9 +661,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -670,12 +673,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 21 recommendable facilities within 150 km, best first."
+    "headline": "3 of 21 recommendable facilities within 150 km, best first; 14 of them are inside the 50 km radius and come first."
    },
    "fingerprint": "b2bedcd575",
    "ms": {
-    "resolve": 7.57,
-    "answer": 1.02
+    "resolve": 7.39,
+    "answer": 1.25
    }
   },
   {
@@ -707,7 +710,7 @@
    "service": "emoc",
    "service_label": "Emergency C-section and high-risk delivery",
    "radius_km": 50.0,
-   "headline": "3 of 14 recommendable facilities within 150 km, best first.",
+   "headline": "3 of 14 recommendable facilities within 150 km, best first; 9 of them are inside the 50 km radius and come first.",
    "cards": [
     {
      "facility_id": "d93e5058-3819-47e3-aaae-49e6d9cfbafb",
@@ -718,9 +721,9 @@
      "state": "Uttar Pradesh",
      "lat": 26.879484176635742,
      "lon": 80.93269348144531,
-     "distance_km": 2.9,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -795,9 +798,9 @@
      "state": "Uttar Pradesh",
      "lat": 26.900938034057617,
      "lon": 80.93594360351562,
-     "distance_km": 5.1,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 2,
      "grade_label": "supported (a fact in the record names the service)",
      "confidence": "medium",
@@ -849,7 +852,7 @@
       "official_website": "https://goo.gl/maps/FtrckHf1E5MTdz3F9",
       "also_listed_as": []
      },
-     "why_here": "Tied with Krishna Medical Centre (scores within 0.02); listed first because it is closer (5.1 km against 5.2 km).",
+     "why_here": "Tied with Krishna Medical Centre (scores within 0.02); listed first because it is closer (about 5 km against about 5 km).",
      "could_be_wrong": "The record does not mention blood bank or transfusion.",
      "evidence_strength": "moderate",
      "flags": []
@@ -863,9 +866,9 @@
      "state": "Uttar Pradesh",
      "lat": 26.901344299316406,
      "lon": 80.93478393554688,
-     "distance_km": 5.2,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 2,
      "grade_label": "supported (a fact in the record names the service)",
      "confidence": "medium",
@@ -938,7 +941,7 @@
      "lon": 80.9425048828125,
      "distance_km": 0.0,
      "location_precision_km": 25.0,
-     "location_note": "Location conflicts with the record's own PIN code and city; it is uncertain. Position good to about 25 km. Straight-line distance.",
+     "location_note": "Location conflicts with the record's own PIN code and city; it is uncertain. Position good to about 25 km. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -992,9 +995,9 @@
      "state": "Uttar Pradesh",
      "lat": 26.849481,
      "lon": 80.945626,
-     "distance_km": 0.7,
+     "distance_km": 1.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -1043,9 +1046,9 @@
      "state": "Uttar Pradesh",
      "lat": 26.849481,
      "lon": 80.945626,
-     "distance_km": 0.7,
+     "distance_km": 1.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Lucknow district, Uttar Pradesh, about 38 km across, which is itself known only to within about 19 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -1118,6 +1121,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 14,
+      "n_distinct": 14,
       "n_blocked": 13,
       "n_scored": 14,
       "max_scored": 50
@@ -1125,7 +1129,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 9
+      "n": 9,
+      "n_distinct": 9
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -1139,9 +1144,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -1150,12 +1156,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 14 recommendable facilities within 150 km, best first."
+    "headline": "3 of 14 recommendable facilities within 150 km, best first; 9 of them are inside the 50 km radius and come first."
    },
    "fingerprint": "1f941260ea",
    "ms": {
-    "resolve": 6.66,
-    "answer": 2.01
+    "resolve": 6.85,
+    "answer": 2.2
    }
   },
   {
@@ -1198,9 +1204,9 @@
     "state": "Uttar Dinajpur",
     "lat": 25.63135528564453,
     "lon": 88.13694763183594,
-    "distance_km": 75.8,
+    "distance_km": 76.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance.",
+    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 11 km.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": "low",
@@ -1261,7 +1267,7 @@
      "official_website": "raiganjgmch.org",
      "also_listed_as": []
     },
-    "why_here": "The nearest recommendable facility, 75.8 km away, beyond the 50 km radius.",
+    "why_here": "The nearest recommendable facility, about 76 km away, beyond the 50 km radius.",
     "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website.",
     "evidence_strength": "thin",
     "flags": []
@@ -1296,6 +1302,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 12,
+      "n_distinct": 12,
       "n_blocked": 0,
       "n_scored": 12,
       "max_scored": 50
@@ -1303,7 +1310,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -1317,9 +1325,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -1332,8 +1341,8 @@
    },
    "fingerprint": "dc8a192260",
    "ms": {
-    "resolve": 18.73,
-    "answer": 0.32
+    "resolve": 21.63,
+    "answer": 0.4
    }
   },
   {
@@ -1365,7 +1374,7 @@
    "service": "emoc",
    "service_label": "Emergency C-section and high-risk delivery",
    "radius_km": 50.0,
-   "headline": "3 of 27 recommendable facilities within 150 km, best first.",
+   "headline": "3 of 27 recommendable facilities within 150 km, best first; 5 of them are inside the 50 km radius and come first.",
    "cards": [
     {
      "facility_id": "6132cee5-de8b-4734-a693-f143b778962c",
@@ -1376,9 +1385,9 @@
      "state": "Maharashtra",
      "lat": 19.98402214050293,
      "lon": 73.72346496582031,
-     "distance_km": 26.3,
+     "distance_km": 26.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
      "grade": 2,
      "grade_label": "supported (a fact in the record names the service)",
      "confidence": "medium",
@@ -1442,9 +1451,9 @@
      "state": "Maharashtra",
      "lat": 19.985469818115234,
      "lon": 73.80235290527344,
-     "distance_km": 18.2,
+     "distance_km": 18.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
      "grade": 2,
      "grade_label": "supported (a fact in the record names the service)",
      "confidence": "medium",
@@ -1493,37 +1502,37 @@
       "official_website": "hrudayasparsh.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Currae Hospital (scores within 0.02); listed first because it is closer (18.2 km against 135.0 km).",
+     "why_here": "Ranked above Prapti Women's Hospital: more evidence for the same level of support.",
      "could_be_wrong": "The record does not mention blood bank or transfusion.",
      "evidence_strength": "moderate",
      "flags": []
     },
     {
-     "facility_id": "c5598920-4152-4fac-95ae-62151f23bbf8",
-     "name": "Currae Hospital",
+     "facility_id": "cb163bdf-5015-46b4-b8e4-b83af28b30ce",
+     "name": "Prapti Women's Hospital",
      "type": "hospital",
-     "operator": "private",
-     "city": "Thane West",
+     "operator": null,
+     "city": "Nashik",
      "state": "Maharashtra",
-     "lat": 19.27501678466797,
-     "lon": 72.95970153808594,
-     "distance_km": 135.0,
+     "lat": 19.988426208496094,
+     "lon": 73.77780151367188,
+     "distance_km": 21.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance.",
-     "grade": 3,
-     "grade_label": "corroborated (the service and the things it needs are named in the record)",
-     "confidence": "high",
-     "confidence_reason": "High: corroborated by 6 facts, strong evidence, no warnings, precise location.",
-     "score": 0.6801618792919023,
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
+     "grade": 2,
+     "grade_label": "supported (a fact in the record names the service)",
+     "confidence": "low",
+     "confidence_reason": "Low: the support is thin (one fact, or a record with one web source and no official website).",
+     "score": 0.6084806754597664,
      "parts": {
-      "evidence": 0.5,
-      "distance": 0.02016187929190223,
+      "evidence": 0.24999999999999997,
+      "distance": 0.19848067545976633,
       "trust": 0.16000000000000003,
       "penalties": [],
       "combine": "sum",
       "raw": {
-       "evidence": 1.0,
-       "distance": 0.06720626430634076,
+       "evidence": 0.49999999999999994,
+       "distance": 0.6616022515325545,
        "trust": 0.8
       },
       "weights": {
@@ -1540,53 +1549,33 @@
      "evidence": [
       {
        "requirement": "caesarean section",
-       "quote": "Provides a comprehensive range of women's health services including normal delivery, C-section, high-risk pregnancy management, and painless delivery",
-       "field": "capability",
-       "fact_id": "646459f524cdcf56"
-      },
-      {
-       "requirement": "blood bank or transfusion",
-       "quote": "Blood storage facility",
-       "field": "equipment",
-       "fact_id": "c2bdc08c6e3956b1"
-      },
-      {
-       "requirement": "anaesthesia or operating theatre",
-       "quote": "Facilities include labour room, birthing suite, LDRP, operation theatres, IVF lab, Andrology lab, ICU, NICU, Emergency Room, X-Ray, Mammography, 2D & 4D Sonography, 24x7 Pathology, and 24x7 Pharmacy",
-       "field": "capability",
-       "fact_id": "60725f6a17ed4147"
+       "quote": "Performs cesarean delivery",
+       "field": "procedure",
+       "fact_id": "4b8a72bad938617b"
       }
      ],
-     "missing": [],
+     "missing": [
+      "no fact in the record mentions blood bank or transfusion",
+      "no fact in the record mentions anaesthesia or operating theatre"
+     ],
      "sources": {
-      "n_domains": 14,
+      "n_domains": 8,
       "domains": [
        "justdial.com",
-       "curisglobal.com",
-       "currae.com",
        "practo.com",
-       "drnehaphysio.com",
-       "drkuldeepgadkari.com",
+       "sulekha.com",
        "facebook.com",
-       "in.indeed.com",
-       "ovu.com",
-       "apollofertility.com",
-       "x.com",
-       "lybrate.com",
-       "thespinecare.in",
-       "drmeghanaandankar.com"
+       "momcuddle.com",
+       "gynecologistnearme.in",
+       "healthfrog.in",
+       "bajajfinservhealth.in"
       ],
-      "official_website": "currae.com",
-      "also_listed_as": [
-       {
-        "facility_id": "69fe9c79-5535-4cbe-9075-1d6ebd9935b0",
-        "name": "Currae Speciality Hospital"
-       }
-      ]
+      "official_website": "praptiivfwomenshospital.com",
+      "also_listed_as": []
      },
-     "why_here": "Ranked above Prapti Women's Hospital: stronger evidence (corroborated, against supported).",
-     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
-     "evidence_strength": "strong",
+     "why_here": "Ranked above Sukhatme Hospital: higher source trust (0.80 against 0.33, from web domains, official website, page recency and named staff).",
+     "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention blood bank or transfusion.",
+     "evidence_strength": "thin",
      "flags": []
     }
    ],
@@ -1601,9 +1590,9 @@
      "state": "Maharashtra",
      "lat": 20.03586196899414,
      "lon": 73.85215759277344,
-     "distance_km": 12.4,
+     "distance_km": 12.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -1650,9 +1639,9 @@
      "state": "Maharashtra",
      "lat": 19.9510440826416,
      "lon": 73.83853149414062,
-     "distance_km": 16.3,
+     "distance_km": 16.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -1697,9 +1686,9 @@
      "state": "Maharashtra",
      "lat": 19.959529876708984,
      "lon": 73.83106231689453,
-     "distance_km": 16.5,
+     "distance_km": 16.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nashik district, Maharashtra, about 137 km across, which is itself known only to within about 69 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -1768,6 +1757,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 28,
+      "n_distinct": 27,
       "n_blocked": 7,
       "n_scored": 28,
       "max_scored": 50
@@ -1775,7 +1765,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 5
+      "n": 5,
+      "n_distinct": 5
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -1789,9 +1780,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -1800,12 +1792,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 27 recommendable facilities within 150 km, best first."
+    "headline": "3 of 27 recommendable facilities within 150 km, best first; 5 of them are inside the 50 km radius and come first."
    },
-   "fingerprint": "47dbd9b6f3",
+   "fingerprint": "4357a818f6",
    "ms": {
-    "resolve": 5.61,
-    "answer": 0.8
+    "resolve": 6.36,
+    "answer": 0.99
    }
   },
   {
@@ -1837,7 +1829,7 @@
    "service": "trauma",
    "service_label": "Trauma and accident care",
    "radius_km": 50.0,
-   "headline": "3 of 50 recommendable facilities within 150 km, best first.",
+   "headline": "3 of 75 recommendable facilities within 150 km, best first; 5 of them are inside the 50 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "bbe21556-3364-4fdf-9784-f8e1ba11152b",
@@ -1848,9 +1840,9 @@
      "state": "Rajasthan",
      "lat": 27.70509147644043,
      "lon": 76.19398498535156,
-     "distance_km": 0.6,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -1917,7 +1909,7 @@
       "official_website": "shyamhospitals.com",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: closer (0.6 km against 40.1 km).",
+     "why_here": "Ranked above Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: closer (about 1 km against about 40 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -1931,9 +1923,9 @@
      "state": "Haryana",
      "lat": 28.05368423461914,
      "lon": 76.10513305664062,
-     "distance_km": 40.1,
+     "distance_km": 40.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -2016,9 +2008,9 @@
      "state": "Rajasthan",
      "lat": 27.97547149658203,
      "lon": 76.39138793945312,
-     "distance_km": 35.7,
+     "distance_km": 36.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -2083,7 +2075,7 @@
       "official_website": "sachkhandhospital.in",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Mangalam Hospital: closer (35.7 km against 96.4 km).",
+     "why_here": "Ranked above Pooja Hospital, Narnaul: stronger evidence (corroborated, against supported).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -2100,9 +2092,9 @@
      "state": "Rajasthan",
      "lat": 27.8981990814209,
      "lon": 76.27877807617188,
-     "distance_km": 23.1,
+     "distance_km": 23.0,
      "location_precision_km": 2.0,
-     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2169,7 +2161,7 @@
      "lon": 76.12044525146484,
      "distance_km": 40.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2220,9 +2212,9 @@
      "state": "Haryana",
      "lat": 28.061359405517578,
      "lon": 76.09808349609375,
-     "distance_km": 41.1,
+     "distance_km": 41.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2291,6 +2283,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 75,
+      "n_distinct": 75,
       "n_blocked": 11,
       "n_scored": 50,
       "max_scored": 50
@@ -2298,7 +2291,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 5
+      "n": 5,
+      "n_distinct": 5
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -2312,9 +2306,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -2323,12 +2318,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 150 km, best first."
+    "headline": "3 of 75 recommendable facilities within 150 km, best first; 5 of them are inside the 50 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "99986c98ed",
    "ms": {
-    "resolve": 18.34,
-    "answer": 0.98
+    "resolve": 19.64,
+    "answer": 1.11
    }
   },
   {
@@ -2360,7 +2355,7 @@
    "service": "nicu",
    "service_label": "Newborn intensive care (NICU)",
    "radius_km": 75.0,
-   "headline": "3 of 50 recommendable facilities within 225 km, best first.",
+   "headline": "3 of 80 recommendable facilities within 225 km, best first; 17 of them are inside the 75 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "7b71adc1-9169-499c-9eef-161d7460972c",
@@ -2371,9 +2366,9 @@
      "state": "Maharashtra",
      "lat": 18.502796173095703,
      "lon": 73.93215942382812,
-     "distance_km": 8.2,
+     "distance_km": 8.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -2462,9 +2457,9 @@
      "state": "Maharashtra",
      "lat": 18.519519805908203,
      "lon": 73.86589813232422,
-     "distance_km": 1.1,
+     "distance_km": 1.0,
      "location_precision_km": 2.0,
-     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance.",
+     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "medium",
@@ -2536,7 +2531,7 @@
       "official_website": "dhanwantarihospitalent.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Dr DY Patil Medical College and Hospital, Pune, India (scores within 0.02); listed first because it is closer (1.1 km against 12.7 km).",
+     "why_here": "Tied with Dr DY Patil Medical College and Hospital, Pune, India (scores within 0.02); listed first because it is closer (about 1 km against about 13 km).",
      "could_be_wrong": "The record's own text places it in Thane, Maharashtra, but its PIN code and city put it in Jalgaon, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
      "evidence_strength": "strong",
      "flags": [
@@ -2558,9 +2553,9 @@
      "state": "Maharashtra",
      "lat": 18.63302778,
      "lon": 73.817013885,
-     "distance_km": 12.7,
+     "distance_km": 13.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "medium",
@@ -2660,9 +2655,9 @@
      "state": "Maharashtra",
      "lat": 18.515017,
      "lon": 73.8567778,
-     "distance_km": 1.2,
+     "distance_km": 1.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2713,9 +2708,9 @@
      "state": "Maharashtra",
      "lat": 18.531864166259766,
      "lon": 73.84746551513672,
-     "distance_km": 1.3,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2785,9 +2780,9 @@
      "state": "Maharashtra",
      "lat": 18.502605438232422,
      "lon": 73.87715148925781,
-     "distance_km": 3.3,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Pune district, Maharashtra, about 133 km across, which is itself known only to within about 67 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -2870,6 +2865,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 81,
+      "n_distinct": 80,
       "n_blocked": 24,
       "n_scored": 50,
       "max_scored": 50
@@ -2877,7 +2873,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 75 km, else no reliable option nearby",
-      "n": 17
+      "n": 17,
+      "n_distinct": 17
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -2891,9 +2888,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -2902,12 +2900,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 225 km, best first."
+    "headline": "3 of 80 recommendable facilities within 225 km, best first; 17 of them are inside the 75 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "ec5127fce9",
    "ms": {
-    "resolve": 5.58,
-    "answer": 0.92
+    "resolve": 6.22,
+    "answer": 1.07
    }
   },
   {
@@ -2939,7 +2937,7 @@
    "service": "icu",
    "service_label": "Intensive care with ventilator",
    "radius_km": 75.0,
-   "headline": "3 of 50 recommendable facilities within 225 km, best first.",
+   "headline": "3 of 101 recommendable facilities within 225 km, best first; 46 of them are inside the 75 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "c105191a-45ea-4b81-933c-419f5cb07cfa",
@@ -2950,9 +2948,9 @@
      "state": "Bihar",
      "lat": 25.60079574584961,
      "lon": 85.14949035644531,
-     "distance_km": 1.5,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -3011,7 +3009,7 @@
       "official_website": "shrinivashospital.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Ford Hospital And Research Center (scores within 0.02); listed first because it is closer (1.5 km against 1.8 km).",
+     "why_here": "Tied with Ford Hospital And Research Center (scores within 0.02); listed first because it is closer (about 1 km against about 2 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -3025,9 +3023,9 @@
      "state": "Bihar",
      "lat": 25.600444793701172,
      "lon": 85.1530990600586,
-     "distance_km": 1.8,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -3110,7 +3108,7 @@
      "lon": 85.15696716308594,
      "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -3165,7 +3163,7 @@
       "official_website": "patnachildrenhospital.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Hi-Tech Emergency Hospital – Saguna More, Bailey Road, Patna-801503 (scores within 0.02); listed first because it is closer (2.0 km against 10.2 km).",
+     "why_here": "Tied with Hi-Tech Emergency Hospital – Saguna More, Bailey Road, Patna-801503 (scores within 0.02); listed first because it is closer (about 2 km against about 10 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -3184,7 +3182,7 @@
      "lon": 85.155186,
      "distance_km": 2.0,
      "location_precision_km": 2.821621343982093,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 3 km. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 3 km. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -3231,7 +3229,7 @@
      "lon": 85.1571273803711,
      "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -3276,9 +3274,9 @@
      "state": "Bihar",
      "lat": 25.601104736328125,
      "lon": 85.15704345703125,
-     "distance_km": 2.1,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Patna district, Bihar, about 105 km across, which is itself known only to within about 53 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -3337,6 +3335,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 101,
+      "n_distinct": 101,
       "n_blocked": 7,
       "n_scored": 50,
       "max_scored": 50
@@ -3344,7 +3343,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 75 km, else no reliable option nearby",
-      "n": 46
+      "n": 46,
+      "n_distinct": 46
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -3358,9 +3358,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -3369,12 +3370,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 225 km, best first."
+    "headline": "3 of 101 recommendable facilities within 225 km, best first; 46 of them are inside the 75 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "71a8bc4555",
    "ms": {
-    "resolve": 5.62,
-    "answer": 0.92
+    "resolve": 6.19,
+    "answer": 1.03
    }
   },
   {
@@ -3406,7 +3407,7 @@
    "service": "cardiac_surgery",
    "service_label": "Heart surgery (bypass, valve)",
    "radius_km": 250.0,
-   "headline": "3 of 50 recommendable facilities within 750 km, best first.",
+   "headline": "3 of 92 recommendable facilities within 750 km, best first; 7 of them are inside the 250 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "30494fe0-d130-4168-84a5-02b78a773940",
@@ -3672,7 +3673,7 @@
       "official_website": "jaiprakashhospitals.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Brahmananda Narayana Multispeciality Hospital, Jamshedpur (scores within 0.02); listed first because it is closer (242.2 km against 287.7 km).",
+     "why_here": "Ranked above Hi-Tech Medical College & Hospital, Bhubaneswar: stronger evidence (corroborated, against supported).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -3843,6 +3844,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 92,
+      "n_distinct": 92,
       "n_blocked": 11,
       "n_scored": 50,
       "max_scored": 50
@@ -3850,7 +3852,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 250 km, else no reliable option nearby",
-      "n": 7
+      "n": 7,
+      "n_distinct": 7
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -3864,9 +3867,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -3875,12 +3879,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 750 km, best first."
+    "headline": "3 of 92 recommendable facilities within 750 km, best first; 7 of them are inside the 250 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "bbe091f6c4",
    "ms": {
-    "resolve": 20.93,
-    "answer": 0.98
+    "resolve": 22.88,
+    "answer": 1.07
    }
   },
   {
@@ -3912,7 +3916,7 @@
    "service": "cath_lab",
    "service_label": "Heart attack care (angiography, angioplasty)",
    "radius_km": 100.0,
-   "headline": "3 of 20 recommendable facilities within 300 km, best first.",
+   "headline": "3 of 20 recommendable facilities within 300 km, best first; 4 of them are inside the 100 km radius and come first.",
    "cards": [
     {
      "facility_id": "3408ec7c-0faf-43a6-a150-0bf197aadb23",
@@ -3923,9 +3927,9 @@
      "state": "Madhya Pradesh",
      "lat": 22.797611236572266,
      "lon": 75.84538269042969,
-     "distance_km": 9.2,
+     "distance_km": 9.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -4021,9 +4025,9 @@
      "state": "Madhya Pradesh",
      "lat": 22.716737747192383,
      "lon": 75.88418579101562,
-     "distance_km": 2.7,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -4090,38 +4094,38 @@
       "official_website": "vonehospital.com",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Hamidia Hospital: closer (2.7 km against 168.3 km).",
+     "why_here": "Ranked above Indira Memorial Hospital: stronger evidence (corroborated, against supported).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
     },
     {
-     "facility_id": "18a41f66-0543-4c65-b1ef-e94ab09858a7",
-     "name": "Hamidia Hospital",
+     "facility_id": "bf131dfc-5554-4b6f-8644-a80f1da4818d",
+     "name": "Indira Memorial Hospital",
      "type": "hospital",
      "operator": "private",
-     "city": "Bhopal",
+     "city": "Indore",
      "state": "Madhya Pradesh",
-     "lat": 23.25997543334961,
-     "lon": 77.3920669555664,
-     "distance_km": 168.3,
-     "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 100 km for this service. Straight-line distance.",
-     "grade": 3,
-     "grade_label": "corroborated (the service and the things it needs are named in the record)",
-     "confidence": "high",
-     "confidence_reason": "High: corroborated by 9 facts, strong evidence, no warnings, precise location.",
-     "score": 0.7557384005086256,
+     "lat": 22.70827865600586,
+     "lon": 75.88250732421875,
+     "distance_km": 3.0,
+     "location_precision_km": 2.0,
+     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
+     "grade": 2,
+     "grade_label": "supported (a fact in the record names the service)",
+     "confidence": "low",
+     "confidence_reason": "Low: the support is thin (one fact, or a record with one web source and no official website).",
+     "score": 0.7020593400330154,
      "parts": {
-      "evidence": 0.5,
-      "distance": 0.05573840050862562,
-      "trust": 0.2,
+      "evidence": 0.24999999999999997,
+      "distance": 0.2920593400330154,
+      "trust": 0.16000000000000003,
       "penalties": [],
       "combine": "sum",
       "raw": {
-       "evidence": 1.0,
-       "distance": 0.1857946683620854,
-       "trust": 1.0
+       "evidence": 0.49999999999999994,
+       "distance": 0.9735311334433848,
+       "trust": 0.8
       },
       "weights": {
        "evidence": 0.5,
@@ -4137,55 +4141,32 @@
      "evidence": [
       {
        "requirement": "cath lab, angiography or angioplasty",
-       "quote": "Angiography performed in the Cardiology catheterization laboratory (Cath Lab)",
-       "field": "procedure",
-       "fact_id": "6358557dcc036a11"
-      },
-      {
-       "requirement": "cardiac or intensive care unit",
-       "quote": "Intensive Care Units with dedicated beds",
-       "field": "capability",
-       "fact_id": "c93c7e7b4c14d8eb"
-      },
-      {
-       "requirement": "24-hour or emergency service",
-       "quote": "Emergency duty cum admission days for Orthopedics are defined per unit",
-       "field": "capability",
-       "fact_id": "6f28ad63bbf4a848"
+       "quote": "Cath Lab",
+       "field": "equipment",
+       "fact_id": "7e43db210a411267"
       }
      ],
-     "missing": [],
+     "missing": [
+      "no fact in the record mentions 24-hour or emergency service"
+     ],
      "sources": {
-      "n_domains": 21,
+      "n_domains": 8,
       "domains": [
-       "mpdoctors.com",
-       "pmc.ncbi.nlm.nih.gov",
-       "gmcbhopal.net",
-       "en.wikipedia.org",
-       "grokipedia.com",
        "practo.com",
-       "emedevents.com",
-       "indiamart.com",
-       "wanderlog.com",
-       "timesofindia.indiatimes.com",
-       "skedoc.com",
+       "justdial.com",
+       "proptiger.com",
+       "hexahealth.com",
+       "smcinsurance.com",
        "facebook.com",
-       "clinicspots.com",
-       "en.bharatpedia.org",
-       "onefivenine.com",
-       "medindia.net",
-       "archello.com",
-       "freepressjournal.in",
-       "bhaskarenglish.in",
-       "grotal.com",
-       "bdir.in"
+       "eka.care",
+       "healthfrog.in"
       ],
-      "official_website": "gmcbhopal.net",
+      "official_website": "indiramemorialhospital.in",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Indira Memorial Hospital: stronger evidence (corroborated, against supported).",
-     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
-     "evidence_strength": "strong",
+     "why_here": "Ranked above Medanta Indore: higher source trust (0.80 against 0.48, from web domains, official website, page recency and named staff).",
+     "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention 24-hour or emergency service.",
+     "evidence_strength": "thin",
      "flags": []
     }
    ],
@@ -4200,9 +4181,9 @@
      "state": "Madhya Pradesh",
      "lat": 22.7157039642334,
      "lon": 75.8501205444336,
-     "distance_km": 0.8,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4251,9 +4232,9 @@
      "state": "Madhya Pradesh",
      "lat": 22.704355239868164,
      "lon": 75.86079406738281,
-     "distance_km": 1.3,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4294,9 +4275,9 @@
      "state": "Madhya Pradesh",
      "lat": 22.71678924560547,
      "lon": 75.87532043457031,
-     "distance_km": 1.8,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore district, Madhya Pradesh, about 63 km across, which is itself known only to within about 32 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4364,6 +4345,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 20,
+      "n_distinct": 20,
       "n_blocked": 18,
       "n_scored": 20,
       "max_scored": 50
@@ -4371,7 +4353,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 100 km, else no reliable option nearby",
-      "n": 4
+      "n": 4,
+      "n_distinct": 4
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -4385,9 +4368,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -4396,12 +4380,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 20 recommendable facilities within 300 km, best first."
+    "headline": "3 of 20 recommendable facilities within 300 km, best first; 4 of them are inside the 100 km radius and come first."
    },
-   "fingerprint": "59b24a7e47",
+   "fingerprint": "411fa835ca",
    "ms": {
-    "resolve": 5.7,
-    "answer": 0.74
+    "resolve": 6.22,
+    "answer": 0.86
    }
   },
   {
@@ -4433,7 +4417,7 @@
    "service": "mri",
    "service_label": "MRI scan",
    "radius_km": 100.0,
-   "headline": "3 of 49 recommendable facilities within 300 km, best first.",
+   "headline": "3 of 127 recommendable facilities within 300 km, best first; 24 of them are inside the 100 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "bfe9ab42-2261-442b-b8b3-4c6fc47ad86b",
@@ -4444,9 +4428,9 @@
      "state": "Tamil Nadu",
      "lat": 11.012645721435547,
      "lon": 76.98078918457031,
-     "distance_km": 1.4,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -4511,7 +4495,7 @@
       "official_website": "gknmhospital.org",
       "also_listed_as": []
      },
-     "why_here": "Tied with Ganga Hospital, Coimbatore (scores within 0.02); listed first because it is closer (1.4 km against 2.8 km).",
+     "why_here": "Tied with Ganga Hospital, Coimbatore (scores within 0.02); listed first because it is closer (about 1 km against about 3 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "moderate",
      "flags": []
@@ -4525,9 +4509,9 @@
      "state": "Tamil Nadu",
      "lat": 11.024828910827637,
      "lon": 76.95173645019531,
-     "distance_km": 2.8,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -4607,7 +4591,7 @@
        }
       ]
      },
-     "why_here": "Tied with Shree Sivaa Hospital (scores within 0.02); listed first because it is closer (2.8 km against 4.6 km).",
+     "why_here": "Tied with Shree Sivaa Hospital (scores within 0.02); listed first because it is closer (about 3 km against about 5 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -4621,9 +4605,9 @@
      "state": "Tamil Nadu",
      "lat": 11.044218063354492,
      "lon": 76.98554992675781,
-     "distance_km": 4.6,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -4687,7 +4671,7 @@
       "official_website": "shreesivaahospital.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Government ESI Medical College, Coimbatore (scores within 0.02); listed first because it is closer (4.6 km against 6.4 km).",
+     "why_here": "Tied with Government ESI Medical College, Coimbatore (scores within 0.02); listed first because it is closer (about 5 km against about 6 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -4704,9 +4688,9 @@
      "state": "Tamil Nadu",
      "lat": 11.018436431884766,
      "lon": 76.96034240722656,
-     "distance_km": 1.7,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4749,9 +4733,9 @@
      "state": "Tamil Nadu",
      "lat": 11.024129867553711,
      "lon": 76.97315979003906,
-     "distance_km": 2.1,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4795,9 +4779,9 @@
      "state": "Tamil Nadu",
      "lat": 11.014705657958984,
      "lon": 76.94879150390625,
-     "distance_km": 2.4,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Coimbatore district, Tamil Nadu, about 60 km across, which is itself known only to within about 30 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -4859,6 +4843,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 128,
+      "n_distinct": 127,
       "n_blocked": 12,
       "n_scored": 50,
       "max_scored": 50
@@ -4866,7 +4851,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 100 km, else no reliable option nearby",
-      "n": 24
+      "n": 24,
+      "n_distinct": 24
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -4880,9 +4866,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -4891,12 +4878,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 49 recommendable facilities within 300 km, best first."
+    "headline": "3 of 127 recommendable facilities within 300 km, best first; 24 of them are inside the 100 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "52185c1952",
    "ms": {
-    "resolve": 5.92,
-    "answer": 1.0
+    "resolve": 6.12,
+    "answer": 1.05
    }
   },
   {
@@ -4928,7 +4915,7 @@
    "service": "ct",
    "service_label": "CT scan",
    "radius_km": 75.0,
-   "headline": "3 of 30 recommendable facilities within 225 km, best first.",
+   "headline": "3 of 30 recommendable facilities within 225 km, best first; 23 of them are inside the 75 km radius and come first.",
    "cards": [
     {
      "facility_id": "c77afe8e-b678-447c-b3e7-008456730827",
@@ -4939,9 +4926,9 @@
      "state": "Assam",
      "lat": 26.165264129638672,
      "lon": 91.74681854248047,
-     "distance_km": 0.6,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5028,7 +5015,7 @@
       "official_website": "bbcionline.org",
       "also_listed_as": []
      },
-     "why_here": "Tied with Narayana Superspeciality Hospital, Guwahati, Assam (scores within 0.02); listed first because it is closer (0.6 km against 1.5 km).",
+     "why_here": "Tied with Narayana Superspeciality Hospital, Guwahati, Assam (scores within 0.02); listed first because it is closer (about 1 km against about 2 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -5042,9 +5029,9 @@
      "state": "Assam",
      "lat": 26.172151565551758,
      "lon": 91.75811767578125,
-     "distance_km": 1.5,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5114,7 +5101,7 @@
       "official_website": "narayanahealth.org",
       "also_listed_as": []
      },
-     "why_here": "Tied with Arya Hospital (scores within 0.02); listed first because it is closer (1.5 km against 1.6 km).",
+     "why_here": "Tied with Arya Hospital (scores within 0.02); listed first because it is closer (about 2 km against about 2 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -5128,9 +5115,9 @@
      "state": "Assam",
      "lat": 26.174814224243164,
      "lon": 91.7524185180664,
-     "distance_km": 1.6,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5190,7 +5177,7 @@
       "official_website": "http://www.aryahospital.com/",
       "also_listed_as": []
      },
-     "why_here": "Tied with Govt. Homoeo Medical College Hospital (Guwahati, Nowgong, Jorhat) (scores within 0.02); listed first because it is closer (1.6 km against 1.8 km).",
+     "why_here": "Tied with Govt. Homoeo Medical College Hospital (Guwahati, Nowgong, Jorhat) (scores within 0.02); listed first because it is closer (about 2 km against about 2 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -5209,7 +5196,7 @@
      "lon": 91.7314224243164,
      "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5250,7 +5237,7 @@
      "lon": 91.76879119873047,
      "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5287,9 +5274,9 @@
      "state": "Assam",
      "lat": 26.18529510498047,
      "lon": 91.75604248046875,
-     "distance_km": 2.8,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kamrup Metro district, Assam, about 24 km across, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5350,6 +5337,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 31,
+      "n_distinct": 30,
       "n_blocked": 0,
       "n_scored": 31,
       "max_scored": 50
@@ -5357,7 +5345,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 75 km, else no reliable option nearby",
-      "n": 24
+      "n": 24,
+      "n_distinct": 23
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -5371,9 +5360,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -5382,12 +5372,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 30 recommendable facilities within 225 km, best first."
+    "headline": "3 of 30 recommendable facilities within 225 km, best first; 23 of them are inside the 75 km radius and come first."
    },
    "fingerprint": "ee018add6b",
    "ms": {
-    "resolve": 6.43,
-    "answer": 0.89
+    "resolve": 6.12,
+    "answer": 0.94
    }
   },
   {
@@ -5419,7 +5409,7 @@
    "service": "burns",
    "service_label": "Burn care",
    "radius_km": 200.0,
-   "headline": "3 of 32 recommendable facilities within 600 km, best first.",
+   "headline": "3 of 32 recommendable facilities within 600 km, best first; 5 of them are inside the 200 km radius and come first.",
    "cards": [
     {
      "facility_id": "8ea11904-1089-41d7-8be1-6a4517a10908",
@@ -5430,9 +5420,9 @@
      "state": "Maharashtra",
      "lat": 21.14486312866211,
      "lon": 79.07806396484375,
-     "distance_km": 0.6,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5517,9 +5507,9 @@
      "state": "Maharashtra",
      "lat": 21.108901977539062,
      "lon": 79.08406066894531,
-     "distance_km": 4.4,
+     "distance_km": 4.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5596,9 +5586,9 @@
      "state": "Maharashtra",
      "lat": 21.134727478027344,
      "lon": 79.07746124267578,
-     "distance_km": 1.5,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -5658,7 +5648,7 @@
       "official_website": "vedantahospitalnagpur.com",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Narmada Apna Hospital, Hoshangabad: closer (1.5 km against 223.2 km).",
+     "why_here": "Ranked above Centre Point Hospital: stronger evidence (corroborated, against supported).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -5675,9 +5665,9 @@
      "state": "Maharashtra",
      "lat": 21.144832611083984,
      "lon": 79.08232116699219,
-     "distance_km": 1.1,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5719,9 +5709,9 @@
      "state": "Maharashtra",
      "lat": 21.138484954833984,
      "lon": 79.07914733886719,
-     "distance_km": 1.2,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5775,9 +5765,9 @@
      "state": "Maharashtra",
      "lat": 21.13908333,
      "lon": 79.08041667,
-     "distance_km": 1.2,
+     "distance_km": 1.0,
      "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Nagpur district, Maharashtra, about 94 km across, which is itself known only to within about 47 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -5852,6 +5842,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 32,
+      "n_distinct": 32,
       "n_blocked": 29,
       "n_scored": 32,
       "max_scored": 50
@@ -5859,7 +5850,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 200 km, else no reliable option nearby",
-      "n": 5
+      "n": 5,
+      "n_distinct": 5
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -5873,9 +5865,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -5884,12 +5877,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 32 recommendable facilities within 600 km, best first."
+    "headline": "3 of 32 recommendable facilities within 600 km, best first; 5 of them are inside the 200 km radius and come first."
    },
    "fingerprint": "63589fd8c4",
    "ms": {
-    "resolve": 6.39,
-    "answer": 0.9
+    "resolve": 6.02,
+    "answer": 0.88
    }
   },
   {
@@ -5921,7 +5914,7 @@
    "service": "neurosurgery",
    "service_label": "Head injury and brain surgery",
    "radius_km": 150.0,
-   "headline": "3 of 50 recommendable facilities within 450 km, best first.",
+   "headline": "3 of 235 recommendable facilities within 450 km, best first; 64 of them are inside the 150 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "0cbdef30-deff-4a8d-bb9e-47a5d1b43199",
@@ -5932,9 +5925,9 @@
      "state": "Punjab",
      "lat": 30.518604278564453,
      "lon": 76.65824890136719,
-     "distance_km": 26.7,
+     "distance_km": 27.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -6003,7 +5996,7 @@
       "official_website": "neelamhospital.com",
       "also_listed_as": []
      },
-     "why_here": "Tied with Healing Touch Super Speciality Hospital (scores within 0.02); listed first because it is closer (26.7 km against 36.9 km).",
+     "why_here": "Tied with Healing Touch Super Speciality Hospital (scores within 0.02); listed first because it is closer (about 27 km against about 37 km).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": []
@@ -6017,9 +6010,9 @@
      "state": "Haryana",
      "lat": 30.401817321777344,
      "lon": 76.78659057617188,
-     "distance_km": 36.9,
+     "distance_km": 37.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "high",
@@ -6102,9 +6095,9 @@
      "state": "Haryana",
      "lat": 30.674476623535156,
      "lon": 76.86473083496094,
-     "distance_km": 10.2,
+     "distance_km": 10.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": "medium",
@@ -6185,7 +6178,7 @@
       "official_website": "ojashospital.co.in",
       "also_listed_as": []
      },
-     "why_here": "Tied with Gaba Hospital (scores within 0.02); listed first because it is closer (10.2 km against 81.4 km).",
+     "why_here": "Tied with Gaba Hospital (scores within 0.02); listed first because it is closer (about 10 km against about 81 km).",
      "could_be_wrong": "The record's city reads \"Gurgaon\" (Gurugram, Haryana), but its PIN code 134112 and map point are in Panchkula, Haryana.",
      "evidence_strength": "strong",
      "flags": [
@@ -6210,9 +6203,9 @@
      "state": "Chandigarh",
      "lat": 30.722902297973633,
      "lon": 76.77055358886719,
-     "distance_km": 1.7,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -6249,9 +6242,9 @@
      "state": "Punjab",
      "lat": 30.68863868713379,
      "lon": 76.71257019042969,
-     "distance_km": 8.4,
+     "distance_km": 8.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -6295,9 +6288,9 @@
      "state": "Punjab",
      "lat": 30.69218635559082,
      "lon": 76.69902038574219,
-     "distance_km": 9.3,
+     "distance_km": 9.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Chandigarh district, Chandigarh, about 13 km across, which is itself known only to within about 6 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": "low",
@@ -6378,6 +6371,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 236,
+      "n_distinct": 235,
       "n_blocked": 60,
       "n_scored": 50,
       "max_scored": 50
@@ -6385,7 +6379,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 150 km, else no reliable option nearby",
-      "n": 50
+      "n": 64,
+      "n_distinct": 64
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -6399,9 +6394,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -6410,12 +6406,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 450 km, best first."
+    "headline": "3 of 235 recommendable facilities within 450 km, best first; 64 of them are inside the 150 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "8e252665ec",
    "ms": {
-    "resolve": 6.45,
-    "answer": 1.01
+    "resolve": 6.04,
+    "answer": 1.06
    }
   },
   {
@@ -6447,7 +6443,7 @@
    "service": "oncology",
    "service_label": "Cancer treatment (chemotherapy, radiotherapy)",
    "radius_km": 250.0,
-   "headline": "3 of 50 recommendable facilities within 750 km, best first.",
+   "headline": "3 of 129 recommendable facilities within 750 km, best first; 22 of them are inside the 250 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "4133ceda-e0f6-426e-8b97-0e78c9bbdd10",
@@ -6896,6 +6892,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 129,
+      "n_distinct": 129,
       "n_blocked": 20,
       "n_scored": 50,
       "max_scored": 50
@@ -6903,7 +6900,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 250 km, else no reliable option nearby",
-      "n": 22
+      "n": 22,
+      "n_distinct": 22
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -6917,9 +6915,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -6928,11 +6927,11 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 50 recommendable facilities within 750 km, best first."
+    "headline": "3 of 129 recommendable facilities within 750 km, best first; 22 of them are inside the 250 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "a319074182",
    "ms": {
-    "resolve": 22.78,
+    "resolve": 22.54,
     "answer": 1.11
    }
   },
@@ -6976,9 +6975,9 @@
     "state": "Himachal Pradesh",
     "lat": 31.95625114440918,
     "lon": 77.11253356933594,
-    "distance_km": 247.9,
+    "distance_km": 248.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance.",
+    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 89 km.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": "high",
@@ -7031,7 +7030,7 @@
      "official_website": null,
      "also_listed_as": []
     },
-    "why_here": "The nearest recommendable facility, 247.9 km away, beyond the 50 km radius.",
+    "why_here": "The nearest recommendable facility, about 248 km away, beyond the 50 km radius.",
     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
     "evidence_strength": "strong",
     "flags": []
@@ -7066,6 +7065,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 0,
+      "n_distinct": 0,
       "n_blocked": 0,
       "n_scored": 0,
       "max_scored": 50
@@ -7073,7 +7073,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -7087,9 +7088,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -7102,8 +7104,8 @@
    },
    "fingerprint": "00936af7f0",
    "ms": {
-    "resolve": 19.85,
-    "answer": 0.33
+    "resolve": 21.49,
+    "answer": 0.39
    }
   },
   {
@@ -7146,9 +7148,9 @@
     "state": "Assam",
     "lat": 26.43756866455078,
     "lon": 91.43749237060547,
-    "distance_km": 148.3,
+    "distance_km": 148.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance.",
+    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance. Measured from the centre of Tawang district, Arunachal Pradesh, about 59 km across, which is itself known only to within about 29 km.",
     "grade": 2,
     "grade_label": "supported (a fact in the record names the service)",
     "confidence": "medium",
@@ -7202,7 +7204,7 @@
      "official_website": "nalbarimaternityhospital.com",
      "also_listed_as": []
     },
-    "why_here": "The nearest recommendable facility, 148.3 km away, beyond the 50 km radius.",
+    "why_here": "The nearest recommendable facility, about 148 km away, beyond the 50 km radius.",
     "could_be_wrong": "The record does not mention anaesthesia or operating theatre.",
     "evidence_strength": "moderate",
     "flags": []
@@ -7238,6 +7240,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 1,
+      "n_distinct": 1,
       "n_blocked": 0,
       "n_scored": 1,
       "max_scored": 50
@@ -7245,7 +7248,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -7259,9 +7263,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -7274,8 +7279,8 @@
    },
    "fingerprint": "463a1f6577",
    "ms": {
-    "resolve": 6.14,
-    "answer": 0.31
+    "resolve": 7.13,
+    "answer": 0.34
    }
   },
   {
@@ -7420,6 +7425,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 0,
+      "n_distinct": 0,
       "n_blocked": 0,
       "n_scored": 0,
       "max_scored": 50
@@ -7427,7 +7433,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 250 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -7441,9 +7448,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -7456,7 +7464,7 @@
    },
    "fingerprint": "23085e7410",
    "ms": {
-    "resolve": 19.12,
+    "resolve": 23.0,
     "answer": 0.32
    }
   },
@@ -7500,9 +7508,9 @@
     "state": "Maharashtra",
     "lat": 19.95384979248047,
     "lon": 79.29673767089844,
-    "distance_km": 72.6,
+    "distance_km": 73.0,
     "location_precision_km": 2.0,
-    "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Beyond the usual 50 km for this service. Straight-line distance.",
+    "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Beyond the usual 50 km for this service. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": "medium",
@@ -7572,7 +7580,7 @@
      "official_website": "ggmcjjh.com",
      "also_listed_as": []
     },
-    "why_here": "The nearest recommendable facility, 72.6 km away, beyond the 50 km radius.",
+    "why_here": "The nearest recommendable facility, about 73 km away, beyond the 50 km radius.",
     "could_be_wrong": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
     "evidence_strength": "strong",
     "flags": [
@@ -7616,6 +7624,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 1,
+      "n_distinct": 1,
       "n_blocked": 0,
       "n_scored": 1,
       "max_scored": 50
@@ -7623,7 +7632,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -7637,9 +7647,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -7652,8 +7663,8 @@
    },
    "fingerprint": "462a4be306",
    "ms": {
-    "resolve": 5.89,
-    "answer": 0.29
+    "resolve": 7.79,
+    "answer": 0.33
    }
   },
   {
@@ -7696,9 +7707,9 @@
      "state": "Telangana",
      "lat": 17.398456573486328,
      "lon": 78.4847412109375,
-     "distance_km": 2.3,
+     "distance_km": 2.0,
      "location_precision_km": 2.0,
-     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance. Measured from the centre of Hyderabad district, Telangana, about 21 km across, which is itself known only to within about 10 km.",
      "grade": null,
      "grade_label": "keyword match, no service recipe",
      "confidence": "low",
@@ -7754,9 +7765,9 @@
      "state": "Telangana",
      "lat": 17.394920349121094,
      "lon": 78.47208404541016,
-     "distance_km": 3.2,
+     "distance_km": 3.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Hyderabad district, Telangana, about 21 km across, which is itself known only to within about 10 km.",
      "grade": null,
      "grade_label": "keyword match, no service recipe",
      "confidence": "low",
@@ -7818,7 +7829,7 @@
       "official_website": "swarupeye.com",
       "also_listed_as": []
      },
-     "why_here": "Ranked above Smart Vision Eye Hospitals: closer (3.2 km against 5.4 km) with a similar match.",
+     "why_here": "Ranked above Smart Vision Eye Hospitals: closer (about 3 km against about 5 km) with a similar match.",
      "could_be_wrong": "This is a keyword match: no rule checked that the service is actually offered.",
      "evidence_strength": "keyword",
      "flags": []
@@ -7832,9 +7843,9 @@
      "state": "Telangana",
      "lat": 17.428876876831055,
      "lon": 78.43989562988281,
-     "distance_km": 5.4,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Hyderabad district, Telangana, about 21 km across, which is itself known only to within about 10 km.",
      "grade": null,
      "grade_label": "keyword match, no service recipe",
      "confidence": "low",
@@ -7911,12 +7922,13 @@
      {
       "gate": "no blocking warning",
       "rule": "no blocking warning on the whole record",
-      "n": 17
+      "n": 17,
+      "n_distinct": 17
      }
     ],
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -7927,8 +7939,8 @@
    },
    "fingerprint": "cc6d0c7c00",
    "ms": {
-    "resolve": 5.98,
-    "answer": 8.6
+    "resolve": 6.98,
+    "answer": 11.66
    }
   },
   {
@@ -7971,9 +7983,9 @@
     "state": "Maharashtra",
     "lat": 21.13308334350586,
     "lon": 79.07785034179688,
-    "distance_km": 265.1,
+    "distance_km": 265.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 100 km for this service. Straight-line distance.",
+    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 100 km for this service. Straight-line distance. Measured from the centre of Raipur district, Chhattisgarh, about 223 km across, which is itself known only to within about 112 km.",
     "grade": null,
     "grade_label": "keyword match, no service recipe",
     "confidence": "low",
@@ -8012,7 +8024,7 @@
      "official_website": "nhrcc.in",
      "also_listed_as": []
     },
-    "why_here": "The nearest keyword match, 265.1 km away, beyond 100 km.",
+    "why_here": "The nearest keyword match, about 265 km away, beyond 100 km.",
     "could_be_wrong": "This is a keyword match: no rule checked that the service is actually offered.",
     "evidence_strength": "keyword",
     "flags": []
@@ -8047,12 +8059,13 @@
      {
       "gate": "no blocking warning",
       "rule": "no blocking warning on the whole record",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -8063,8 +8076,8 @@
    },
    "fingerprint": "5a34ce75ed",
    "ms": {
-    "resolve": 6.19,
-    "answer": 6.73
+    "resolve": 7.91,
+    "answer": 7.1
    }
   },
   {
@@ -8133,8 +8146,8 @@
    },
    "fingerprint": "92aad042fb",
    "ms": {
-    "resolve": 0.12,
-    "answer": 0.01
+    "resolve": 0.15,
+    "answer": 0.02
    }
   },
   {
@@ -8247,9 +8260,9 @@
     "state": "Bihar",
     "lat": 25.78279685974121,
     "lon": 84.722900390625,
-    "distance_km": 131.9,
+    "distance_km": 132.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance.",
+    "location_note": "Location from the record, consistent with its PIN code. Beyond the usual 50 km for this service. Straight-line distance. Measured from the centre of Aurangabad district, Bihar, about 113 km across, which is itself known only to within about 56 km.",
     "grade": 2,
     "grade_label": "supported (a fact in the record names the service)",
     "confidence": "low",
@@ -8301,7 +8314,7 @@
      "official_website": "sanjeevansparshhospital.com",
      "also_listed_as": []
     },
-    "why_here": "The nearest recommendable facility, 131.9 km away, beyond the 50 km radius.",
+    "why_here": "The nearest recommendable facility, about 132 km away, beyond the 50 km radius.",
     "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention blood bank or transfusion.",
     "evidence_strength": "thin",
     "flags": []
@@ -8337,6 +8350,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 9,
+      "n_distinct": 9,
       "n_blocked": 3,
       "n_scored": 9,
       "max_scored": 50
@@ -8344,7 +8358,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 0
+      "n": 0,
+      "n_distinct": 0
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -8358,9 +8373,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -8373,8 +8389,8 @@
    },
    "fingerprint": "0b2266373f",
    "ms": {
-    "resolve": 6.23,
-    "answer": 0.3
+    "resolve": 7.69,
+    "answer": 0.37
    }
   },
   {
@@ -8406,7 +8422,7 @@
    "service": "dialysis",
    "service_label": "Dialysis",
    "radius_km": 50.0,
-   "headline": "3 of 21 recommendable facilities within 150 km, best first.",
+   "headline": "3 of 21 recommendable facilities within 150 km, best first; 14 of them are inside the 50 km radius and come first.",
    "cards": [
     {
      "facility_id": "ebb4d2d3-4c1d-436d-b270-2e0f4498cfaa",
@@ -8882,6 +8898,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 21,
+      "n_distinct": 21,
       "n_blocked": 1,
       "n_scored": 21,
       "max_scored": 50
@@ -8889,7 +8906,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 50 km, else no reliable option nearby",
-      "n": 14
+      "n": 14,
+      "n_distinct": 14
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -8903,9 +8921,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -8914,12 +8933,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 21 recommendable facilities within 150 km, best first."
+    "headline": "3 of 21 recommendable facilities within 150 km, best first; 14 of them are inside the 50 km radius and come first."
    },
    "fingerprint": "b2bedcd575",
    "ms": {
-    "resolve": 1.01,
-    "answer": 0.84
+    "resolve": 1.02,
+    "answer": 0.88
    }
   },
   {
@@ -8951,7 +8970,7 @@
    "service": "icu",
    "service_label": "Intensive care with ventilator",
    "radius_km": 75.0,
-   "headline": "3 of 49 recommendable facilities within 225 km, best first.",
+   "headline": "3 of 74 recommendable facilities within 225 km, best first; 40 of them are inside the 75 km radius and come first. Only the nearest 50 were scored.",
    "cards": [
     {
      "facility_id": "d4066f5a-ad1f-48b9-92cf-6b32431939a8",
@@ -9396,6 +9415,7 @@
       "gate": "recommendable",
       "rule": "supported or corroborated by facts in the record, and no blocking warning",
       "n": 75,
+      "n_distinct": 74,
       "n_blocked": 14,
       "n_scored": 50,
       "max_scored": 50
@@ -9403,7 +9423,8 @@
      {
       "gate": "within radius",
       "rule": "at least one recommendable facility within 75 km, else no reliable option nearby",
-      "n": 41
+      "n": 41,
+      "n_distinct": 40
      }
     ],
     "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x trust - penalties. evidence: supported 0.7 or corroborated 1.0, minus 0.2 if the evidence is thin, plus 0.1 if strong, capped at 1. distance: exp(-km / radius). trust: source confidence from distinct web domains, an official website, page recency and named staff. penalties: possible merged record 0.15, minor location conflict 0.10.",
@@ -9417,9 +9438,10 @@
      "location_conflict": 0.1
     },
     "tie_rule": "Scores within 0.02 are ties, broken by distance.",
+    "order_rule": "Facilities inside the service radius are listed before any beyond it; within each group, by score. A higher score beyond the radius never pushes a facility inside the radius off the list.",
     "flags_source": "wp11_v2",
     "limits": [
-     "Distances are straight-line km, not travel time.",
+     "Distances are straight-line km, not travel time, measured from the point the place name resolved to.",
      "The data is a sample of mostly private, web-visible facilities. Public hospitals are under-covered, so no result often means not in this data.",
      "Grades describe what web pages say, not what a facility can do today. Pages can be stale.",
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
@@ -9428,12 +9450,12 @@
     "notes": [
      "The score is provisional: its weights, radii and penalties are stated defaults, not measured."
     ],
-    "headline": "3 of 49 recommendable facilities within 225 km, best first."
+    "headline": "3 of 74 recommendable facilities within 225 km, best first; 40 of them are inside the 75 km radius and come first. Only the nearest 50 were scored."
    },
    "fingerprint": "23546b4a30",
    "ms": {
-    "resolve": 1.66,
-    "answer": 0.96
+    "resolve": 1.72,
+    "answer": 1.0
    }
   },
   {
@@ -9474,8 +9496,8 @@
    },
    "fingerprint": "dbbe9bb869",
    "ms": {
-    "resolve": 7.43,
-    "answer": 0.01
+    "resolve": 7.74,
+    "answer": 0.02
    }
   }
  ]
