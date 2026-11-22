@@ -24,8 +24,18 @@ Groups:
   query        the demo queries (the brief's five from labels/scenarios.csv,
                plus the cold-open and Nashik PINs), answered live from the bundle
   cold_open    the obvious SQL foil on the Marketplace rows, and typicality
-  laqshya      government-list link numbers, when a hand-labeled link file exists
-  sealed_eval  the sealed evaluation, when its result file exists
+  laqshya      LaQshya link review as shipped (bundle laqshya_links.parquet)
+  sealed_eval  the sealed evaluation, both halves (labels/eval_sealed/results_*.json, outcomes, judgments):
+               coverage, precision, cost of caution, judge agreement, ranker vs any-fact sign test
+  spend        LLM spend per ledger and the project total (every labels/**/spend*.jsonl)
+  method       declared constants the app shows: drive-time fit, windows, allowance (vf.travel, vf.services)
+  outside      outside lists in the bundle, and link precision per band recomputed from silver/ext_links_*
+  tagger_wp4b  the tagger mix in the frozen bundle (WP4b, D059, D064), teacher pilot, ship-rule gates
+  teacher      WP3 teacher labels against regex v0.2
+  v0v1         blind v0 against v1 comparison, rounds 1 and 2
+  recipe_v03   recipe v0.2 against v0.3 grades
+  scenarios_v1 the v1 scenario run (not judged as a whole)
+  ordering     the order and abstention sensitivity, rerun (skip with --no-ordering)
   extra.*      any JSON passed with --extra GROUP=FILE (numeric leaves)
 
 Check mode scans text files (a script, a caption list, story JSON) for
@@ -52,8 +62,9 @@ own text).
 
     python scripts/wp9_findings.py                          # writes reports/findings.json
     python scripts/wp9_findings.py --bundle dbapp/bundle --out reports/findings.json
-    python scripts/wp9_findings.py --laqshya-links data/labels/laqshya_public_links_handlabeled.csv
-    python scripts/wp9_findings.py --extra sealed_eval=reports/sealed_eval.json
+    python scripts/wp9_findings.py --laqshya-links dbapp/bundle/laqshya_links.parquet
+    python scripts/wp9_findings.py --sealed data/labels/eval_sealed/results_sealed.json
+    python scripts/wp9_findings.py --extra mygroup=some.json   # numeric leaves of any JSON
     python scripts/wp9_findings.py --check reports/demo_script.md [more files]
     python scripts/wp9_findings.py --check captions.json --strict   # every number must be a {{key}}
 """
@@ -105,6 +116,32 @@ SEALED_CANDIDATES = [
     "reports/eval/sealed_eval.json",
     "reports/eval/results.json",
 ]
+#: which findings groups carry each report's numbers (recomputed from the files the report names, not parsed
+#: from the report text); a report number with no machine-readable source is an explicit null with report_states
+REPORT_COVERAGE = {
+    "reports/eval_sealed_results.md": "sealed_eval.sealed.*, sealed_eval.dev.*, spend.*",
+    "reports/eval_dev_rubric_check.md": "sealed_eval.dev_rubric_check.*",
+    "reports/HUMAN_LABELING.md": "sealed_eval.*.human.* (null: not labeled yet)",
+    "reports/outside_lists.md": "outside.*, laqshya.*",
+    "reports/ext_aerb_rt.md, ext_ncg.md, ext_nhp_bloodbank.md, ext_mohfw_trauma.md, ext_nabi_burns.md":
+        "outside.<source>.* (band verdicts and Clopper-Pearson bounds recomputed from silver/ext_links_*)",
+    "reports/laqshya_links.md": "laqshya.* (from the bundle's laqshya_links.parquet)",
+    "reports/model_a_wp4b.md": "tagger_wp4b.*",
+    "reports/model_a_results.md": "tagger.* (the WP4 mix, superseded in the frozen bundle by tagger_wp4b.mix)",
+    "reports/teacher_run.md": "teacher.*, tagger.teacher.*",
+    "reports/ranking_v0_vs_v1.md": "v0v1.r1.*, v0v1.r2.*, v0v1.judge_noise.*",
+    "reports/ranking_scenarios.md": "scenarios.* (v0 run, judged), scenarios_v1.* (v1 run, not judged as a whole)",
+    "reports/recipe_v03_changes.md": "recipe_v03.*, grades.*",
+    "reports/trust_checks.md": "trust.*",
+    "reports/resolver_eval.md": "resolver.*",
+    "reports/ordering_behaviour.md": "ordering.* (rerun now)",
+    "reports/cold_open.md": "cold_open.*, query.cold_open_226001.*",
+    "reports/score_methodology_research.md": "method.* (the constants the code ships, vf.travel and vf.services)",
+    "not covered": "build_final.md and overnight_test_and_fix.md (process logs: hashes, test counts, issue lists); "
+                   "eda_notes.md, wp2b_external_validation.md, wp6_rule_quadrants.md (retired outputs, D024); "
+                   "standout_brainstorm.md, outside_data_research.md, eval_sealed_protocol.md, "
+                   "eval_sealed_amendment_reach_draft.md (plans and research, no results)",
+}
 MAX_LIST_FLATTEN = 20
 
 
@@ -143,6 +180,10 @@ def fmt_display(value, kind: str, digits: Optional[int] = None) -> Optional[str]
         return f"{float(value):.{1 if digits is None else digits}f} s"
     if kind == "score":
         return f"{float(value):.{2 if digits is None else digits}f}"
+    if kind == "minutes":
+        return f"{float(value):,.{0 if digits is None else digits}f} min"
+    if kind == "usd":
+        return f"${float(value):,.{2 if digits is None else digits}f}"
     if isinstance(value, int):
         return f"{value:,}"
     d = (2 if abs(float(value)) < 10 else 1) if digits is None else digits
@@ -364,14 +405,20 @@ class Findings:
             "source_file": self._src(source), "how_computed": how,
         })
 
-    def null(self, key: str, *, source, reason: str, how: str = "", kind: str = "number") -> None:
+    def null(self, key: str, *, source, reason: str, how: str = "", kind: str = "number",
+             report_states: Optional[str] = None) -> None:
+        """An explicit null. ``report_states`` quotes what a report says, when a report gives a number that no
+        machine-readable file backs; it is kept for the reader and never counts as a finding in --check."""
         if key in self.keys:
             raise ValueError(f"duplicate finding key {key}")
         self.keys.add(key)
-        self.items.append({
+        item = {
             "key": key, "group": key.split(".")[0], "value": None, "kind": kind, "display": None,
             "source_file": self.rel(source) if source else None, "how_computed": how, "reason": reason,
-        })
+        }
+        if report_states is not None:
+            item["report_states"] = report_states
+        self.items.append(item)
 
 
 def _sha256(p: Path) -> str:
@@ -495,16 +542,33 @@ def emoc_section(F: Findings, b: Path, grades, idx, data_dir: Path) -> None:
     F.add("emoc.post_office_points", len(pts), source=po_src, kind="count",
           how="distinct (lat, lon) points in the bundle's post_offices.parquet (non-suspect geocoded offices, "
               "one row per placeholder point)")
+    # D048 item 7: sea-pixel post offices are dropped from coverage numbers. A bundle point is a sea point when it
+    # lies within 10 m of a point in reference/sea_pixel_post_offices.csv (coordinates are rounded differently).
+    sea_p = ROOT / "reference" / "sea_pixel_post_offices.csv"
+    land = np.ones(len(pts), dtype=bool)
+    if sea_p.exists():
+        sea = pd.read_csv(sea_p)[["lat_po", "lon_po"]].dropna().drop_duplicates()
+        if len(sea):
+            ds, _ = BallTree(np.radians(sea.to_numpy()), metric="haversine").query(P, k=1)
+            land = ds[:, 0] * 6371.0088 > 0.01
+        F.add("emoc.post_office_points_sea_pixel", int((~land).sum()), source=sea_p, kind="count",
+              how="bundle post-office points within 10 m of a sea-pixel post office (D048 item 7); dropped from "
+                  "the coverage shares")
+    F.add("emoc.post_office_points_land", int(land.sum()), source=po_src, kind="count",
+          how="distinct post-office points used for the coverage shares: bundle points minus sea-pixel points")
     R = 50.0
     for name, mask, what in (
             ("specialty_label", lab & ok, f"a record listing {OBS_SPECIALTY!r}"),
             ("grade_2plus", (idx.lines["emoc"].grade >= 2) & ok, "a record graded 2+ on emoc (names a caesarean)")):
         X = np.radians(np.c_[idx.lat[mask], idx.lon[mask]])
         d, _ = BallTree(X, metric="haversine").query(P, k=1)
-        share = float((d[:, 0] * 6371.0088 <= R).mean())
-        F.add(f"emoc.coverage_50km_{name}", share, source=po_src, kind="share", digits=1,
-              how=f"share of those post-office points within {R:.0f} km straight-line of {what} with a usable "
-                  "location. A fact about records, not about care")
+        within = d[:, 0] * 6371.0088 <= R
+        F.add(f"emoc.coverage_50km_{name}", float(within[land].mean()), source=po_src, kind="share", digits=1,
+              how=f"share of the land post-office points (sea-pixel points dropped, D048 item 7) within {R:.0f} km "
+                  f"straight-line of {what} with a usable location. A fact about records, not about care")
+        F.add(f"emoc.coverage_50km_{name}_with_sea", float(within.mean()), source=po_src, kind="share", digits=1,
+              how=f"same share over every bundle post-office point, sea-pixel points included (before D048 item 7 "
+                  "was applied)")
 
 
 def tagger_section(F: Findings, data_dir: Path) -> None:
@@ -517,7 +581,8 @@ def tagger_section(F: Findings, data_dir: Path) -> None:
         return
     r = json.loads(rep.read_text())
     gs = r.get("gold_scores", {})
-    names = {"shipped": "shipped mix (WP4 student on 4 tags, regex v0.2 on the rest)",
+    names = {"shipped": "WP4 mix (student 1b on ob_delivery, h24, icu, ventilator; regex v0.2 on the rest), the "
+                        "shipped tagger before the WP4b promotion; the frozen bundle ships tagger_wp4b.mix (D059, D064)",
              "regex": "regex v0.2", "teacher": "LLM teacher labels", "student_1b": "student 1b alone"}
     rows = None
     for m, what in names.items():
@@ -544,13 +609,31 @@ def tagger_section(F: Findings, data_dir: Path) -> None:
     d = ((r.get("paired_delta_vs_regex") or {}).get("shipped") or {}).get("macro_f1_delta_ci95")
     if d:
         F.add("tagger.shipped_minus_regex_ci_low", d[0], source=rep, kind="score", digits=3,
-              how="paired bootstrap 95% interval of shipped minus regex macro F1 on gold: lower end")
+              how="paired bootstrap 95% interval of WP4 mix (before WP4b) minus regex macro F1 on gold: lower end")
         F.add("tagger.shipped_minus_regex_ci_high", d[1], source=rep, kind="score", digits=3,
-              how="paired bootstrap 95% interval of shipped minus regex macro F1 on gold: upper end")
+              how="paired bootstrap 95% interval of WP4 mix (before WP4b) minus regex macro F1 on gold: upper end")
     shipped = r.get("shipped_tags")
     if shipped is not None:
         F.add("tagger.student_tags_shipped", len(shipped), source=rep, kind="count",
-              how=f"tags the student model ships on ({', '.join(shipped)}); regex v0.2 on the rest")
+              how=f"tags the WP4 student shipped on before WP4b ({', '.join(shipped)}); regex v0.2 on the rest. "
+                  "Since D064 ob_delivery comes from WP4b 2b_r2 (tagger_wp4b)")
+    pc = (r.get("population_check") or {}).get("per_tag") or {}
+    for tag, d in pc.items():
+        if "read" in d and "right" in d:
+            hw = (f"WP4 population check of the student on {tag}: 25 random texts the student tags and regex v0.2 "
+                  "does not, read by the WP4 agent (not blinded, not a clinician); the WP4 gate shipped a tag when "
+                  "at least half were right")
+            F.add(f"tagger.population.{tag}.read", d["read"], source=rep, kind="count", how=f"{hw}: texts read")
+            F.add(f"tagger.population.{tag}.right", d["right"], source=rep, kind="count", how=f"{hw}: texts right")
+    tr = ((r.get("grade_changes") or {}).get("icu") or {}).get("transitions") or {}
+    if tr:
+        up = sum(v for k, v in tr.items() if int(k[0]) < 2 <= int(k[-1]))
+        down = sum(v for k, v in tr.items() if int(k[-1]) < 2 <= int(k[0]))
+        hw = "icu line, regex v0.2 against the WP4 mix (student on icu, h24, ventilator, ob_delivery), recipe v0.2"
+        F.add("tagger.icu_grade.rose_to_2plus", up, source=rep, kind="count",
+              how=f"{hw}: facilities moving from grade 0 or 1 to grade 2 or 3")
+        F.add("tagger.icu_grade.fell_below_2", down, source=rep, kind="count",
+              how=f"{hw}: facilities moving from grade 2 or 3 to grade 0 or 1")
     sp = r.get("split") or {}
     for k in ("train", "val"):
         if k in sp:
@@ -650,7 +733,8 @@ def scenarios_section(F: Findings, data_dir: Path) -> None:
     raw = ROOT / "reports" / "ranking_scenarios_raw.json"
     if raw.exists():
         s = json.loads(raw.read_text()).get("summary", {})
-        how = "summary of the WP5 scenario run (scripts/wp5_scenarios.py) on labels/scenarios.csv"
+        how = ("summary of the WP5 v0 scenario run (scripts/wp5_scenarios.py, score v0, recipe v0.2, flags wp11_v2) "
+               "on labels/scenarios.csv; the run the judges marked, not the frozen v1 build (see scenarios_v1, v0v1)")
         for k in ("scenarios", "resolved", "abstentions", "recipe_resolved", "recipe_abstentions", "cards_shown",
                   "cards_with_a_flag", "status_as_expected", "expected_abstentions",
                   "expected_abstentions_that_abstained"):
@@ -678,7 +762,8 @@ def scenarios_section(F: Findings, data_dir: Path) -> None:
     j = pd.read_csv(jp, dtype=str, keep_default_na=False)
     cards = j[j["rank"] != ""]
     noc = j[j["rank"] == ""]
-    how = "independent judges' marks on the WP5 scenario run (labels/scenario_judgments.csv), agent judges"
+    how = ("independent judges' marks on the WP5 v0 scenario run (labels/scenario_judgments.csv; score v0, recipe "
+           "v0.2, flags wp11_v2, not the frozen v1 build), agent judges")
     F.add("scenarios.judged.total", len(j), source=jp, kind="count", how=f"{how}: all judgments")
     F.add("scenarios.judged.cards", len(cards), source=jp, kind="count", how=f"{how}: recommendation cards judged")
     F.add("scenarios.judged.no_card_answers", len(noc), source=jp, kind="count",
@@ -839,6 +924,18 @@ def cold_open_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> No
         F.add("cold_open.foil.rows_passing", int(m.sum()), source=raw_src, kind="count", how=sql + ": rows passing")
         F.add("cold_open.foil.junk_rows_passing", int((m & (raw["address_countryCode"] != "IN")).sum()),
               source=raw_src, kind="count", how=sql + ": junk rows (country code not IN) passing")
+        # the filmed SQL (sql/cold_open_lucknow.sql): country IN and lower(specialties) LIKE '%obstetric%'
+        m_sql = ((raw["address_countryCode"] == "IN")
+                 & raw["specialties"].astype(str).str.lower().str.contains("obstetric", regex=False)
+                 & lat.between(*INDIA_BBOX["lat"]) & lon.between(*INDIA_BBOX["lon"]))
+        F.add("cold_open.foil.rows_passing_sql", int(m_sql.sum()), source=raw_src, kind="count",
+              how="the filmed query's filters as in sql/cold_open_lucknow.sql (address_countryCode = 'IN', "
+                  "lower(specialties) LIKE '%obstetric%', try_cast coordinates inside India's bounding box), "
+                  "replicated on the raw CSV: rows passing. rows_passing above uses the exact label instead")
+        top_sql = raw[m_sql].assign(km=km[m_sql]).sort_values("km", kind="stable").head(3)
+        F.add("cold_open.foil.sql_top3_same_as_exact_label", int(list(top_sql["unique_id"]) == list(top["unique_id"])),
+              source=raw_src, kind="count",
+              how="1 if the filmed query's top 3 equals the exact-label top 3 (same rows, same order), else 0")
         facts_p = data_dir / "silver" / "facts.parquet"
         facts = pd.read_parquet(facts_p, columns=["facility_id", "text"]) if facts_p.exists() else None
         flags = pd.read_parquet(b / "flags.parquet")
@@ -898,48 +995,6 @@ def cold_open_section(F: Findings, b: Path, idx, resolver, data_dir: Path) -> No
           how=how + "; distinct records graded below 2 among the tied nearest records under the upper-bound rule")
 
 
-def laqshya_section(F: Findings, b: Path, grades, data_dir: Path, path: Optional[Path]) -> None:
-    import pandas as pd
-
-    p = path or _first_existing(LAQSHYA_CANDIDATES)
-    if p is None or not Path(p).exists():
-        F.null("laqshya.link_candidates", source=None,
-               reason="no hand-labeled LaQshya link file found (looked for " + ", ".join(LAQSHYA_CANDIDATES) +
-                      "); pass --laqshya-links FILE")
-        return
-    p = Path(p)
-    if p.suffix == ".json":
-        flatten_section(F, "laqshya", p)
-        return
-    d = pd.read_csv(p, dtype=str, keep_default_na=False)
-    need = {"uid", "fid", "hand"}
-    if not need <= set(d.columns):
-        F.null("laqshya.link_candidates", source=p, reason=f"link file lacks columns {sorted(need - set(d.columns))}")
-        return
-    how = ("LaQshya units linked by name to public records within the PIN's district, each link checked by an "
-           "agent (column hand); Hruday's spot-check is pending (D044), so keep ratios off screen until then")
-    F.add("laqshya.link_candidates", len(d), source=p, kind="count", how=how + ": candidate links")
-    for mk, c in d["hand"].value_counts().sort_index().items():
-        F.add(f"laqshya.links_{_slug(mk)}", int(c), source=p, kind="count", how=how + f": links marked {mk!r}")
-    lq_p = data_dir / "silver" / "ext_laqshya.parquet"
-    if not lq_p.exists():
-        F.null("laqshya.correct_with_current_maternity_ot", source=lq_p, reason="silver/ext_laqshya.parquet not found")
-        return
-    lq = pd.read_parquet(lq_p)
-    c = d[d["hand"] == "correct"]
-    ot = lq[lq["facility_uid"].isin(c["uid"]) & lq["department"].astype(str).str.contains("Maternity OT")]
-    cur = ot[~ot["expired_as_of_retrieval"].fillna(True).astype(bool)]
-    cur_uids = set(cur["facility_uid"])
-    F.add("laqshya.correct_with_current_maternity_ot", len(cur_uids), source=lq_p, kind="count",
-          how="correct links whose LaQshya unit holds a Maternity OT certificate not expired at retrieval "
-              "(21 Nov 2026, D019)")
-    fids = set(c[c["uid"].isin(cur_uids)]["fid"])
-    em = grades[(grades["service_line"] == "emoc") & grades["facility_id"].isin(fids)]
-    n_cs = int(em["tags_present"].map(lambda t: "csection" in list(t)).sum())
-    F.add("laqshya.current_maternity_ot_record_names_csection", n_cs, source=b / "grades.parquet", kind="count",
-          how="of those, records with a fact naming a caesarean (emoc tags_present has csection)")
-
-
 def _flatten(obj, prefix: str = "") -> Iterable[tuple[str, Any]]:
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -969,15 +1024,886 @@ def flatten_section(F: Findings, group: str, path: Path) -> int:
     return n
 
 
-def sealed_section(F: Findings, path: Optional[Path]) -> None:
-    p = path or _first_existing(SEALED_CANDIDATES)
-    if p is None or not Path(p).exists():
-        F.null("sealed_eval.results", source=None,
-               reason="sealed evaluation not run yet (looked for " + ", ".join(SEALED_CANDIDATES) +
-                      "); pass --sealed FILE")
+# ---------------------------------------------------------------------------
+# report sources (D063 stage: findings from the frozen bundle and every report)
+# ---------------------------------------------------------------------------
+
+def _wilson(k: int, n: int, z: float = 1.96) -> tuple[Optional[float], Optional[float]]:
+    """Wilson 95% interval, the same formula as scripts/eval_sealed.py."""
+    if not n:
+        return None, None
+    p = k / n
+    den = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / den
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return max(0.0, c - h), min(1.0, c + h)
+
+
+def _cp_lower(k: int, n: int, alpha: float = 0.05) -> Optional[float]:
+    """One-sided Clopper-Pearson lower bound (95% by default), the D048 item 5 link rule."""
+    from scipy.stats import beta
+    if not n:
+        return None
+    return 0.0 if k == 0 else float(beta.ppf(alpha, k, n - k + 1))
+
+
+def _cp_two_sided(k: int, n: int) -> tuple[Optional[float], Optional[float]]:
+    from scipy.stats import beta
+    if not n:
+        return None, None
+    lo = 0.0 if k == 0 else float(beta.ppf(0.025, k, n - k + 1))
+    hi = 1.0 if k == n else float(beta.ppf(0.975, k + 1, n - k))
+    return lo, hi
+
+
+def _sign_test(a: int, b: int, alternative: str = "two-sided") -> Optional[float]:
+    from scipy.stats import binomtest
+    if a + b == 0:
+        return None
+    return float(binomtest(a, a + b, 0.5, alternative=alternative).pvalue)
+
+
+def _cohen_kappa(a: list, b: list) -> Optional[float]:
+    """Cohen's kappa for two lists of booleans, the same formula as scripts/eval_sealed.py."""
+    pairs = [(bool(x), bool(y)) for x, y in zip(a, b) if x is not None and y is not None]
+    n = len(pairs)
+    if n == 0:
+        return None
+    po = sum(x == y for x, y in pairs) / n
+    pa = sum(x for x, _ in pairs) / n
+    pb = sum(y for _, y in pairs) / n
+    pe = pa * pb + (1 - pa) * (1 - pb)
+    if pe >= 1.0:
+        return 1.0 if po == 1.0 else 0.0
+    return (po - pe) / (1 - pe)
+
+
+def _tf(x) -> Optional[bool]:
+    s = str(x)
+    return True if s == "True" else False if s == "False" else None
+
+
+def _add_kn(F: Findings, key: str, k: int, n: int, *, source, how: str, ci: str = "wilson",
+            ci_given: Optional[Iterable] = None, share_digits: int = 0) -> None:
+    """k, n, rate and its 95% interval as one group of findings (so "k of n" passes --check)."""
+    F.add(f"{key}.k", int(k), source=source, kind="count", how=f"{how}: numerator")
+    F.add(f"{key}.n", int(n), source=source, kind="count", how=f"{how}: denominator")
+    if not n:
+        F.null(f"{key}.rate", source=source, reason="denominator is 0", how=how, kind="share")
         return
-    if flatten_section(F, "sealed_eval", Path(p)) == 0:
-        F.null("sealed_eval.results", source=p, reason="the sealed evaluation file has no numbers")
+    F.add(f"{key}.rate", k / n, source=source, kind="share", digits=share_digits, how=f"{how}: k / n")
+    if ci_given is not None:
+        lo, hi = list(ci_given)[:2]
+        what = "95% interval as stored in the source file"
+    elif ci == "wilson":
+        lo, hi = _wilson(k, n)
+        what = "95% Wilson interval"
+    else:
+        lo, hi = _cp_two_sided(k, n)
+        what = "two-sided 95% Clopper-Pearson interval"
+    if lo is not None:
+        F.add(f"{key}.ci_low", lo, source=source, kind="share", digits=share_digits, how=f"{how}: {what}, lower end")
+        F.add(f"{key}.ci_high", hi, source=source, kind="share", digits=share_digits, how=f"{how}: {what}, upper end")
+
+
+def method_section(F: Findings) -> None:
+    """Declared design parameters the app shows (D048): the drive-time fit and each line's window."""
+    from vf import services as S
+    from vf import travel as T
+
+    tsrc, ssrc = ROOT / "src" / "vf" / "travel.py", ROOT / "src" / "vf" / "services.py"
+    F.add("method.drive_time.n_trips", T.N_TRIPS, source=tsrc, kind="count",
+          how="OSRM free-flow car trips the drive-time model was fitted to (score research, Nov 21; vf.travel.N_TRIPS)")
+    F.add("method.drive_time.n_anchors", T.N_ANCHORS, source=tsrc, kind="count",
+          how="anchor post offices those trips start from (vf.travel.N_ANCHORS)")
+    F.add("method.drive_time.coef_minutes", T.A_MIN, source=tsrc, kind="number", digits=2,
+          how="minutes = state factor x 2.30 x km^0.842: the multiplier (vf.travel.A_MIN)")
+    F.add("method.drive_time.exponent", T.B_EXP, source=tsrc, kind="number", digits=3,
+          how="minutes = state factor x 2.30 x km^0.842: the exponent on straight-line km (vf.travel.B_EXP)")
+    F.add("method.drive_time.log_sd", T.LOG_SD, source=tsrc, kind="score",
+          how="leave-one-anchor-out SD of log(OSRM minutes / fitted minutes) (vf.travel.LOG_SD)")
+    F.add("method.drive_time.band_coverage", T.BAND_COVERAGE, source=tsrc, kind="share", digits=1,
+          how="share of held-out OSRM trips inside the shown band, minutes x e^-0.52 to x e^+0.52 (vf.travel.BAND_COVERAGE)")
+    F.add("method.allowance.urgent", S.ALLOWANCE_URGENT, source=ssrc, kind="minutes",
+          how="declared evidence allowance: a better-evidenced facility may come first if at most this many "
+              "estimated minutes further (urgent lines; design choice, D048 item 4)")
+    F.add("method.allowance.planned", S.ALLOWANCE_PLANNED, source=ssrc, kind="minutes",
+          how="the same allowance for planned care (MRI, cardiac surgery, oncology)")
+    F.add("method.max_candidates", S.MAX_CANDIDATES, source=ssrc, kind="count",
+          how="candidate cap: the ranker orders at most this many nearest recommendable records (vf.services.MAX_CANDIDATES)")
+    for line, w in S.WINDOWS.items():
+        F.add(f"method.window.{line}", w.minutes, source=ssrc, kind="minutes",
+              how=f"{line} drive-time window, a planning threshold not a clinical deadline ({w.kind}): {w.basis}")
+
+
+def _eval_split(F: Findings, split: str, res_p: Path, b: Path) -> None:
+    import pandas as pd
+
+    g = f"sealed_eval.{split}"
+    ev = res_p.parent
+    if not res_p.exists():
+        F.null(f"{g}.queries", source=res_p, reason=f"{res_p.name} not found (eval_sealed.py score not run for {split})")
+        return
+    r = json.loads(res_p.read_text())
+    base = (f"{split} half of the sealed evaluation (scripts/eval_sealed.py, protocol reports/eval_sealed_protocol.md "
+            "with Amendment 3: every tool on the same drive-time window, same right to abstain). Judges are AI models "
+            "(A claude-haiku-5-5, B claude-sonnet-5-5, C claude-opus-5-5 on A/B disagreements), blind to the tool, "
+            "reading only this dataset's text")
+    if split == "dev":
+        base += ". The dev half was used for design decisions (D053), so it is not clean evidence"
+    F.add(f"{g}.queries", r["n_queries"], source=res_p, kind="count", how=f"{base}: queries")
+    metrics = {
+        "coverage": "queries the tool answered (gave a top pick) / all queries",
+        "precision": "answered queries whose top pick's record the judges found clearly shows the service (Q1 yes) "
+                     "/ answered queries",
+        "good_pick": "answered queries whose top pick is Q1 yes and judged sensible for the place (Q2 yes) / answered",
+        "abstained_with_support": "abstentions where the judges found a facility inside the same window whose "
+                                  "record clearly shows the service / abstentions (a lower bound: at most 10 "
+                                  "facilities with some signal read per query)",
+        "abstained_with_support_of_all": "abstentions with a judge-supported option / all queries",
+        "skipped_nearer": "answers whose top pick is beaten by a different record at least 1 km nearer that the "
+                          "judges found clearly shows the service / answers",
+        "wrong_picks_of_all": "answered queries whose top pick is Q1 no / all queries",
+        "precision_excluding_listing_only": "precision with Q1 yes votes that rest only on the specialties listing "
+                                            "counted as no (strict)",
+        "precision_excluding_listing_any": "precision with Q1 yes votes that cite the specialties listing at all "
+                                           "counted as no (loose)",
+    }
+    names = {"specialty": "specialty filter (obvious query)", "any_fact": "any-fact baseline (any fact names it)",
+             "ranker": "our ranker (v1-final, frozen)"}
+    for tool, t in (r.get("tools") or {}).items():
+        for m, what in metrics.items():
+            d = t.get(m)
+            if isinstance(d, dict) and "k" in d:
+                _add_kn(F, f"{g}.{tool}.{m}", d["k"], d["n"], source=res_p, ci_given=d.get("ci95"),
+                        how=f"{base}. {names.get(tool, tool)}: {what}")
+        al = t.get("skipped_nearer_allowance") or {}
+        for part in ("within_allowance", "beyond_allowance"):
+            d = al.get(part)
+            if isinstance(d, dict) and "k" in d:
+                _add_kn(F, f"{g}.{tool}.skipped_nearer_{part}", d["k"], d["n"], source=res_p, ci_given=d.get("ci95"),
+                        how=f"{base}. {names.get(tool, tool)}: skipped a nearer supported option with the pick "
+                            f"{'at most' if part == 'within_allowance' else 'more than'} the declared allowance "
+                            "(15 minutes, 30 for MRI, cardiac surgery and oncology) further / answers")
+    for svc, by in (r.get("by_service") or {}).items():
+        for tool, d in by.items():
+            for f_ in ("queries", "answered", "correct"):
+                if f_ in d:
+                    F.add(f"{g}.by_service.{svc}.{tool}.{f_}", d[f_], source=res_p, kind="count",
+                          how=f"{base}. {svc}, {names.get(tool, tool)}: {f_} ('correct' = top pick Q1 yes)")
+    third = {}
+    for svc, by in (r.get("by_service") or {}).items():
+        if svc in ("emoc", "dialysis"):
+            continue
+        for tool, d in by.items():
+            t3 = third.setdefault(tool, {"queries": 0, "answered": 0, "correct": 0})
+            for f_ in t3:
+                t3[f_] += int(d.get(f_, 0))
+    for tool, d in third.items():
+        for f_, v in d.items():
+            F.add(f"{g}.by_service.third_service.{tool}.{f_}", v, source=res_p, kind="count",
+                  how=f"{base}. Third service (one per point, every service except emoc and dialysis, summed from "
+                      f"by_service), {names.get(tool, tool)}: {f_}")
+    wsp = r.get("without_sea_pixel") or {}
+    if "n_points" in wsp:
+        F.add(f"{g}.without_sea_pixel.points_dropped", wsp["n_points"], source=res_p, kind="count",
+              how=f"{base}: sea-pixel post offices among the points (D048 item 7), dropped in this sensitivity line")
+        F.add(f"{g}.without_sea_pixel.queries_dropped", wsp.get("n_queries_dropped"), source=res_p, kind="count",
+              how=f"{base}: queries dropped with them")
+        for tool, t in (wsp.get("tools") or {}).items():
+            for m in ("coverage", "precision"):
+                d = t.get(m)
+                if isinstance(d, dict) and "k" in d:
+                    _add_kn(F, f"{g}.without_sea_pixel.{tool}.{m}", d["k"], d["n"], source=res_p,
+                            ci_given=d.get("ci95"), how=f"{base}. Without sea-pixel points, {names.get(tool, tool)}: "
+                                                        f"{metrics[m]}")
+    pk0 = ev / f"picks_{split}.json"
+    if pk0.exists():
+        cr = [c for q in json.loads(pk0.read_text()).get("queries", [])
+              for c in (((q.get("tools") or {}).get("ranker") or {}).get("cards_reach") or [])]
+        ok = sum(1 for c in cr if c.get("inside") and c.get("card_minutes") is not None
+                 and abs(float(c["card_minutes"]) - float(c["harness_minutes"])) <= 0.05 + 1e-9)
+        _add_kn(F, f"{g}.integrity.card_minutes_match", ok, len(cr), source=pk0,
+                how=f"integrity check ({split}): ranker cards whose shown minutes are within 0.05 of the harness's "
+                    "minutes and inside the pinned window")
+    ce = ev / f"cost_estimate_{split}.json"
+    if ce.exists():
+        c = json.loads(ce.read_text())
+        for nm, lab in (("expected", "expected"), ("high", "high (every walk to the cap)"),
+                        ("low", "low (picks only)")):
+            if lab in c and "usd" in c[lab]:
+                F.add(f"{g}.cost_estimate.{nm}_usd", c[lab]["usd"], source=ce, kind="usd",
+                      how=f"judge cost estimate before the {split} run, {lab}")
+    for st, n in (r.get("walk_status") or {}).items():
+        F.add(f"{g}.walk_status.{_slug(st)}", n, source=res_p, kind="count",
+              how=f"{base}: queries whose judge walk (nearest facilities with any signal, up to 10) ended {st!r}")
+    for ck, d in (r.get("integrity_checks") or {}).items():
+        if isinstance(d, dict) and "k" in d:
+            _add_kn(F, f"{g}.integrity.{ck}", d["k"], d["n"], source=res_p, ci_given=d.get("ci95"),
+                    how=f"integrity check, not a judged result ({split}): {ck.replace('_', ' ')}; holds by construction")
+    meta = r.get("meta") or {}
+    led = meta.get("ledger") or {}
+    if "usd" in led:
+        F.add(f"{g}.judge_spend_ledger_usd", led["usd"], source=res_p, kind="usd",
+              how=f"cumulative judge spend on ledger purpose {led.get('purpose')!r} over every run of this half "
+                  f"({led.get('first_at')} to {led.get('last_at')})")
+    sp_p, t0 = ev / "spend.jsonl", meta.get("picks_created_at_utc")
+    if sp_p.exists() and t0:
+        usd, calls = 0.0, 0
+        for line in sp_p.read_text().splitlines():
+            if line.strip():
+                x = json.loads(line)
+                if x.get("purpose") == f"judge_{split}" and str(x.get("at")) >= t0:
+                    usd += float(x.get("cost_usd") or 0.0)
+                    calls += 1
+        F.add(f"{g}.judge_spend_usd", usd, source=sp_p, kind="usd",
+              how=f"spend of the judging run behind these results: cost_usd of judge_{split} ledger lines at or after "
+                  f"the picks ({t0})")
+        F.add(f"{g}.judge_api_calls", calls, source=sp_p, kind="count", how="API calls of that run")
+
+    # derived from the per-query outcomes and per-unit judgments
+    oc_p, jd_p, jj_p, pk_p = (ev / f"outcomes_{split}.csv", ev / f"judgments_{split}.csv",
+                              ev / f"judged_{split}.json", ev / f"picks_{split}.json")
+    if not (oc_p.exists() and jd_p.exists()):
+        F.null(f"{g}.judges.q1.kappa", source=jd_p, reason="outcomes or judgments csv not found")
+        return
+    o = pd.read_csv(oc_p, dtype={"pick_id": str, "nearest_yes_id": str})
+    F.add(f"{g}.points", int(o["po_id"].nunique()), source=oc_p, kind="count",
+          how=f"{base}: distinct random post offices (po_id) the queries were asked at; emoc and dialysis at every "
+              "point, a third service at some")
+    j = pd.read_csv(jd_p)
+    for q in ("q1", "q2"):
+        jq = j[j["kind"] == q]
+        A, B = [_tf(x) for x in jq["vote_A"]], [_tf(x) for x in jq["vote_B"]]
+        pairs = [(a, b_) for a, b_ in zip(A, B) if a is not None and b_ is not None]
+        agree = sum(a == b_ for a, b_ in pairs)
+        what = ("Q1, record clearly shows the service" if q == "q1" else "Q2, sensible for the place")
+        hw = f"{base}. Judge units for {what}, from {jd_p.name}"
+        _add_kn(F, f"{g}.judges.{q}.agree", agree, len(pairs), source=jd_p, share_digits=1,
+                how=f"{hw}: units where judges A and B gave the same vote / units with both votes")
+        F.add(f"{g}.judges.{q}.units", len(jq), source=jd_p, kind="count", how=f"{hw}: judge units")
+        F.add(f"{g}.judges.{q}.kappa", _cohen_kappa([a for a, _ in pairs], [b_ for _, b_ in pairs]), source=jd_p,
+              kind="score", how=f"{hw}: Cohen's kappa, judge A vs judge B")
+        F.add(f"{g}.judges.{q}.sent_to_c", int(jq["vote_C"].notna().sum()), source=jd_p, kind="count",
+              how=f"{hw}: units sent to judge C (A and B disagreed)")
+        F.add(f"{g}.judges.{q}.a_yes", sum(1 for a in A if a), source=jd_p, kind="count", how=f"{hw}: judge A yes votes")
+        F.add(f"{g}.judges.{q}.b_yes", sum(1 for b_ in B if b_), source=jd_p, kind="count", how=f"{hw}: judge B yes votes")
+        F.add(f"{g}.judges.{q}.unresolved", int(jq["final"].isna().sum()), source=jd_p, kind="count",
+              how=f"{hw}: units with no final verdict")
+
+    rk = o[o["tool"] == "ranker"].set_index("query_id")
+    af = o[o["tool"] == "any_fact"].set_index("query_id").reindex(rk.index)
+    both = rk["answered"].astype(bool) & af["answered"].astype(bool)
+    hw = f"{base}. Ranker against the any-fact baseline on queries both answered, from {oc_p.name}"
+    F.add(f"{g}.ranker_vs_any_fact.both_answered", int(both.sum()), source=oc_p, kind="count", how=f"{hw}: queries")
+    F.add(f"{g}.ranker_vs_any_fact.same_top_pick", int((rk["pick_id"][both] == af["pick_id"][both]).sum()),
+          source=oc_p, kind="count", how=f"{hw}: same top pick (facility_id)")
+    rc = rk["correct"][both].map(_tf) == True  # noqa: E712
+    ac = af["correct"][both].map(_tf) == True  # noqa: E712
+    n10, n01 = int((rc & ~ac).sum()), int((~rc & ac).sum())
+    F.add(f"{g}.ranker_vs_any_fact.ranker_only_supported", n10, source=oc_p, kind="count",
+          how=f"{hw}: ranker's pick Q1 yes and the baseline's Q1 no (discordant)")
+    F.add(f"{g}.ranker_vs_any_fact.any_fact_only_supported", n01, source=oc_p, kind="count",
+          how=f"{hw}: baseline's pick Q1 yes and the ranker's Q1 no (discordant)")
+    F.add(f"{g}.ranker_vs_any_fact.sign_test_p", _sign_test(n10, n01), source=oc_p, kind="score", digits=3,
+          how=f"{hw}: exact two-sided binomial sign test on the discordant queries, p = 0.5")
+
+    ra = rk[rk["answered"].astype(bool)]
+    wrong = ra[ra["correct"].map(_tf) == False]  # noqa: E712
+    for svc, n in wrong["service"].value_counts().sort_index().items():
+        F.add(f"{g}.ranker.wrong_picks_by_service.{svc}", int(n), source=oc_p, kind="count",
+              how=f"{base}. Ranker answers whose top pick is Q1 no, service {svc}")
+    F.add(f"{g}.ranker.not_sensible", int((ra["q2"].map(_tf) == False).sum()), source=oc_p, kind="count",  # noqa: E712
+          how=f"{base}. Ranker answers whose top pick was judged not sensible for the place (Q2 no). Q2 is the "
+              "least reliable judge question (see judges.q2.kappa)")
+    sk = ra[ra["skipped_nearer"].map(_tf) == True]  # noqa: E712
+    beyond = sk[sk["skip_beyond_allowance"].map(_tf) == True]  # noqa: E712
+    if len(beyond):
+        F.add(f"{g}.ranker.skipped_beyond_extra_min_min", float(beyond["skip_extra_min"].min()), source=oc_p,
+              kind="minutes", how=f"{base}. Skips beyond the allowance: fewest extra estimated minutes of the pick "
+                                  "over the nearer supported option")
+        F.add(f"{g}.ranker.skipped_beyond_extra_min_max", float(beyond["skip_extra_min"].max()), source=oc_p,
+              kind="minutes", how=f"{base}. Skips beyond the allowance: most extra estimated minutes")
+    grades = pd.read_parquet(b / "grades.parquet", columns=["facility_id", "service_line", "grade"])
+    gm = grades.set_index(["facility_id", "service_line"])["grade"]
+    g1 = [fid for fid, svc in zip(sk["nearest_yes_id"], sk["service"]) if gm.get((fid, svc)) == 1]
+    F.add(f"{g}.ranker.skipped_nearer.graded_1", len(g1), source=b / "grades.parquet", kind="count",
+          how=f"{base}. Of the ranker's skips, those whose nearer judge-supported facility is graded 1 (claimed) by "
+              "recipe v0.3 in the frozen bundle, so it never passed the grade 2 gate: grading misses, not ordering")
+    if pk_p.exists():
+        pk = json.loads(pk_p.read_text())
+        cards = {q["query_id"]: set(((q.get("tools") or {}).get("ranker") or {}).get("result_ids") or [])
+                 for q in pk.get("queries", [])}
+        win = sk[sk["skip_within_allowance"].map(_tf) == True]  # noqa: E712
+        on_cards = sum(1 for qid, fid in zip(win.index, win["nearest_yes_id"]) if fid in cards.get(qid, set()))
+        F.add(f"{g}.ranker.skipped_nearer_within_allowance.nearer_on_own_cards", on_cards, source=pk_p, kind="count",
+              how=f"{base}. Of the skips inside the allowance, those where the nearer supported facility is on the "
+                  "ranker's own answer (card 2 or 3): the allowance put a better-evidenced record first, as designed")
+    if jj_p.exists():
+        jq = json.loads(jj_p.read_text()).get("queries", {})
+        ab = rk[~rk["answered"].astype(bool)].index
+        walked = [int((jq.get(q) or {}).get("walked") or 0) for q in ab]
+        _add_kn(F, f"{g}.ranker.abstentions", len(ab), len(rk), source=oc_p,
+                how=f"{base}. Ranker abstentions ('no reliable option') / all queries")
+        F.add(f"{g}.ranker.abstentions.no_signal_in_window", sum(1 for w in walked if w == 0), source=jj_p,
+              kind="count", how=f"{base}. Ranker abstentions where no facility with any signal for the service lay "
+                                 "inside the window (the judges had nothing to read): nothing to miss in this dataset")
+        F.add(f"{g}.ranker.abstentions.facilities_read", sum(walked), source=jj_p, kind="count",
+              how=f"{base}. Facilities the judges read across the other ranker abstentions")
+
+    # human check of the judges
+    hl_p, hk_p = ev / f"human_labels_{split}.csv", ev / f"human_key_{split}.csv"
+    if hl_p.exists():
+        hl = pd.read_csv(hl_p, dtype=str, keep_default_na=False)
+        F.add(f"{g}.human.items", len(hl), source=hl_p, kind="count",
+              how="items in the human label file for Hruday (stratified across tools, outcomes and judge disagreements)")
+        filled = int((hl.get("human_clearly_offers", pd.Series(dtype=str)).str.strip() != "").sum())
+        if filled == 0:
+            F.null(f"{g}.human.agreement_q1", source=hl_p, kind="share",
+                   reason="not labeled yet: human_clearly_offers is empty on every item, so no human agreement "
+                          "figure exists (reports/HUMAN_LABELING.md)")
+        else:
+            F.null(f"{g}.human.agreement_q1", source=hl_p, kind="share",
+                   reason=f"{filled} items labeled; run scripts/eval_sealed.py agreement to score them against "
+                          f"{hk_p.name}, then rebuild")
+
+
+def sealed_section(F: Findings, b: Path, data_dir: Path, path: Optional[Path]) -> None:
+    ev = data_dir / "labels" / "eval_sealed"
+    old = ev / "archive_v0_radius" / "results_dev.json"
+    if old.exists():
+        r0 = json.loads(old.read_text())
+        hw0 = ("archived dev-half run under the old km radii and the v0 ranker (D053), before the window rule and "
+               "v1-final; superseded by sealed_eval.dev, kept for the D053 comparison. D053 and the reports quote "
+               "precision_excluding_listing_only (listing-only yes votes counted as no)")
+        for tool, t0 in (r0.get("tools") or {}).items():
+            for m in ("precision", "precision_excluding_listing_only", "skipped_nearer", "coverage"):
+                d = t0.get(m)
+                if isinstance(d, dict) and "k" in d:
+                    _add_kn(F, f"sealed_eval.dev_v0_radius.{tool}.{m}", d["k"], d["n"], source=old,
+                            ci_given=d.get("ci95"), how=f"{hw0}: {tool} {m.replace('_', ' ')}")
+        oc0, rc0 = old.with_name("outcomes_dev.csv"), ev / "dev_rubric_check_q1_yes.csv"
+        if oc0.exists() and rc0.exists():
+            import pandas as pd
+            o0 = pd.read_csv(oc0, dtype={"pick_id": str})
+            rcd = pd.read_csv(rc0, dtype=str, keep_default_na=False)
+            lo_units = set(rcd[rcd["class"] == "listing_only"]["unit_id"])
+            for tool in ("specialty", "any_fact", "ranker"):
+                a0 = o0[(o0["tool"] == tool) & o0["answered"].astype(bool)]
+                yes = a0["correct"].map(_tf) == True  # noqa: E712
+                k0 = int((yes & ~(a0["pick_id"] + "|" + a0["service"]).isin(lo_units)).sum())
+                _add_kn(F, f"sealed_eval.dev_v0_radius.{tool}.precision_without_hand_listing_only", k0, len(a0),
+                        source=oc0, how=f"{hw0}: {tool} top picks with Q1 yes, leaving out the units the dev rubric "
+                                        "check hand-classified as listing-only / answered (the D053 figures)")
+    sealed_p = Path(path) if path else ev / "results_sealed.json"
+    _eval_split(F, "sealed", sealed_p, b)
+    _eval_split(F, "dev", sealed_p.with_name("results_dev.json"), b)
+    F.null("sealed_eval.sealed.ranker.not_sensible_reasons_merge", source=ROOT / "reports" / "eval_sealed_results.md",
+           kind="count", reason="a crude keyword read of the judges' Q2 reasons in the report; the keyword rule was not "
+                                "saved, so it cannot be recomputed exactly",
+           report_states="of the 34 ranker picks judged not sensible, 33 mention a record that merges branches or "
+                         "several facilities and 20 a listed city inconsistent with the distance")
+    rc = ev / "dev_rubric_check_q1_yes.csv"
+    if rc.exists():
+        import pandas as pd
+        d = pd.read_csv(rc, dtype=str, keep_default_na=False)
+        _add_kn(F, "sealed_eval.dev_rubric_check.listing_only", int((d["class"] == "listing_only").sum()), len(d),
+                source=rc, share_digits=1,
+                how="dev half, before sealing (D053): final Q1 yes verdicts that rest only on a specialty or "
+                    "department name / all final Q1 yes verdicts, hand-classified; threshold fixed in advance at 10%")
+    else:
+        F.null("sealed_eval.dev_rubric_check.listing_only.k", source=rc, reason="dev rubric check file not found")
+
+
+def spend_section(F: Findings, data_dir: Path) -> None:
+    led = sorted((data_dir / "labels").rglob("spend*.jsonl"))
+    if not led:
+        F.null("spend.project_usd", source=data_dir / "labels", reason="no spend*.jsonl ledger under labels/")
+        return
+    total = 0.0
+    for p in led:
+        s = 0.0
+        n = 0
+        for line in p.read_text().splitlines():
+            if line.strip():
+                s += float(json.loads(line).get("cost_usd") or 0.0)
+                n += 1
+        total += s
+        name = _slug(str(p.parent.relative_to(data_dir / "labels")) + "_" + p.stem)
+        F.add(f"spend.ledger.{name}.usd", s, source=p, kind="usd", how=f"sum of cost_usd over the {n} lines of this ledger")
+        F.add(f"spend.ledger.{name}.calls", n, source=p, kind="count", how="lines (API responses) in this ledger")
+    F.add("spend.project_usd", total, source=data_dir / "labels", kind="usd",
+          how="project LLM spend: sum of cost_usd over every spend*.jsonl ledger under labels/ ("
+              + ", ".join(F.rel(p) for p in led) + "); the project cap is 28 USD")
+
+
+def outside_section(F: Findings, b: Path, data_dir: Path) -> None:
+    import pandas as pd
+
+    mp = b / "outside_meta.json"
+    if not mp.exists():
+        F.null("outside.card_facts", source=mp, reason="bundle has no outside_meta.json")
+        return
+    m = json.loads(mp.read_text())
+    hw = "outside lists in the frozen bundle (vf.public_list v2, D055, D057 terms gates)"
+    F.add("outside.card_facts_bundle", m.get("card_facts"), source=mp, kind="count",
+          how=f"{hw}: card facts in outside_card_facts.parquet (AERB and NCG; LaQshya lines come from "
+              "laqshya_links.parquet, see laqshya.*)")
+    F.add("outside.lane_rows", m.get("lane_rows"), source=mp, kind="count",
+          how=f"{hw}: lane rows 'also on government or registry lists nearby', reuse-permitted lists only")
+    F.add("outside.lane_cross_source_merged_rows", m.get("lane_cross_source_merged_rows"), source=mp, kind="count",
+          how=f"{hw}: rows re-keyed into one place across sources at build time")
+    srcs = m.get("sources") or {}
+    F.add("outside.built.card_links_all_sources", sum(int(v.get("card_links", 0)) for v in srcs.values()), source=mp,
+          kind="count", how=f"{hw}: accepted card links summed over every source as built, including those withheld "
+                            "from the app by the D057 terms gate")
+    F.add("outside.built.lane_rows_all_sources", sum(int(v.get("lane_rows", 0)) for v in srcs.values()), source=mp,
+          kind="count", how=f"{hw}: lane rows summed over every source as built, including withheld sources")
+    info = m.get("sources_info") or {}
+    lane_ok = set(m.get("lane_sources_shown") or [])
+    card_ok = set(m.get("card_sources_shown") or [])
+    for sid, s in (m.get("sources") or {}).items():
+        k = f"outside.{sid}"
+        for f_ in ("list_rows", "card_links", "card_records", "lane_candidates", "lane_rows"):
+            if f_ in s:
+                shown = (sid in lane_ok) if f_.startswith("lane") else (sid in card_ok)
+                F.add(f"{k}.{f_}", s[f_], source=mp, kind="count",
+                      how=f"{hw}: {sid} {f_.replace('_', ' ')} as built"
+                          + ("" if shown else " (withheld from the app by the D057 terms gate)"))
+        for why, n in (s.get("lane_excluded") or {}).items():
+            F.add(f"{k}.lane_excluded.{_slug(why)}", n, source=mp, kind="count",
+                  how=f"{hw}: {sid} lane candidates dropped by rule {why!r}")
+    cf, ln = b / "outside_card_facts.parquet", b / "outside_lane.parquet"
+    if cf.exists():
+        c = pd.read_parquet(cf)
+        for sid, n in c["source_id"].value_counts().sort_index().items():
+            F.add(f"outside.shown.card_facts.{sid}", int(n), source=cf, kind="count",
+                  how=f"rows of the bundle's outside_card_facts.parquet from {sid}: card facts the app can show")
+    if ln.exists():
+        lr = pd.read_parquet(ln)
+        for sid, n in lr["source_id"].value_counts().sort_index().items():
+            F.add(f"outside.shown.lane_rows.{sid}", int(n), source=ln, kind="count",
+                  how=f"rows of the bundle's outside_lane.parquet from {sid}: lane entries the app can show")
+    # link precision per band, recomputed from the reader verdicts
+    for sid in ("aerb_rt", "ncg", "nhp_bloodbank", "mohfw_trauma", "nabi_burns"):
+        lp = data_dir / "silver" / f"ext_links_{sid}.parquet"
+        if not lp.exists():
+            F.null(f"outside.{sid}.band.auto.precision", source=lp, reason=f"silver/ext_links_{sid}.parquet not found")
+            continue
+        d = pd.read_parquet(lp, columns=["band", "reader_verdict", "accepted", "facility_id"])
+        v = d["reader_verdict"].astype(str)
+        F.add(f"outside.{sid}.accepted_links", int(d["accepted"].fillna(False).astype(bool).sum()), source=lp,
+              kind="count", how=f"{sid}: reader-marked 'same' pairs inside a band that passed the 0.90 rule")
+        for band in ("auto", "middle", "low"):
+            sel = d["band"] == band
+            same, diff, uns = int((sel & (v == "same")).sum()), int((sel & (v == "different")).sum()), \
+                int((sel & (v == "unsure")).sum())
+            if same + diff + uns == 0:
+                continue
+            k = f"outside.{sid}.band.{band}"
+            hw2 = (f"{sid} link candidates in the {band} band, agent reader verdicts (silver/ext_links_{sid}.parquet); "
+                   "precision = same / (same + different), unsure left out as the rule says")
+            F.add(f"{k}.same", same, source=lp, kind="count", how=f"{hw2}: same")
+            F.add(f"{k}.different", diff, source=lp, kind="count", how=f"{hw2}: different")
+            F.add(f"{k}.unsure", uns, source=lp, kind="count", how=f"{hw2}: unsure")
+            if same + diff:
+                F.add(f"{k}.precision", same / (same + diff), source=lp, kind="score", digits=3, how=hw2)
+                lo = _cp_lower(same, same + diff)
+                l2, h2 = _cp_two_sided(same, same + diff)
+                F.add(f"{k}.ci_low", l2, source=lp, kind="score", digits=3,
+                      how=f"{hw2}: two-sided 95% Clopper-Pearson interval, lower end")
+                F.add(f"{k}.ci_high", h2, source=lp, kind="score", digits=3,
+                      how=f"{hw2}: two-sided 95% Clopper-Pearson interval, upper end")
+                F.add(f"{k}.lower95_one_sided", lo, source=lp, kind="score", digits=3,
+                      how=f"{hw2}: one-sided 95% Clopper-Pearson lower bound; the band is accepted only if >= 0.90 "
+                          f"(here {'passes' if lo >= 0.9 else 'fails'})")
+                if uns:
+                    F.add(f"{k}.lower95_unsure_as_wrong", _cp_lower(same, same + diff + uns), source=lp, kind="score",
+                          digits=3, how=f"{hw2}: the same bound with unsure counted as wrong (sensitivity)")
+    F.null("outside.aerb_rt.lane_residual_in_dataset", source=ROOT / "reports" / "ext_aerb_rt.md", kind="share",
+           reason="AERB's 40-row lane audit is described in reports/ext_aerb_rt.md and reports/outside_lists.md, "
+                  "with no machine-readable audit file to recompute it from; it also predates the v2 lane fixes",
+           report_states="about 5 to 8% of AERB lane rows may be in our data (one-sided 95% upper bound 18%)")
+
+
+def laqshya_section(F: Findings, b: Path, grades, data_dir: Path, path: Optional[Path]) -> None:
+    """LaQshya links as shipped in the frozen bundle (laqshya_links.parquet, every candidate agent-reviewed)."""
+    import pandas as pd
+
+    p = Path(path) if path else b / "laqshya_links.parquet"
+    if not p.exists():
+        F.null("laqshya.link_candidates", source=p, reason=f"{p} not found; pass --laqshya-links FILE")
+        return
+    d = pd.read_parquet(p) if p.suffix == ".parquet" else pd.read_csv(p, dtype=str, keep_default_na=False)
+    if "review" not in d.columns:
+        F.null("laqshya.link_candidates", source=p, reason="link file has no review column")
+        return
+    how = ("LaQshya units (NHSRC list, 8 Apr 2026) linked by name to our public records in the PIN's district or "
+           "state; every candidate read by an agent (Claude), not by Hruday (D051)")
+    F.add("laqshya.link_candidates", len(d), source=p, kind="count", how=how + ": candidate links")
+    rv = d["review"].astype(str)
+    for mk, c in rv.value_counts().sort_index().items():
+        F.add(f"laqshya.links_{_slug(mk)}", int(c), source=p, kind="count", how=how + f": links marked {mk!r}")
+    ok, bad = int((rv == "correct").sum()), int((rv == "wrong").sum())
+    _add_kn(F, "laqshya.matcher_precision", ok, ok + bad, source=p, ci="cp",
+            how=how + ": matcher precision, correct / (correct + wrong), unsure left out")
+    c = d[rv == "correct"]
+    F.add("laqshya.records_with_correct_link", int(c["facility_id"].nunique()), source=p, kind="count",
+          how="our records with at least one correct LaQshya link (each gets a cited card line)")
+    F.add("laqshya.units_with_correct_link", int(c["facility_uid"].nunique()), source=p, kind="count",
+          how="LaQshya units with at least one correct link")
+    if "has_current_maternity_ot" in c.columns:
+        cur = c[c["has_current_maternity_ot"].astype(str) == "True"]
+        F.add("laqshya.records_current_maternity_ot", int(cur["facility_id"].nunique()), source=p, kind="count",
+              how="of those records, ones whose linked unit holds a maternity OT certificate current at the link "
+                  "build (has_current_maternity_ot)")
+        if "caesarean_named" in c.columns:
+            F.add("laqshya.records_current_maternity_ot_naming_caesarean",
+                  int(cur[cur["caesarean_named"].astype(str) == "True"]["facility_id"].nunique()), source=p,
+                  kind="count", how="of those, records with a fact naming a caesarean: the rest are a gap in the "
+                                    "record, not evidence about the hospital")
+    if "emoc_grade" in c.columns:
+        for gr, n in c.drop_duplicates("facility_id")["emoc_grade"].astype(str).value_counts().sort_index().items():
+            F.add(f"laqshya.records_correct_link_emoc_grade_{_slug(gr)}", int(n), source=p, kind="count",
+                  how=f"records with a correct link whose emoc grade (as stored in the link file) is {gr}")
+
+
+def tagger_wp4b_section(F: Findings, b: Path, data_dir: Path) -> None:
+    dp, ip, pp = (data_dir / "labels" / "wp4b" / f for f in ("decision.json", "impact.json", "pilot_result.json"))
+    if not (dp.exists() and ip.exists()):
+        F.null("tagger_wp4b.mix.macro_f1", source=dp, reason="labels/wp4b decision.json or impact.json not found")
+        return
+    dec, imp = json.loads(dp.read_text()), json.loads(ip.read_text())
+    man = json.loads((b / "manifest.json").read_text()) if (b / "manifest.json").exists() else {}
+    shipped = ((man.get("versions") or {}).get("fact_tags_model"))
+    if shipped and shipped != dec.get("model_version"):
+        F.warnings.append(f"bundle fact_tags_model {shipped!r} differs from WP4b decision model {dec.get('model_version')!r}")
+    gold = imp.get("gold") or {}
+    names = {"candidate_mix": ("mix", "the tagger mix in the frozen bundle (WP4b 2b_r2 on ob_delivery, student 1b on "
+                                      "h24, icu, ventilator, regex v0.2 on the rest; promoted D059, D064)"),
+             "current": ("pre_wp4b", "the WP4 mix it replaced (student 1b on 4 tags, regex v0.2 on the rest)"),
+             "regex_v0.2": ("regex", "regex v0.2 alone")}
+    for src_k, (k, what) in names.items():
+        s = gold.get(src_k)
+        if not s:
+            continue
+        hw = (f"{what}: on the {s.get('rows')} agent-labeled gold texts over {s.get('tags')} tags; 95% interval from a "
+              "stratified bootstrap (2,000 resamples). Gold also decided the per-tag ship gate, so the mix is slightly "
+              "optimistic (D050)")
+        lo, hi = s.get("macro_f1_ci95", [None, None])
+        F.add(f"tagger_wp4b.{k}.macro_f1", s["macro_f1"], source=ip, kind="score",
+              display=f"{s['macro_f1']:.3f} ({lo:.3f} to {hi:.3f})" if lo is not None else None, how=f"{hw}: macro F1")
+        if lo is not None:
+            F.add(f"tagger_wp4b.{k}.macro_f1_ci_low", lo, source=ip, kind="score", digits=3, how=f"{hw}: lower end")
+            F.add(f"tagger_wp4b.{k}.macro_f1_ci_high", hi, source=ip, kind="score", digits=3, how=f"{hw}: upper end")
+        F.add(f"tagger_wp4b.{k}.macro_precision", s["macro_precision"], source=ip, kind="score", digits=3,
+              how=f"{hw}: macro precision")
+        F.add(f"tagger_wp4b.{k}.macro_recall", s["macro_recall"], source=ip, kind="score", digits=3,
+              how=f"{hw}: macro recall")
+    for nm, key in (("mix_minus_current", "paired_macro_f1_delta_mix_minus_current_ci95"),
+                    ("mix_minus_regex", "paired_macro_f1_delta_mix_minus_regex_ci95")):
+        d = gold.get(key)
+        if d:
+            F.add(f"tagger_wp4b.paired.{nm}.ci_low", d[0], source=ip, kind="score", digits=4,
+                  how=f"paired bootstrap 95% interval of gold macro F1, {nm.replace('_', ' ')}: lower end")
+            F.add(f"tagger_wp4b.paired.{nm}.ci_high", d[1], source=ip, kind="score", digits=4,
+                  how=f"paired bootstrap 95% interval of gold macro F1, {nm.replace('_', ' ')}: upper end")
+    pt = dec.get("per_tag") or {}
+    for tag in ("ob_delivery", "burns"):
+        t = pt.get(tag) or {}
+        c = (t.get("candidates") or {}).get("2b_r2") or {}
+        if not c:
+            continue
+        hw = f"WP4b, tag {tag}, candidate 2b_r2 (fine-tuned bge-small encoder) under the D050 ship rule"
+        F.add(f"tagger_wp4b.{tag}.current_gold_f1", t.get("current_gold_f1"), source=dp, kind="score",
+              how=f"{hw}: the method it would replace ({t.get('current_method')}), gold F1")
+        F.add(f"tagger_wp4b.{tag}.candidate_gold_f1", c.get("gold_f1"), source=dp, kind="score", how=f"{hw}: gold F1")
+        d = c.get("paired_delta_ci95") or [None, None]
+        F.add(f"tagger_wp4b.{tag}.paired_ci_low", d[0], source=dp, kind="score", digits=3,
+              how=f"{hw}: paired 95% interval of the gold F1 gain, lower end (gate 1 needs > 0)")
+        F.add(f"tagger_wp4b.{tag}.paired_ci_high", d[1], source=dp, kind="score", digits=3,
+              how=f"{hw}: paired 95% interval of the gold F1 gain, upper end")
+        hr = c.get("hand_read") or {}
+        if hr:
+            _add_kn(F, f"tagger_wp4b.{tag}.hand_read_favours_candidate", hr["favours_candidate"], hr["n"], source=dp,
+                    how=f"{hw}: blinded hand read of disagreements by an agent that did not build it, texts in the "
+                        f"candidate's favour (gate 2 needs at least {hr.get('needed')})")
+        F.add(f"tagger_wp4b.{tag}.ships", 1 if c.get("passes_both") else 0, source=dp, kind="count",
+              how=f"{hw}: 1 if it passed both gates and ships, else 0")
+    sens = (((dec.get("gold_gate_sensitivity") or {}).get("per_candidate_tag") or {}).get("2b_r2|ob_delivery") or {})
+    ext, oth = sens.get("declared_seed_extended") or {}, sens.get("other_seeds") or {}
+    if ext:
+        ci = ext.get("ci95") or [None, None]
+        F.add("tagger_wp4b.ob_delivery.extended_ci_low", ci[0], source=dp, kind="score", digits=4,
+              how=f"disclosure: paired interval of the ob_delivery gold gain at {ext.get('resamples'):,} resamples "
+                  "(declared seed): lower end")
+        F.add("tagger_wp4b.ob_delivery.extended_resamples", ext.get("resamples"), source=dp, kind="count",
+              how="disclosure: resamples in that extended run")
+        F.add("tagger_wp4b.ob_delivery.p_gain_le_0", ext.get("p_delta_le_0"), source=dp, kind="share", digits=1,
+              how="disclosure: share of 50,000 paired resamples (declared seed) where the ob_delivery gold gain is <= 0")
+    if oth:
+        _add_kn(F, "tagger_wp4b.ob_delivery.other_seeds_lower_above_0", oth.get("runs_with_lower_bound_above_0"),
+                oth.get("runs"), source=dp, how="disclosure: of 100 other bootstrap seeds (2,000 resamples each), runs "
+                                                "whose paired interval's lower bound is above 0")
+    for cand, s in ((dec.get("summary") or {}).get("candidates_as_whole_taggers") or {}).items():
+        F.add(f"tagger_wp4b.whole.{cand}.gold_macro_f1", s.get("gold_macro_f1"), source=dp, kind="score", digits=3,
+              how=f"candidate {cand} used as a whole tagger: gold macro F1 (it scores below the shipped mix)")
+        d = s.get("paired_macro_delta_vs_current_ci95") or [None, None]
+        F.add(f"tagger_wp4b.whole.{cand}.paired_ci_low", d[0], source=dp, kind="score", digits=3,
+              how=f"candidate {cand} as a whole tagger: paired 95% interval of gold macro F1 minus the WP4 mix, lower end")
+        F.add(f"tagger_wp4b.whole.{cand}.paired_ci_high", d[1], source=dp, kind="score", digits=3,
+              how=f"candidate {cand} as a whole tagger: paired 95% interval, upper end")
+    gi = (imp.get("grades") or {}).get("v0.3") or (imp.get("grades") or {}).get("v0.2") or {}
+    em = gi.get("emoc") or {}
+    ver = "v0.3" if (imp.get("grades") or {}).get("v0.3") else "v0.2"
+    if em:
+        F.add("tagger_wp4b.grade_impact.emoc_facilities_changed", em.get("facilities_changed"), source=ip, kind="count",
+              how=f"emoc facility grades changed by the WP4b promotion (recipe {ver})")
+        for tr, n in (em.get("transitions") or {}).items():
+            F.add(f"tagger_wp4b.grade_impact.emoc_{_slug(tr)}", n, source=ip, kind="count",
+                  how=f"emoc facility grades moving {tr} (recipe {ver})")
+    g2 = imp.get("grade2_gate") or {}
+    if "facility_lines_crossing_v0.3" in g2:
+        F.add("tagger_wp4b.grade_impact.lines_crossing_grade2_gate", g2["facility_lines_crossing_v0.3"], source=ip,
+              kind="count", how="facility-lines crossing the grade 2 gate under recipe v0.3 because of the promotion "
+                                "(emoc, dialysis, icu, trauma, neurosurgery): the promotion changes no recommendation")
+    fl = imp.get("fact_level") or {}
+    for k_ in ("fact_rows_whose_tags_change", "facilities_with_a_changed_fact", "distinct_texts_whose_tags_change"):
+        if k_ in fl:
+            F.add(f"tagger_wp4b.fact_level.{k_}", fl[k_], source=ip, kind="count",
+                  how=f"WP4b promotion at fact level: {k_.replace('_', ' ')}")
+    if pp.exists():
+        pr = json.loads(pp.read_text())
+        ov = pr.get("overall") or {}
+        for tch, s in ov.items():
+            _add_kn(F, f"tagger_wp4b.pilot.{tch}", s["correct"], s["n"], source=pp, ci_given=s.get("wilson95"),
+                    how=f"teacher pilot: {tch} correct on the blinded disagreement items read by two independent agent "
+                        "readers (accuracy only where the three teachers disagree)")
+    mlp = data_dir / "labels" / "wp4b" / "merged_labels.parquet.meta.json"
+    if mlp.exists():
+        ml = json.loads(mlp.read_text())
+        if ml.get("rows") is not None:
+            F.add("tagger_wp4b.merged_label_texts", ml["rows"], source=mlp, kind="count",
+                  how="texts in the merged teacher labels the WP4b students trained on (Opus 5.5 relabels plus Haiku)")
+
+
+def v0v1_section(F: Findings, data_dir: Path) -> None:
+    import pandas as pd
+
+    marks_by_round = {}
+    for rnd, sub in (("r1", "v0v1_blind"), ("r2", "v0v1_blind_r2")):
+        jp = data_dir / "labels" / sub / "judgments.csv"
+        if not jp.exists():
+            F.null(f"v0v1.{rnd}.prefer.v1", source=jp, reason=f"labels/{sub}/judgments.csv not found")
+            continue
+        j = pd.read_csv(jp, dtype=str, keep_default_na=False)
+        hw = (f"blind side-by-side, round {rnd[1]}, of the v0 and v1 ranker answers on the 26 WP5 scenarios "
+              f"(labels/{sub}/judgments.csv, unblinded); agent judges, not clinicians")
+        if rnd == "r1":
+            hw += ". Round 1 judged v1 before the D058 fix round"
+        else:
+            hw += ". Round 2 judged v1 after the D058 fix round (v1 file of 06:34 UTC, before the final assembly)"
+        for ver in ("v0", "v1"):
+            mk = j[j["version"] == ver]["mark"]
+            marks_by_round.setdefault(rnd, {})[ver] = dict(zip(j[j["version"] == ver]["scenario_id"], mk))
+            for m in ("right", "defensible", "wrong", "abstention_right", "abstention_wrong"):
+                F.add(f"v0v1.{rnd}.marks.{ver}.{m}", int((mk == m).sum()), source=jp, kind="count",
+                      how=f"{hw}: {ver} answers marked {m}")
+            F.add(f"v0v1.{rnd}.marks.{ver}.unmarked", int((mk == "").sum()), source=jp, kind="count",
+                  how=f"{hw}: {ver} answers left unmarked")
+        pref = j.drop_duplicates("scenario_id")["prefer_version"]
+        a, b_, t = int((pref == "v1").sum()), int((pref == "v0").sum()), int((pref == "tie").sum())
+        F.add(f"v0v1.{rnd}.prefer.v1", a, source=jp, kind="count", how=f"{hw}: scenarios where v1 was preferred")
+        F.add(f"v0v1.{rnd}.prefer.v0", b_, source=jp, kind="count", how=f"{hw}: scenarios where v0 was preferred")
+        F.add(f"v0v1.{rnd}.prefer.tie", t, source=jp, kind="count", how=f"{hw}: ties")
+        F.add(f"v0v1.{rnd}.prefer.sign_test_p", _sign_test(a, b_), source=jp, kind="score", digits=2,
+              how=f"{hw}: exact two-sided binomial sign test on the untied preferences, p = 0.5")
+        F.add(f"v0v1.{rnd}.prefer.sign_test_p_one_sided", _sign_test(a, b_, "greater"), source=jp, kind="score",
+              digits=2, how=f"{hw}: the same test, one-sided (v1 better)")
+    if {"r1", "r2"} <= set(marks_by_round):
+        a, b_ = marks_by_round["r1"]["v0"], marks_by_round["r2"]["v0"]
+        conv = {"right", "abstention_right"}
+        # comparable: marked in both rounds, leaving out the non-answers that round 1 marked abstention_right and
+        # round 2 marked right (a labeling convention, not a change of judgment)
+        both = [s for s in a if s in b_ and a[s] and b_[s] and not ({a[s], b_[s]} == conv)]
+        ch = sum(1 for s in both if a[s] != b_[s])
+        jp2 = data_dir / "labels" / "v0v1_blind_r2" / "judgments.csv"
+        hw = ("v0's answers are identical in both blind rounds (labels/v0v1_blind and v0v1_blind_r2); comparable "
+              "scenarios have a v0 mark in both rounds, leaving out the non-answers marked abstention_right in round 1 "
+              "and right in round 2 (a labeling convention change)")
+        F.add("v0v1.judge_noise.v0_marks_changed", ch, source=jp2, kind="count",
+              how=f"{hw}: comparable scenarios whose v0 mark changed (judge noise)")
+        F.add("v0v1.judge_noise.v0_marks_comparable", len(both), source=jp2, kind="count", how=f"{hw}: comparable scenarios")
+
+
+def recipe_v03_section(F: Findings, data_dir: Path) -> None:
+    import pandas as pd
+
+    p2, p3 = data_dir / "gold" / "capability_grades.parquet", data_dir / "gold" / "capability_grades_v03.parquet"
+    if not (p2.exists() and p3.exists()):
+        F.null("recipe_v03.changed_lines", source=p3, reason="gold v0.2 or v0.3 grade file not found")
+        return
+    a = pd.read_parquet(p2, columns=["facility_id", "service_line", "grade"])
+    c = pd.read_parquet(p3, columns=["facility_id", "service_line", "grade"])
+    m = a.merge(c, on=["facility_id", "service_line"], suffixes=("_v02", "_v03"))
+    hw = ("recipe v0.2 (gold/capability_grades.parquet) against recipe v0.3 (gold/capability_grades_v03.parquet), "
+          "both regraded from the promoted WP4b tags in the final assembly (D064); a rule-level change only (D052)")
+    ch = m[m["grade_v02"] != m["grade_v03"]]
+    F.add("recipe_v03.changed_lines", len(ch), source=p3, kind="count", how=f"{hw}: facility-lines whose grade changed")
+    for line, g in ch.groupby("service_line"):
+        F.add(f"recipe_v03.changed.{line}", len(g), source=p3, kind="count", how=f"{hw}: {line} grades changed")
+        up2 = int(((g["grade_v02"] < 2) & (g["grade_v03"] >= 2)).sum())
+        dn2 = int(((g["grade_v02"] >= 2) & (g["grade_v03"] < 2)).sum())
+        F.add(f"recipe_v03.gate.{line}.up", up2, source=p3, kind="count", how=f"{hw}: {line} lines crossing up into grade 2+")
+        F.add(f"recipe_v03.gate.{line}.down", dn2, source=p3, kind="count", how=f"{hw}: {line} lines dropping below grade 2")
+        for ver, col in (("v02", "grade_v02"), ("v03", "grade_v03")):
+            mm = m[m["service_line"] == line]
+            F.add(f"recipe_v03.{line}.{ver}.grade_2plus", int((mm[col] >= 2).sum()), source=p3 if ver == "v03" else p2,
+                  kind="count", how=f"{hw}: {line} grade 2 or 3 under {ver.replace('v0', 'v0.')}")
+            F.add(f"recipe_v03.{line}.{ver}.grade_3", int((mm[col] == 3).sum()), source=p3 if ver == "v03" else p2,
+                  kind="count", how=f"{hw}: {line} grade 3 (corroborated) under {ver.replace('v0', 'v0.')}")
+    md = ROOT / "reports" / "recipe_v03_changes.md"
+    F.null("recipe_v03.read.debatable", source=md, kind="count",
+           reason="the read verdicts of changed records are in the report's tables only; no machine-readable "
+                  "verdict file exists to recompute them from",
+           report_states="no wrong change under the final rules; 15 debatable (D052 says 13, before the fix round); "
+                         "every changed record read except cath lab demotions (a random 30 of 271 and all 15 added "
+                         "by the fix round)")
+
+
+def trust_extra_section(F: Findings, data_dir: Path) -> None:
+    import pandas as pd
+
+    rv = data_dir / "labels" / "flag_review.csv"
+    if not rv.exists():
+        return
+    r = pd.read_csv(rv, dtype=str, keep_default_na=False)
+    for rnd, what in (("5a", "first version"), ("5b", "second version"), ("5c", "final version (wp11_v3)")):
+        g = r[(r["round"] == rnd) & (r["sample"] == "newly_blocked")]
+        if not len(g):
+            continue
+        right = int((g["mark"] == "correct").sum())
+        _add_kn(F, f"trust.per_line_rule.r{rnd}.correct_of_read", right, len(g), source=rv,
+                how=f"WP11 per-line merge rule, {what}: hand-read sample of newly blocked facility-lines, rows marked "
+                    "correct / rows read (unsure and wrong both count against); agent reader")
+        F.add(f"trust.per_line_rule.r{rnd}.wrong", int((g["mark"] == "wrong").sum()), source=rv, kind="count",
+              how=f"WP11 per-line merge rule, {what}: rows marked wrong")
+        F.add(f"trust.per_line_rule.r{rnd}.unsure", int((g["mark"] == "unsure").sum()), source=rv, kind="count",
+              how=f"WP11 per-line merge rule, {what}: rows marked unsure")
+
+
+def resolver_extra_section(F: Findings, b: Path) -> None:
+    import numpy as np
+    import pandas as pd
+
+    pp = b / "places.parquet"
+    if not pp.exists():
+        return
+    p = pd.read_parquet(pp, columns=["kind", "name", "precision_km"])
+    pin = p[p["kind"] == "pin"]["precision_km"].astype(float)
+    hw = "PIN places in the frozen bundle's places.parquet (places-v3, outlier offices left out, D061)"
+    F.add("resolver.places.pins", len(pin), source=pp, kind="count", how=f"{hw}: PINs")
+    for q, nm in ((0.5, "median"), (0.9, "p90"), (0.99, "p99")):
+        F.add(f"resolver.places.pin_precision_{nm}_km", float(np.quantile(pin, q)), source=pp, kind="km",
+              how=f"{hw}: {nm} location precision (km)")
+    F.add("resolver.places.pin_precision_max_km", float(pin.max()), source=pp, kind="km", how=f"{hw}: largest precision")
+    for t in (50, 100):
+        F.add(f"resolver.places.pins_over_{t}km", int((pin > t).sum()), source=pp, kind="count",
+              how=f"{hw}: PINs whose precision is over {t} km")
+    k = p[(p["kind"] == "pin") & (p["name"].astype(str) == "303108")]
+    if len(k):
+        F.add("resolver.places.pin_303108_precision_km", float(k["precision_km"].iloc[0]), source=pp, kind="km",
+              how="precision of PIN 303108 (Kotputli, the brief's highway trauma scenario) after places-v3")
+    md = ROOT / "reports" / "resolver_eval.md"
+    F.null("resolver.places.pin_precision_median_km_before_v3", source=md, kind="km",
+           reason="the places-v2 file was replaced by places-v3; the before figures are in the report only",
+           report_states="all PINs, precision km before and after: median 6.4 to 4.9, p90 46.1 to 20.8, p99 122.9 to "
+                         "84.9; Kotputli 303108 163.4 to 11.5")
+
+
+def scenarios_v1_section(F: Findings) -> None:
+    raw = ROOT / "reports" / "ranking_scenarios_v1_raw.json"
+    if not raw.exists():
+        F.null("scenarios_v1.scenarios", source=raw, reason="reports/ranking_scenarios_v1_raw.json not found")
+        return
+    d = json.loads(raw.read_text())
+    s, m = d.get("summary") or {}, d.get("meta") or {}
+    how = (f"v1 ranker scenario run (scripts/wp5_scenarios.py, {m.get('created_at_utc')}, git "
+           f"{str(m.get('git_commit'))[:7]}, recipe {m.get('recipe_version')}, flags {m.get('flags_source')}); "
+           "before the final assembly (D064) and not judged as a whole (see v0v1.r2 for the blind comparison)")
+    for k in ("scenarios", "resolved", "abstentions", "recipe_resolved", "recipe_abstentions", "cards_shown",
+              "cards_with_a_flag", "cards_nearest_reserved", "status_as_expected", "expected_abstentions",
+              "expected_abstentions_that_abstained"):
+        if k in s:
+            F.add(f"scenarios_v1.{k}", s[k], source=raw, kind="count", how=f"{how}: {k.replace('_', ' ')}")
+    for k in ("abstention_rate", "recipe_abstention_rate"):
+        if k in s:
+            F.add(f"scenarios_v1.{k}", s[k], source=raw, kind="share", digits=1, how=f"{how}: {k.replace('_', ' ')}")
+    for k, v in (s.get("status_counts") or {}).items():
+        F.add(f"scenarios_v1.status.{k}", v, source=raw, kind="count", how=f"{how}: answers with status {k}")
+    lc = s.get("latency_check") or {}
+    for k in ("ms_median", "ms_p95", "ms_max"):
+        if k in lc:
+            F.add(f"scenarios_v1.latency.{k}", lc[k], source=raw, kind="ms",
+                  how=f"v1 rank() time after loading over {lc.get('n_queries')} queries, {k[3:]} (one machine, one run)")
+
+
+def teacher_section(F: Findings, data_dir: Path) -> None:
+    tp = data_dir / "labels" / "teacher_scores.json"
+    if not tp.exists():
+        F.null("teacher.macro_f1", source=tp, reason="labels/teacher_scores.json not found")
+        return
+    t = json.loads(tp.read_text())
+    mac = ((t.get("summary") or {}).get("macro") or {})
+    hw = (f"WP3 teacher labels ({t.get('model')}, prompt {t.get('prompt_version')}) on the "
+          f"{(t.get('gold') or {}).get('rows')} agent-labeled gold texts, recipe {t.get('recipe_version')}")
+    if "f1" in mac:
+        F.add("teacher.macro_f1", mac["f1"], source=tp, kind="score", how=f"{hw}: macro F1")
+    d = (t.get("teacher_minus_regex") or {}).get("macro_f1_delta_ci95")
+    if d:
+        F.add("teacher.minus_regex_ci_low", d[0], source=tp, kind="score", digits=3,
+              how=f"{hw}: paired 95% interval of teacher minus regex v0.2 macro F1, lower end (spans 0: not better)")
+        F.add("teacher.minus_regex_ci_high", d[1], source=tp, kind="score", digits=3, how=f"{hw}: upper end")
+    sp = t.get("spend") or {}
+    for k_ in ("usd", "total_usd"):
+        if k_ in sp:
+            F.add("teacher.spend_usd", sp[k_], source=tp, kind="usd", how=f"{hw}: teacher labeling spend")
+            break
+
+
+def ordering_section(F: Findings) -> None:
+    """Rerun the v1 order and abstention sensitivity (scripts/wp5_scenarios.py --sensitivity) into a temp file."""
+    import importlib.util
+
+    sp = ROOT / "scripts" / "wp5_scenarios.py"
+    try:
+        spec = importlib.util.spec_from_file_location("wp5_scenarios_for_findings", sp)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        with tempfile.TemporaryDirectory() as td:
+            s = mod.run_sensitivity(out=Path(td) / "ordering_behaviour.md")
+    except Exception as e:  # noqa: BLE001
+        F.null("ordering.abstention.base", source=sp, kind="share", reason=f"sensitivity rerun failed: {e!r}")
+        return
+    how = (f"rerun now: wp5_scenarios.run_sensitivity on {s['origins']:,} random geocoded post offices (seed 7, "
+           f"{s['sea_excluded']:,} sea-pixel offices excluded), v1 ranker with grades and flags from the gold folder "
+           "(frozen with the bundle); origins are post offices, not people; mean over the 12 lines")
+    for name, v in (s.get("mean_abstention") or {}).items():
+        F.add(f"ordering.abstention.{_slug(name)}", v, source=sp, kind="share", digits=1,
+              how=f"{how}: share of origins with no recommendable facility inside the window, setting {name!r}")
+    for name, v in (s.get("mean_top1_change") or {}).items():
+        F.add(f"ordering.top1_change.{_slug(name)}", v, source=sp, kind="share", digits=1,
+              how=f"{how}: share of origins answered under both whose first card changes against the shipped "
+                  f"settings, setting {name!r}")
+    F.add("ordering.cap_binds", s.get("cap_binds"), source=sp, kind="count",
+          how=f"{how}: line-origin queries where the 50-candidate cap hid a corroborated record the allowance would "
+              "have put first (out of origins x 12 lines)")
+    F.add("ordering.origins", s.get("origins"), source=sp, kind="count", how=f"{how}: origins")
+    md = ROOT / "reports" / "ordering_behaviour.md"
+    F.null("ordering.top_pick_not_nearest", source=md, kind="share",
+           reason="run_sensitivity returns no per-line table, only the means above; these are in the report only",
+           report_states="top pick not the nearest recommendable facility in 27.3% of answered origins; nearest "
+                         "reserved to the last card in 9.4%")
 
 
 # ---------------------------------------------------------------------------
@@ -1017,7 +1943,7 @@ def public_view(obj: dict) -> dict:
 
 def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laqshya: Optional[Path] = None,
           sealed: Optional[Path] = None, extras: Optional[dict] = None, cold_open: bool = True,
-          queries: bool = True) -> dict:
+          queries: bool = True, ordering: bool = True) -> dict:
     import pandas as pd
     from vf import locate, paths, rank
     from vf import services as S
@@ -1048,7 +1974,19 @@ def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laq
     if cold_open and resolver is not None:
         cold_open_section(F, bundle, idx, resolver, data_dir)
     laqshya_section(F, bundle, grades, data_dir, laqshya)
-    sealed_section(F, sealed)
+    sealed_section(F, bundle, data_dir, sealed)
+    method_section(F)
+    spend_section(F, data_dir)
+    outside_section(F, bundle, data_dir)
+    tagger_wp4b_section(F, bundle, data_dir)
+    v0v1_section(F, data_dir)
+    recipe_v03_section(F, data_dir)
+    trust_extra_section(F, data_dir)
+    resolver_extra_section(F, bundle)
+    scenarios_v1_section(F)
+    teacher_section(F, data_dir)
+    if ordering:
+        ordering_section(F)
     for group, p in (extras or {}).items():
         if Path(p).exists():
             flatten_section(F, f"extra.{_slug(group)}", Path(p))
@@ -1079,7 +2017,8 @@ def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laq
             "bundle_created_at_utc": manifest.get("created_at_utc"),
             "bundle_git_commit": manifest.get("git_commit"),
             "bundle_versions": manifest.get("versions"),
-            "score_status": "provisional (v0 score, D039)" if not any(idx.is_probability(l) for l in idx.lines)
+            "score_status": (f"ranker {idx.rank_version} (v1-final: gates and an order rule, no score or "
+                             "probability, D048)") if not any(idx.is_probability(l) for l in idx.lines)
             else "probability mode",
             "n_findings": len(F.items),
             "n_null": len(nulls),
@@ -1098,6 +2037,7 @@ def build(bundle: Path = DEFAULT_BUNDLE, *, data_dir: Optional[Path] = None, laq
                                "102, 108 and 112; lines with findings:skip. Durations, money and glued units "
                                "(45 minutes, Rs.2000, 250mg) are scanned",
             "check_note": CHECK_NOTE,
+            "report_coverage": REPORT_COVERAGE,
             "build_s": round(time.time() - t0, 1),
         },
         "findings": F.items,
@@ -1258,7 +2198,11 @@ def _print_summary(obj: dict, out: Path) -> None:
         if f["value"] is None:
             print(f"  null {f['key']}: {f['reason']}")
     pick = ["facilities.records", "facilities.usable_locations", "emoc.specialty_label_records", "emoc.grade_2plus",
-            "tagger.shipped.macro_f1", "tagger.regex.macro_f1", "tagger.gold_rows", "trust.facilities_flagged",
+            "tagger.shipped.macro_f1", "tagger_wp4b.mix.macro_f1", "tagger.regex.macro_f1", "tagger.gold_rows",
+            "trust.facilities_flagged", "sealed_eval.sealed.ranker.precision.rate",
+            "sealed_eval.sealed.specialty.precision.rate", "sealed_eval.sealed.any_fact.precision.rate",
+            "sealed_eval.sealed.ranker.skipped_nearer.rate", "sealed_eval.sealed.judges.q1.kappa",
+            "sealed_eval.sealed.ranker_vs_any_fact.sign_test_p", "spend.project_usd", "v0v1.r2.prefer.sign_test_p",
             "trust.blocked_pairs", "resolver.hits", "resolver.cases", "scenarios.judged.right",
             "scenarios.judged.defensible", "scenarios.judged.wrong", "query.cold_open_226001.card1.distance_km"]
     d = {f["key"]: f for f in obj["findings"]}
@@ -1283,6 +2227,7 @@ def main(argv=None) -> int:
     ap.add_argument("--sealed", type=Path, default=None)
     ap.add_argument("--extra", action="append", default=[], metavar="GROUP=FILE")
     ap.add_argument("--no-cold-open", action="store_true", help="skip the raw-data foil and typicality")
+    ap.add_argument("--no-ordering", action="store_true", help="skip the 15 s ordering sensitivity rerun")
     ap.add_argument("--check", nargs="+", type=Path, metavar="FILE")
     ap.add_argument("--allow", default="", help="comma-separated extra numbers to allow in --check")
     ap.add_argument("--strict", action="store_true",
@@ -1311,7 +2256,8 @@ def main(argv=None) -> int:
         if not p:
             ap.error(f"--extra wants GROUP=FILE, got {e!r}")
         extras[g] = Path(p)
-    obj = build(a.bundle, laqshya=a.laqshya_links, sealed=a.sealed, extras=extras, cold_open=not a.no_cold_open)
+    obj = build(a.bundle, laqshya=a.laqshya_links, sealed=a.sealed, extras=extras, cold_open=not a.no_cold_open,
+                ordering=not a.no_ordering)
     write_atomic(obj, a.out)
     _print_summary(obj, a.out)
     return 0

@@ -45,21 +45,21 @@ Update your row when you start, when you finish, and when you are blocked. One l
 
 | WP | Title | Status | Owner | Branch | Notes |
 | --- | --- | --- | --- | --- | --- |
-| 0 | Bootstrap | done | orchestrator | main | py3.12 venv at `.venv` |
-| 1 | Silver facilities | done | | rescope | 9,989 facilities, about 460k facts, `coord_check` against PIN |
-| 2 | Geography and location resolver | doing | | | Part A done (post offices, PIN crosswalk). Part B resolver todo. NFHS dropped |
-| 2b | External data | done, optional | | rescope | OSM, LaQshya. Only for the WP10 B cross-check |
-| 3 | Recipes, gold set, teacher labels | doing | | | v0.1 done: 13 tags, regex macro F1 0.90 on 429 gold facts. v0.2 (12 lines) todo. Part 3 unblocked: key valid (D037) |
-| 4 | Fact tagger (Model A) | done | | rescope | WP4 student 1b ships h24, icu, ventilator; WP4b 2b_r2 ships ob_delivery, promoted in the final assembly (D059, D064) |
-| 5 | Ranking engine | todo | | | Old access tables done and retired; `haversine_km` carries over |
+| 0 | Bootstrap | done | orchestrator | main | py3.12 venv at `.venv`; ML venv `.venv-ml` for the encoder only |
+| 1 | Silver facilities | done | | rescope | 9,989 facilities (9,671 with a usable location), 451,105 facts, `coord_check` against PIN (`wp1-silver-v3`) |
+| 2 | Geography and location resolver | done | | rescope | Part A: 165,627 post offices, PIN crosswalk. Part B: 182,755 places, 54/55 frozen cases, places-v3 PIN precision median 4.9 km (D061). NFHS dropped |
+| 2b | External data | done, optional | | rescope | OSM, LaQshya; LaQshya now feeds 63 hand-checked card links and 779 lane rows (D051, D060) |
+| 3 | Recipes, gold set, teacher labels | done | | rescope | 24 tags, 12 lines; recipe v0.3 shipped (D052); 777 gold facts; Haiku teacher 0.888 macro F1, a tie with regex 0.890 |
+| 4 | Fact tagger (Model A) | done | | rescope | Student 1b ships h24, icu, ventilator; WP4b 2b_r2 ships ob_delivery (marginal gain, D059, D064); final mix macro F1 0.916 (0.898 to 0.931); 0 lines cross the grade 2 gate |
+| 5 | Ranking engine | done | | rescope | Ranker v1-final (D048, D058): drive-time windows, gates, 15/30 min evidence allowance; abstains at 12.9% of random origins; v1 vs v0 blinded p = 0.18, not proven better (D061) |
 | 6 | Outcome model and quadrants | dropped | | | D023. Rule quadrants were done; kept as history |
-| 7 | Simulator | dropped | | | D023 |
-| 8 | Databricks App | todo | | | Old India map app retired; map and swarm code reused for the trip view (D032) |
-| 9 | Demo, video, submission | todo | | | |
-| 10 | Stretch | todo | | | |
-| 11 | Trust checks | todo | | | New |
-| 12 | Databricks port and bundle | doing | final assembly | rescope | Final bundle built and `--check` ok (D064): v0.3 grades, wp11_v3, places-v3, outside lists, masked phones; redeploy is the next stage |
-| 13 | Outside data and calibration model | doing | orchestrator (workflow) | rescope | Phase R research running; full track approved (D040) |
+| 7 | Simulator | dropped | | | D023. Replaced by the in-app agent simulator with what-if tools, built under WP8 (D056, D062) |
+| 8 | Databricks App | done | | rescope | Referral-note UI, labeled map with India zoom, agent simulator (D062); overnight test: 7 of 9 high issues fixed, 2 partly; deployed (WP12) |
+| 9 | Demo, video, submission | doing | overnight-final | rescope | Sealed eval run once (D066); findings.json rebuilt after the critics' fix round (D068); methods, README (with "What we propose") and demo script done and checked; 40 human labels, the Nashik LaQshya spot-check, recording, creating the repo remote and pushing, and submission are Hruday's |
+| 10 | Stretch | dropped | | | Not run before the freeze (D065); item B (LaQshya cross-check) delivered through the outside lists (D060); A, C to F not built |
+| 11 | Trust checks | done | | rescope | `wp11_v3`: 2,471 records flagged, 1,010 of 10,957 grade 2+ lines blocked, 75 duplicate pairs; merged-evidence block 26/30 on hand read (D061) |
+| 12 | Databricks port and bundle | done | final assembly | rescope | Bundle `--check` ok (D064); frozen at 05:15 ET (D065, manifest 520a5159); deployed as 01f1e65c and verified at 06:00 ET; notebook `notebooks/01_pipeline.py` |
+| 13 | Outside data and calibration model | done | orchestrator (workflow) | rescope | Outside lists: 196 card facts, 1,204 lane rows, others withheld by terms (D057, D060). Calibration model dropped (D048) |
 
 Status values: `todo`, `doing`, `blocked`, `done`, `dropped`.
 

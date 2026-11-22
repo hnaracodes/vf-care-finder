@@ -263,35 +263,65 @@ def test_flatten_section(tmp_path):
 
 
 def test_missing_optional_sources_are_explicit_nulls(tmp_path, monkeypatch):
-    monkeypatch.setattr(wf, "ROOT", tmp_path)  # no candidate files exist here
+    monkeypatch.setattr(wf, "ROOT", tmp_path)  # no report or label files exist here
     F = wf.Findings(tmp_path)
     wf.laqshya_section(F, tmp_path, pd.DataFrame(), tmp_path, None)
-    wf.sealed_section(F, None)
-    assert [(f["key"], f["value"]) for f in F.items] == [("laqshya.link_candidates", None),
-                                                          ("sealed_eval.results", None)]
+    wf.sealed_section(F, tmp_path, tmp_path, None)
+    wf.v0v1_section(F, tmp_path)
+    wf.recipe_v03_section(F, tmp_path)
+    nulls = [f["key"] for f in F.items if f["value"] is None]
+    assert nulls == ["laqshya.link_candidates", "sealed_eval.sealed.queries", "sealed_eval.dev.queries",
+                     "sealed_eval.sealed.ranker.not_sensible_reasons_merge",
+                     "sealed_eval.dev_rubric_check.listing_only.k", "v0v1.r1.prefer.v1", "v0v1.r2.prefer.v1",
+                     "recipe_v03.changed_lines"]
     assert all(f["reason"] for f in F.items)
 
 
-def test_laqshya_from_handlabeled_links(tmp_path):
-    links = pd.DataFrame({"uid": ["u1", "u2", "u3", "u4"], "fid": ["f1", "f2", "f3", "f4"],
-                          "hand": ["correct", "correct", "wrong", "correct"]})
-    lp = tmp_path / "links.csv"
-    links.to_csv(lp, index=False)
-    (tmp_path / "silver").mkdir()
-    pd.DataFrame({
-        "facility_uid": ["u1", "u1", "u2", "u3", "u4"],
-        "department": ["Maternity OT", "Labour Room", "Maternity OT", "Maternity OT", "Labour Room"],
-        "expired_as_of_retrieval": pd.array([False, False, True, False, False], dtype="boolean"),
-    }).to_parquet(tmp_path / "silver" / "ext_laqshya.parquet")
-    grades = pd.DataFrame({"facility_id": ["f1", "f2", "f3"], "service_line": ["emoc"] * 3,
-                           "tags_present": [["csection", "blood"], ["csection"], ["csection"]]})
+def test_laqshya_from_reviewed_links(tmp_path):
+    links = pd.DataFrame({"facility_uid": ["u1", "u2", "u3", "u4", "u5"], "facility_id": ["f1", "f2", "f3", "f4", "f4"],
+                          "review": ["correct", "correct", "wrong", "correct", "unsure"],
+                          "has_current_maternity_ot": [True, False, True, True, True],
+                          "caesarean_named": [True, False, False, False, False],
+                          "emoc_grade": [2, 1, 0, 1, 1]})
+    lp = tmp_path / "laqshya_links.parquet"
+    links.to_parquet(lp)
     F = wf.Findings(tmp_path)
-    wf.laqshya_section(F, tmp_path, grades, tmp_path, lp)
+    wf.laqshya_section(F, tmp_path, pd.DataFrame(), tmp_path, None)
     d = {f["key"]: f["value"] for f in F.items}
-    assert d["laqshya.link_candidates"] == 4
-    assert d["laqshya.links_correct"] == 3 and d["laqshya.links_wrong"] == 1
-    assert d["laqshya.correct_with_current_maternity_ot"] == 1  # u1 only: u2 expired, u3 wrong, u4 no OT
-    assert d["laqshya.current_maternity_ot_record_names_csection"] == 1
+    assert d["laqshya.link_candidates"] == 5
+    assert d["laqshya.links_correct"] == 3 and d["laqshya.links_wrong"] == 1 and d["laqshya.links_unsure"] == 1
+    assert d["laqshya.matcher_precision.k"] == 3 and d["laqshya.matcher_precision.n"] == 4  # unsure left out
+    assert d["laqshya.records_with_correct_link"] == 3
+    assert d["laqshya.records_current_maternity_ot"] == 2  # f1 and f4; u3 is wrong
+    assert d["laqshya.records_current_maternity_ot_naming_caesarean"] == 1
+
+
+def test_link_rule_bounds_and_agreement_helpers():
+    assert round(wf._cp_lower(79, 81), 3) == 0.924  # AERB auto band passes the 0.90 rule
+    assert round(wf._cp_lower(14, 14), 3) == 0.807  # MoHFW: clean but too few pairs
+    assert wf._cp_lower(0, 5) == 0.0 and wf._cp_lower(1, 0) is None
+    assert wf._cohen_kappa([True, False, True, False], [True, False, True, False]) == 1.0
+    assert wf._sign_test(6, 1) == 0.125 and wf._sign_test(0, 0) is None
+    lo, hi = wf._wilson(26, 30)
+    assert round(lo, 2) == 0.70 and round(hi, 2) == 0.95
+
+
+def test_v0_mark_noise_ignores_the_abstention_label_convention(tmp_path):
+    rows = []
+    for rnd, marks in (("v0v1_blind", ["right", "wrong", "abstention_right", ""]),
+                       ("v0v1_blind_r2", ["right", "defensible", "right", "right"])):
+        d = tmp_path / "labels" / rnd
+        d.mkdir(parents=True)
+        js = pd.DataFrame({"scenario_id": ["a", "b", "c", "d"] * 2, "answer_label": ["X"] * 8,
+                           "version": ["v0"] * 4 + ["v1"] * 4, "mark": marks + ["right"] * 4, "note": "",
+                           "prefer_label": "X", "prefer_version": ["v1", "tie", "v0", "v1"] * 2, "prefer_why": ""})
+        js.to_csv(d / "judgments.csv", index=False)
+    F = wf.Findings(tmp_path)
+    wf.v0v1_section(F, tmp_path)
+    d = {f["key"]: f["value"] for f in F.items}
+    # a: same; b: changed; c: convention only, left out; d: unmarked in round 1, left out
+    assert d["v0v1.judge_noise.v0_marks_comparable"] == 2 and d["v0v1.judge_noise.v0_marks_changed"] == 1
+    assert d["v0v1.r2.prefer.v1"] == 2 and d["v0v1.r2.prefer.v0"] == 1 and d["v0v1.r2.prefer.tie"] == 1
 
 
 def test_typicality_tie_rule():
