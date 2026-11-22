@@ -153,3 +153,56 @@ Written on 22 Nov 2026, 04:31 UTC, dev half only, before any tool or judge has r
 
 1. Besides the strict "listing-only" reading in Amendment 1 (every judge who said yes quoted only the "Specialties listed" line), the report also gives a loose reading: at least one judge who said yes quoted only that line. Precision is shown without each, and the "skipped" and "abstained" counts give both. In the dev dry run the one "skipped a nearer option" case is loose but not strict: judge A quoted the specialties line, judge B a department list in the description.
 Protocol sha256 (of every byte above this line): `01ef778314f40f47c93e7bfba06b98c80849ce62122e1b2f78e2739a8d589ded`
+
+## Amendment 3: the same drive-time window for every tool
+
+Written on 22 Nov 2026, 10:17 UTC (05:17 ET), after the final build was frozen and before any tool or judge has run on the sealed half. The frozen build is recorded in `reports/FROZEN_BUILD.json` (git commit 17bf7e6, bundle manifest sha256 `520a5159b49da8786b2de7885a6129b76d52fb19cf18a6bbe925fd72ed3158da`, the same manifest the deployed app serves); it was frozen at 10:15 UTC (05:15 ET), later than the 04:00 ET named in rule 2, and that frozen build is the one the sealed half reads. Decision D048 replaces the ranker's km radii with estimated drive-time windows. The protocol's fairness rule ("the same radius per service" and "the same right to abstain" for every tool) is kept by applying one window rule to all three tools, to the judge walk and to every metric. Nothing else changes: the sample, the services, the judge models, the judge prompts (prompt sha256 as last sealed), the walk cap and the verdict rule stay as they are.
+
+1. Drive time. For a query at post office `p` and a facility at straight-line distance `km` from `p`'s own coordinates:
+
+   `minutes = f(state of p) x 2.30 x km^0.842`
+
+   `f` is the multiplier in `reference/terrain_multiplier.csv` for the post office's PIN-directory state, matched in upper case (for example "Jammu And Kashmir" to "JAMMU AND KASHMIR"). The origin's state is used for every facility, never the facility's state, so for one query minutes rise strictly with km. The point estimate is used; the displayed range (minutes x e^(plus or minus 0.52)) plays no part in any gate. Minutes are compared unrounded. No sampled state lacks a factor (the two states with a blank factor, Andaman and Nicobar Islands and Lakshadweep, are not in the sample); if one did, the harness refuses to run rather than guess.
+
+2. Windows (minutes), per service, the same for every tool:
+
+   | Service | Window (min) | Basis (D048) | Old radius (km) | km at factor 0.80 | km at 1.00 | km at 3.08 |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | `emoc` | 120 | cited (Lancet Commission 2-hour indicator) | 50 | 143 | 110 | 29 |
+   | `trauma` | 120 | cited (same) | 50 | 143 | 110 | 29 |
+   | `cath_lab` | 90 | design choice informed by ESC 2023 | 100 | 101 | 78 | 20 |
+   | `neurosurgery` | 150 | informed by Seelig 1981 | 150 | 186 | 143 | 38 |
+   | `dialysis` | 60 | informed by DOPPS | 50 | 63 | 48 | 13 |
+   | `icu` | 120 | design choice | 75 | 143 | 110 | 29 |
+   | `nicu` | 120 | design choice | 75 | 143 | 110 | 29 |
+   | `ct` | 120 | design choice | 75 | 143 | 110 | 29 |
+   | `mri` | 180 | design choice | 100 | 231 | 177 | 47 |
+   | `burns` | 240 | design choice | 200 | 325 | 250 | 66 |
+   | `cardiac_surgery` | 240 | design choice | 250 | 325 | 250 | 66 |
+   | `oncology` | 240 | design choice | 250 | 325 | 250 | 66 |
+
+   The km columns are the window converted back to straight-line km, `(window / (2.30 x f))^(1/0.842)`, for the lowest factor in the file (0.80), a factor of 1, and the highest (3.08, Arunachal Pradesh). They are for reading only; the gate is the minutes. All windows are planning thresholds, not clinical deadlines. If the frozen ranker's windows or formula differ from this table, this amendment is wrong and must be rewritten before it is sealed; it is not sealed with a mismatch.
+
+3. Inside the window. A facility is inside the window for a query when its minutes from that query's post office are at most the service's window. This replaces "inside the radius" everywhere in the protocol: in each tool's right to abstain, in the judge walk, and in metrics 3 and 4. Because minutes rise strictly with km for one origin, "inside the window" is the same as "within the query's window km", `(window / (2.30 x f))^(1/0.842)`, and "nearest by minutes" is the same as "nearest by km".
+
+4. The three tools under the window.
+   - (a) `specialty`: among facilities with a usable location (the frozen bundle, `excluded_unresolved` dropped, as before) that list a related specialty (`vf.recipes` claim specialties for the line, as committed for the sealed run), the one with the fewest minutes from the post office, if its minutes are at most the window; otherwise it abstains. Ties: lower index position, as before. No trust checks, no duplicate handling, no evidence allowance.
+   - (b) `any_fact`: among facilities with a usable location and grade 2 or 3 for the line by our tags (the frozen bundle's grades, the same recipe version the ranker gates on), the one with the fewest minutes, if inside the window; otherwise it abstains. No trust checks, no duplicate handling, no evidence allowance.
+   - (c) `ranker`: `vf.rank.rank(index, service, resolution, k=3)` with the point as a coordinate resolution (precision 2 km), as before, which now also carries the post office's PIN-directory state, so the ranker takes the same origin factor as item 1. Its pick is its first result card whose minutes, recomputed by the harness with item 1 from the post office's coordinates and the facility's mapped location, are at most the window. If no result card is inside the window, or the answer is `no_reliable_option`, it abstains. The ranker may apply its declared evidence allowance (a better-evidenced facility may come first if at most 15 minutes further, 30 for MRI, cardiac surgery and oncology) inside the window; the baselines have no allowance. The harness also records the minutes and window the ranker itself reports on each result card. The sealed picks refuse to start unless the dev picks were computed under this sealed amendment with the same code (the harness, this file, `src/vf` and both reference files in item 10), and on those dev picks every ranker result card, at least one, reports minutes within 0.5 minutes of the harness's and the window in the table above.
+
+5. Judge walk. The walk stops at the farthest pick when every tool answered (unchanged), else at the query's window km (item 3) in place of the radius. Pool membership (any signal for the service), nearest-first order, the walk cap of 10 and the stored pool size are unchanged.
+
+6. Metrics.
+   - Metric 3 ("abstained when a supported option existed"): the judge-supported facility must be inside the window.
+   - Metric 4 ("skipped a nearer supported option"): unchanged in form: a judge-supported facility at least 1 km nearer than the pick, not in the pick's WP11 duplicate group. For one origin, 1 km nearer is also fewer minutes. A new split is added for the ranker: skips where the pick is at most the evidence allowance further in minutes than the skipped facility (by design: the ranker chose a better-evidenced record within its declared allowance) and skips beyond it. Both counts are reported; neither is dropped.
+   - Each pick and each nearest judge-supported option is stored with its km and its minutes.
+   - Coverage (metric 1) is computed over every query under the window rule.
+
+7. Judges. Q1 is unchanged and place-free, so cached Q1 verdicts on the dev half are reused where the facility and service repeat. Q2 still shows the straight-line km (the Q2 prompt and its user message are unchanged, so the prompt sha256 is unchanged); its sentence "every facility shown is inside the same search radius for this service" remains true of the window, which is one search distance per query applied to every tool.
+
+8. Sea-pixel post offices. D048 item 7 drops the 1,032 sea-pixel post offices (`reference/sea_pixel_post_offices.csv`) from the product's coverage numbers and origins. The evaluation sample was drawn and sealed before that list existed in the evaluation, and rule 3 forbids dropping a query after the fact. So sampled points on the list stay in the sample, are run and judged like any other, and are counted in the headline numbers. The report also gives each headline figure without them, as a sensitivity line, and names how many there are per half. (On the dev half: 2 of 60 points, po_id 142781 and 13304.)
+
+9. Re-running the dev half. The dev picks are recomputed with the window rule (`picks --split dev`), then judged (`judge --split dev`), scored and estimated, before the sealed run. The sealed picks are computed once, after this amendment is sealed and the harness that implements it is committed (Amendment 1 item 2).
+
+10. Harness. The windows table, the formula's constants (2.30, 0.842), the evidence allowance and the sha256 of the two reference files are pinned in `scripts/eval_sealed.py` and recorded in the picks file: `reference/terrain_multiplier.csv` sha256 `a3695f7bd3466921a9b97e0e98a29efb4b9d41c72f6df8a627b1f7ed0964a344`, `reference/sea_pixel_post_offices.csv` sha256 `5278e3d7b6cfd25ff5194aa8d974b1439f6d5c7bedee689f9a1f83b12e0cd557`. Both files join the guarded paths for the sealed half. The harness activates the window rule only when this amendment is sealed and its windows table, formula ("2.30 x km^0.842") and allowance sentence match what it pins. It reads the windows from the same code the ranker uses (`vf.services`) and refuses the sealed half if they differ from the pinned table.
+Protocol sha256 (of every byte above this line): `84a7bdd667c547a48ae6621fd4d1d2d7d4996854ad2932755d97dfe3d2fcee06`

@@ -1,5 +1,7 @@
 # DRAFT amendment to the sealed evaluation: drive-time windows instead of km radii
 
+**Update, 22 Nov 2026, 10:17 UTC: sealed as Amendment 3** of `reports/eval_sealed_protocol.md` (seal `84a7bdd6...`, pinned in `EXPECTED_SEALS`), after the build freeze in `reports/FROZEN_BUILD.json`. The sealed text is the one below with N = 3 and a dated first sentence that names the freeze. The protocol file is the authority; this draft is kept as history.
+
 **Status: DRAFT, NOT SEALED. Implemented in the harness, inactive until sealed.** Written on 22 Nov 2026 around 04:50 UTC by the dev-rubric agent for decision D048; items 4 and 10 tightened on 22 Nov when `scripts/eval_sealed.py` implemented it. The orchestrator seals it, by appending the text below the last seal of `reports/eval_sealed_protocol.md` and running `python scripts/eval_sealed.py seal`, only after the final ranker is frozen. Nothing in this file changes the evaluation until then. The sealed half has not been run, and nothing here was informed by it.
 
 The text between the two rules below is the proposed amendment, ready to paste. The amendment number is a placeholder: use the next free number at sealing time.

@@ -149,6 +149,7 @@ EXPECTED_SEALS = (
     "6dae9ca7aff2cd749401d5661237073760d36cda428667ce4ff2b62dc0713dc6",  # protocol, 22 Nov 04:11:42 UTC
     "51e25495d6c0a64935a524994af4a21f1e9cb66ee054fc756e21988d18f07e0f",  # amendment 1, 22 Nov 04:30 UTC
     "01ef778314f40f47c93e7bfba06b98c80849ce62122e1b2f78e2739a8d589ded",  # amendment 2, 22 Nov 04:31 UTC
+    "84a7bdd667c547a48ae6621fd4d1d2d7d4996854ad2932755d97dfe3d2fcee06",  # amendment 3 (reach), 22 Nov 10:17 UTC
 )
 
 #: Paths whose committed, unmodified state the sealed half requires (git):

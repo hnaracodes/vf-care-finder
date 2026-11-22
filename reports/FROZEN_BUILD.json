@@ -1,0 +1,341 @@
+{
+ "frozen_at_utc": "2026-11-22T10:15:20+00:00",
+ "script": "scripts/freeze_build.py",
+ "rule": "From this freeze on, nothing may change the bundle (D063; sealed evaluation protocol rule 2).",
+ "git_commit": "17bf7e6e892483b6f74be9b990ffbfca92538bb7",
+ "git_branch": "rescope",
+ "git_uncommitted_tracked": [
+  "M dbapp/README.md"
+ ],
+ "bundle_dir": "dbapp/bundle",
+ "bundle_manifest_sha256": "520a5159b49da8786b2de7885a6129b76d52fb19cf18a6bbe925fd72ed3158da",
+ "bundle_manifest": {
+  "bundle_version": "wp12-bundle-v1",
+  "created_at_utc": "2026-11-22T09:22:18+00:00",
+  "git_commit": "e1f02f100f573492905ca85c4e28a0136c2f0733",
+  "code_uncommitted": true,
+  "versions": {
+   "silver_facilities": "wp1-silver-v3",
+   "recipes": [
+    "v0.3"
+   ],
+   "grade_method": [
+    "student"
+   ],
+   "checks": [
+    "wp11_v3"
+   ],
+   "places": "places-v3",
+   "fact_tags_model": "student:wp4b-2b_r2[ob_delivery]+student:s1-1b[h24,icu,ventilator]+regex:v0.2[rest]",
+   "fact_tags_sha256": "1bc6faf5da8df74ece73edcc50a1bb95d3dcb029770f7fd1a1f84f0b8645f982",
+   "outside_lists": "public_list_v2",
+   "probability_model": null
+  }
+ },
+ "bundle_files": {
+  ".gitignore": {
+   "sha256": "6fddc41ec50533027ca4ace710efcba4658f3a5021904bb44cf1df59548f5e5e",
+   "bytes": 198
+  },
+  "duplicates.parquet": {
+   "sha256": "a17f24b375e9d400828545104e33c65201864752872cb045dc21306213c00f7b",
+   "bytes": 9945
+  },
+  "facilities.parquet": {
+   "sha256": "fc0ec6e349a9340c3365836c8e2af87da4e2d9f76cf7fab80817fa0c4f049159",
+   "bytes": 878488
+  },
+  "flags.parquet": {
+   "sha256": "b2789019b0ccf2db77aa9dee7a883bc372abea0370895e7332731bfc1b820eab",
+   "bytes": 124950
+  },
+  "grades.parquet": {
+   "sha256": "44298ad921ea6884e8826d5f557a78d53d3e31007d703b27789c110a37f329ac",
+   "bytes": 1659425
+  },
+  "keyword_index/docs.parquet": {
+   "sha256": "d26ccb8888bd2fc2574b8b440940dc123388290cf62b718312208cb65133cf6b",
+   "bytes": 6175962
+  },
+  "keyword_index/matrix.part-000.npz": {
+   "sha256": "0d7adf1278dbde47ac9f0175e9ffa7393700c2024fe8e63f2e3b8832e92b1ad7",
+   "bytes": 5060366
+  },
+  "keyword_index/matrix.part-001.npz": {
+   "sha256": "6aea2530b5865182e892e8a473936d6298d812154a337f43783a77291baff832",
+   "bytes": 5062393
+  },
+  "keyword_index/matrix.part-002.npz": {
+   "sha256": "a55953169f6a63388c467368797dceecca57da5326e035d229db9869a76abcb4",
+   "bytes": 5016989
+  },
+  "keyword_index/matrix.part-003.npz": {
+   "sha256": "1cd9dd493166541edabf844c3c938ece37d40e76bbb1755df2c12d94c3ec5c21",
+   "bytes": 4907740
+  },
+  "keyword_index/meta.json": {
+   "sha256": "22f0172d75d2afe9771107c84ebf1cbca6baaaa0692f4642b6545c1f9dd0cd47",
+   "bytes": 269
+  },
+  "keyword_index/postings.parquet": {
+   "sha256": "410258884aba816a53bba4d3eaa40a6879aafb85c8717f5bfd68aed2be784f1f",
+   "bytes": 5697462
+  },
+  "keyword_index/vectorizer.pkl": {
+   "sha256": "1783588b9a6e739883a83b8572cb7ed4d4727326f64af0ed2f89d8b507790482",
+   "bytes": 4039957
+  },
+  "laqshya_links.parquet": {
+   "sha256": "33b43601676ada68701c3672af77fd5813447e53ace89f259f1a668f2c210b3d",
+   "bytes": 41882
+  },
+  "manifest.json": {
+   "sha256": "520a5159b49da8786b2de7885a6129b76d52fb19cf18a6bbe925fd72ed3158da",
+   "bytes": 16478
+  },
+  "outside_card_facts.parquet": {
+   "sha256": "1ca23b3eec29ade5ae044c029de58e5a3242bcb8f65b561fd034d1fbbc87144b",
+   "bytes": 10537
+  },
+  "outside_lane.parquet": {
+   "sha256": "b310cd4ca487ae1b624f943bc31ad7d3d655fbbb39eb8dc87d5184c295b749b6",
+   "bytes": 86458
+  },
+  "outside_meta.json": {
+   "sha256": "a173fe23687a8675e3b68cb416f494f473455f2658394b72421d5aeba3b3b23b",
+   "bytes": 20261
+  },
+  "places.parquet": {
+   "sha256": "13d1f76fcddb5f72e8ff97606c4ffebb04ef97e7bd4e3b55f35c15e88df0315c",
+   "bytes": 7207577
+  },
+  "post_offices.parquet": {
+   "sha256": "2dcb227e72b13f13534e82c0e313bccb0d74f13c522a6ecc621ed763cb98b013",
+   "bytes": 2193995
+  },
+  "record_info.parquet": {
+   "sha256": "1e3b7b1770b0e1c51448f52d83c42476f0fdddc3614e52f5f0589a4c22bcd483",
+   "bytes": 581994
+  },
+  "terrain_multiplier.csv": {
+   "sha256": "a3695f7bd3466921a9b97e0e98a29efb4b9d41c72f6df8a627b1f7ed0964a344",
+   "bytes": 807
+  }
+ },
+ "bundle_manifest_files_match": true,
+ "bundle_inputs_named_in_manifest": [
+  "gold/capability_grades.parquet",
+  "gold/capability_grades_v03.parquet",
+  "gold/facility_duplicates.parquet",
+  "gold/facility_flags.parquet",
+  "gold/fact_tags.parquet",
+  "gold/service_probability.parquet",
+  "silver/ext_*",
+  "silver/facilities.parquet",
+  "silver/facts.parquet",
+  "silver/laqshya_links.parquet",
+  "silver/pin_crosswalk.parquet",
+  "silver/places.parquet",
+  "silver/post_offices.parquet"
+ ],
+ "input_tables": {
+  "silver/district_crosswalk.parquet": {
+   "sha256": "0b5df44b99973dbf2e7ccab1c16dc167a553b37ea7036af05520493c077a21a2",
+   "bytes": 28121,
+   "bundle_input": false
+  },
+  "silver/district_crosswalk_review.csv": {
+   "sha256": "4fe9472840650048798b9f21a6af3a23c94c142fbb35745ce35fb8d1bba52676",
+   "bytes": 30678,
+   "bundle_input": false
+  },
+  "silver/ext_aerb_rt.parquet": {
+   "sha256": "9fbccf9ce7a9cb930261be2d4bdf02ba84db5e82afce2ffc191d7a89b8a90095",
+   "bytes": 159063,
+   "bundle_input": true
+  },
+  "silver/ext_district_population.parquet": {
+   "sha256": "45b0ff68db9b2eb9a2cc9718e75846eb6422313777d8b1a33170714f9c1379d0",
+   "bytes": 33013,
+   "bundle_input": false
+  },
+  "silver/ext_laqshya.parquet": {
+   "sha256": "22da7b92a528261fc1bc9aea51a5322e19e24bd96530291d630c51e3f8dc7d44",
+   "bytes": 153446,
+   "bundle_input": true
+  },
+  "silver/ext_links_aerb_rt.parquet": {
+   "sha256": "fb35ebb19d8cd8bc57f3c5c6f401d2092e3f1c7dca9fb38a809e2b3cbc881bd4",
+   "bytes": 390731,
+   "bundle_input": true
+  },
+  "silver/ext_links_mohfw_trauma.parquet": {
+   "sha256": "5bce9126e2f9c984f45425d60ef9c57c03fd84c5e006e4bb18aaca32c1527946",
+   "bytes": 50732,
+   "bundle_input": true
+  },
+  "silver/ext_links_nabi_burns.parquet": {
+   "sha256": "d1eb20d56990ea48b6678c9241a3e4ce197c1c1e844d0968fed93e6e8c1bebc3",
+   "bytes": 79919,
+   "bundle_input": true
+  },
+  "silver/ext_links_ncg.parquet": {
+   "sha256": "3a9da65e212085a444b57540e337904a2cd5a9778e0e7c1bb8b32b1758debdbd",
+   "bytes": 250282,
+   "bundle_input": true
+  },
+  "silver/ext_links_nhp_bloodbank.parquet": {
+   "sha256": "a9206e8c7ea3eaa7bcbd69a3a187c1b0ce30d4f0296074049fbb18ead0f67ad6",
+   "bytes": 1223959,
+   "bundle_input": true
+  },
+  "silver/ext_mohfw_trauma.parquet": {
+   "sha256": "e50f35430eb009eb9cb8b635d70f35a0a5259ab16d114eef9e5b3f121b9ec3af",
+   "bytes": 59173,
+   "bundle_input": true
+  },
+  "silver/ext_nabi_burns.parquet": {
+   "sha256": "c211676c21b5672513fcf79765f1c6c75462322e75b19a07f81e9dc69ac06157",
+   "bytes": 80095,
+   "bundle_input": true
+  },
+  "silver/ext_ncg.parquet": {
+   "sha256": "ebcc8ee430780b2a74b3f5893b1ff3a7d24266b8840630319a2834fac984d753",
+   "bytes": 130352,
+   "bundle_input": true
+  },
+  "silver/ext_nhp_bloodbank.parquet": {
+   "sha256": "eda3427f03211a4852eee3764bb11d36bbecde09517ec189a8c98e3cb4169944",
+   "bytes": 716228,
+   "bundle_input": true
+  },
+  "silver/ext_osm_health.parquet": {
+   "sha256": "681b3636fe52f3591c13e9cd8cb25002dcf5c184114339b0bcff6e90b6b1c97e",
+   "bytes": 6185556,
+   "bundle_input": false
+  },
+  "silver/facilities.parquet": {
+   "sha256": "37cbc779d27dc44798feb9dc492a7d73e6458194353efbaac71b2819e35fd8ac",
+   "bytes": 17897756,
+   "bundle_input": true
+  },
+  "silver/facts.parquet": {
+   "sha256": "4650f6be54ec66689a94da7616655184c3b7b71791fbc112e557753c3be95a88",
+   "bytes": 27659920,
+   "bundle_input": true
+  },
+  "silver/laqshya_links.parquet": {
+   "sha256": "34f21f4db380ae722b13ab67690873985516a004f935a7f2263436d06284daaf",
+   "bytes": 50106,
+   "bundle_input": true
+  },
+  "silver/nfhs.parquet": {
+   "sha256": "ad56dbf5e20d842f3017d8aea6ac16c66938816a5faf26d5da3c2ff48c0df909",
+   "bytes": 306371,
+   "bundle_input": false
+  },
+  "silver/nfhs_flags.parquet": {
+   "sha256": "5dd6fbcfbb89c334b4dff5b68a2d2c74d2197e500edad63891038ba2b9c5a8d6",
+   "bytes": 114818,
+   "bundle_input": false
+  },
+  "silver/pin_crosswalk.parquet": {
+   "sha256": "8149e0d14a2147470e4037884489041554db7aa8b1dff73b5f358bd1b0308684",
+   "bytes": 176422,
+   "bundle_input": true
+  },
+  "silver/places.parquet": {
+   "sha256": "5107f96f4b04f3b8915ea3687c2dff0b97841d0824cabedd157cb3c81bd97848",
+   "bytes": 9006577,
+   "bundle_input": true
+  },
+  "silver/post_offices.parquet": {
+   "sha256": "abad21289987dd2b3172f4bc74230efcab5490735af3d263ce67fd1b555bcfc2",
+   "bytes": 5366599,
+   "bundle_input": true
+  },
+  "gold/access_summary_regex.json": {
+   "sha256": "8fb3686d089edabc454f4f340dd22eb035c32a89ff4a7b0a25182cd9b3df12e2",
+   "bytes": 13770,
+   "bundle_input": false
+  },
+  "gold/capability_grades.parquet": {
+   "sha256": "6380e5173aefc12fdfaec222292c942895fc2bcbd4f49028cdecf1541116fe1f",
+   "bytes": 2497618,
+   "bundle_input": true
+  },
+  "gold/capability_grades_v03.parquet": {
+   "sha256": "aa32480bf4c819e8c281107e463f855aac9e27e3929fffe4f52f7ade567b7875",
+   "bytes": 2382792,
+   "bundle_input": true
+  },
+  "gold/district_access.parquet": {
+   "sha256": "891133fd2fcd2b5e3f524a82ff3a669ab16adacdb8a88d056bd6052a081ed3d4",
+   "bytes": 239157,
+   "bundle_input": false
+  },
+  "gold/district_quadrants.parquet": {
+   "sha256": "e111f8da2d210050d2cfbcd4553a112d00449c54affe325ff6bf354942fca833",
+   "bytes": 24595,
+   "bundle_input": false
+  },
+  "gold/facility_duplicates.parquet": {
+   "sha256": "8830f4144480b3d2ebafca040d8c8b1adf095e0392abad76cf409151f69af3d7",
+   "bytes": 13784,
+   "bundle_input": true
+  },
+  "gold/facility_flags.parquet": {
+   "sha256": "76f947d1319e74a2c08813b48f176ce4c440569bee3ed0006399a7166c055525",
+   "bytes": 195495,
+   "bundle_input": true
+  },
+  "gold/fact_tags.parquet": {
+   "sha256": "1bc6faf5da8df74ece73edcc50a1bb95d3dcb029770f7fd1a1f84f0b8645f982",
+   "bytes": 8248209,
+   "bundle_input": true
+  },
+  "gold/fact_tags_candidate_wp4b.parquet": {
+   "sha256": "1bc6faf5da8df74ece73edcc50a1bb95d3dcb029770f7fd1a1f84f0b8645f982",
+   "bytes": 8248209,
+   "bundle_input": false
+  },
+  "gold/model_a_report.json": {
+   "sha256": "049d0f740ef9c9a59122d5077795f8873a013e967a32fcc05abb6722bead9918",
+   "bytes": 148095,
+   "bundle_input": false
+  },
+  "gold/post_office_access.parquet": {
+   "sha256": "f3cfda9d9287d9326024f9af757f1523509b5f3845ad44f641ff2e0f0395a9cb",
+   "bytes": 15953218,
+   "bundle_input": false
+  }
+ },
+ "code_and_reference": {
+  "reference/terrain_multiplier.csv": "a3695f7bd3466921a9b97e0e98a29efb4b9d41c72f6df8a627b1f7ed0964a344",
+  "reference/sea_pixel_post_offices.csv": "5278e3d7b6cfd25ff5194aa8d974b1439f6d5c7bedee689f9a1f83b12e0cd557",
+  "src/vf/__init__.py": "f71e1e7a37af878ea94129fd9fc1f3eabcf606aa137c91ca8c84a49a6f62365a",
+  "src/vf/clean.py": "0093b99e76dae0456643a96bde07de0b076a1476648995bc4ea49f280510e31b",
+  "src/vf/geo.py": "c4dd736175cd1cc70fcdad8b7d93a0e233439fc5d79e3f4700e0cee8bedcc59a",
+  "src/vf/io.py": "0ab24d462c72a506597d3c30e3eee7a882d7eada33bfec55cdeff366747651be",
+  "src/vf/locate.py": "36c80471ee00b0c72a18043792d0169efc65c15c5aaae9a7ce42595583d99250",
+  "src/vf/paths.py": "da38b051ba338daefaa2a2fb143c7785e6f56c39156d3dad996ed8bfd28d9714",
+  "src/vf/plotstyle.py": "a19e855383691331990f9749b99f9eb79d443515560cdc38532652744e87db1b",
+  "src/vf/public_list.py": "76bd944a4b994c6ec3dd924373e466fa2500766837330f757a0fa579b072d9a0",
+  "src/vf/questions.py": "230b7fe6406fc8a54a0173f22079664f3192532cd3c062c05968b212a60e4c6b",
+  "src/vf/rank.py": "2c7014e86e81a696f53f6094f77be8420893af2e8f035255439309ea672f0d4d",
+  "src/vf/recipes.py": "e00467c3960a9845e684dd2bebcb40beb41d036159a559eec2929f87398e26cc",
+  "src/vf/services.py": "db04fa0d03c4e2cf1c8cf6a74fab33cacfe0eda109fcad97720ea0977f3a3ade",
+  "src/vf/travel.py": "0740dc4a643f5020c2dc971cd7c0226ebf899f776b8079947d28d8836bb07b02",
+  "src/vf/trust.py": "0b0279cef05b5366aa9b5cdbb2eb1761d6971bc1ac5ef66944b4337ad36368cb",
+  "src/vf/why_not.py": "f227a4bbc1d1c44c20dc90675b787fe04857a4168158193b08f5758930ad20a1",
+  "data/labels/eval_sealed/points.csv": "5030e273a856443bcadc3642fe0067bb7bfae3647dc988b2bba7e4beb84020c6",
+  "data/labels/eval_sealed/queries.csv": "73e7026fe6f99795d462a6faf0dac70e226f96427694c903cd4e13a0a03558a6"
+ },
+ "deployed_app": {
+  "app": "vf-care-finder",
+  "deployment_id": "01f1e65cfe49190ea3a7672a51f4b564",
+  "manifest_sha256": "520a5159b49da8786b2de7885a6129b76d52fb19cf18a6bbe925fd72ed3158da",
+  "matches_bundle": true
+ },
+ "freeze_sha256": "d448086febb33026d68429bf7da40f23824915da37100832aae03f156881811f"
+}
