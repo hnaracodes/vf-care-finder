@@ -175,3 +175,34 @@ The five brief scenarios through `/api/answer`, compared with the local run in `
 - Answers took 0.3 to 0.7 s each.
 
 The 24-hour Free Edition clock restarted with this deploy (about 07:54 UTC Nov 22). Restart the app before judging (see "Restart before judging").
+
+## Deployment 2 (overnight fixes, Nov 22)
+
+Deployed Nov 22, 05:10 ET (10:10:50 UTC; "App started successfully", state `SUCCEEDED` at 10:11:21 UTC), deployment `01f1e65cfe49190ea3a7672a51f4b564`, mode `SNAPSHOT`. It replaces `01f1e649d9621e14ae07b9686db87a15`. First attempt, no retry needed.
+
+- What changed since Deployment 1: the overnight test and fix round (commit 17bf7e6, `reports/overnight_test_and_fix.md`): `server.py`, `vf/locate.py`, `vf/questions.py`, `vf/rank.py`, a rebuilt front end (`index-COzRBfmM.js`), and a bundle rebuilt for the phone-mask fix (ISO dates no longer masked).
+- Route: "bundle built locally". `wp12_bundle.py --check` passed first (dbapp/vf matches src/vf, 15 of 15 required files, recipe v0.3, wp11_v3, places-v3, no file over 10 MB, none of 9,352 call numbers in clear). The bundle was not rebuilt. `dbapp/` was copied with `stage_app` (55 files, no `.gitignore`, no caches, about 50 MB), the old `/Workspace/Users/$ME/vf-care-finder` was deleted, the copy uploaded with `import-dir` (file counts per folder match the staged copy), and deployed from there.
+- Build id: the manifest is the one in `dbapp/bundle/manifest.json` at commit 17bf7e6 (created 2026-11-22T09:22:18Z, file sha256 `520a5159...58da`). This is not the manifest hash in `reports/build_final.md` (`225936a2...0cce`, 07:48:00Z): the overnight round rebuilt the bundle after that report. Every build id part in that report's table still matches: recipe v0.3, tagger `student:wp4b-2b_r2[ob_delivery]+student:s1-1b[h24,icu,ventilator]+regex:v0.2[rest]`, fact tags sha256 `1bc6faf5...f982`, `wp11_v3`, `places-v3`, ranker `v1`, `public_list_v2`, `questions_v2`. Only the masked-text files changed (grades, record info, outside lists).
+
+Checked through the URL with a workspace bearer token, 10:12 to 10:15 UTC:
+
+- `/api/health`: `ok`, `mode: bundle`, `vf_from: dbapp/vf`, 9,989 facilities, 12 graded lines, recipe v0.3, `grades_method: student`, `flags_source: wp11_v3`, 182,755 places, `sim_v1`, static front end present, every extra loaded, no extras errors, load 6.7 s. The served manifest equals the local `dbapp/bundle/manifest.json` field for field.
+- A request without a token gets 401.
+- `/` returns the built front end: `index.html` byte-identical to `dbapp/static/index.html`; its five referenced JS and CSS assets (including `index-COzRBfmM.js`) return 200 and are byte-identical to the local files.
+
+The five brief scenarios through `/api/answer`. "Same as local" means the same status, card ids, grades, minutes, outside lane, nearest-with-evidence line and call fields as the same code and bundle run locally (FastAPI test client), and the same status and cards as `reports/build_final.md`:
+
+| Scenario | Status | Cards (grade) | Same as local |
+| --- | --- | --- | --- |
+| Dialysis, Jaipur | ok | Soni (g3, about 6 min), NAV Imperial (g3), Garg Child Hospital (g2) | yes |
+| Emergency C-section, PIN 226001 | ok | BNK (g3), Fatima (g2), Pawar's Clinic (g2); 3 LaQshya lane lines (Ram Sagar Misra, Jhalkari Bai Mahila, CHC Sarojini Nagar) | yes |
+| Dialysis, Jokihat, Bihar | no_reliable_option | no cards; nearest with evidence Raiganj GMCH, 76 km, about 1 h 30 min | yes |
+| Emergency C-section, Nashik | ok | Hrudayasparsh (g2), Prapti Women's (g2), Sukhatme (g2); District Hospital, Nashik on the why-not list with its LaQshya line and a masked call button (overnight fix H2, H4); 3 LaQshya lane lines (Malegaon, Kalwan, Manmad) | yes |
+| Trauma, Kotputli | ok | Shri Shyam, Kotputli (g3, about 2 min), Sachkhand (g3, about 51 min), Rainbow, Narnaul (g3) | yes |
+
+- `/api/sim`: dialysis Jokihat ok, 170 villages, 11 inside the window, 13 evidence and 22 claim-only facilities; emergency C-section PIN 226001 ok, 402 villages, all inside the window, 47 evidence facilities. Both equal the local run's summary field for field.
+- Calls: every card shows a masked number with `tel` null. None of the bundle's 9,352 call numbers appears in clear in the five answers or the two sim responses.
+- Answers took 0.2 to 0.8 s each.
+- Not changed by this deploy: `app.yaml` still sets no `VF_DEMO_MODE` (overnight report H1). Record with `?demo=1` in the URL, or set it in `app.yaml` and redeploy, and check that the "Demo" chip shows before a take.
+
+The 24-hour Free Edition clock restarted with this deploy (about 10:11 UTC Nov 22). Restart the app before judging (see "Restart before judging").
