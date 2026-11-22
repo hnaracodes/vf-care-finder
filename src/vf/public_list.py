@@ -24,19 +24,31 @@ Rules this module keeps:
   date; it is not a statement about the record, and the absence of a line says
   nothing about a hospital.
 
+A lapsed certificate is worded as D051 says: "certificate on the 8 Apr 2026
+list, valid to <date>, not renewed on that list" (never "expired facility").
+
+Version 2 (D055, ``annotate_answer``, at the end of this file) adds five more
+outside lists (AERB radiotherapy licences, National Cancer Grid, MoHFW trauma
+care facilities, NABI burn-care providers, the NHP blood bank directory) as
+``outside_lines`` on cards and an ``outside_nearby`` lane on the answer.
+
 Pure functions (normalisation, scoring, the line text) are importable without
 any data. ``PublicList`` holds the link table; ``public_line(facility_id)``
 uses a cached default loaded from ``silver/laqshya_links.parquet``.
 """
 from __future__ import annotations
 
+import json
+import math
+import os
 import re
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Iterable, Mapping, Optional
 
+import numpy as np
 import pandas as pd
 
 SOURCE = "LaQshya, NHSRC"
@@ -376,18 +388,26 @@ def _cert_order(cert: Mapping, as_of: date):
 
 def line_text(cert: Mapping, as_of: date, list_date: date = LIST_DATE) -> str:
     """The card sentence for one list row. Template only (D030)."""
+    return (f"Government list ({SOURCE}, {fmt_date(list_date)}, page {int(cert['page'])} row {int(cert['sno'])}): "
+            f"{cert_what(cert)}{cert_validity(cert, as_of, list_date)}. Outside data, not from this record.")
+
+
+def cert_what(cert: Mapping) -> str:
+    """'maternity operating theatre certified' (department and status, no dates)."""
     dept = DEPARTMENT_PLAIN.get(cert.get("department") or "", "unit (department not stated)")
     status = STATUS_PLAIN.get(cert.get("certification_status"), str(cert.get("certification_status")))
+    return f"{dept} {status}"
+
+
+def cert_validity(cert: Mapping, as_of: date, list_date: date = LIST_DATE) -> str:
+    """The validity clause after ``cert_what``. A lapsed certificate is worded as D051 says: "certificate on
+    the 8 Apr 2026 list, valid to <date>, not renewed on that list" (never "expired facility")."""
     v = _d(cert.get("validity_date"))
-    tail = ""
     if v is None:
-        valid = "validity not stated"
-    else:
-        valid = f"valid to {fmt_date(v)}"
-        if v < as_of:
-            tail = f" (expired by {fmt_date(as_of)})"
-    return (f"Government list ({SOURCE}, {fmt_date(list_date)}, page {int(cert['page'])} row {int(cert['sno'])}): "
-            f"{dept} {status}, {valid}{tail}. Outside data, not from this record.")
+        return ", validity not stated"
+    if v < as_of:
+        return f"; certificate on the {fmt_date(list_date)} list, valid to {fmt_date(v)}, not renewed on that list"
+    return f", valid to {fmt_date(v)}"
 
 
 def line_dict(cert: Mapping, as_of: date, listed_as: Optional[str] = None) -> dict:
@@ -524,3 +544,1224 @@ def summarise(links: pd.DataFrame, as_of: date) -> dict:
         "records_with_current_maternity_ot": int(cur_ot["facility_id"].nunique()),
         "current_ot_facility_ids": sorted(cur_ot["facility_id"].unique().tolist()),
     }
+
+
+# ===========================================================================
+# public_list v2: outside lists (D055)
+# ===========================================================================
+#
+# Six outside lists, two uses, ranking unchanged:
+#
+# 1. ``outside_lines`` on a card: a dated, cited fact from a list row linked to
+#    that record. Only links a reader marked ``same`` inside a band whose
+#    one-sided 95% lower bound of precision is at least 0.90 (``accepted`` in
+#    ``silver/ext_links_<source>.parquet``; for LaQshya, ``review == "correct"``).
+# 2. ``outside_nearby`` on the answer: up to 3 listed facilities for this
+#    service, within the service window, that are not linked to any record in
+#    our dataset. A separate lane, never mixed with recommended cards. Blood bank
+#    listings never appear in it (card fact only).
+#
+# Lists never make a facility recommendable, never change a grade, and the
+# absence of a line says nothing about a facility. Every text ends with
+# ``OUTSIDE_TAIL``.
+#
+#     from vf import public_list as pl
+#     d = pl.annotate_answer(ans.to_dict(), "oncology", res.lat, res.lon, res.state)
+#     d["results"][0]["outside_lines"]    # [{source_id, ..., text}]
+#     d["outside_nearby"]                  # [{source_id, name, ..., minutes_label, text}]
+#
+# Tables: built once from ``silver/`` (``build_outside``) or read from a bundle
+# folder holding ``outside_card_facts.parquet`` and ``outside_lane.parquet``
+# (``write_bundle``), then cached (``default_outside``).
+
+OUTSIDE_VERSION = "public_list_v2"
+OUTSIDE_TAIL = "Outside data, not from this record."
+LANE_HEADING = "Also on government or registry lists nearby (not matched to a record in this dataset)"
+LANE_NOT_LINKED = "Not linked to any record in this dataset."
+CARD_FACTS_FILE = "outside_card_facts.parquet"
+LANE_FILE = "outside_lane.parquet"
+OUTSIDE_META_FILE = "outside_meta.json"
+LANE_MAX = 3
+#: A listed position less precise than this is shown as a drive-time range, not one number.
+LOOSE_POSITION_KM = 5.0
+
+#: Lane rule shared with the AERB and blood bank accept stages: a list row is
+#: kept out of the lane when a low-band candidate it was never read against
+#: scores at least this (it may still be one of our records).
+NEAR_MISS_MIN = 0.20
+#: Look-alike rule (from scripts/wp13_ext_aerb_rt.py): one of our records within
+#: max(LOOKALIKE_KM, the row's position precision) whose distinctive name words
+#: match at token set ratio LOOKALIKE_MIN or more keeps the row out of the lane.
+LOOKALIKE_KM = 10.0
+LOOKALIKE_MAX_KM = 40.0
+LOOKALIKE_MIN = 85
+#: Two lane entries this close with matching distinctive words are one place
+#: listed twice (for example by AERB and NCG); the nearer citation is kept.
+LANE_DEDUPE_KM = 3.0
+#: Closer than this, two sources' rows sharing a word rare in our records (LANE_RARE_MAX records or
+#: fewer) are one place ("Dr. Balabhai Nanavati Hospital" and "Nanavati Max Institute of Cancer Care").
+LANE_RARE_KM = 1.0
+LANE_RARE_MAX = 3
+#: Beyond the look-alike radius, a near-identical name (token sort LOOKALIKE_FAR_MIN or more) in the same
+#: district, or the same state within LOOKALIKE_FAR_KM, still keeps the row out (an off map point).
+LOOKALIKE_FAR_MIN = 95
+LOOKALIKE_FAR_KM = 60.0
+#: A look-alike of a record another list is already linked to keeps the row out within this distance.
+LINKED_LOOKALIKE_KM = 30.0
+#: Our records of these types never block the lane (a dental clinic is not a hospital).
+LOOKALIKE_SKIP_TYPES = frozenset({"dentist", "pharmacy"})
+
+#: Words that say what kind of place it is, not which place: dropped with GENERIC
+#: before the look-alike and dedupe comparisons.
+_LANE_GENERIC = GENERIC | frozenset("""pvt private ltd limited llp trust society unit cancer oncology
+radiotherapy radiation burn burns trauma blood bank centre center centres institute hospital
+healthcare clinic clinics nursing home sciences foundation institutes med charitable mission superspeciality
+superspecialty multispeciality multispecialty speciality specialty and of the referal dr department
+excellence advanced""".split())
+
+
+@dataclass(frozen=True)
+class OutsideSource:
+    """One outside list. ``kind`` opens every sentence ("Regulator list (...)");
+    ``short`` is the in-sentence citation; ``card_lines`` are the service lines
+    whose cards may show its facts; ``lane_lines`` those whose lane may show
+    its unlinked rows (empty: card fact only)."""
+    source_id: str
+    source_name: str
+    publisher: str
+    kind: str
+    short: str
+    list_date: Optional[str]
+    card_lines: tuple
+    lane_lines: tuple
+    terms: str
+    note: str = ""
+    #: D057: may this source's rows (names, positions) appear in the lane? Only sources whose recorded
+    #: terms allow reuse with acknowledgement. Switch others on with $VF_OUTSIDE_LANE_SOURCES.
+    lane_public_ok: bool = False
+    #: may its card facts be shown? Off for a source read from an unofficial copy (D057: third-party
+    #: re-hosts are not used). Switch on with $VF_OUTSIDE_CARD_SOURCES.
+    card_public_ok: bool = True
+
+    def as_dict(self) -> dict:
+        return {"source_id": self.source_id, "source_name": self.source_name, "publisher": self.publisher,
+                "kind": self.kind, "short": self.short, "list_date": self.list_date,
+                "card_lines": list(self.card_lines), "lane_lines": list(self.lane_lines), "terms": self.terms,
+                "lane_public_ok": self.lane_public_ok, "card_public_ok": self.card_public_ok}
+
+
+OUTSIDE_SOURCES: dict[str, OutsideSource] = {s.source_id: s for s in (
+    OutsideSource("laqshya", "LaQshya master list", "National Health Systems Resource Centre (NHSRC), MoHFW",
+                  "Government list", "LaQshya, NHSRC, 8 Apr 2026", "2026-04-08", ("emoc",), ("emoc",),
+                  "NHSRC copyright policy (nhsrcindia.org/copyright-policy, read 2026-11-22T06:15Z): material may be "
+                  "reproduced free of charge without specific permission, accurately and not in a misleading "
+                  "context; \"the source must be prominently acknowledged\".", lane_public_ok=True),
+    OutsideSource("aerb_rt", "AERB list of licensed radiotherapy centres",
+                  "Atomic Energy Regulatory Board (AERB), Government of India",
+                  "Regulator list", "AERB, as on Apr 2025", "2025-04", ("oncology",), ("oncology",),
+                  "AERB disclaimer: extracts may be freely used with acknowledgement of the source.",
+                  note="the list gives no licence dates", lane_public_ok=True),
+    OutsideSource("ncg", "National Cancer Grid member list",
+                  "National Cancer Grid (NCG), coordinated by Tata Memorial Centre",
+                  "Registry list", "National Cancer Grid member list, as served 22 Nov 2026", None,
+                  ("oncology",), ("oncology",),
+                  "Page footer: all rights reserved; no terms page. Cited facts only.",
+                  note="membership is not an accreditation of a service"),
+    OutsideSource("mohfw_trauma", "MoHFW list of 196 trauma care facilities",
+                  "Ministry of Health and Family Welfare (MoHFW), Government of India",
+                  "Government list", "MoHFW, 8 Feb 2023", "2023-02-08", ("trauma",), ("trauma",),
+                  "MoHFW copyright policy: no reproduction without permission; cite and acknowledge.",
+                  note="the list records scheme funding and gives no level or operating status"),
+    OutsideSource("nabi_burns", "NABI list of burn care providers", "National Academy of Burns India (NABI)",
+                  "Registry list", "NABI, updated 5 Feb 2026", "2026-02-05", ("burns",), ("burns",),
+                  "NABI page: all contents private properties of NABI, all rights reserved. Cited facts only."),
+    OutsideSource("nhp_bloodbank", "National Health Portal blood bank directory",
+                  "National Health Portal, MoHFW (data.gov.in)",
+                  "Government directory",
+                  "National Health Portal, data.gov.in file published 10 Aug 2017, read from a third-party copy",
+                  "2017-08-10", ("emoc", "cardiac_surgery", "trauma"), (),
+                  "Government Open Data License - India (GODL), attribution required. The bytes are a GitHub copy "
+                  "(data.gov.in was unreachable), so card facts are off by default (D057: no third-party "
+                  "re-hosts).", card_public_ok=False),
+)}
+#: The five sources with a link table of their own (LaQshya keeps laqshya_links.parquet).
+LINKED_SOURCES = ("aerb_rt", "ncg", "mohfw_trauma", "nabi_burns", "nhp_bloodbank")
+
+
+def _env_ids(var: str) -> set:
+    return {x.strip() for x in os.environ.get(var, "").split(",") if x.strip()}
+
+
+def lane_sources_allowed() -> frozenset:
+    """Sources whose rows may appear in the lane: ``lane_public_ok`` ones plus any named in
+    $VF_OUTSIDE_LANE_SOURCES (comma separated; ``all`` for every source). Read on each call."""
+    extra = _env_ids("VF_OUTSIDE_LANE_SOURCES")
+    if "all" in extra:
+        return frozenset(OUTSIDE_SOURCES)
+    return frozenset(k for k, v in OUTSIDE_SOURCES.items() if v.lane_public_ok or k in extra)
+
+
+def card_sources_allowed() -> frozenset:
+    """Sources whose card facts may be shown: ``card_public_ok`` ones plus $VF_OUTSIDE_CARD_SOURCES."""
+    extra = _env_ids("VF_OUTSIDE_CARD_SOURCES")
+    if "all" in extra:
+        return frozenset(OUTSIDE_SOURCES)
+    return frozenset(k for k, v in OUTSIDE_SOURCES.items() if v.card_public_ok or k in extra)
+
+_CARD_COLS = ["facility_id", "source_id", "list_uid", "what", "citation", "locator", "valid_to"]
+_LANE_COLS = ["source_id", "list_uid", "service_line", "name", "district", "state", "pin", "lat", "lon",
+              "position_precision_km", "position_note", "what", "citation", "locator", "valid_to", "group_key"]
+
+
+def _blank(v) -> bool:
+    if v is None:
+        return True
+    if isinstance(v, float) and math.isnan(v):
+        return True
+    try:
+        if v is pd.NA or v is pd.NaT:
+            return True
+    except TypeError:
+        pass
+    return isinstance(v, str) and v.strip().lower() in ("", "nan", "none", "null", "nat")
+
+
+def _s(v) -> Optional[str]:
+    return None if _blank(v) else str(v).strip()
+
+
+def _iso(v) -> Optional[str]:
+    d = None if _blank(v) else _d(v)
+    return d.isoformat() if d else None
+
+
+def _fmt_list_date(iso: Optional[str]) -> Optional[str]:
+    if not iso:
+        return None
+    if len(iso) == 7:  # year and month only
+        return datetime.strptime(iso, "%Y-%m").strftime("%b %Y")
+    return fmt_date(date.fromisoformat(iso))
+
+
+def nice_place(s) -> str:
+    """'GUNTUR' -> 'Guntur'; mixed case is kept as written."""
+    s = _s(s)
+    if not s:
+        return ""
+    if s.upper() != s:
+        return s
+    small = {"And", "Of", "The"}
+    words = s.title().split()
+    return " ".join(w.lower() if i and w in small else w for i, w in enumerate(words))
+
+
+def nice_name(s) -> str:
+    """An all-capitals list name in title case ('SRI PRAAGNA HOSPITALS' -> 'Sri Praagna Hospitals');
+    short all-capital words (AIIMS, ESIC) and mixed-case names are kept. Dashes between words become
+    commas (the house style has no dashes), ' ,' closes up and trailing dots go."""
+    s = _s(s)
+    if not s:
+        return ""
+    s = re.sub(r"\s+[‐-―-]+\s+", ", ", s)
+    s = re.sub(r"\s+,", ",", s)
+    s = re.sub(r",\s*,", ",", s)
+    s = re.sub(r"[\s.,]*\.{2,}$", "", s).strip()
+    s = re.sub(r"\s{2,}", " ", s)
+    letters = [c for c in s if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.8:
+        return s
+    out = []
+    for w in s.split():
+        core = re.sub(r"[^A-Za-z]", "", w)
+        keep = core in _ACRONYMS or (2 <= len(core) <= 5 and not re.search(r"[AEIOUY]", core))
+        out.append(w if keep else w.capitalize())
+    return " ".join(out)
+
+
+#: Capitalised words kept as written by ``nice_name`` (words with no vowel, such as MGM, are kept anyway).
+_ACRONYMS = frozenset("""AIIMS ESIC ESI PGIMER NIMHANS SGPGI SGPGIMS KGMU TMC HCG BHU CMC JIPMER ACTREC KEM GMC
+RML LNJP SMS IGIMS RIMS SKIMS ICMR NHSRC DRDO KLE KMC CHC PHC DH SDH GH ECHS MCH IMS AIMS MIOT SIMS NIMS""".split())
+
+
+#: Names one place goes by that share no words, found in the review of the lane (normalised-name regex
+#: -> the token added to the name). SSKM Hospital is also "IPGME&R" and, in our data, "PG Hospital".
+NAME_ALIASES = (
+    (re.compile(r"\b(?:sskm|ipgmer|ipgme|i p g m e|pg hospital)\b"), "sskm"),
+)
+_INITIAL_STOP = frozenset({"and", "of", "the"})
+
+
+def join_initials(norm: str) -> str:
+    """Runs of single letters become one word ("s m s medical college" -> "sms medical college",
+    "i p g m e and r" -> "ipgmer"). Takes a ``normalise_name`` result."""
+    toks = norm.split()
+    out, run = [], []
+    for i, w in enumerate(toks):
+        if len(w) == 1 and w.isalpha():
+            run.append(w)
+            continue
+        if run and w == "and" and i + 1 < len(toks) and len(toks[i + 1]) == 1:
+            continue  # "e and r" inside a run of initials
+        if run:
+            out.append("".join(run))
+            run = []
+        out.append(w)
+    if run:
+        out.append("".join(run))
+    return " ".join(out)
+
+
+def _alias_norm(name) -> str:
+    n = join_initials(normalise_name(name))
+    for rx, tok in NAME_ALIASES:
+        n = rx.sub(tok, n)
+    return _SPACES.sub(" ", n).strip()
+
+
+def generic_words(name) -> str:
+    """The kind-of-place words of a name ("Referal Hospital" -> "hospital referal"), for comparing two
+    names that have no distinctive word."""
+    return " ".join(sorted({w for w in _alias_norm(name).split() if w in _LANE_GENERIC
+                            and w not in _INITIAL_STOP}))
+
+
+def kind_words(name) -> set:
+    """``generic_words`` without "hospital", which every name carries."""
+    return set(generic_words(name).split()) - {"hospital"}
+
+
+def kinds_within(a: set, b: set) -> bool:
+    """Every kind word of ``a`` has a counterpart in ``b``, spelling slips allowed ("referal" and
+    "referral" count, "area" and "care" do not). Empty ``a`` never matches."""
+    from rapidfuzz import fuzz
+
+    return bool(a) and all(any(fuzz.ratio(x, y) >= 85 for y in b) for x in a)
+
+
+def lane_core(name, place=None) -> str:
+    """Distinctive words of a facility name for the look-alike and dedupe checks, initials joined and
+    aliases added. When the name has none ("Government Medical College", "District Hospital"), the
+    distinctive words of ``place`` (the list's district, or our record's city) stand in."""
+    n = _alias_norm(name)
+    core = {w for w in n.split() if w not in _LANE_GENERIC and len(w) > 1}
+    if not core and place is not None and not _blank(place):
+        core = {w for w in _alias_norm(place).split() if w not in _LANE_GENERIC and len(w) > 1}
+    return " ".join(sorted(core))
+
+
+#: Short words that name a kind of unit (civil hospital, referral hospital), never one place's initials.
+_KIND_ABBR = frozenset("ch rh gh dh sdh mch phc chc uphc uchc fru th ah mc gmc gmch dwh dch cs".split())
+#: Kind words that may sit inside a run of initials ("KMC" = Kasturba Medical College, "MPCT" = Mahatma
+#: Phule Charitable Trust); others ("nursing", "general", "multi") may not ("SN" is not "Sarthak Nursing").
+_RUN_OK_GENERIC = frozenset("""medical college institute sciences science research hospital charitable trust
+memorial foundation centre society mission government""".split())
+_UNIT_OF = re.compile(r"\(?\s*\b(?:a\s+)?unit\s+of\b", re.I)
+
+
+PLACE_DROP_MIN = 90
+
+
+def name_parts(name) -> list:
+    """The name, plus each half of "X, a unit of Y" that has two distinctive words or more (either may be
+    our record's name; "Max Superspeciality Hospital, a unit of ..." alone is too thin to try)."""
+    s = _s(name) or ""
+    parts = [s]
+    if _UNIT_OF.search(s):
+        parts += [x.strip(" ,()-") for x in _UNIT_OF.split(s, maxsplit=1)
+                  if len(lane_core(x.strip(" ,()-")).split()) >= 2]
+    return parts
+
+
+def initials_match(a_core: str, b_core: str, b_full: str, local_places: frozenset = frozenset()) -> bool:
+    """True when a short word of ``a_core`` (2 to 6 letters, not a kind abbreviation such as CH or DH)
+    spells the initials of a run of words in ``b_full`` ("ld" and "Lal Ded", "sk" and "Sri Krishna",
+    "kmc" and "Kasturba Medical College") and nothing distinctive is left over on either side (place
+    names of this place aside, ``local_places``: the row's district and state, our record's city):
+    "LD Hospital" matches "Lal Ded Hospital", "S M Deb Civil Hospital" does not match "Silchar Medical
+    College", and "MCH K R Nagara" does not match "Krishna Rajendra Hospital" (Mysuru)."""
+    a, b = set(a_core.split()), set(b_core.split())
+    words = [w for w in b_full.split() if w not in _INITIAL_STOP]
+    for t in a:
+        if not (2 <= len(t) <= 6 and t.isalpha()) or t in _KIND_ABBR or t in b:
+            continue
+        for i in range(len(words) - len(t) + 1):
+            run = words[i:i + len(t)]
+            if (any(len(w) < 2 for w in run) or run[0] in _LANE_GENERIC
+                    or any(w in _LANE_GENERIC and w not in _RUN_OK_GENERIC for w in run)
+                    or "".join(w[0] for w in run) != t):
+                continue
+            if (a - {t} - local_places - _KIND_ABBR) <= b and (b - set(run) - local_places) <= a:
+                return True
+    return False
+
+
+def name_match(a_core: str, a_full: str, b_core: str, b_full: str,
+               place_words: frozenset = frozenset(), local_places: frozenset = frozenset()) -> tuple[float, float]:
+    """(loose, strict) similarity of two names for the lane checks, 0 to 100. ``loose`` is
+    ``lookalike_ratio`` of the cores; ``strict`` is their token sort ratio (extra distinctive words lower
+    it). Both are 100 when ``initials_match`` holds either way ("LD Hospital", "Lal Ded Hospital")."""
+    from rapidfuzz import fuzz
+
+    if not a_core or not b_core:
+        return 0.0, 0.0
+    if initials_match(a_core, b_core, b_full, local_places) or initials_match(b_core, a_core, a_full,
+                                                                             local_places):
+        return 100.0, 100.0
+    loose = lookalike_ratio(a_core, b_core, place_words)
+    strict = float(fuzz.token_sort_ratio(a_core, b_core))
+    # the same with this place's names dropped from both ("..., Wardha" against a name without it), by
+    # token sort at PLACE_DROP_MIN or more only, so "Apollo" does not match "Apollo Sugar Clinic"
+    a2 = " ".join(w for w in a_core.split() if w not in local_places)
+    b2 = " ".join(w for w in b_core.split() if w not in local_places)
+    if a2 and b2 and (a2, b2) != (a_core, b_core):
+        q = float(fuzz.token_sort_ratio(a2, b2))
+        if q >= PLACE_DROP_MIN:
+            loose, strict = max(loose, q), max(strict, q)
+    return loose, strict
+
+
+def outside_status(valid_to: Optional[str], as_of: date) -> str:
+    """``current`` (a validity or renewal date on or after ``as_of``), ``lapsed``
+    (a date before it) or ``undated`` (the row carries none)."""
+    valid_to = _iso(valid_to)
+    if not valid_to:
+        return "undated"
+    return "current" if date.fromisoformat(valid_to) >= as_of else "lapsed"
+
+
+def _validity_clause(source_id: str, valid_to: Optional[str], as_of: date) -> str:
+    valid_to = _iso(valid_to)
+    st = outside_status(valid_to, as_of)
+    src = OUTSIDE_SOURCES[source_id]
+    if source_id == "laqshya":
+        return cert_validity({"validity_date": valid_to}, as_of)
+    if source_id == "nhp_bloodbank":
+        if st == "undated":
+            return "; no usable licence renewal date on the list"
+        when = fmt_date(date.fromisoformat(valid_to))
+        if st == "lapsed":
+            return f", licence renewal date on the list {when}, not renewed on that list"
+        return f", licence renewal date on the list {when}"
+    return f"; {src.note}" if src.note else ""
+
+
+def card_text(source_id: str, locator: str, what: str, valid_to: Optional[str], as_of: date) -> str:
+    """'Regulator list (AERB, as on Apr 2025, page 3 row 12): licensed by AERB for radiotherapy; the list
+    gives no licence dates. Outside data, not from this record.' Template only (D030)."""
+    src = OUTSIDE_SOURCES[source_id]
+    return (f"{src.kind} ({src.short}, {locator}): {what}{_validity_clause(source_id, valid_to, as_of)}. "
+            f"{OUTSIDE_TAIL}")
+
+
+def lane_text(row: Mapping, minutes_label: str, as_of: date) -> str:
+    """The lane sentence: name and place, what the list says, the citation, that it is not linked to our
+    data, the estimated drive and the position quality."""
+    src = OUTSIDE_SOURCES[row["source_id"]]
+    name = nice_name(row["name"])
+    parts = [x for x in (nice_place(row.get("district")), nice_place(row.get("state"))) if x]
+    parts = [x for x in parts if x.lower() not in name.lower()]  # "District Hospital, Rewari", not "..., Rewari"
+    head = name + (f", {', '.join(parts)}" if parts else "")
+    pos = row.get("position_note") or "approximate"
+    pos_txt = ("position as listed" if pos == "listed coordinates" else f"position approximate ({pos})")
+    return (f"{head}: {row['what']}{_validity_clause(row['source_id'], row.get('valid_to'), as_of)} "
+            f"({src.kind}, {src.short}, {row['locator']}). {LANE_NOT_LINKED} {minutes_label[0].upper()}"
+            f"{minutes_label[1:]}; {pos_txt}. {OUTSIDE_TAIL}")
+
+
+def _locator(source_id: str, r: Mapping) -> str:
+    def i(v):
+        return int(v) if not _blank(v) else "?"
+    if source_id == "aerb_rt":
+        return f"page {i(r.get('page'))} row {i(r.get('row_on_page'))}"
+    if source_id == "ncg":
+        return f"section '{_s(r.get('raw_section')) or '?'}' row {i(r.get('row_in_section'))}"
+    if source_id == "mohfw_trauma":
+        return f"page {i(r.get('page'))} S. No. {i(r.get('raw_sno'))}"
+    if source_id == "nabi_burns":
+        return f"sheet row {i(r.get('sheet_row'))}"
+    if source_id == "nhp_bloodbank":
+        return f"row Sr No {_s(r.get('raw_sr_no')) or '?'}"
+    if source_id == "laqshya":
+        return f"page {i(r.get('page'))} row {i(r.get('sno'))}"
+    raise KeyError(source_id)
+
+
+def _haversine(lat0: float, lon0: float, lat, lon) -> np.ndarray:
+    la0, lo0 = math.radians(lat0), math.radians(lon0)
+    la, lo = np.radians(np.asarray(lat, dtype=float)), np.radians(np.asarray(lon, dtype=float))
+    h = np.sin((la - la0) / 2) ** 2 + math.cos(la0) * np.cos(la) * np.sin((lo - lo0) / 2) ** 2
+    return 6371.0088 * 2 * np.arcsin(np.sqrt(np.clip(h, 0.0, 1.0)))
+
+
+# ---------------------------------------------------------------------------
+# Building the tables from silver
+# ---------------------------------------------------------------------------
+
+def _source_rows(source_id: str, silver: Path) -> tuple[Optional[pd.DataFrame], Optional[pd.DataFrame]]:
+    lp, kp = silver / f"ext_{source_id}.parquet", silver / f"ext_links_{source_id}.parquet"
+    if not lp.exists() or not kp.exists():
+        return None, None
+    return pd.read_parquet(lp), pd.read_parquet(kp)
+
+
+def _card_facts_for(source_id: str, lst: pd.DataFrame, links: pd.DataFrame) -> pd.DataFrame:
+    acc = links[links["accepted"].fillna(False).astype(bool)]
+    if not len(acc):
+        return pd.DataFrame(columns=_CARD_COLS)
+    by_uid = lst.set_index("list_uid")
+    rows = []
+    for a in acc.itertuples():
+        r = by_uid.loc[a.list_uid].to_dict()
+        valid = _iso(r.get("renewal_date")) if source_id == "nhp_bloodbank" else None
+        rows.append({"facility_id": a.facility_id, "source_id": source_id, "list_uid": a.list_uid,
+                     "what": _s(r.get("what")) or "listed", "citation": _s(r.get("citation")) or "",
+                     "locator": _locator(source_id, r), "valid_to": valid})
+    return pd.DataFrame(rows, columns=_CARD_COLS)
+
+
+def _lane_rows_for(source_id: str, lst: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
+    """Rows that may enter the lane before the look-alike check, and why the others did not."""
+    why: dict[str, int] = {}
+    if "lane_eligible" in lst.columns:
+        ok = lst["lane_eligible"].fillna(False).astype(bool)
+        for k, v in lst.loc[~ok, "lane_exclusion" if "lane_exclusion" in lst else "link_status"].fillna(
+                "not eligible").value_counts().items():
+            why[f"source rule: {k}"] = int(v)
+    else:
+        status = lst["link_status"].fillna("")
+        ok = status.eq("not_in_dataset")
+        for k, v in status[~ok].value_counts().items():
+            why[f"source rule: {k}"] = int(v)
+    if "best_unread_score" in lst:  # every source, including those with their own lane_eligible rule
+        near = ok & lst["best_unread_score"].fillna(0.0).ge(NEAR_MISS_MIN)
+        why["near_miss_low_candidate"] = int(near.sum())
+        ok = ok & ~near
+    located = lst["lat"].notna() & lst["lon"].notna()
+    why["not_located"] = int((ok & ~located).sum())
+    sel = lst[ok & located]
+    line = OUTSIDE_SOURCES[source_id].lane_lines
+    rows = []
+    for r in sel.to_dict("records"):
+        name = _s(r.get("name"))
+        if not name:
+            why["unnamed"] = why.get("unnamed", 0) + 1
+            continue
+        for sl in line:
+            rows.append({"source_id": source_id, "list_uid": r["list_uid"], "service_line": sl, "name": name,
+                         "district": _s(r.get("district")), "state": _s(r.get("state")), "pin": _s(r.get("pin")),
+                         "lat": float(r["lat"]), "lon": float(r["lon"]),
+                         "position_precision_km": None if _blank(r.get("position_precision_km"))
+                         else float(r["position_precision_km"]),
+                         "position_note": _s(r.get("position_note")), "what": _s(r.get("what")) or "listed",
+                         "citation": _s(r.get("citation")) or "", "locator": _locator(source_id, r),
+                         "valid_to": None, "group_key": _s(r.get("list_group")) or r["list_uid"]})
+    return pd.DataFrame(rows, columns=_LANE_COLS), why
+
+
+def _district_centres(silver: Path) -> dict:
+    """NFHS district_key -> (lat, lon, precision_km, district, state) of the PIN directory's district
+    centre (``places`` kind ``district``). A district_key that several PIN districts map to takes the one
+    with the most post offices."""
+    pl_path, dc_path = silver / "places.parquet", silver / "district_crosswalk.parquet"
+    if not pl_path.exists() or not dc_path.exists():
+        return {}
+    places = pd.read_parquet(pl_path, columns=["kind", "state", "district", "lat", "lon", "precision_km",
+                                                "n_offices"])
+    d = places[places["kind"].eq("district")]
+    dc = pd.read_parquet(dc_path, columns=["state_pin", "district_pin", "district_key"]).dropna()
+    m = d.merge(dc, left_on=["state", "district"], right_on=["state_pin", "district_pin"], how="inner")
+    m = m.sort_values("n_offices", ascending=False).drop_duplicates("district_key")
+    return {r.district_key: (float(r.lat), float(r.lon), None if pd.isna(r.precision_km) else float(r.precision_km),
+                             r.district, r.state) for r in m.itertuples()}
+
+
+def _laqshya_lane(silver: Path, links: pd.DataFrame, as_of: date) -> tuple[pd.DataFrame, dict]:
+    """LaQshya units with a maternity operating theatre row and no link to our records: no candidate at
+    all, or only candidates a reviewer marked ``wrong``. Placed at their district centre: the list's OSM
+    point matches came from place-name tokens and some are wrong."""
+    p = silver / "ext_laqshya.parquet"
+    why: dict[str, int] = {}
+    if not p.exists():
+        return pd.DataFrame(columns=_LANE_COLS), why
+    lq = pd.read_parquet(p)
+    units = lq.groupby("facility_uid")
+    reviewed = links.groupby("facility_uid")["review"].agg(set).to_dict() if len(links) else {}
+    centres = _district_centres(silver)
+    rows = []
+    for uid, g in units:
+        ot = g[g["department"].eq("Maternity OT")]
+        if not len(ot):
+            why["no maternity OT row"] = why.get("no maternity OT row", 0) + 1
+            continue
+        rv = reviewed.get(uid, set())
+        if rv - {"wrong"}:
+            k = "linked or under review (" + ", ".join(sorted(rv - {"wrong"})) + ")"
+            why[k] = why.get(k, 0) + 1
+            continue
+        c = centres.get(g["district_key"].iloc[0]) if isinstance(g["district_key"].iloc[0], str) else None
+        if c is None:
+            why["not_located"] = why.get("not_located", 0) + 1
+            continue
+        certs = [{"sno": int(r.sno), "page": int(r.page), "department": r.department,
+                  "certification_status": r.certification_status,
+                  "validity_date": None if pd.isna(r.validity_date) else pd.Timestamp(r.validity_date).date()}
+                 for r in ot.itertuples()]
+        best = sorted(certs, key=lambda x: _cert_order(x, as_of))[0]
+        first = g.iloc[0]
+        rows.append({"source_id": "laqshya", "list_uid": f"laqshya:{uid}", "service_line": "emoc",
+                     "name": str(first.facility_name), "district": _s(first.district_raw),
+                     "state": _s(c[4]) or _s(first.state_ut), "pin": None, "lat": c[0], "lon": c[1],
+                     "position_precision_km": c[2], "position_note": "district centre",
+                     "what": cert_what(best),
+                     "citation": (f"LaQshya master list (NHSRC, 8 Apr 2026), page {best['page']}, S.No. "
+                                  f"{best['sno']}; {SOURCE_URL}, retrieved {RETRIEVED.isoformat()}"),
+                     "locator": f"page {best['page']} row {best['sno']}",
+                     "valid_to": best["validity_date"].isoformat() if best["validity_date"] else None,
+                     "group_key": f"laqshya:{uid}"})
+    return pd.DataFrame(rows, columns=_LANE_COLS), why
+
+
+def lookalike_ratio(core: str, ours: str, place_words: frozenset = frozenset()) -> float:
+    """How well our record's distinctive words match a list row's. Token set ratio (one name's words all
+    in the other's scores 100), except when the row's only distinctive word is a place name ("DH
+    Gwalior" -> "gwalior"): then token sort ratio, so "Paridhi Hospital, Gwalior" does not count but
+    "District Hospital, Gwalior" does."""
+    from rapidfuzz import fuzz
+
+    if not core or not ours:
+        return 0.0
+    if len(core.split()) == 1 and core in place_words:
+        return float(fuzz.token_sort_ratio(core, ours))
+    return float(fuzz.token_set_ratio(core, ours))
+
+
+def _place_words(silver: Path) -> frozenset:
+    """Single-word place names (districts, cities, post offices), lower case."""
+    p = silver / "places.parquet"
+    if not p.exists():
+        return frozenset()
+    n = pd.read_parquet(p, columns=["name_norm"])["name_norm"].dropna().astype(str).str.lower()
+    return frozenset(w for w in n.unique() if w.isalpha() and len(w) > 2)
+
+
+def _state_norm(s) -> str:
+    s = _s(s)
+    return re.sub(r"[^A-Z]", "", s.upper().replace("&", " AND ")) if s else ""
+
+
+def _ours_for_lookalike(fac: pd.DataFrame, silver: Optional[Path], linked: frozenset) -> pd.DataFrame:
+    """Our located records with the name forms the lane checks use: ``core`` (city_raw stands in when the
+    name has no distinctive word), ``full`` (normalised, initials joined), the PIN's district and state,
+    and ``linked`` (an accepted link or a correct LaQshya link from any source)."""
+    f = fac[fac["lat"].notna() & fac["lon"].notna()].copy()
+    if "facility_type" in f:
+        f = f[~f["facility_type"].isin(LOOKALIKE_SKIP_TYPES)]
+    city = f["city_raw"] if "city_raw" in f else pd.Series(None, index=f.index)
+    f["core"] = [lane_core(n, c) for n, c in zip(f["name"], city)]
+    f["full"] = [_alias_norm(n) for n in f["name"]]
+    f["name_core"] = [lane_core(n) for n in f["name"]]
+    f["full_city"] = [set(a.split()) | set(_alias_norm(c).split() if _s(c) else ()) for a, c in zip(f["full"], city)]
+    f["district_n"], f["state_n"] = "", [_state_norm(x) for x in (f["state_raw"] if "state_raw" in f else city)]
+    pc = silver / "pin_crosswalk.parquet" if silver is not None else None
+    if pc is not None and pc.exists() and "pin" in f:
+        x = pd.read_parquet(pc, columns=["pin", "state_pin", "district_pin", "rank"])
+        x = x[x["rank"].eq(1)].drop_duplicates("pin").set_index("pin")
+        pins = f["pin"].astype(str)
+        dist = pins.map(x["district_pin"]).fillna("")
+        st = pins.map(x["state_pin"])
+        f["district_n"] = [_state_norm(d) for d in dist]
+        f["state_n"] = [_state_norm(a) if isinstance(a, str) else b for a, b in zip(st, f["state_n"])]
+    f["linked"] = f["facility_id"].isin(linked)
+    return f.reset_index(drop=True)
+
+
+def _place_tokens(*places) -> frozenset:
+    """The words of some place names ("Mumbai Suburban", "Tamil Nadu"), normalised."""
+    return frozenset(w for p in places if not _blank(p) for w in _alias_norm(p).split())
+
+
+def _row_districts(r, pin_district: Mapping) -> set:
+    out = {_state_norm(r.district)} if _s(r.district) else set()
+    pin = _s(r.pin)
+    if pin and pin in pin_district:
+        out.add(pin_district[pin])
+    return out - {""}
+
+
+def _lookalike_filter(lane: pd.DataFrame, fac: Optional[pd.DataFrame], place_words: frozenset = frozenset(),
+                      silver: Optional[Path] = None, linked: frozenset = frozenset()
+                      ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Split lane rows into (kept, dropped). A row is dropped when one of our records looks like it
+    (``name_match``: initials joined and matched, aliases added; a missing core uses the place). Each of
+    ``name_parts`` is tried ("X, a unit of Y" also as X and as Y):
+
+    * ``nearby``: loose score LOOKALIKE_MIN or more within max(LOOKALIKE_KM, the row's position precision),
+      capped at LOOKALIKE_MAX_KM;
+    * ``generic_twin``: within that radius, one name has no distinctive word ("Government Medical
+      College", our "District Hospital"); the kind words agree (``kinds_within``) and the place matches
+      (the row's district is in our name or city, or our city matches the row's place word); our record
+      must be a hospital;
+    * ``same_name_far``: full names alike at token sort LOOKALIKE_FAR_MIN or more, with a distinctive core
+      (two words or more, or one rare in our records), in the same district or the same state within
+      LOOKALIKE_FAR_KM (our map point or the list's may be off: "C R Gardi Hospital" 53 km);
+    * ``linked_elsewhere``: a record another list (or a correct LaQshya link) is already linked to, within
+      LINKED_LOOKALIKE_KM or in the same district, sharing two distinctive non-place words (loose score
+      LOOKALIKE_MIN or more), at strict score 90 or more on a core that is not only place names, or with
+      full names alike at LOOKALIKE_FAR_MIN or more."""
+    empty = lane.iloc[0:0].assign(lookalike_facility_id=None, lookalike_name=None, lookalike_km=None,
+                                  lookalike_rule=None)
+    if fac is None or not len(lane):
+        return lane, empty
+    f = _ours_for_lookalike(fac, silver, linked)
+    flat, flon = f["lat"].astype(float).to_numpy(), f["lon"].astype(float).to_numpy()
+    ctx = {"f": f, "place_words": place_words, "cores": f["core"].tolist(), "fulls": f["full"].tolist(),
+           "ncores": f["name_core"].tolist(), "fullcity": f["full_city"].tolist(),
+           "fkinds": [kind_words(n) for n in f["name"]],
+           "fcity_words": [_place_tokens(c) for c in (f["city_raw"] if "city_raw" in f else [None] * len(f))],
+           # only a hospital can be the twin of an all-generic name (a laboratory's address may name a college)
+           "fhosp": (f["facility_type"].eq("hospital") if "facility_type" in f
+                     else pd.Series(True, index=f.index)).tolist(),
+           "fdist": f["district_n"].tolist(), "fstate": f["state_n"].tolist(), "flinked": f["linked"].to_numpy()}
+    df: dict[str, int] = {}
+    for c in ctx["ncores"]:
+        for w in set(c.split()):
+            df[w] = df.get(w, 0) + 1
+    ctx["df"] = df
+    pin_district = {}
+    pc = silver / "pin_crosswalk.parquet" if silver is not None else None
+    if pc is not None and pc.exists():
+        x = pd.read_parquet(pc, columns=["pin", "district_pin", "rank"])
+        pin_district = {str(k): _state_norm(v) for k, v in x[x["rank"].eq(1)].drop_duplicates("pin")
+                        .set_index("pin")["district_pin"].items()}
+    reach_km = max(LOOKALIKE_FAR_KM, LINKED_LOOKALIKE_KM, LOOKALIKE_MAX_KM)
+    keep, drop = [], []
+    cache: dict[str, Optional[tuple]] = {}
+    for r in lane.itertuples(index=False):
+        key = f"{r.list_uid}"
+        if key not in cache:
+            dists, st = _row_districts(r, pin_district), _state_norm(r.state)
+            radius = min(max(LOOKALIKE_KM, r.position_precision_km or 0.0), LOOKALIKE_MAX_KM)
+            km = _haversine(r.lat, r.lon, flat, flon)
+            best = None
+            for part in name_parts(r.name):
+                hit = _best_lookalike(part, r, ctx, km, radius, reach_km, dists, st)
+                if hit and (best is None or (hit[3], -hit[2]) > (best[3], -best[2])):
+                    best = hit
+            cache[key] = best
+        (drop if cache[key] else keep).append(r._asdict())
+    kept = pd.DataFrame(keep, columns=lane.columns)
+    dropped = pd.DataFrame(drop, columns=lane.columns)
+    if len(dropped):
+        for j, c in enumerate(("lookalike_facility_id", "lookalike_name", "lookalike_km", "lookalike_rule")):
+            dropped[c] = [cache[u][j if j < 3 else 4] for u in dropped["list_uid"]]
+    return kept, dropped
+
+
+def _best_lookalike(name: str, r, ctx: Mapping, km: np.ndarray, radius: float, reach_km: float, dists: set,
+                    st: str) -> Optional[tuple]:
+    """(facility_id, name, km, score, rule) of the best of our records that looks like ``name`` (one of
+    ``name_parts`` of lane row ``r``) under the ``_lookalike_filter`` rules, or None."""
+    from rapidfuzz import fuzz
+
+    f, place_words, df = ctx["f"], ctx["place_words"], ctx["df"]
+    cores, fulls, ncores, fullcity = ctx["cores"], ctx["fulls"], ctx["ncores"], ctx["fullcity"]
+    fdist, fstate, flinked = ctx["fdist"], ctx["fstate"], ctx["flinked"]
+    fkinds, fhosp, fcity_words = ctx["fkinds"], ctx["fhosp"], ctx["fcity_words"]
+    core, full = lane_core(name, r.district), _alias_norm(name)
+    own_core = lane_core(name)
+    own_words, kinds = set(own_core.split()), kind_words(name)
+    row_places = _place_tokens(r.district, r.state)
+    best = None
+    for i in np.flatnonzero(km <= reach_km):
+        same_d = bool(fdist[i]) and fdist[i] in dists
+        same_s = bool(st) and fstate[i] == st
+        d = float(km[i])
+        if not (d <= radius or same_d or same_s or flinked[i]):
+            continue
+        loose, strict = name_match(core, full, cores[i], fulls[i], place_words, row_places | fcity_words[i])
+        rule = None
+        if not own_core or not ncores[i]:
+            # one name is all kind words ("Government Medical College", our "District Hospital"): the
+            # kinds must agree and the place must match, close by only
+            if d > radius or not fhosp[i]:
+                pass
+            elif not own_core and ncores[i]:
+                if kinds_within(kinds, fkinds[i]) and set(core.split()) <= fullcity[i]:
+                    rule = "generic_twin"
+            elif kinds_within(kinds, fkinds[i]) and kinds_within(fkinds[i], kinds) and loose >= LOOKALIKE_MIN:
+                rule = "generic_twin"
+        elif loose >= LOOKALIKE_MIN and d <= radius:
+            rule = "nearby"
+        else:
+            shared = (own_words & set(ncores[i].split())) - place_words
+            distinctive = len(own_words) >= 2 or any(df.get(w, 0) <= LANE_RARE_MAX for w in own_words)
+            full_alike = fuzz.token_sort_ratio(full, fulls[i]) >= LOOKALIKE_FAR_MIN
+            if full_alike and distinctive and (same_d or (same_s and d <= LOOKALIKE_FAR_KM)):
+                rule = "same_name_far"
+            elif flinked[i] and (d <= LINKED_LOOKALIKE_KM or same_d) and (
+                    (len(shared) >= 2 and loose >= LOOKALIKE_MIN) or (strict >= 90 and own_words - place_words)
+                    or full_alike):
+                rule = "linked_elsewhere"
+        if rule and (best is None or (loose, -d) > (best[3], -best[2])):
+            best = (f["facility_id"].iat[i], f["name"].iat[i], round(d, 1), loose, rule)
+    return best
+
+
+def _merge_cross_source(lane: pd.DataFrame, fac: Optional[pd.DataFrame],
+                        place_words: frozenset = frozenset()) -> tuple[pd.DataFrame, int]:
+    """Give rows of different sources that are one place the same ``group_key``, so the lane shows one
+    of them. Place names (the row's district and state, and single-word place names) never count as a
+    match. Two rows within LANE_DEDUPE_KM are one place when:
+
+    * both names are all kind words plus a place ("DH Gumla", "District Hospital, Gumla"): the kinds
+      agree both ways and the places are the same ("DWH Fatehpur" is not "District Hospital, Fatehpur");
+    * otherwise their non-place words match (``_same_place``; token sort too when either row sits on a
+      district centre, where every row of the district shares one point), or, both placed better than a
+      district centre and within LANE_RARE_KM, they share a word that is rare in our records (at most
+      LANE_RARE_MAX of them): "Dr. Balabhai Nanavati Hospital" and "Nanavati Max Institute".
+
+    A group never holds two rows of one source. Returns the table and the number of rows re-keyed."""
+    from rapidfuzz import fuzz
+
+    if not len(lane):
+        return lane, 0
+    df: dict[str, int] = {}
+    if fac is not None:
+        for n in fac["name"]:
+            for w in set(lane_core(n).split()):
+                df[w] = df.get(w, 0) + 1
+    u = lane.drop_duplicates("list_uid").reset_index(drop=True)
+    here = [_place_tokens(d, st) for d, st in zip(u["district"], u["state"])]
+    core = [set(lane_core(n).split()) for n in u["name"]]
+    nonplace = [c - place_words - h for c, h in zip(core, here)]
+    kinds = [kind_words(n) for n in u["name"]]
+    centre = u["position_note"].fillna("").eq("district centre").to_numpy()
+    src = u["source_id"].tolist()
+    lat, lon = u["lat"].astype(float).to_numpy(), u["lon"].astype(float).to_numpy()
+    parent = list(range(len(u)))
+    members = {i: {src[i]} for i in range(len(u))}
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def same(i, j, d) -> bool:
+        a, b = nonplace[i], nonplace[j]
+        if not a or not b:
+            return (not a and not b and core[i] == core[j] and kinds_within(kinds[i], kinds[j])
+                    and kinds_within(kinds[j], kinds[i]))
+        x, y = " ".join(sorted(a)), " ".join(sorted(b))
+        if _same_place(x, y) and (not (centre[i] or centre[j]) or fuzz.token_sort_ratio(x, y) >= LOOKALIKE_MIN):
+            return True
+        return (not centre[i] and not centre[j] and d <= LANE_RARE_KM
+                and any(df.get(w, 0) <= LANE_RARE_MAX and len(w) > 2 for w in a & b))
+
+    for i in range(len(u)):
+        km = _haversine(lat[i], lon[i], lat, lon)
+        for j in np.flatnonzero(km <= LANE_DEDUPE_KM):
+            if j <= i or src[i] == src[j]:
+                continue
+            ri, rj = root(i), root(j)
+            if ri == rj or members[ri] & members[rj] or not same(i, j, float(km[j])):
+                continue
+            parent[rj] = ri
+            members[ri] |= members.pop(rj)
+    gk = {u["list_uid"].iat[i]: u["group_key"].iat[root(i)] for i in range(len(u))}
+    new = lane["list_uid"].map(gk)
+    n = int((new != lane["group_key"]).sum())
+    return lane.assign(group_key=new), n
+
+
+@dataclass
+class OutsideLists:
+    """The outside-list tables for ``annotate_answer``. ``card_facts``: one row
+    per accepted link (five linked sources); ``laqshya``: the reviewed LaQshya
+    links (v1 ``PublicList``); ``lane``: list rows not linked to our data, one
+    row per (row, service line); ``meta``: counts and sources."""
+    card_facts: pd.DataFrame
+    lane: pd.DataFrame
+    laqshya: PublicList
+    meta: dict
+
+    def __post_init__(self):
+        self._facts: dict[str, list[dict]] = {}
+        for r in self.card_facts.to_dict("records"):
+            self._facts.setdefault(r["facility_id"], []).append(r)
+        self._lane_by_line: dict[str, tuple[pd.DataFrame, np.ndarray, np.ndarray]] = {}
+        for line, g in self.lane.groupby("service_line"):
+            g = g.reset_index(drop=True)
+            self._lane_by_line[line] = (g, g["lat"].to_numpy(float), g["lon"].to_numpy(float))
+
+    # -- card facts --------------------------------------------------------
+    def lines_for(self, facility_id: str, service_line: Optional[str], as_of: Optional[date] = None) -> list[dict]:
+        """Outside lines for one record and service: LaQshya first (its best certificate), then the other
+        sources in ``OUTSIDE_SOURCES`` order. An unknown or missing service line shows every source's
+        card facts except blood banks."""
+        as_of = as_of or date.today()
+        allowed = card_sources_allowed()
+
+        def wanted(sid: str) -> bool:
+            src = OUTSIDE_SOURCES[sid]
+            if sid not in allowed:
+                return False
+            if service_line in SERVICE_LINES_ALL:
+                return service_line in src.card_lines
+            return bool(src.card_lines) and sid != "nhp_bloodbank"
+
+        out = []
+        if wanted("laqshya"):
+            ln = self.laqshya.line(facility_id, as_of=as_of)
+            if ln is not None:
+                cert = {"validity_date": ln["validity"], "department": ln["department"],
+                        "certification_status": ln["status"]}
+                src = OUTSIDE_SOURCES["laqshya"]
+                out.append({"source_id": "laqshya", "source_name": src.source_name, "publisher": src.publisher,
+                            "list_date": src.list_date, "what": cert_what(cert),
+                            "status": outside_status(ln["validity"], as_of),
+                            "citation": (f"LaQshya master list (NHSRC, 8 Apr 2026), page {ln['page']}, S.No. "
+                                         f"{ln['row']}; {SOURCE_URL}, retrieved {ln['retrieved']}"),
+                            "text": ln["text"]})
+        order = {sid: i for i, sid in enumerate(OUTSIDE_SOURCES)}
+        seen = set()
+        for r in sorted(self._facts.get(facility_id, []), key=lambda x: order.get(x["source_id"], 99)):
+            sid = r["source_id"]
+            if not wanted(sid) or (sid, r["list_uid"]) in seen:
+                continue
+            seen.add((sid, r["list_uid"]))
+            src = OUTSIDE_SOURCES[sid]
+            vt = _s(r.get("valid_to"))
+            out.append({"source_id": sid, "source_name": src.source_name, "publisher": src.publisher,
+                        "list_date": src.list_date, "what": r["what"], "status": outside_status(vt, as_of),
+                        "citation": r["citation"], "text": card_text(sid, r["locator"], r["what"], vt, as_of)})
+        return out
+
+    # -- the lane ------------------------------------------------------------
+    def nearby(self, service_line: Optional[str], lat: Optional[float], lon: Optional[float],
+               state: Optional[str] = None, k: int = LANE_MAX, as_of: Optional[date] = None,
+               exclude_like: Iterable[Mapping] = ()) -> list[dict]:
+        """Up to ``k`` listed facilities for ``service_line`` within its window from (lat, lon), nearest
+        first, that are not linked to our data. Drive time from ``vf.travel`` when it is available and the
+        origin is not an island; otherwise the line's straight-line km radius from ``vf.services``.
+        Only ``lane_sources_allowed()`` sources are shown. An entry whose name looks like one of
+        ``exclude_like`` (card dicts with ``name``, ``city``, ``lat``, ``lon``: the answer's own cards)
+        within LINKED_LOOKALIKE_KM is skipped, so one place never shows as a card and a lane entry."""
+        if service_line not in self._lane_by_line or lat is None or lon is None:
+            return []
+        try:
+            lat, lon = float(lat), float(lon)
+        except (TypeError, ValueError):
+            return []
+        if math.isnan(lat) or math.isnan(lon):
+            return []
+        as_of = as_of or date.today()
+        g, glat, glon = self._lane_by_line[service_line]
+        km = _haversine(lat, lon, glat, glon)
+        reach = _reach(service_line, state)
+        inside = km <= reach["km_limit"] + 1e-9
+        if not inside.any():
+            return []
+        allowed = lane_sources_allowed()
+        cards = []
+        for c in exclude_like or ():
+            if isinstance(c, Mapping) and _s(c.get("name")):
+                cards.append((lane_core(c["name"], c.get("city")), _alias_norm(c["name"]), _place_tokens(c.get("city")),
+                              None if _blank(c.get("lat")) else float(c["lat"]),
+                              None if _blank(c.get("lon")) else float(c["lon"])))
+        out, kept_cores = [], []
+        # nearest first; ties (rows placed on one district centre) put a current certificate first, then
+        # the more precise position, then list order
+        cur = np.array([0 if outside_status(v, as_of) == "current" else 1 for v in g["valid_to"]])
+        prec = g["position_precision_km"].astype(float).fillna(0.0).to_numpy()
+        order = np.lexsort((np.arange(len(g)), prec, cur, np.round(km, 1)))
+        for i in order:
+            if not inside[i]:
+                continue
+            r = g.iloc[int(i)].to_dict()
+            if r["source_id"] not in allowed:
+                continue
+            d = float(km[i])
+            core = lane_core(r["name"], r.get("district"))
+            full = _alias_norm(r["name"])
+            here = _place_tokens(r.get("district"), r.get("state"))
+            if any(name_match(core, full, cc, cf, local_places=here | cp)[0] >= LOOKALIKE_MIN
+                   and (cla is None or _haversine(r["lat"], r["lon"], [cla], [clo])[0] <= LINKED_LOOKALIKE_KM)
+                   for cc, cf, cp, cla, clo in cards):
+                continue
+            # one place listed twice: the same list group, or another source's row close by with the
+            # same distinctive words (rows of one source are distinct entries of that list)
+            dup = any(gk == r["group_key"]
+                      or (sid != r["source_id"] and core and c and _same_place(core, c)
+                          and _haversine(r["lat"], r["lon"], [la], [lo])[0] <= LANE_DEDUPE_KM)
+                      for c, la, lo, gk, sid in kept_cores)
+            if dup:
+                continue
+            label = _minutes_label(d, r.get("position_precision_km"), reach)
+            src = OUTSIDE_SOURCES[r["source_id"]]
+            vt = _s(r.get("valid_to"))
+            out.append({
+                "source_id": r["source_id"], "source_name": src.source_name, "name": nice_name(r["name"]),
+                "district": nice_place(r.get("district")) or None, "state": nice_place(r.get("state")) or None,
+                "pin": _s(r.get("pin")), "lat": round(float(r["lat"]), 6), "lon": round(float(r["lon"]), 6),
+                "position_precision_km": None if _blank(r.get("position_precision_km"))
+                else round(float(r["position_precision_km"]), 1),
+                "position_note": r.get("position_note"), "minutes_label": label, "km": round(d, 1),
+                "what": r["what"] + (_validity_clause(r["source_id"], vt, as_of) if r["source_id"] == "laqshya"
+                                     else ""),
+                "citation": r["citation"], "text": lane_text(r, label, as_of),
+            })
+            kept_cores.append((core, r["lat"], r["lon"], r["group_key"], r["source_id"]))
+            if len(out) >= k:
+                break
+        return out
+
+
+def _same_place(a: str, b: str) -> bool:
+    from rapidfuzz import fuzz
+    return fuzz.token_set_ratio(a, b) >= LOOKALIKE_MIN
+
+
+def _service_lines_all() -> tuple:
+    try:
+        from .services import SERVICE_LINES
+        return tuple(SERVICE_LINES)
+    except Exception:  # services not importable: the twelve lines as shipped
+        return ("emoc", "nicu", "dialysis", "icu", "cardiac_surgery", "cath_lab", "mri", "ct", "trauma",
+                "burns", "neurosurgery", "oncology")
+
+
+SERVICE_LINES_ALL = _service_lines_all()
+
+
+def _reach(service_line: str, state: Optional[str]) -> dict:
+    """The lane's reach for one origin: the service window in estimated drive minutes (``vf.travel``),
+    or, where minutes cannot be estimated (islands) or ``vf.travel`` is missing, the line's km radius."""
+    try:
+        from . import services as S
+        radius = float(S.RADII_KM.get(service_line, 50.0))
+        win = S.WINDOWS.get(service_line) if hasattr(S, "WINDOWS") else None
+    except Exception:
+        S, radius, win = None, 50.0, None
+    try:
+        from . import travel
+    except Exception:
+        travel = None
+    if travel is not None and win is not None:
+        f = travel.state_factor(state)
+        if f.value is not None:
+            km_limit = travel.window_km(win.minutes, factor=f.value)
+            return {"mode": "minutes", "minutes": float(win.minutes), "factor": f.value, "km_limit": km_limit,
+                    "travel": travel}
+        return {"mode": "km", "km_limit": radius, "why": travel.SEA_NOTE, "travel": travel}
+    return {"mode": "km", "km_limit": radius, "why": "drive time not estimated", "travel": travel}
+
+
+def _minutes_label(km: float, precision: Optional[float], reach: Mapping) -> str:
+    """'about 25 min estimated drive, free-flow; real trips take longer', a range when the listed position
+    is loose (precision above LOOSE_POSITION_KM: the range spans km minus to km plus the precision and the
+    95% band of the drive-time fit), or the km fallback."""
+    if reach["mode"] == "minutes":
+        tr, f = reach["travel"], reach["factor"]
+        loose = precision is not None and not _blank(precision) and float(precision) > LOOSE_POSITION_KM
+        t, lo, hi = tr.minutes_range(km, f, None if not loose else float(precision), loose=loose)
+        if loose:
+            return (f"about {tr.fmt_minutes(lo)} to {tr.fmt_minutes(hi)} estimated drive, free-flow (the listed "
+                    f"position is approximate); real trips take longer")
+        return f"about {tr.fmt_minutes(t)} estimated drive, free-flow; real trips take longer"
+    return (f"{km:.0f} km straight line, within the {reach['km_limit']:.0f} km radius for this service "
+            f"({reach['why']})")
+
+
+def _empty_outside(note: str) -> OutsideLists:
+    return OutsideLists(pd.DataFrame(columns=_CARD_COLS), pd.DataFrame(columns=_LANE_COLS),
+                        PublicList(pd.DataFrame(columns=["facility_id", "lq_name", "certs", "review"])),
+                        {"version": OUTSIDE_VERSION, "note": note, "sources": {}})
+
+
+def build_outside(data_dir: Optional[Path] = None, as_of: Optional[date] = None) -> OutsideLists:
+    """Build the tables from ``silver/`` (``data_dir`` defaults to ``vf.paths.data_dir()``). A missing
+    source is skipped and recorded in ``meta['sources'][id]['status']``. ``as_of`` only chooses which
+    LaQshya certificate a lane row cites; status and wording are computed when an answer is served."""
+    from . import paths
+
+    root = Path(data_dir) if data_dir is not None else paths.data_dir()
+    silver = root / "silver"
+    as_of = as_of or date.today()
+    meta = {"version": OUTSIDE_VERSION, "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "as_of": as_of.isoformat(), "lane_rules": {
+                "near_miss_min": NEAR_MISS_MIN, "lookalike_km": LOOKALIKE_KM, "lookalike_max_km": LOOKALIKE_MAX_KM,
+                "lookalike_min": LOOKALIKE_MIN, "dedupe_km": LANE_DEDUPE_KM}, "sources": {}}
+    facts, lanes = [], []
+    lq_links_path = silver / LINKS_FILE
+    lq_links = pd.read_parquet(lq_links_path) if lq_links_path.exists() else pd.DataFrame(
+        columns=["facility_uid", "facility_id", "lq_name", "certs", "review"])
+    laq = PublicList(lq_links)
+    lq_lane, lq_why = _laqshya_lane(silver, lq_links, as_of)
+    meta["sources"]["laqshya"] = {"status": "ok" if lq_links_path.exists() else "missing",
+                                  "card_links": int(lq_links["review"].eq("correct").sum()) if len(lq_links) else 0,
+                                  "card_records": len(laq.facility_ids()), "lane_candidates": int(len(lq_lane)),
+                                  "lane_excluded": lq_why}
+    lanes.append(lq_lane)
+    for sid in LINKED_SOURCES:
+        lst, links = _source_rows(sid, silver)
+        if lst is None:
+            meta["sources"][sid] = {"status": "missing"}
+            continue
+        cf = _card_facts_for(sid, lst, links)
+        facts.append(cf)
+        info = {"status": "ok", "list_rows": int(len(lst)), "card_links": int(len(cf)),
+                "card_records": int(cf["facility_id"].nunique()) if len(cf) else 0}
+        if OUTSIDE_SOURCES[sid].lane_lines:
+            ln, why = _lane_rows_for(sid, lst)
+            lanes.append(ln)
+            info.update({"lane_candidates": int(ln["list_uid"].nunique()), "lane_excluded": why})
+        else:
+            info.update({"lane_candidates": 0, "lane_excluded": {"card fact only source": int(len(lst))}})
+        meta["sources"][sid] = info
+    lane = pd.concat([x for x in lanes if len(x)], ignore_index=True) if any(len(x) for x in lanes) else \
+        pd.DataFrame(columns=_LANE_COLS)
+    fac_path = silver / "facilities.parquet"
+    fac = pd.read_parquet(fac_path, columns=["facility_id", "name", "facility_type", "lat", "lon", "pin",
+                                             "city_raw", "state_raw"]) if fac_path.exists() else None
+    card = pd.concat([x for x in facts if len(x)], ignore_index=True) if any(len(x) for x in facts) else \
+        pd.DataFrame(columns=_CARD_COLS)
+    linked = frozenset(card["facility_id"].astype(str)) | frozenset(laq.facility_ids())
+    places = _place_words(silver)
+    lane, dropped = _lookalike_filter(lane, fac, places, silver=silver, linked=linked)
+    for (sid, rule), n in dropped.groupby(["source_id", "lookalike_rule"])["list_uid"].nunique().items():
+        meta["sources"][sid].setdefault("lane_excluded", {})[f"lookalike_record_{rule}"] = int(n)
+    lane, n_merged = _merge_cross_source(lane, fac, places)
+    meta["lane_cross_source_merged_rows"] = n_merged
+    for sid in meta["sources"]:
+        if "lane_candidates" in meta["sources"][sid]:
+            meta["sources"][sid]["lane_rows"] = int(lane.loc[lane["source_id"].eq(sid), "list_uid"].nunique())
+    meta["lookalike_examples"] = dropped.drop_duplicates("list_uid").head(60)[
+        ["source_id", "list_uid", "name", "lookalike_name", "lookalike_km", "lookalike_rule"]].to_dict(
+        "records") if len(dropped) else []
+    meta["card_facts"] = int(len(card))
+    meta["lane_rows"] = int(len(lane))
+    meta["sources_info"] = {k: v.as_dict() for k, v in OUTSIDE_SOURCES.items()}
+    return OutsideLists(card.reset_index(drop=True), lane.reset_index(drop=True), laq, meta)
+
+
+def publishable(o: OutsideLists) -> OutsideLists:
+    """The tables a deployed app may carry (D057): card facts only from ``card_sources_allowed()``, lane
+    rows only from ``lane_sources_allowed()``. ``meta`` records what was withheld and why."""
+    cs, ls = card_sources_allowed(), lane_sources_allowed()
+    card = o.card_facts[o.card_facts["source_id"].isin(cs)].reset_index(drop=True)
+    lane = o.lane[o.lane["source_id"].isin(ls)].reset_index(drop=True)
+    meta = json.loads(json.dumps(o.meta, default=str))
+    meta["card_sources_shown"], meta["lane_sources_shown"] = sorted(cs), sorted(ls)
+    meta["withheld_terms"] = {
+        "card_facts": {k: int(v) for k, v in o.card_facts.loc[~o.card_facts["source_id"].isin(cs), "source_id"]
+                       .value_counts().items()},
+        "lane_rows": {k: int(v) for k, v in o.lane.loc[~o.lane["source_id"].isin(ls)].drop_duplicates("list_uid")
+                      ["source_id"].value_counts().items()}}
+    meta["card_facts"], meta["lane_rows"] = int(len(card)), int(len(lane))
+    return OutsideLists(card, lane, o.laqshya, meta)
+
+
+def write_bundle(out_dir: Path, outside: Optional[OutsideLists] = None) -> dict:
+    """Write ``outside_card_facts.parquet``, ``outside_lane.parquet`` and ``outside_meta.json`` into a
+    bundle folder (WP12), atomically. Only ``publishable`` rows are written (D057 terms gates).
+    ``laqshya_links.parquet`` is shipped separately, as before. Returns {file name: bytes}."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    o = publishable(outside or build_outside())
+    sizes = {}
+    for name, df in ((CARD_FACTS_FILE, o.card_facts), (LANE_FILE, o.lane)):
+        tmp = out_dir / (name + ".tmp")
+        df.to_parquet(tmp, index=False)
+        os.replace(tmp, out_dir / name)
+        sizes[name] = (out_dir / name).stat().st_size
+    tmp = out_dir / (OUTSIDE_META_FILE + ".tmp")
+    tmp.write_text(json.dumps(o.meta, indent=1, default=str))
+    os.replace(tmp, out_dir / OUTSIDE_META_FILE)
+    sizes[OUTSIDE_META_FILE] = (out_dir / OUTSIDE_META_FILE).stat().st_size
+    return sizes
+
+
+def _bundle_candidates() -> list[Path]:
+    here = Path(__file__).resolve()
+    c = []
+    if os.environ.get("VF_BUNDLE_DIR"):
+        c.append(Path(os.environ["VF_BUNDLE_DIR"]))
+    c.append(here.parents[1] / "bundle")  # dbapp/vf -> dbapp/bundle
+    return c
+
+
+def _warn_empty(why: str) -> None:
+    """A deployed app with no outside tables shows no outside data at all, silently: say so in the log."""
+    import logging
+    logging.getLogger("vf.public_list").warning("outside lists empty: %s; outside_lines and outside_nearby "
+                                                "will be empty (WP12: call public_list.write_bundle)", why)
+
+
+def load_outside(path: Optional[Path] = None) -> OutsideLists:
+    """The outside tables from ``path`` (a bundle folder holding ``outside_card_facts.parquet`` and
+    ``outside_lane.parquet``, or a data folder holding ``silver/``). With no path: $VF_BUNDLE_DIR or the
+    app's bundle folder when they hold the files, else built from ``silver/``. Nothing found gives empty
+    tables (no lines, no lane), never an error."""
+    cands = [Path(path)] if path is not None else _bundle_candidates()
+    for d in cands:
+        if (d / CARD_FACTS_FILE).exists() and (d / LANE_FILE).exists():
+            meta = {}
+            if (d / OUTSIDE_META_FILE).exists():
+                try:
+                    meta = json.loads((d / OUTSIDE_META_FILE).read_text())
+                except ValueError:
+                    meta = {}
+            o = OutsideLists(pd.read_parquet(d / CARD_FACTS_FILE), pd.read_parquet(d / LANE_FILE), load(d),
+                             meta or {"version": OUTSIDE_VERSION})
+            if not len(o.card_facts) and not len(o.lane):
+                _warn_empty(f"the bundle at {d} holds no rows")
+            return o
+        if (d / "silver").is_dir():
+            return build_outside(d)
+    if path is not None:
+        _warn_empty(f"no outside tables at {path}")
+        return _empty_outside(f"no outside tables at {path}")
+    try:
+        from . import paths
+        if (paths.data_dir() / "silver").is_dir():
+            return build_outside()
+    except Exception:
+        pass
+    _warn_empty("no outside tables found (bundle or silver)")
+    return _empty_outside("no outside tables found")
+
+
+@lru_cache(maxsize=1)
+def default_outside() -> OutsideLists:
+    return load_outside()
+
+
+CARD_SECTIONS = ("results", "beyond_radius", "unverified_nearby", "further_away")
+
+
+def annotate_answer(answer: dict, service_line: Optional[str], lat: Optional[float], lon: Optional[float],
+                    state: Optional[str] = None, *, outside: Optional[OutsideLists] = None,
+                    as_of: Optional[date] = None, k: int = LANE_MAX) -> dict:
+    """Add ``outside_lines`` (a list, possibly empty) to every card dict in ``answer`` (``results``,
+    ``beyond_radius``, ``unverified_nearby``, ``further_away``) and ``outside_nearby`` (up to ``k`` lane
+    entries) to the answer. Nothing existing is changed or removed. Returns the same dict."""
+    o = outside if outside is not None else default_outside()
+    as_of = as_of or date.today()
+
+    cards = []
+
+    def tag(card):
+        if isinstance(card, dict) and card.get("facility_id"):
+            card["outside_lines"] = o.lines_for(str(card["facility_id"]), service_line, as_of=as_of)
+            cards.append(card)
+
+    for sec in CARD_SECTIONS:
+        v = answer.get(sec)
+        if isinstance(v, list):
+            for c in v:
+                tag(c)
+        else:
+            tag(v)
+    answer["outside_nearby"] = o.nearby(service_line, lat, lon, state, k=k, as_of=as_of, exclude_like=cards)
+    return answer
