@@ -38,9 +38,11 @@ The server loads the bundle once at start and answers in process. No SQL warehou
 5. "How we decided" panel, collapsed by default: the recipe for this service in plain words, the gates with counts ("812 facilities within 150 km; 37 with supported evidence; 3 shown"), the score formula and weights, the radius and why, the known limits.
 6. Small map, to the right of the cards or below them on narrow screens: the searched point with its precision circle, the three results numbered like the cards, unverified nearby facilities as hollow markers, nearby post offices as faint dots for context. No basemap tiles (D009). Clicking a marker highlights its card.
 
-## The trip view (D032, last, cut if late)
+## The trip view and simulation (D032, D038: committed)
 
 On the small map, a "Show trips" toggle animates nearby post offices (up to about 3,000, non-suspect, one per placeholder point) travelling to their nearest recommended facility among the results. A second toggle, "If we trusted claims alone", sends them first to the nearest facility that only claims the service; dots whose target has no supporting evidence then re-route, and a counter shows the extra straight-line km: "412 villages would first go to a facility with no evidence of a C-section, then travel 38 km more on average." `/api/trip` returns the points and both target sets; reuse `app/src/swarm.ts` and `swarm-layer.ts`. Every number comes from the API.
+
+Simulation mode (D038), once WP13 ships `p_offers`: a third toggle, "Simulate arrivals", animates the three policies (nearest claim, nearest evidence, our ranking). At each facility a dot either stops (service found) or bounces on to the next facility in that policy's order, with the share that bounce equal to 1 - `p_offers`, assigned deterministically from a hash of the dot's index so every take is identical. A panel shows each policy's expected km to real care and share needing a second trip, from `/api/simulate` (WP5 `simulate`). Before `p_offers` exists the toggle is hidden; no made-up probabilities.
 
 ## Steps
 

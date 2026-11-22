@@ -147,6 +147,19 @@ One row per facility per flag raised; a facility with no flags has no rows.
 | `quote` | str, nullable | the record text that triggered it, verbatim |
 | `check_version` | str | |
 
+### `gold/service_probability.parquet` (WP13)
+
+One row per facility per service line, for facilities graded 1 or higher. Absent until WP13 ships; the ranker falls back to the v0 score (D039).
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `facility_id`, `service_line` | str | |
+| `p_offers` | float | calibrated probability that an independent source confirms the facility offers the service (a lower bound on the true chance, D040) |
+| `p_low`, `p_high` | float | 90% interval (bootstrap over training labels) |
+| `top_factors` | list[struct] | up to 3 `{feature, direction, plain}` items that most moved this facility's probability, for the card |
+| `model_version` | str | |
+| `n_labels_line` | int | independent labels behind this line's model; the app shows "not calibrated" for a line under the minimum WP13 sets |
+
 ### `gold/facility_duplicates.parquet` (WP11)
 
 Pairs `facility_id_a`, `facility_id_b` (a < b), `distance_km`, `name_score`, `signal`, `keep` (the id WP5 shows; the other is "also listed as").

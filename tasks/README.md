@@ -20,6 +20,7 @@ WP0 bootstrap (done)
 
 WP10 stretch: only after WP8 answers the five brief scenarios on Databricks
 WP6, WP7: dropped (D023)
+WP13 outside data + calibration (parallel track, D040) ──────► WP5 probability mode, WP8 simulation (D038, D039)
 ```
 
 What can run in parallel now: WP2 Part B, WP3 v0.2, WP11, WP8, WP12 skeleton (five agents, disjoint files). WP5 starts as soon as one of WP2 B or WP3 lands, against stubs for the other.
@@ -58,6 +59,7 @@ Update your row when you start, when you finish, and when you are blocked. One l
 | 10 | Stretch | todo | | | |
 | 11 | Trust checks | todo | | | New |
 | 12 | Databricks port and bundle | todo | | | CLI installed. Needs Hruday: workspace, Marketplace catalog name, `databricks auth login` |
+| 13 | Outside data and calibration model | doing | orchestrator (workflow) | rescope | Phase R research running; full track approved (D040) |
 
 Status values: `todo`, `doing`, `blocked`, `done`, `dropped`.
 
