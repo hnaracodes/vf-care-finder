@@ -1,0 +1,28 @@
+{
+ "status": "ambiguous",
+ "label": "Aurangabad",
+ "how": "Two districts share this name.",
+ "lat": null,
+ "lon": null,
+ "precision_km": null,
+ "kind": "district",
+ "place_id": null,
+ "candidates": [
+  {
+   "label": "Aurangabad, Maharashtra",
+   "place_id": "district:aurangabad|maharashtra",
+   "kind": "district",
+   "lat": 19.8762,
+   "lon": 75.3433,
+   "precision_km": 25.0
+  },
+  {
+   "label": "Aurangabad, Bihar",
+   "place_id": "district:aurangabad|bihar",
+   "kind": "district",
+   "lat": 24.752,
+   "lon": 84.3742,
+   "precision_km": 20.0
+  }
+ ]
+}

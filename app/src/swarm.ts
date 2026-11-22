@@ -1,209 +1,112 @@
-// Patient swarm (docs/superpowers/specs/2026-11-21-patient-swarm-design.md,
-// approach A). Each dot is one post office area, not a person. Target: the
-// nearest facility at the active grade for the active line. Every dot moves
-// at the same speed in km; a dot whose target is beyond R km travels R km and
-// stops (stranded). A stranded dot in a district the outcome model calls a
-// data desert stays home and pulses: care likely exists, not in this data
-// (est.). Deterministic: start offsets come from a hash of the dot index.
+// Route swarm for the small map's trip view (D032) and simulation (D038).
+// Reuses the India-wide patient swarm's approach (the old class is kept in
+// legacy/swarm.ts): each dot is one post office area, not a person; every dot
+// moves at the same speed in km; start offsets come from a hash of the dot
+// index, so every playback is identical. A route is a list of stops. Each leg
+// (stop k to stop k+1) is one SwarmLayer instance; legs after the first stay
+// hidden until their dot arrives at the leg's start, so a re-routed dot reads
+// as one dot that stops, then moves on.
 
-import type { AppData } from './data';
-import { hash32, interpolateGreatCircle } from './geo';
-import { SWARM } from './colors';
-import type { Simulator } from './sim';
+import { hash32, haversineKm } from './geo';
+import { SWARM, type RGBA } from './colors';
 
-export const STATE_REACHED = 0;
-export const STATE_STRANDED = 1;
-export const STATE_LIKELY = 2;
-
-export interface SwarmCounts {
-  reached: number;
-  stranded: number;
-  likely: number;
+export interface Route {
+  /** [lon, lat] stops; the first is the post office */
+  path: [number, number][];
+  /** colour at each intermediate stop (no service found) and at the end */
+  end: 'reached' | 'stranded';
 }
 
-interface BinaryData {
+export interface LegData {
   length: number;
-  attributes: Record<string, { value: ArrayBufferView; size: number; normalized?: boolean }>;
+  hideBefore: boolean;
+  attributes: Record<string, { value: Float32Array | Uint8Array; size: number; normalized?: boolean }>;
 }
 
-export class Swarm {
-  readonly data: AppData;
-  readonly n: number;
-  /** animate 1 in `ratio` dots at national zoom, chosen by hash of the index */
-  readonly ratio: number;
-  /** km per animation second, the same for every dot */
-  speedKmS = 15;
-  readonly origin: Float32Array;
-  readonly target: Float32Array;
-  readonly timing: Float32Array;
-  readonly color: Uint8Array;
-  readonly state: Int8Array;
-  readonly subset: Uint32Array;
-  counts: SwarmCounts = { reached: 0, stranded: 0, likely: 0 };
-  baseline: SwarmCounts | null = null;
-  rescued = { stranded: 0, likely: 0 };
-  version = 0;
-  private originDescFull: { value: Float32Array; size: number };
-  private originDescSub: { value: Float32Array; size: number };
-  private cacheFull: { v: number; d: BinaryData } | null = null;
-  private cacheSub: { v: number; d: BinaryData } | null = null;
+export interface Segment {
+  from: [number, number];
+  to: [number, number];
+  /** true when this leg leads to a stop where the service was not found */
+  toDeadEnd: boolean;
+}
 
-  constructor(data: AppData, ratio = 5) {
-    this.data = data;
-    this.n = data.n;
-    this.ratio = ratio;
-    const n = this.n;
-    this.origin = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      this.origin[i * 3] = data.lon[i];
-      this.origin[i * 3 + 1] = data.lat[i];
-    }
-    this.target = this.origin.slice();
-    this.timing = new Float32Array(n * 4);
-    this.color = new Uint8Array(n * 4);
-    this.state = new Int8Array(n).fill(-1);
-    const sub: number[] = [];
-    for (let i = 0; i < n; i++) if (hash32(i) % ratio === 0) sub.push(i);
-    this.subset = Uint32Array.from(sub);
-    const subOrigin = new Float32Array(sub.length * 3);
-    sub.forEach((i, j) => {
-      subOrigin[j * 3] = this.origin[i * 3];
-      subOrigin[j * 3 + 1] = this.origin[i * 3 + 1];
-    });
-    this.originDescFull = { value: this.origin, size: 3 };
-    this.originDescSub = { value: subOrigin, size: 3 };
-  }
+export interface SwarmOptions {
+  /** seconds for a typical (85th percentile) leg */
+  typicalLegS?: number;
+  /** seconds for the longest single leg, at most */
+  longestLegS?: number;
+  /** spread of start times, seconds */
+  stagger?: number;
+  /** pause at a stop before moving on, seconds */
+  pause?: number;
+  /** animation time the playback starts at */
+  t0?: number;
+}
 
-  private setDot(i: number, sim: Simulator, k: number, R: number, likelyByDistrict: Uint8Array, t0: number): number {
-    const d = sim.dist[k][i];
-    const f = sim.near[k][i];
-    const di = this.data.district[i];
-    const likely = di !== this.data.noIndex && likelyByDistrict[di] === 1;
-    const lon = this.data.lon[i], lat = this.data.lat[i];
-    let st: number, tlon = lon, tlat = lat, dur = 0;
-    const fac = f !== this.data.noIndex ? sim.facility(f) : null;
-    if (!fac || fac.lat == null || fac.lon == null || !Number.isFinite(d)) {
-      st = likely ? STATE_LIKELY : STATE_STRANDED;
-    } else if (d <= Math.fround(R)) {
-      st = STATE_REACHED;
-      tlon = fac.lon; tlat = fac.lat;
-      dur = d / this.speedKmS;
-    } else if (likely) {
-      st = STATE_LIKELY;
-    } else {
-      st = STATE_STRANDED;
-      [tlon, tlat] = interpolateGreatCircle(lat, lon, fac.lat, fac.lon, R / d);
-      dur = R / this.speedKmS;
-    }
-    const changed = st !== this.state[i] || this.target[i * 3] !== Math.fround(tlon) || this.target[i * 3 + 1] !== Math.fround(tlat);
-    this.state[i] = st;
-    this.target[i * 3] = tlon;
-    this.target[i * 3 + 1] = tlat;
-    if (changed) {
-      this.timing[i * 4] = t0 + (hash32(i) / 4294967296) * 1.5;
-      this.timing[i * 4 + 1] = dur;
-    }
-    this.timing[i * 4 + 2] = st;
-    this.timing[i * 4 + 3] = (hash32(i ^ 0x5bd1e995) / 4294967296) * Math.PI * 2;
-    const c = st === STATE_REACHED ? SWARM.reached : st === STATE_STRANDED ? SWARM.stranded : SWARM.likely;
-    this.color.set(c, i * 4);
-    return st;
-  }
+const END_COLOR: Record<Route['end'], RGBA> = { reached: SWARM.reached, stranded: SWARM.stranded };
 
-  private recount(): void {
-    const c: SwarmCounts = { reached: 0, stranded: 0, likely: 0 };
-    for (let i = 0; i < this.n; i++) {
-      const s = this.state[i];
-      if (s === STATE_REACHED) c.reached++;
-      else if (s === STATE_STRANDED) c.stranded++;
-      else if (s === STATE_LIKELY) c.likely++;
-    }
-    this.counts = c;
-  }
+export class RouteSwarm {
+  readonly legs: LegData[] = [];
+  /** every leg as a straight line, for the faint trip lines under the dots */
+  readonly segments: Segment[] = [];
+  readonly endTime: number;
+  readonly speedKmS: number;
 
-  /** Release every dot from its post office at time t0. */
-  run(sim: Simulator, k: number, R: number, likelyByDistrict: Uint8Array, t0: number, keepBaseline = false, settled = false): void {
-    this.state.fill(-1);
-    // settled: every dot already sits at its end point (used to rewind before a plan replays)
-    const start = settled ? t0 - 1000 : t0;
-    for (let i = 0; i < this.n; i++) this.setDot(i, sim, k, R, likelyByDistrict, start);
-    this.recount();
-    if (!keepBaseline || !this.baseline) this.baseline = { ...this.counts };
-    this.rescued = { stranded: 0, likely: 0 };
-    this.version++;
-  }
-
-  /** Recompute only these post offices (those within R km of a new site) and replay the ones that changed. */
-  replay(sim: Simulator, k: number, R: number, likelyByDistrict: Uint8Array, idx: Int32Array, now: number): number {
-    let replayed = 0;
-    for (let j = 0; j < idx.length; j++) {
-      const i = idx[j];
-      const before = this.state[i];
-      const bx = this.target[i * 3], by = this.target[i * 3 + 1];
-      const after = this.setDot(i, sim, k, R, likelyByDistrict, now);
-      if (after !== before || bx !== this.target[i * 3] || by !== this.target[i * 3 + 1]) {
-        replayed++;
-        // Replays start from home with a short stagger, so the rescue reads clearly.
-        this.timing[i * 4] = now + (hash32(i) / 4294967296) * 0.6;
-        if (before === STATE_STRANDED && after === STATE_REACHED) this.rescued.stranded++;
-        if (before === STATE_LIKELY && after === STATE_REACHED) this.rescued.likely++;
+  constructor(routes: Route[], opts: SwarmOptions = {}) {
+    const stagger = opts.stagger ?? 1.2;
+    const pause = opts.pause ?? 0.5;
+    const t0 = opts.t0 ?? 0;
+    let maxLegs = 0;
+    const lens: number[] = [];
+    for (const r of routes) {
+      maxLegs = Math.max(maxLegs, r.path.length - 1);
+      for (let k = 0; k + 1 < r.path.length; k++) {
+        const [a, b] = [r.path[k], r.path[k + 1]];
+        lens.push(haversineKm(a[1], a[0], b[1], b[0]));
+        const last = k + 2 === r.path.length;
+        this.segments.push({ from: a, to: b, toDeadEnd: !last || r.end === 'stranded' });
       }
     }
-    this.recount();
-    this.version++;
-    return replayed;
-  }
-
-  layerData(all: boolean): BinaryData {
-    if (all) {
-      if (this.cacheFull?.v !== this.version) {
-        this.cacheFull = {
-          v: this.version,
-          d: {
-            length: this.n,
-            attributes: {
-              getPosition: this.originDescFull,
-              getTarget: { value: this.target, size: 3 },
-              getTiming: { value: this.timing, size: 4 },
-              getFillColor: { value: this.color, size: 4, normalized: true },
-            },
-          },
-        };
-      }
-      return this.cacheFull.d;
-    }
-    if (this.cacheSub?.v !== this.version) {
-      const s = this.subset, m = s.length;
-      const tg = new Float32Array(m * 3), tm = new Float32Array(m * 4), co = new Uint8Array(m * 4);
-      for (let j = 0; j < m; j++) {
-        const i = s[j];
-        tg[j * 3] = this.target[i * 3]; tg[j * 3 + 1] = this.target[i * 3 + 1];
-        tm.set(this.timing.subarray(i * 4, i * 4 + 4), j * 4);
-        co.set(this.color.subarray(i * 4, i * 4 + 4), j * 4);
-      }
-      this.cacheSub = {
-        v: this.version,
-        d: {
-          length: m,
-          attributes: {
-            getPosition: this.originDescSub,
-            getTarget: { value: tg, size: 3 },
-            getTiming: { value: tm, size: 4 },
-            getFillColor: { value: co, size: 4, normalized: true },
-          },
+    lens.sort((x, y) => x - y);
+    const p85 = lens.length ? lens[Math.floor(0.85 * (lens.length - 1))] : 1;
+    const longest = lens.length ? lens[lens.length - 1] : 1;
+    // Typical legs take a readable time; the longest never takes more than longestLegS.
+    this.speedKmS = Math.max(0.5, p85 / (opts.typicalLegS ?? 2.2), longest / (opts.longestLegS ?? 6));
+    const start = routes.map((_, i) => t0 + (hash32(i) / 4294967296) * stagger);
+    const clock = start.slice();
+    let end = t0;
+    for (let k = 0; k < maxLegs; k++) {
+      const idx: number[] = [];
+      routes.forEach((r, i) => { if (r.path.length > k + 1) idx.push(i); });
+      const m = idx.length;
+      const pos = new Float32Array(m * 3), tgt = new Float32Array(m * 3), tim = new Float32Array(m * 4), col = new Uint8Array(m * 4);
+      idx.forEach((i, j) => {
+        const r = routes[i];
+        const a = r.path[k], b = r.path[k + 1];
+        const d = haversineKm(a[1], a[0], b[1], b[0]);
+        const dur = d / this.speedKmS;
+        pos[j * 3] = a[0]; pos[j * 3 + 1] = a[1];
+        tgt[j * 3] = b[0]; tgt[j * 3 + 1] = b[1];
+        tim[j * 4] = clock[i];
+        tim[j * 4 + 1] = dur;
+        tim[j * 4 + 2] = 0;
+        tim[j * 4 + 3] = (hash32(i ^ 0x5bd1e995) / 4294967296) * Math.PI * 2;
+        const last = k + 2 === r.path.length;
+        col.set(last ? END_COLOR[r.end] : SWARM.stranded, j * 4);
+        clock[i] += dur + pause;
+        end = Math.max(end, clock[i]);
+      });
+      this.legs.push({
+        length: m,
+        hideBefore: k > 0,
+        attributes: {
+          getPosition: { value: pos, size: 3 },
+          getTarget: { value: tgt, size: 3 },
+          getTiming: { value: tim, size: 4 },
+          getFillColor: { value: col, size: 4, normalized: true },
         },
-      };
+      });
     }
-    return this.cacheSub.d;
-  }
-
-  /** Last time any dot is still moving, to know when to stop redrawing. */
-  endTime(): number {
-    let t = 0;
-    for (let i = 0; i < this.n; i++) {
-      const e = this.timing[i * 4] + this.timing[i * 4 + 1];
-      if (e > t) t = e;
-    }
-    return t;
+    this.endTime = end;
   }
 }

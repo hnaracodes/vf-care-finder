@@ -1,0 +1,11 @@
+# Databricks App config (WP8, D033). Format per the Databricks Apps docs, checked Nov 21 2026:
+#   https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-runtime  (command, env, health_check)
+#   https://docs.databricks.com/aws/en/dev-tools/databricks-apps/system-env   (DATABRICKS_APP_PORT)
+# The command is not run in a shell, so "$VAR" is not expanded. server.py's __main__ starts uvicorn on
+# int(os.environ["DATABRICKS_APP_PORT"]) and host 0.0.0.0, which works whatever the substitution syntax is.
+# (The runtime also sets UVICORN_PORT and UVICORN_HOST=0.0.0.0, so ['uvicorn', 'server:app'] would work too.)
+command: ['python', 'server.py']
+# The bundle is read from dbapp/bundle/ next to server.py; set VF_BUNDLE_DIR under env: to move it.
+health_check:
+  path: '/api/health'
+  timeout_seconds: 120

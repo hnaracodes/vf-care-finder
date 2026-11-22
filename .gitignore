@@ -45,3 +45,4 @@ app/.vite/
 # Video exports are large; keep them out of git
 reports/*.mp4
 reports/*.mov
+.playwright-mcp/

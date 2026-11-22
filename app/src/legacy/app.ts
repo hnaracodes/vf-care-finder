@@ -5,10 +5,10 @@ import { LineLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers';
 import type { AppData, Camera, LineKey, ScenarioSetting, ScenarioStep } from './data';
 import {
   ACCENT, DIM_PO, DIST_COLORS, GRADE_COLORS, GRADE_RADIUS_PX, QUADRANT_COLORS, distClass, normQuadrant, rgbaCss,
-} from './colors';
+} from '../colors';
 import { Simulator } from './sim';
 import { Swarm } from './swarm';
-import { SwarmLayer } from './swarm-layer';
+import { SwarmLayer } from '../swarm-layer';
 import {
   districtHTML, drawerHTML, el, esc, facilityHTML, fmtInt, fmtKm, fmtPct, gradeLabel, legendHTML, limitsHTML,
   lineLabel, listsHTML, patientHTML, type NearRow,

@@ -1,0 +1,11 @@
+{
+ "status": "outside_india",
+ "label": "51.5074, -0.1278",
+ "how": "These coordinates are outside India.",
+ "lat": 51.5074,
+ "lon": -0.1278,
+ "precision_km": null,
+ "kind": "coords",
+ "place_id": null,
+ "candidates": []
+}

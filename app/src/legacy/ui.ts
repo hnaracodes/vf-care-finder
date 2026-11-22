@@ -5,7 +5,7 @@ import type { AppData, District, Facility, LineKey, Meta } from './data';
 import {
   DIST_COLORS, DIST_LABELS, GRADE_COLORS, QUADRANT_ACTIONS, QUADRANT_COLORS, QUADRANT_LABELS,
   QUADRANT_ORDER, SWARM, normQuadrant, rgbaCss,
-} from './colors';
+} from '../colors';
 
 export function esc(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);

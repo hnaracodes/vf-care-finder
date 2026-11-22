@@ -1,0 +1,146 @@
+{
+ "status": "ok",
+ "service": "other",
+ "service_label": "cataract surgery",
+ "radius_km": 50,
+ "method": "keyword",
+ "location": {
+  "status": "ok",
+  "label": "Jaipur, Rajasthan",
+  "how": "Matched the city name Jaipur; the point is the centre of its post offices.",
+  "lat": 26.9124,
+  "lon": 75.7873,
+  "precision_km": 6.0,
+  "kind": "city",
+  "place_id": "city:jaipur|rajasthan",
+  "candidates": []
+ },
+ "results": [
+  {
+   "facility_id": "FX-201",
+   "name": "Fixture Eye Hospital",
+   "type": "hospital",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.889,
+   "lon": 75.76,
+   "distance_km": 3.75,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 0,
+   "grade_label": "none",
+   "confidence": "low",
+   "confidence_reason": "Keyword match only: there is no service recipe for this search.",
+   "score": null,
+   "parts": null,
+   "evidence": [
+    {
+     "requirement": "matches \"cataract surgery\"",
+     "quote": "Fixture text: Phaco cataract surgery with foldable lens implant.",
+     "field": "procedure",
+     "fact_id": "fx-f-0201"
+    }
+   ],
+   "missing": [],
+   "sources": {
+    "n_domains": 2,
+    "domains": [
+     "fixture-eye.example",
+     "fixture-listing.example"
+    ],
+    "official_website": "fixture-eye.example"
+   },
+   "why_here": "Best keyword match within reach.",
+   "could_be_wrong": "A keyword match is not checked against any rule.",
+   "also_listed_as": [],
+   "reason": null
+  },
+  {
+   "facility_id": "FX-202",
+   "name": "Fixture Vision Clinic",
+   "type": "clinic",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.94,
+   "lon": 75.83,
+   "distance_km": 5.23,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 0,
+   "grade_label": "none",
+   "confidence": "low",
+   "confidence_reason": "Keyword match only: there is no service recipe for this search.",
+   "score": null,
+   "parts": null,
+   "evidence": [
+    {
+     "requirement": "matches \"cataract surgery\"",
+     "quote": "Fixture text: cataract and glaucoma consultations",
+     "field": "capability",
+     "fact_id": "fx-f-0202"
+    }
+   ],
+   "missing": [],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": "Second best keyword match.",
+   "could_be_wrong": "The match is to a consultation, which may not mean surgery is done here.",
+   "also_listed_as": [],
+   "reason": null
+  }
+ ],
+ "beyond_radius": null,
+ "unverified_nearby": [],
+ "how_we_decided": {
+  "method": "keyword",
+  "recipe": [
+   "No service recipe covers this search. Facilities are matched on the words in their facts and specialties.",
+   "Confidence is never above low for a keyword match."
+  ],
+  "gates": [
+   {
+    "name": "Location usable",
+    "description": "Facilities whose location could be used",
+    "count": 9656
+   },
+   {
+    "name": "Within reach",
+    "description": "Within 50 km straight line",
+    "count": 41
+   },
+   {
+    "name": "Keyword match",
+    "description": "A fact or specialty matches the words searched",
+    "count": 6
+   },
+   {
+    "name": "Shown",
+    "description": "Best matches",
+    "count": 2
+   }
+  ],
+  "formula": "Keyword similarity between the search and each fact (TF-IDF), best fact per facility",
+  "weights": null,
+  "parts_explained": {},
+  "radius_km": 50,
+  "radius_reason": "A straight-line product default for this service, not clinical guidance.",
+  "score_status": null,
+  "score_status_note": null,
+  "limits": [
+   "Distances are straight-line kilometres, not travel time.",
+   "This dataset mostly covers private facilities with a web presence. Public hospitals are under-covered.",
+   "Evidence describes what web pages say, not what a facility can do today. Pages can be stale.",
+   "Quotes name the fact and its field, not the web page it came from: the data has no per-fact source.",
+   "The test set for the fact tagger was labeled by an AI agent, not a clinician.",
+   "Weights and radii are stated defaults, not fitted or clinically validated."
+  ]
+ },
+ "fixture": true
+}

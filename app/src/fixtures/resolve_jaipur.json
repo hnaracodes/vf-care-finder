@@ -1,0 +1,11 @@
+{
+ "status": "ok",
+ "label": "Jaipur, Rajasthan",
+ "how": "Matched the city name Jaipur; the point is the centre of its post offices.",
+ "lat": 26.9124,
+ "lon": 75.7873,
+ "precision_km": 6.0,
+ "kind": "city",
+ "place_id": "city:jaipur|rajasthan",
+ "candidates": []
+}

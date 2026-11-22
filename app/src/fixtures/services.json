@@ -1,0 +1,77 @@
+{
+ "services": [
+  {
+   "id": "emoc",
+   "label": "Emergency C-section and high-risk delivery",
+   "radius_km": 50,
+   "description": "A caesarean section named in the record; best with a blood bank and an operating theatre or anaesthesia."
+  },
+  {
+   "id": "nicu",
+   "label": "Newborn intensive care (NICU)",
+   "radius_km": 75,
+   "description": "A neonatal intensive or special care unit named in the record."
+  },
+  {
+   "id": "dialysis",
+   "label": "Dialysis",
+   "radius_km": 50,
+   "description": "Dialysis named in the record; best with a named dialysis unit, machines or a nephrologist."
+  },
+  {
+   "id": "icu",
+   "label": "Intensive care with ventilator",
+   "radius_km": 75,
+   "description": "An intensive care unit named in the record; best with ventilators."
+  },
+  {
+   "id": "cardiac_surgery",
+   "label": "Heart surgery (bypass, valve)",
+   "radius_km": 250,
+   "description": "Heart surgery such as bypass or valve replacement named in the record."
+  },
+  {
+   "id": "cath_lab",
+   "label": "Heart attack care (angiography, angioplasty)",
+   "radius_km": 100,
+   "description": "A cath lab, angiography or angioplasty named in the record."
+  },
+  {
+   "id": "mri",
+   "label": "MRI scan",
+   "radius_km": 100,
+   "description": "An MRI machine or MRI service named in the record."
+  },
+  {
+   "id": "ct",
+   "label": "CT scan",
+   "radius_km": 75,
+   "description": "A CT scanner or CT service named in the record."
+  },
+  {
+   "id": "trauma",
+   "label": "Trauma and accident care",
+   "radius_km": 50,
+   "description": "Trauma or accident care named in the record; best with an emergency unit open round the clock."
+  },
+  {
+   "id": "burns",
+   "label": "Burn care",
+   "radius_km": 200,
+   "description": "A burns unit or burn care named in the record."
+  },
+  {
+   "id": "neurosurgery",
+   "label": "Head injury and brain surgery",
+   "radius_km": 150,
+   "description": "Neurosurgery named in the record."
+  },
+  {
+   "id": "oncology",
+   "label": "Cancer treatment (chemotherapy, radiotherapy)",
+   "radius_km": 250,
+   "description": "Chemotherapy or radiotherapy named in the record."
+  }
+ ],
+ "fixture": true
+}

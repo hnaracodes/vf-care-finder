@@ -1,0 +1,11 @@
+{
+ "status": "ok",
+ "label": "Fixturepur (fixture village), Darbhanga, Bihar",
+ "how": "Matched a post office name; the point is that post office.",
+ "lat": 25.95,
+ "lon": 86.2,
+ "precision_km": 4.0,
+ "kind": "post_office",
+ "place_id": "post_office:fixture",
+ "candidates": []
+}

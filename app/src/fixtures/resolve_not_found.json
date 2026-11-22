@@ -1,0 +1,11 @@
+{
+ "status": "not_found",
+ "label": "",
+ "how": "No PIN, district, city or post office matches this text.",
+ "lat": null,
+ "lon": null,
+ "precision_km": null,
+ "kind": null,
+ "place_id": null,
+ "candidates": []
+}

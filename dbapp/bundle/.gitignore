@@ -1,0 +1,5 @@
+# Written by scripts/wp12_bundle.py: the bundle is built at deploy time, not committed.
+# Only the manifest is versioned, as the local reference for the Databricks run.
+*
+!.gitignore
+!manifest.json

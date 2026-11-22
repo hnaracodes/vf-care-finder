@@ -1,0 +1,338 @@
+{
+ "status": "ok",
+ "service": "dialysis",
+ "service_label": "Dialysis",
+ "radius_km": 50,
+ "method": "recipe",
+ "location": {
+  "status": "ok",
+  "label": "Jaipur, Rajasthan",
+  "how": "Matched the city name Jaipur; the point is the centre of its post offices.",
+  "lat": 26.9124,
+  "lon": 75.7873,
+  "precision_km": 6.0,
+  "kind": "city",
+  "place_id": "city:jaipur|rajasthan",
+  "candidates": []
+ },
+ "results": [
+  {
+   "facility_id": "FX-001",
+   "name": "Fixture Kidney Care Hospital",
+   "type": "hospital",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.8612,
+   "lon": 75.8044,
+   "distance_km": 5.94,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 3,
+   "grade_label": "corroborated",
+   "confidence": "high",
+   "confidence_reason": "Dialysis and a named dialysis unit both appear, from 3 independent web sources.",
+   "score": 0.93,
+   "parts": {
+    "evidence": 1.0,
+    "distance": 0.888,
+    "trust": 0.82,
+    "penalties": []
+   },
+   "evidence": [
+    {
+     "requirement": "dialysis",
+     "quote": "Fixture text: 24 hour haemodialysis for patients with kidney failure.",
+     "field": "capability",
+     "fact_id": "fx-f-0011"
+    },
+    {
+     "requirement": "named dialysis unit, machines or nephrologist",
+     "quote": "Fixture text: 12-bed dialysis unit with RO water plant.",
+     "field": "equipment",
+     "fact_id": "fx-f-0012"
+    }
+   ],
+   "missing": [],
+   "sources": {
+    "n_domains": 3,
+    "domains": [
+     "fixture-kidney.example",
+     "fixture-listing.example",
+     "fixture-reviews.example"
+    ],
+    "official_website": "fixture-kidney.example"
+   },
+   "why_here": "Ranked first: strongest evidence of the three and the closest.",
+   "could_be_wrong": "The pages may be out of date; call before travelling.",
+   "also_listed_as": [],
+   "reason": null
+  },
+  {
+   "facility_id": "FX-002",
+   "name": "Fixture Multispeciality Hospital",
+   "type": "hospital",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.9541,
+   "lon": 75.7172,
+   "distance_km": 8.35,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 2,
+   "grade_label": "supported",
+   "confidence": "medium",
+   "confidence_reason": "Dialysis is named, but no dialysis unit, machines or nephrologist.",
+   "score": 0.596,
+   "parts": {
+    "evidence": 0.7,
+    "distance": 0.846,
+    "trust": 0.71,
+    "penalties": [
+     {
+      "name": "possible merged record",
+      "value": 0.15,
+      "reason": "The record's name may join two facilities.",
+      "quote": "Fixture Multispeciality Hospital and Fixture Eye Centre"
+     }
+    ]
+   },
+   "evidence": [
+    {
+     "requirement": "dialysis",
+     "quote": "Fixture text: Dialysis services available for admitted patients.",
+     "field": "procedure",
+     "fact_id": "fx-f-0021"
+    }
+   ],
+   "missing": [
+    "no fact names a dialysis unit, dialysis machines or a nephrologist"
+   ],
+   "sources": {
+    "n_domains": 2,
+    "domains": [
+     "fixture-multi.example",
+     "fixture-listing.example"
+    ],
+    "official_website": "fixture-multi.example"
+   },
+   "why_here": "Ranked below the first: less complete evidence and farther away.",
+   "could_be_wrong": "This record may combine two facilities, so the dialysis service may belong to the other one.",
+   "also_listed_as": [],
+   "reason": null
+  },
+  {
+   "facility_id": "FX-003",
+   "name": "Fixture Charitable Hospital",
+   "type": "hospital",
+   "operator": "public",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.7905,
+   "lon": 75.871,
+   "distance_km": 15.9,
+   "location_precision_km": 5.0,
+   "location_note": "Placed at its PIN code's area: the scraped point disagreed with the PIN.",
+   "grade": 2,
+   "grade_label": "supported",
+   "confidence": "low",
+   "confidence_reason": "One fact from one web source.",
+   "score": 0.478,
+   "parts": {
+    "evidence": 0.5,
+    "distance": 0.728,
+    "trust": 0.55,
+    "penalties": [
+     {
+      "name": "minor location conflict",
+      "value": 0.1,
+      "reason": "The scraped location was 62 km from its PIN code's area, so it was moved to the PIN.",
+      "quote": null
+     }
+    ]
+   },
+   "evidence": [
+    {
+     "requirement": "dialysis",
+     "quote": "Fixture text: dialysis",
+     "field": "capability",
+     "fact_id": "fx-f-0031"
+    }
+   ],
+   "missing": [
+    "no fact names a dialysis unit, dialysis machines or a nephrologist"
+   ],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": "Ranked third: thin evidence and the location is only known to its PIN area.",
+   "could_be_wrong": "Only one short fact supports dialysis, and the location is approximate.",
+   "also_listed_as": [],
+   "reason": null
+  }
+ ],
+ "beyond_radius": null,
+ "unverified_nearby": [
+  {
+   "facility_id": "FX-101",
+   "name": "Fixture Nephrology Clinic",
+   "type": "clinic",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.92,
+   "lon": 75.795,
+   "distance_km": 1.14,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 1,
+   "grade_label": "claimed",
+   "confidence": null,
+   "confidence_reason": null,
+   "score": null,
+   "parts": null,
+   "evidence": [],
+   "missing": [
+    "no fact mentions dialysis"
+   ],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": null,
+   "could_be_wrong": null,
+   "also_listed_as": [],
+   "reason": "Lists nephrology as a specialty, but no fact in its record mentions dialysis."
+  },
+  {
+   "facility_id": "FX-102",
+   "name": "Fixture City Hospital",
+   "type": "hospital",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 27.031,
+   "lon": 75.889,
+   "distance_km": 16.6,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 1,
+   "grade_label": "claimed",
+   "confidence": null,
+   "confidence_reason": null,
+   "score": null,
+   "parts": null,
+   "evidence": [],
+   "missing": [
+    "no fact mentions dialysis"
+   ],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": null,
+   "could_be_wrong": null,
+   "also_listed_as": [],
+   "reason": "Lists nephrology as a specialty, but no fact in its record mentions dialysis."
+  },
+  {
+   "facility_id": "FX-103",
+   "name": "Fixture Diagnostic Centre",
+   "type": "clinic",
+   "operator": "private",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "lat": 26.76,
+   "lon": 75.66,
+   "distance_km": 21.14,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 1,
+   "grade_label": "claimed",
+   "confidence": null,
+   "confidence_reason": null,
+   "score": null,
+   "parts": null,
+   "evidence": [],
+   "missing": [
+    "no fact mentions dialysis"
+   ],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": null,
+   "could_be_wrong": null,
+   "also_listed_as": [],
+   "reason": "Lists nephrology as a specialty, but no fact in its record mentions dialysis."
+  }
+ ],
+ "how_we_decided": {
+  "method": "recipe",
+  "recipe": [
+   "Lowest level: nephrology listed as a specialty. This alone is never recommended.",
+   "Supported: a fact names dialysis.",
+   "Corroborated: dialysis and a named dialysis unit, dialysis machines or a nephrologist."
+  ],
+  "gates": [
+   {
+    "name": "Location usable",
+    "description": "Facilities whose location could be used",
+    "count": 9656
+   },
+   {
+    "name": "Within reach",
+    "description": "Within 150 km straight line (at most 50 kept)",
+    "count": 50
+   },
+   {
+    "name": "Reliable evidence",
+    "description": "The record names the service, and no blocking warning",
+    "count": 7
+   },
+   {
+    "name": "Shown",
+    "description": "Top three by score",
+    "count": 3
+   }
+  ],
+  "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x source trust - penalties",
+  "weights": {
+   "evidence": 0.5,
+   "distance": 0.3,
+   "trust": 0.2
+  },
+  "parts_explained": {
+   "evidence": "How completely the record names the service: supported 0.7, corroborated 1.0; thin evidence -0.2, strong +0.1.",
+   "distance": "exp(-km / radius): 1.0 at the searched point, 0.37 at the radius.",
+   "trust": "Independent web domains behind the record, an official website, and how recent the pages are."
+  },
+  "radius_km": 50,
+  "radius_reason": "A straight-line product default for this service, not clinical guidance.",
+  "score_status": "provisional",
+  "score_status_note": "The weights are judgment calls, not fitted. They will be replaced by a calibrated probability when outside labels are linked.",
+  "limits": [
+   "Distances are straight-line kilometres, not travel time.",
+   "This dataset mostly covers private facilities with a web presence. Public hospitals are under-covered.",
+   "Evidence describes what web pages say, not what a facility can do today. Pages can be stale.",
+   "Quotes name the fact and its field, not the web page it came from: the data has no per-fact source.",
+   "The test set for the fact tagger was labeled by an AI agent, not a clinician.",
+   "Weights and radii are stated defaults, not fitted or clinically validated."
+  ]
+ },
+ "fixture": true
+}

@@ -4,7 +4,7 @@
 // means one pass over the post office array.
 
 import type { AppData, Facility, LineKey } from './data';
-import { DEFAULT_EARTH_R_KM, haversineKm, nearestAll } from './geo';
+import { DEFAULT_EARTH_R_KM, haversineKm, nearestAll } from '../geo';
 
 export interface Site {
   facIndex: number;

@@ -2,7 +2,8 @@
 // (getPosition), stop point (getTarget) and timing [t0, duration, state,
 // phase]. A single `time` uniform drives all motion, so a frame only
 // updates one float. States: 0 reached, 1 stranded, 2 care likely exists
-// (pulses in place).
+// (pulses in place). With `hideBefore`, a dot is invisible until its t0, so a
+// second leg of a route appears only when its dot arrives (swarm.ts).
 
 import { ScatterplotLayer } from '@deck.gl/layers';
 
@@ -11,10 +12,11 @@ const swarmModule = {
   vs: /* glsl */ `\
 layout(std140) uniform swarmUniforms {
   float time;
+  float hideBefore;
 } swarm;
 `,
   fs: '',
-  uniformTypes: { time: 'f32' },
+  uniformTypes: { time: 'f32', hideBefore: 'f32' },
 };
 
 function mustReplace(src: string, find: string, repl: string): string {
@@ -24,6 +26,7 @@ function mustReplace(src: string, find: string, repl: string): string {
 
 export interface SwarmProps {
   time: number;
+  hideBefore?: boolean;
   getTarget: unknown;
   getTiming: unknown;
 }
@@ -35,6 +38,7 @@ export class SwarmLayer extends ScatterplotLayer<any, SwarmProps> {
   static defaultProps: any = {
     ...ScatterplotLayer.defaultProps,
     time: 0,
+    hideBefore: false,
     getTarget: { type: 'accessor', value: [0, 0, 0] },
     getTiming: { type: 'accessor', value: [0, 0, 0, 0] },
   };
@@ -57,6 +61,7 @@ float swarmPulse = instanceTiming.z > 1.5 ? 1.0 + 0.6 * (0.5 + 0.5 * sin(swarm.t
     vs = mustReplace(vs, 'vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * layer.opacity);', `\
 vec4 swarmCol = swarmP < 1.0 ? vec4(0.79, 0.82, 0.85, 0.85) : instanceFillColors;
 if (instanceTiming.z > 1.5) swarmCol.a *= 0.55 + 0.45 * (0.5 + 0.5 * sin(swarm.time * 4.2 + instanceTiming.w));
+if (swarm.hideBefore > 0.5 && swarm.time < instanceTiming.x) swarmCol.a = 0.0;
 vFillColor = vec4(swarmCol.rgb, swarmCol.a * layer.opacity);`);
     s.vs = vs;
     s.modules = [...s.modules, swarmModule];
@@ -74,7 +79,7 @@ vFillColor = vec4(swarmCol.rgb, swarmCol.a * layer.opacity);`);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   draw(opts: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.state as any).model?.shaderInputs.setProps({ swarm: { time: this.props.time } });
+    (this.state as any).model?.shaderInputs.setProps({ swarm: { time: this.props.time, hideBefore: this.props.hideBefore ? 1 : 0 } });
     super.draw(opts);
   }
 }

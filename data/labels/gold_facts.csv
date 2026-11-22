@@ -1,8 +1,8 @@
 text_norm,tags,labeled_by,note
 rajindra hospital is attached to government medical college patiala,,agent,affiliation statement only
-"cghs recognized poly-trauma, neuro-surgery, critical care and orthopedics center at nagpur",emergency|scheme,agent,polytrauma centre; critical care in a specialty list is not an ICU
-"non-cghs empanelled hospital on ring road, surat named mahavir general and trauma hospital with no cashless facility for indoor admissions",emergency,agent,negated scheme (non-CGHS empanelled); trauma only from the hospital name
-has 24-hour cardiac backup with a fully equipped intensive cardiac care unit (iccu),h24|icu,agent,ICCU is an intensive care unit
+"cghs recognized poly-trauma, neuro-surgery, critical care and orthopedics center at nagpur",emergency|scheme|trauma|neurosurgery,agent,polytrauma centre; critical care in a specialty list is not an ICU [v0.2: polytrauma and neuro-surgery centre]
+"non-cghs empanelled hospital on ring road, surat named mahavir general and trauma hospital with no cashless facility for indoor admissions",emergency|trauma,agent,negated scheme (non-CGHS empanelled); trauma only from the hospital name [v0.2: trauma only from the hospital name (v0.1 tagged emergency the same way)]
+has 24-hour cardiac backup with a fully equipped intensive cardiac care unit (iccu),h24|icu|ccu,agent,ICCU is an intensive care unit [v0.2: ICCU]
 well-equipped nicu,nicu,agent,
 dialysis access procedures,other_clinical,agent,dialysis access procedures only; dialysis itself not stated
 blood bank on site,blood,agent,
@@ -17,12 +17,12 @@ hemodialysis is performed in the hemodialysis unit,dialysis|dialysis_unit,agent,
 ventilator/anaesthesia machine with patient monitor visible in the room image,photo_artifact,agent,photo caption; device ambiguous (ventilator or anaesthesia machine)
 cesarean delivery performed at spandan hospital,ob_delivery|csection,agent,
 deliveries including lscs (cesarean section),ob_delivery|csection,agent,
-non-invasive mechanical ventilation,ventilator,agent,non-invasive ventilation named as mechanical ventilation
+non-invasive mechanical ventilation,ventilator,agent,"non-invasive ventilation named as mechanical ventilation [v0.2: non-invasive ventilation, not neonatal]"
 neonatal care services provided in nicu.,nicu,agent,
 operates a well-equipped operation theatre,ot,agent,
 100% painless dental treatments,other_clinical,agent,painless dental treatment; no anesthesia service stated
 ear surgeries under ayushman bharat pm-jay scheme (free if eligible),scheme,agent,
-eye trauma management,emergency,agent,eye trauma care
+eye trauma management,emergency,agent,"eye trauma care [v0.2: eye trauma is organ-specific, like dental trauma; not trauma care]"
 blood testing with home sample collection and pathologist oversight.,other_clinical,agent,"blood tests, not blood bank"
 "ultrasound imaging capability including nt scan, level ii ultrasound, 3-d ultrasound, growth scans, tvs and 3-d ultrasound for gynecologic diseases",other_clinical,agent,pregnancy scans are not deliveries
 has ventilators,ventilator,agent,
@@ -31,10 +31,10 @@ maternity care including normal delivery and cesarean section; high-risk pregnan
 general medicine and critical care services including icu and emergency care,icu|emergency,agent,
 "regional hospital kullu hosted a blood donation camp organized by district red cross society, kullu",,agent,"blood donation camp, not a blood bank"
 performs pediatric dialysis,dialysis,agent,
-"siddharth hospital offers diagnostic services in pune including blood tests, ultrasound (usg), x-ray, ecg, pft, echo, ct calcium score, pap smear, and sono mammography.",other_clinical,agent,"blood tests, not blood bank"
+"siddharth hospital offers diagnostic services in pune including blood tests, ultrasound (usg), x-ray, ecg, pft, echo, ct calcium score, pap smear, and sono mammography.",ct|other_clinical,agent,"blood tests, not blood bank [v0.2: CT calcium score is a CT scan]"
 provides dental procedures under general anesthesia,anesthesia,agent,general anesthesia service (dental)
 follow up of nicu graduates,other_clinical,agent,follow-up clinic; a NICU at this facility is not stated
-plastic surgery and burns services,other_clinical,agent,burns service without trauma or emergency words
+plastic surgery and burns services,burns|other_clinical,agent,burns service without trauma or emergency words [v0.2: burns services]
 offers advanced facials,other_clinical,agent,
 24x7 emergency care is provided.,h24|emergency,agent,
 operating theatre presence at blue wheel hospital,ot,agent,
@@ -72,7 +72,7 @@ phc kanonda exists as a government health center,,agent,facility type statement
 "international patients services department offering airport pickup/drop, language services and ambulance support for international patients",,agent,"ambulance as concierge transport for international patients, not emergency care"
 specialties include orthopedic oncology; women’s urology; pediatric urology; integrative urology and wellness; dialysis; general medicine,dialysis,agent,dialysis listed among services
 adult and paediatric hepatobiliary cancer surgery program,other_clinical,agent,
-has emergency & trauma care department,emergency,agent,
+has emergency & trauma care department,emergency|trauma,agent,[v0.2: emergency and trauma care department]
 modern blood bank following strict regulatory protocols,blood,agent,
 ayushman yojna - rghs facility,scheme,agent,Ayushman Yojana and RGHS
 caesarean section (c-section) offered at zoi hospitals attapur,ob_delivery|csection,agent,
@@ -92,27 +92,27 @@ provides laser vaginal tightening,other_clinical,agent,
 "need for monitors, ventilators, infusion pumps, and defibrillators to augment icu facilities",icu,agent,"ICU exists; ventilators are a stated need, not present"
 provides intensive care unit (icu) services,icu,agent,
 caesarean section (c-section) is performed at yashlok hospital,ob_delivery|csection,agent,
-"pediatric care services at sakra world hospital include management of dengue fever, malaria, status asthmaticus, seizures in children, septic shock in children, acute liver failure, acute cardiac failure, status epilepticus, head injuries, and severe infections",other_clinical,agent,"critical conditions listed, no unit named"
+"pediatric care services at sakra world hospital include management of dengue fever, malaria, status asthmaticus, seizures in children, septic shock in children, acute liver failure, acute cardiac failure, status epilepticus, head injuries, and severe infections",other_clinical,agent,"critical conditions listed, no unit named [v0.2: medical management of head injuries in children; no surgery or trauma care named]"
 non-invasive ventilation is provided,ventilator,agent,non-invasive ventilation
 "ayushman eye hospital is listed as a star health network hospital in dhamnod, madhya pradesh.",,agent,private insurer network; Ayushman is the hospital name
 cataract surgery performed under topical anesthesia with a 2.2 mm corneal incision,other_clinical,agent,topical anaesthesia for cataract surgery
 nicu with neonatal incubators,nicu,agent,
 25 modern operating theatres,ot,agent,
-"dedicated neonatal conventional ventilators including hamilton, dräger, avea, servo-i (maquet)",nicu|ventilator,agent,neonatal ventilators
+"dedicated neonatal conventional ventilators including hamilton, dräger, avea, servo-i (maquet)",nicu|ventilator|neonatal_resp,agent,neonatal ventilators [v0.2: neonatal ventilators]
 accepts ayushman bharat pm-jay for eligible patients,scheme,agent,
 implant procedures performed at marwaha dental clinic,other_clinical,agent,
 bedside ultrasonography in nicu,nicu,agent,
 aarogyam x 1+1 offer (139 tests),other_clinical,agent,lab test package (Aarogyam is a brand)
 manages normal delivery,ob_delivery,agent,
 pediatric intensive care unit with 5 icu beds,icu,agent,paediatric ICU
-departments include cardiology; cardio thoracic & vascular surgery; medical oncology; general & cancer surgery; neurosurgery; internal medicine & critical care; general & laparoscopic surgery; gastroenterology,other_clinical,agent,critical care in a department list
+departments include cardiology; cardio thoracic & vascular surgery; medical oncology; general & cancer surgery; neurosurgery; internal medicine & critical care; general & laparoscopic surgery; gastroenterology,other_clinical,agent,"critical care in a department list [v0.2: department list: cardiothoracic surgery, medical oncology, neurosurgery as names only]"
 maternity and eye care specialties,ob_delivery,agent,maternity listed as a specialty
 performs obstetric delivery including normal and cesarean section deliveries,ob_delivery|csection,agent,
 has 2+ emergency services,emergency,agent,counter artifact
 performs obstetric deliveries at sion hospital.,ob_delivery,agent,
-"offers multispecialty services including anesthesiology, cardiology, dermatology, ent, paediatrics, pathology, psychiatry, critical-care, gasterentrology, general-medicine, obstetrics-gynecology, laparoscopic-surgery, plastic-surgery, pulmonology/respiratory, radio-diagnosis, institute-of-laboratary-medicine, medical-oncology, nephrology, neurology, neurosurgery, surgical-oncology, urology, vascular-surgeon, physiotherapy, ophthalmology, oral/maxillofacial-surgery, orthopedics, paediatric-surgery, accident-emergency, endocrinology, dentistry",anesthesia|emergency,agent,anesthesiology offered; critical care and nephrology as specialty names only
+"offers multispecialty services including anesthesiology, cardiology, dermatology, ent, paediatrics, pathology, psychiatry, critical-care, gasterentrology, general-medicine, obstetrics-gynecology, laparoscopic-surgery, plastic-surgery, pulmonology/respiratory, radio-diagnosis, institute-of-laboratary-medicine, medical-oncology, nephrology, neurology, neurosurgery, surgical-oncology, urology, vascular-surgeon, physiotherapy, ophthalmology, oral/maxillofacial-surgery, orthopedics, paediatric-surgery, accident-emergency, endocrinology, dentistry",anesthesia|emergency|trauma,agent,anesthesiology offered; critical care and nephrology as specialty names only [v0.2: roster: neurosurgery and oncology as names only; accident-emergency is an A&E service]
 the hospital operates a 24-hour casualty/emergency department.,h24|emergency,agent,
-"has 150 beds including icu, nicu, ccu, emergency and trauma",nicu|icu|emergency,agent,
+"has 150 beds including icu, nicu, ccu, emergency and trauma",nicu|icu|emergency|ccu|trauma,agent,[v0.2: beds include CCU and trauma]
 emergency blood in urine treatment,emergency,agent,emergency treatment of haematuria; not a blood bank
 blood bank services,blood,agent,
 cesarean delivery is performed,ob_delivery|csection,agent,
@@ -125,7 +125,7 @@ cghs-empanelled dental clinic,scheme,agent,
 dialysis unit inaugurated on 31 october 2023,dialysis|dialysis_unit,agent,
 queen's care hospital provides neonatal care services,other_clinical,agent,"neonatal care, not intensive or special care"
 the cardiac program aims to deliver exceptional outcomes and provide world-class heart care accessible to all,other_clinical,agent,
-provides neuro-critical care with ventilator support following surgery,icu|ventilator,agent,neuro-critical care service with ventilator support
+provides neuro-critical care with ventilator support following surgery,icu|ventilator,agent,neuro-critical care service with ventilator support [v0.2: neuro-critical care after surgery; neurosurgery not named]
 "{""has 24 years of operation in healthcare"":null}",reputation,agent,years of operation
 offers home delivery of medicines via medplus app and other delivery services,,agent,"home delivery of medicines, not childbirth"
 fully equipped dialysis center,dialysis|dialysis_unit,agent,
@@ -135,23 +135,23 @@ three ventilators total,ventilator,agent,
 pm-jay free medical treatment under ayushman bharat pm-jay,scheme,agent,
 icu with ventilators,icu|ventilator,agent,
 "sir jj group of hospitals, mumbai, served as an ethics review site for clinical research, including the mumbai maternal nutrition project trial (isrctn62811278).",,agent,research ethics site
-major trauma rehabilitation,other_clinical,agent,"rehabilitation after trauma, not trauma care"
+major trauma rehabilitation,other_clinical,agent,"rehabilitation after trauma, not trauma care [v0.2: rehabilitation after trauma, not trauma care]"
 haemodialysis and peritoneal dialysis are offered,dialysis,agent,
 kevalya hospital hosts dr alpa modi's breast clinic,staff_name|other_clinical,agent,
 surgery icu,icu,agent,
 ventilators for ards ventilation including prone positioning,ventilator,agent,
-"casualty and intensive care units amcu, iccu, sicu, picu, and nicu are fully equipped",nicu|icu|emergency,agent,
+"casualty and intensive care units amcu, iccu, sicu, picu, and nicu are fully equipped",nicu|icu|emergency|ccu,agent,[v0.2: ICCU]
 obstetrics and gynecology department includes infertility treatment and gynecological laparoscopy.,other_clinical,agent,"OBG department, no delivery word"
 "empanelled with hdfc ergo, aditiya birla, ericson tpa and ayushman tpa",scheme,agent,'Ayushman TPA' in an insurer list; read as Ayushman Bharat
 government district blood bank,blood,agent,
 "offers ophthalmology, otorhinolaryngology (ent), dermatology, psychiatry, dentistry, and anaesthesiology procedures",anesthesia,agent,
-high-flow nasal cannula (hfnc) system used for respiratory support in mucormycosis case,other_clinical,agent,HFNC is not mechanical ventilation
+high-flow nasal cannula (hfnc) system used for respiratory support in mucormycosis case,other_clinical,agent,"HFNC is not mechanical ventilation [v0.2: HFNC, not neonatal]"
 laparoscopic instruments and high-intensity operating room lights,ot,agent,operating room lights
-"provides a wide range of specialties including anesthesiology, arthroscopy, cardiology, critical care, dermatology, diabetology, endocrinology, ent, gastroenterology, general and laparoscopic surgery, general medicine, maxillofacial surgery, nephrology and dialysis, neurology, neurosurgery, orthopedics, plastic surgery, pulmonology, clinical psychology, radiology, and urology",anesthesia|dialysis,agent,dialysis listed as a service; critical care in a specialty list
+"provides a wide range of specialties including anesthesiology, arthroscopy, cardiology, critical care, dermatology, diabetology, endocrinology, ent, gastroenterology, general and laparoscopic surgery, general medicine, maxillofacial surgery, nephrology and dialysis, neurology, neurosurgery, orthopedics, plastic surgery, pulmonology, clinical psychology, radiology, and urology",anesthesia|dialysis|neurosurgery,agent,dialysis listed as a service; critical care in a specialty list [v0.2: neurosurgery listed as a specialty (specialty name is the surgery); plastic surgery is not burns; radiology is not mri or ct]
 24/7 dialysis,h24|dialysis,agent,
 c-section (cesarean),ob_delivery|csection,agent,
 comprehensive dialysis program,dialysis,agent,dialysis program; no unit or machine named
-nicu with level iii care and ventilatory support,nicu|ventilator,agent,ventilatory support in the NICU
+nicu with level iii care and ventilatory support,nicu|ventilator|neonatal_resp,agent,ventilatory support in the NICU [v0.2: ventilatory support in a NICU]
 maquet surgical equipment in operating room,ot,agent,
 neurocritical care,other_clinical,agent,'neurocritical care' as a bare specialty label; no unit or service stated
 government of west bengal issued essentiality certificate for establishment (certificate no me/ wbuhs- 06-09/m/1307 dated 19 august 2009),,agent,regulatory certificate
@@ -162,7 +162,7 @@ operating theatre features overhead surgical lights,ot,agent,
 dedicated paediatric section,other_clinical,agent,word-internal 'section'
 "offers dental care to rghs, cghs beneficiaries and general patients",scheme,agent,
 modern clinical laboratory and blood bank,blood,agent,
-specializes in polytrauma management,emergency,agent,polytrauma management
+specializes in polytrauma management,emergency|trauma,agent,polytrauma management
 cesarean deliveries,ob_delivery|csection,agent,
 offers diagnostic testing through blood sample collection at the center,other_clinical,agent,blood sample collection for tests
 includes anesthesia and critical care services as part of its clinical offerings,anesthesia|icu,agent,critical care services stated as provided
@@ -186,18 +186,18 @@ on-site emergency entrance with 24x7 chemist,h24|emergency|photo_artifact,agent,
 "staff includes dr. hirachand mutagi, anesthesiologist.",anesthesia|staff_name,agent,
 icu (intensive care unit) present,icu,agent,
 "empaneled with isro, iima, prl, ongc, esic, iho, cghs, and echs",scheme,agent,"ESIC, CGHS, ECHS"
-has level iii nicu,nicu,agent,
+has level iii nicu,nicu,agent,[v0.2: level III NICU implies but does not state breathing support]
 maternity and new born nicu,ob_delivery|nicu,agent,
 centre for anesthesiology.,anesthesia,agent,
 shri fever clinic is an infectious disease diagnostic and treatment centre,other_clinical,agent,
 ventilator,ventilator,agent,
 lscs,ob_delivery|csection,agent,
-ventilators available for adult and pediatric patients,ventilator,agent,
+ventilators available for adult and pediatric patients,ventilator,agent,"[v0.2: paediatric, not neonatal]"
 outpatient department includes paediatric section,other_clinical,agent,word-internal 'section'
 gynecology and obstetrics surgeries including laparoscopic techniques are performed,other_clinical,agent,obstetric surgery with no delivery or caesarean named
 high-end ventilators with icu monitoring,icu|ventilator,agent,ICU monitoring named
-gastrointestinal oncology surgeries,other_clinical,agent,
-provides advanced neonatal care including cpap and mechanical ventilation,nicu|ventilator,agent,neonatal mechanical ventilation
+gastrointestinal oncology surgeries,other_clinical,agent,"[v0.2: oncology surgery, not chemotherapy]"
+provides advanced neonatal care including cpap and mechanical ventilation,nicu|ventilator|neonatal_resp,agent,neonatal mechanical ventilation [v0.2: neonatal CPAP and mechanical ventilation]
 operates a blood bank at dr. imkongliba memorial district hospital in mokokchung,blood,agent,
 provides maternity and childbirth services,ob_delivery,agent,
 quality and safety program,,agent,
@@ -207,16 +207,16 @@ dialysis center with 8 dialysis units,dialysis|dialysis_unit,agent,
 "critical care services offered in gotri and narayan garden, vadodara",icu,agent,critical care services stated as offered
 uncomplicated lscs (lower segment caesarean section),ob_delivery|csection,agent,
 provides maternity care and delivery services,ob_delivery,agent,
-neonatal ventilator facility,nicu|ventilator,agent,
+neonatal ventilator facility,nicu|ventilator|neonatal_resp,agent,
 operates 24/7 with open 24 hours every day,h24,agent,
 care & maintenance of sound processors,other_clinical,agent,
 sai clinic & maternity provides ayurvedic general physician services,ob_delivery,agent,maternity only from the clinic name
 medical intensive care unit,icu,agent,
 "has a department of critical care medicine at orchid medical centre, ranchi, jharkhand, india.",other_clinical,agent,department of critical care medicine = specialty claim
 blood bank: 0,,agent,blood bank count is zero
-24/7 ct scanning and ultrasound imaging capability,h24,agent,
+24/7 ct scanning and ultrasound imaging capability,h24|ct,agent,
 mittal hospital has nicu,nicu,agent,
-has a 24/7 casualty block to handle trauma,h24|emergency,agent,
+has a 24/7 casualty block to handle trauma,h24|emergency|trauma,agent,[v0.2: casualty block handling trauma]
 "empanelled with ayushman bharat, esi, cghs, echs, golden card, star health, vipul med corp and all other private insurance and tpas",scheme,agent,
 "supports delivery options including normal delivery, cesarean section, and painless delivery",ob_delivery|csection,agent,painless delivery alone is not an anesthesia statement
 maternity care program featuring dr. monika bhargav,ob_delivery|staff_name,agent,
@@ -225,17 +225,17 @@ nicu for infants,nicu,agent,
 offers kidney care services including dialysis at kidney care center,dialysis,agent,kidney care centre is not a named dialysis unit
 provides maternity and pregnancy care services,ob_delivery,agent,
 labour room facility,ob_delivery,agent,
-"emergency department with critical care units (ccu, icu, nicu, sicu)",nicu|icu|emergency,agent,
+"emergency department with critical care units (ccu, icu, nicu, sicu)",nicu|icu|emergency|ccu,agent,[v0.2: CCU listed next to ICU; read as cardiac care unit though it sits under 'critical care units']
 dr vaishali dubey is a gastroenterologist at vidya hospital and kidney centre,staff_name,agent,kidney centre in a name; no dialysis stated
 ventilators and oxygen cylinders,ventilator,agent,
 blood bank services provided by north western railway hospital blood bank,blood,agent,
 neonatology - (level – 3 nicu),nicu,agent,
-"14-bed iccu equipped with a ventilator, cpap/bipap, bedside multi-parameter monitors, infusion pumps, and defibrillator",icu|ventilator,agent,
+"14-bed iccu equipped with a ventilator, cpap/bipap, bedside multi-parameter monitors, infusion pumps, and defibrillator",icu|ventilator|ccu,agent,[v0.2: ICCU; CPAP/BiPAP here is adult]
 fundus fluorescein angiography services,other_clinical,agent,
 offers cesarean section delivery services,ob_delivery|csection,agent,
 "charge: secured loan of ₹82,500,000.00 from siemens financial services private limited (charge creation date: 2014-05-24; charge closure date: 2019-04-24)",,agent,financial filing
 does not operate an emergency department,,agent,negation: no emergency department
-neonatal incubator and nicu equipment,nicu,agent,NICU equipment named
+neonatal incubator and nicu equipment,nicu,agent,NICU equipment named [v0.2: incubator is not breathing support]
 semirecumbent positioning of icu patients to reduce vap.,icu|ventilator,agent,ICU practice to prevent ventilator-associated pneumonia implies ventilated ICU patients
 provides av fistula creation for patients on hemodialysis,other_clinical,agent,dialysis access procedure only
 ayushman bharat coverage provided,scheme,agent,
@@ -272,9 +272,9 @@ hemodialysis machines with reverse osmosis water treatment system,dialysis|dialy
 laminar flow system in operating theatres and icu,ot|icu,agent,
 provides maternity care for pregnancy-related conditions,ob_delivery,agent,maternity care
 "public sector/government tie-ups with coal india, indian railways, airports, cseb, esic, cghs, ayushman bharat pm-jay",scheme,agent,
-has over 40 nicu beds designed for level ii and level iii neonatal care,nicu,agent,
+has over 40 nicu beds designed for level ii and level iii neonatal care,nicu,agent,"[v0.2: level III NICU, but no breathing support named]"
 blood bank facility started in may,blood,agent,
-round-the-clock community cancer care center,h24,agent,
+round-the-clock community cancer care center,h24,agent,[v0.2: cancer care centre; chemotherapy not named]
 apollo hospitals bilaspur employs a nephrology department with a senior consultant nephrologist and transplant physician (dr. jignesh pandya),dialysis_unit|staff_name,agent,nephrologist named
 pediatric intensive care unit (picu) with invasive and non-invasive ventilation,icu|ventilator,agent,
 renal dialysis unit with 48 machines,dialysis|dialysis_unit,agent,
@@ -287,9 +287,9 @@ the blood bank at district hospital rajouri is categorized as government (govt.)
 gynaecology consultation and post-delivery care,other_clinical,agent,post-delivery care only; deliveries not stated
 conducts a multidimensional infection control program in intensive care units to reduce ventilator-associated pneumonia.,icu|ventilator,agent,VAP prevention in its ICUs implies ventilated patients
 engages in obstetric anesthesia research at murshidabad medical college & hospital,,agent,"obstetric anesthesia research, not a service"
-manages ocular trauma with foreign body removal and globe perforation repair; 24/7 emergency ophthalmology services,h24|emergency,agent,
+manages ocular trauma with foreign body removal and globe perforation repair; 24/7 emergency ophthalmology services,h24|emergency,agent,"[v0.2: ocular trauma is eye care, not trauma care]"
 "ayushman card empanelled hospital in lucknow, uttar pradesh under ayushman bharat pm-jay",scheme,agent,
-signage indicates iccu presence,icu|photo_artifact,agent,
+signage indicates iccu presence,icu|ccu|photo_artifact,agent,[v0.2: ICCU from signage]
 specializes in women’s health and maternity care,ob_delivery,agent,
 oxygen booth and oxygen plant on-site to support emergency patients (up to 8 patients at a time),emergency,agent,oxygen supply for emergency patients
 ventilators used for covid-19 treatment at victoria hospital,ventilator,agent,
@@ -307,7 +307,7 @@ provides in-clinic hemodialysis (hemo dialysis),dialysis,agent,
 provides ambulance facilities,emergency,agent,ambulance service
 offers anaesthesia & critical care specialty.,anesthesia,agent,anaesthesia specialty is the service; critical care as a specialty name is not an ICU
 has dialysis centre on site,dialysis|dialysis_unit,agent,
-ventilator and bipap facilities,ventilator,agent,
+ventilator and bipap facilities,ventilator,agent,"[v0.2: BiPAP, not neonatal]"
 has obstetrician & gynecologist dr suprita rajput,staff_name,agent,
 state-of-the-art operation theatres with laminar flow,ot,agent,
 accepts central government health scheme (cghs) insurance,scheme,agent,
@@ -321,8 +321,8 @@ listed as top clinic in gurgaon sector 54 on practo,reputation|web_presence,agen
 performs caesarean delivery,ob_delivery|csection,agent,
 at least one operating theater equipped with anesthesia machine and patient monitoring equipment,anesthesia|ot,agent,
 cghs empanelled dental clinic in delhi with cashless dental care,scheme,agent,
-gmch admitted a patient with a serious head injury,emergency,agent,admitted a serious head injury (trauma care)
-"tertiary care centre in neurosciences, orthopedics & trauma",emergency,agent,trauma tertiary centre
+gmch admitted a patient with a serious head injury,emergency|trauma,agent,admitted a serious head injury (trauma care) [v0.2: admitted a serious head injury; no surgery named so no neurosurgery]
+"tertiary care centre in neurosciences, orthopedics & trauma",emergency|trauma,agent,trauma tertiary centre [v0.2: trauma tertiary care centre]
 aims to provide comprehensive dialysis services to patients in need,dialysis,agent,mission statement about dialysis services
 provides round-the-clock dialysis services (24/7),h24|dialysis,agent,
 blood bank services with plasmapheresis,blood,agent,
@@ -331,7 +331,7 @@ hemodialysis (hd) and haemodiafiltration (hdf),dialysis,agent,
 offers online and whatsapp appointment booking,web_presence,agent,
 separate operating theatre (ot) suite with interventional pulmonology setup,ot,agent,
 operates eight ambulances providing free services; icu ambulance service available 24/7 at fair rates,h24|emergency,agent,ICU ambulance is not an ICU unit
-provides treatment for dentofacial trauma,emergency,agent,dentofacial trauma care
+provides treatment for dentofacial trauma,emergency,agent,"dentofacial trauma care [v0.2: dentofacial trauma is dental, not trauma care]"
 "well-equipped critical care unit with ventilators, defibrillators, pulse oximeters, and monitoring equipment",icu|ventilator,agent,
 historically used a 25-bed maternity hospital model,,agent,"historical maternity model, not current"
 offers epidural steroid injections,other_clinical,agent,epidural steroid injection for pain
@@ -346,17 +346,17 @@ kadam maternity and nursing home operates as a maternity and nursing home.,ob_de
 on-site blood bank and advanced ventilator support,blood|ventilator,agent,
 dialysis ward,dialysis|dialysis_unit,agent,dialysis ward = named unit
 haemodialysis equipment,dialysis|dialysis_unit,agent,haemodialysis equipment = machines
-ecmo equipment for cardiac and respiratory support,other_clinical,agent,ECMO is not mechanical ventilation
+ecmo equipment for cardiac and respiratory support,other_clinical,agent,ECMO is not mechanical ventilation [v0.2: ECMO is not CCU or neonatal breathing support]
 anesthetist and pain management specialist dr. upasna,anesthesia|staff_name,agent,
 advanced anaesthesia workstation,anesthesia,agent,
 normal delivery & caesarean section,ob_delivery|csection,agent,
 pediatric intensive care unit with 7 beds,icu,agent,paediatric ICU
 ceiling-mounted surgical lights (in or/nicu setup visible in images),photo_artifact,agent,caption; OR or NICU ambiguous
-pediatric respiratory support facilities including 10 cpap/hfnc,other_clinical,agent,"CPAP/HFNC is not mechanical ventilation; paediatric, not neonatal"
+pediatric respiratory support facilities including 10 cpap/hfnc,other_clinical,agent,"CPAP/HFNC is not mechanical ventilation; paediatric, not neonatal [v0.2: paediatric CPAP/HFNC, not stated neonatal]"
 offers infertility treatments including iui and ivf,other_clinical,agent,
 blood transfusion services provided,blood,agent,
 non-invasive ventilation devices (nivs),ventilator,agent,non-invasive ventilation devices
-has burn unit,other_clinical,agent,burn unit without trauma or emergency words
+has burn unit,burns|other_clinical,agent,burn unit without trauma or emergency words [v0.2: burn unit]
 provides vaginal birth after cesarean (vbac) services as a supported option,ob_delivery,agent,"VBAC is a vaginal birth, not a caesarean"
 acute & chronic kidney failure / haemodialysis,dialysis,agent,
 md india tpa network affiliation,,agent,private TPA network
@@ -369,7 +369,7 @@ restorative dentistry services including dental implants and crowns and bridges,
 walk-ins are accepted for ayushman card treatment; no prior registration is required.,scheme,agent,
 dr. sunil kr gupta is head of the respiratory intensive care unit (ricu) at paras hospital,icu|staff_name,agent,respiratory ICU
 performs general and major surgical procedures in the operation theater and modular operation theater,ot,agent,
-24/7 emergency and trauma services with ambulance,h24|emergency,agent,
+24/7 emergency and trauma services with ambulance,h24|emergency|trauma,agent,
 hemodialysis performed at the dialysis center,dialysis|dialysis_unit,agent,
 provides hemodialysis treatment,dialysis,agent,
 blood bank (transfusion medicine),blood,agent,
@@ -378,7 +378,7 @@ has neonatal and pediatric intensive care units (nicu & picu).,nicu|icu,agent,
 "open 24x7 hours is not listed as a capability per se due to the restrictions on business hours, but the hospital is described as a 'multi-speciality hospital' with 24x7 operation in the site content; an explicit capability note is avoided here.",h24|web_presence,agent,"meta-comment, but states 24x7 operation"
 pediatric and neonatal laparoscopic instrumentation,other_clinical,agent,
 does not attend cardiac emergency cases.,,agent,negation: does not attend cardiac emergencies
-"offers trauma care with spine, sports injury, and general injury treatment",emergency,agent,
+"offers trauma care with spine, sports injury, and general injury treatment",emergency|trauma,agent,
 offers normal delivery and cesarean section deliveries,ob_delivery|csection,agent,
 "centers of excellence include orthopedics, general surgery, critical care, and dialysis",dialysis,agent,critical care in a centre-of-excellence list is not an ICU
 no prior registration required for ayushman card treatment; walk-ins are accepted,scheme,agent,
@@ -389,11 +389,11 @@ hosts academic events such as the national conference on emerging trends in heal
 "dialysis clinic located at lions eye & general hospital in sahapur, thane, maharashtra, india.",dialysis|dialysis_unit,agent,named dialysis clinic
 on-site hemodialysis machines used for patient care,dialysis|dialysis_unit,agent,
 "ayushman card empanelled hospital in jhansi, uttar pradesh",scheme,agent,
-"departments include cardiology, cardio vascular thoracic surgery, cardiac anaesthesia, radiology & nuclear medicine, and other department",anesthesia,agent,cardiac anaesthesia department
+"departments include cardiology, cardio vascular thoracic surgery, cardiac anaesthesia, radiology & nuclear medicine, and other department",anesthesia,agent,cardiac anaesthesia department [v0.2: department list: CVTS and cardiac anaesthesia as department names only]
 cesarean delivery performed,ob_delivery|csection,agent,
 operating theatre with surgical setup and anesthesia equipment visible in photographs,anesthesia|ot|photo_artifact,agent,
 maternity and gynecology services,ob_delivery,agent,
-listed under category – a3 as a secondary care institution for cemonc and trauma & sncu / nicu under the directorate of medical education,ob_delivery|nicu|emergency,agent,CeMONC designation; caesarean and blood not named
+listed under category – a3 as a secondary care institution for cemonc and trauma & sncu / nicu under the directorate of medical education,ob_delivery|nicu|emergency|trauma,agent,CeMONC designation; caesarean and blood not named [v0.2: designated institution for trauma]
 physician on staff holds mbbs and md in obstetrics & gynecology,other_clinical,agent,"qualification, no name"
 dr. ravi bhadania is a nephrologist and pediatrician,dialysis_unit|staff_name,agent,nephrologist named; dialysis not stated
 "ayushman card empanelled hospital in porbandar, gujarat",scheme,agent,
@@ -403,8 +403,8 @@ open 24x7 service availability,h24,agent,
 laughing gas (nitrous oxide) sedation and advanced anesthesia available for pain-free dentistry,other_clinical,agent,dental N2O sedation and unspecified 'advanced anesthesia' (likely local); no anesthesia service
 root canal treatment is usually painless due to local anesthesia,other_clinical,agent,local anaesthesia for a dental procedure
 blood bank license valid up to 2026-07-05,blood,agent,
-"offers departments including surgical oncology, medical oncology, radiation oncology, internal medicine, radiology, pathology, anaesthesiology, blood centre, microbiology, research & clinical genetics, nursing, breast and lymphedema clinic, stoma clinic, physiotherapy, dietetics, psychology",blood|anesthesia,agent,anaesthesiology department and blood centre
-"centers of excellence in neurology, neuro surgery, endovascular neurosurgery, neuro psychiatry, neuro rehabilitation, neuro anesthesiology, interventional neuro radiology, and general medicine & emergency",anesthesia|emergency,agent,neuro-anaesthesiology and emergency departments
+"offers departments including surgical oncology, medical oncology, radiation oncology, internal medicine, radiology, pathology, anaesthesiology, blood centre, microbiology, research & clinical genetics, nursing, breast and lymphedema clinic, stoma clinic, physiotherapy, dietetics, psychology",blood|anesthesia,agent,anaesthesiology department and blood centre [v0.2: radiation and medical oncology as department names only]
+"centers of excellence in neurology, neuro surgery, endovascular neurosurgery, neuro psychiatry, neuro rehabilitation, neuro anesthesiology, interventional neuro radiology, and general medicine & emergency",anesthesia|emergency,agent,neuro-anaesthesiology and emergency departments [v0.2: roster of centres: neurosurgery as a name only]
 operating theatre equipped with anesthesia machine,anesthesia|ot,agent,
 licensed blood bank,blood,agent,
 "multidisciplinary team of neurologists, anesthesiologists, and rehabilitation specialists",anesthesia,agent,anesthesiologists on the team
@@ -412,19 +412,367 @@ two fully fledged modern operating theatres with c-arm and laparoscopic instrume
 24-hour blood bank facilities with transfusion service,blood|h24,agent,
 pmjay facilities available,scheme,agent,
 7 eye operation theaters,ot,agent,
-"the trauma centre includes its own blood bank, mri, ct scan facility, pathology labs, and ambulance facilities.",blood|emergency,agent,
+"the trauma centre includes its own blood bank, mri, ct scan facility, pathology labs, and ambulance facilities.",blood|emergency|mri|ct|trauma,agent,[v0.2: trauma centre with its own MRI and CT]
 "ayushman card empanelled hospital under pm-jay in patiala, punjab",scheme,agent,
 fully equipped blood bank for transfusions,blood,agent,
-dedicated burns operation theatre,ot,agent,
-"operation theatres for spine, kidney and eyes in the spine/kidney/ophthalmic hospital",ot,agent,
+dedicated burns operation theatre,ot|burns,agent,[v0.2: burns operation theatre]
+"operation theatres for spine, kidney and eyes in the spine/kidney/ophthalmic hospital",ot|neurosurgery,agent,[v0.2: operation theatres for spine surgery]
 robotic-enabled operating theatre facility,ot,agent,
 three major operating theatres with laminar airflow,ot,agent,
-"center of excellence including accident & emergency, cardiac care center, kidney care & dialysis center, neuroscience, mother and baby care center, and cancer center",dialysis|dialysis_unit|emergency,agent,named dialysis centre; 'mother and baby care' has no delivery or maternity word
-"multi-specialty hospital with departments including orthopaedics, anaesthesia & critical care, general medicine, pulmonology, ophthalmology, gynaecology, cardiothoracic surgery, radiology, dental, laboratory & pathology, ent, urology, medical gastroenterology, surgical gastroenterology, neurology, neurosurgery, maxillo facial surgeon, cardiology",anesthesia,agent,critical care as a department name is not an ICU
+"center of excellence including accident & emergency, cardiac care center, kidney care & dialysis center, neuroscience, mother and baby care center, and cancer center",dialysis|dialysis_unit|emergency|trauma,agent,named dialysis centre; 'mother and baby care' has no delivery or maternity word [v0.2: accident & emergency is an A&E service; cardiac care center is not CCU; cancer center names no therapy]
+"multi-specialty hospital with departments including orthopaedics, anaesthesia & critical care, general medicine, pulmonology, ophthalmology, gynaecology, cardiothoracic surgery, radiology, dental, laboratory & pathology, ent, urology, medical gastroenterology, surgical gastroenterology, neurology, neurosurgery, maxillo facial surgeon, cardiology",anesthesia,agent,critical care as a department name is not an ICU [v0.2: department roster: cardiothoracic surgery and neurosurgery as names only]
 dialysis center infrastructure,dialysis|dialysis_unit,agent,
 surgeries are performed in an advanced operation theater,ot,agent,
 one major operating theatre (ot),ot,agent,
-"specialty departments including laparoscopy & general surgery, gynecology, orthopedics, pediatrics, internal medicine, urology, anesthesia & critical care, plastic surgery, neurosurgery, cardiology, ent",anesthesia,agent,critical care as a department name is not an ICU
+"specialty departments including laparoscopy & general surgery, gynecology, orthopedics, pediatrics, internal medicine, urology, anesthesia & critical care, plastic surgery, neurosurgery, cardiology, ent",anesthesia,agent,critical care as a department name is not an ICU [v0.2: neurosurgery as a department name only]
 operating theatre with overhead surgical lights and anesthesia machine with patient monitoring,anesthesia|ot,agent,
 24-hour in-house pharmacy,h24,agent,
 operates a blood bank in bhagalpur (812001),blood,agent,
+cpap machines in nicu,nicu|neonatal_resp,agent,CPAP in the NICU
+fisher-paykel bubble cpap,neonatal_resp,agent,bubble CPAP is a neonatal breathing-support device
+"specializes in spine, orthopedic, cosmetic and plastic surgery, and eye care",neurosurgery,agent,spine surgery named as a specialization; plastic surgery is not burn care
+burns center,burns,agent,
+neurosurgery services including spinal surgery,neurosurgery,agent,
+specialties offered: internal medicine and diabetology; general laparoscopic surgery; obstetrics and gynecology; adolescent clinic infertility; pediatrics and neonatology; urology and nephrology; orthopaedics & trauma care,emergency|trauma,agent,trauma care named in a specialty list; obstetrics in a list is not deliveries
+icu/iccu/post surgical icu,icu|ccu,agent,ICCU is a cardiac ICU
+performs teeth bleaching,other_clinical,agent,
+"digital x-ray, ultrasound (usg), ct scan, and mri available on-site",mri|ct,agent,
+pet ct scanner and pet mri machine available,mri|ct,agent,PET-CT and PET-MRI scanners include CT and MRI
+round-the-clock emergency and trauma services,h24|emergency|trauma,agent,
+awarded the young investigator award at the international society of burn injuries (isbi).,reputation,agent,"award for burn research, not a burn service"
+offers cardiothoracic surgery & vascular surgery,cardiac_surgery,agent,cardiothoracic surgery stated as offered
+open mri system,mri,agent,
+advanced interventional cardiology and cardiac surgery programs,cardiac_surgery|cath_lab,agent,programs = service; interventional cardiology is catheter-based
+offers obstetrics and gynecology consultation and care at sharma nursing and maternity home,ob_delivery,agent,maternity only from the nursing home name
+has board-certified cardiologist(s),other_clinical,agent,cardiologist only; no cath lab or procedure
+sleep apnea management including cpap therapy and oral appliances,other_clinical,agent,adult CPAP for sleep apnoea
+has icu / ccu / iccu,icu|ccu,agent,
+palliative chemotherapy,chemo,agent,
+latest mri machine,mri,agent,
+heart valve repair and valvuloplasty,cardiac_surgery,agent,"valve repair; valvuloplasty may be balloon (cath) but not stated, so no cath_lab"
+performs interventional radiology procedures in a dedicated cath lab 24/7,h24|cath_lab,agent,"dedicated cath lab, used here for interventional radiology"
+"neurolytic blocks for cancer pain including coeliac, stellate, lumbar sympathetic, superior hypogastric, and ganglion impar",other_clinical,agent,"pain blocks, not an anesthesia service or chemo"
+provides medical oncology,other_clinical,agent,medical oncology is a specialty; chemotherapy not named
+chemotherapy can boost the effect of radiation therapy,,agent,"general medical statement, not a service claim"
+performs chemical peels as a scar treatment and anti-aging procedure,other_clinical,agent,"chemical peel, not chemotherapy"
+specialized orthopaedic and trauma center,emergency|trauma,agent,
+three-bedded intensive care unit (icu),icu,agent,
+center of excellence includes oncology and onco surgery,other_clinical,agent,oncology specialty only
+"specialties include gastroenterology, nephrology, neurosurgery, obstetrics & gynecology, plastic, cosmetic & reconstructive surgery, psychiatry, transplant",other_clinical,agent,specialty list; neurosurgery and plastic surgery as names only
+state-of-the-art cardiac imaging equipment,other_clinical,agent,cardiac imaging equipment unspecified; no CT or MRI named
+"departments include cardiology, critical care, neurology, oncology, orthopaedics surgery, ophthalmology, obstetrics & gynaecology, paediatric & neonatology, pulmonary medicine, urology, gastroenterology, endocrinology, ent, dermatology & venereology, general surgery, pathology, radiology, physiotherapy, pharmacy, and diet clinic",other_clinical,agent,department list only
+cardiology and cardiothoracic surgery services,cardiac_surgery,agent,cardiothoracic surgery services
+performs robotic-assisted minimally invasive surgeries using the da vinci xi system,other_clinical,agent,robotic surgery; no OT named
+"provides mental health care for children, teens, and adults with emotional, behavioral, and neurodevelopmental challenges",other_clinical,agent,
+diagnostic imaging capabilities including ct scan and x-ray,ct,agent,
+offers chemotherapy day care services,chemo,agent,
+"departments include neurology and neurosurgery, obstetrics & gynecology, ophthalmology, paediatrics, neonatology, pulmonology, urology, nephrology, general & laparoscopic surgery, orthopaedics, general medicine, radiology, dermatology, anesthesiology & critical care, ent, emergency medicine, dental & maxillofacial surgery, clinical nutrition, psychology, physiotherapy, and microbiology.",anesthesia|emergency,agent,department list: neurosurgery as a department name is not the tag; anaesthesiology and emergency medicine departments follow v0.1 convention
+imaging capabilities including 3t mri and ct scan,mri|ct,agent,
+cpap and bipap devices for sleep apnea therapy,other_clinical,agent,"sleep apnoea CPAP/BiPAP, not neonatal and not a ventilation service"
+hbot and ozone therapy offered as part of stroke care,other_clinical,agent,
+"super specialties including gi surgery, cardiology with cath lab & ccu, joint replacements, urology, surgical oncology, cosmetic surgery, spine surgery, and laparoscopic surgeries",cath_lab|ccu|neurosurgery,agent,cath lab and CCU named; spine surgery is a procedure name
+"departments include anaesthesia, critical care & pain; cardiology; cardio thoracic and vascular surgery; dermatology; ent, head and neck surgery; internal medicine; ophthalmology; orthopedics; paediatrics; pathology and microbiology; radiodiagnosis & internevtional neuro radiology; radiation oncology; surgical oncology; urology",anesthesia,agent,department list: cardiothoracic surgery and radiation oncology as department names only
+ct angiography is offered,ct,agent,CT angiography is a CT scan
+angiography/angioplasty equipment for renal arteries and other vessels,other_clinical,agent,"renal and peripheral angioplasty, not cardiac catheterisation"
+cardiac and diabetic dental care,other_clinical,agent,dental care
+performs angiography and angioplasty in a dedicated cath lab.,cath_lab,agent,
+"krishna hospital is located in kothrud, pune, maharashtra",location,agent,
+linac (linear accelerator) for radiotherapy,radiotherapy,agent,
+first systematized burn care unit in eastern india,burns,agent,
+departments include cardiac sciences; neuro sciences; gastrointestinal sciences; renal sciences; orthopaedic & joint replacement; medicine & allied specialities; endocrinology; surgery & allied specialities; obstetrics & gynaecology; paediatric & neonatology; critical care & emergency; ent; physiotherapy & occupational therapy; pathology; microbiology; radiology; dietician; 24 hrs emergency & pharmacy services,h24|emergency,agent,24 hrs emergency services
+24×7 emergency & trauma care,h24|emergency|trauma,agent,
+state-of-the-art cardiac catheterization labs (cath labs),cath_lab,agent,
+"specialties include internal medicine, obstetrics & gynaecology, general surgery, paediatrics, orthopaedics, cardiology, neurology, nephrology, urology, dermatology, psychiatry, neurosurgery, plastic surgery, surgical oncology, critical care, emergency medicine, radiodiagnosis, vascular surgery, ent, gastroenterology, ophthalmology, medical oncology, diabetology, endocrinology, infectious diseases, endocrine surgery, spine surgery, paediatric surgery, and anaesthesiology",anesthesia|emergency|neurosurgery,agent,specialty list; spine surgery is a procedure name; neurosurgery and medical oncology as names only
+"multispecialty hospital with specialties including critical care, cardiology, cardiac surgery, orthopaedics and joint replacement, neurology, neuro-surgery, pulmonology, gastroenterology, diabetes and endocrinology, pediatrics, gynecology, nephrology, and urology",other_clinical,agent,specialty list; cardiac surgery and neurosurgery as specialty names only
+has a 10-bed nicu,nicu,agent,
+critical care management with icu/ccu,icu|ccu,agent,
+performs hipec (hyperthermic intraperitoneal chemotherapy),chemo,agent,HIPEC is chemotherapy given in surgery
+offers ct scanning with fast reporting,ct,agent,
+offers post-surgical chemotherapy and radiotherapy coordination with nutritional and psychological support,other_clinical,agent,"'coordination' of chemo and radiotherapy reads as arranging care, not giving it"
+emergency angioplasty and stenting for acute heart attacks (primary ptca),emergency|cath_lab,agent,primary PTCA
+"offers dm in medical oncology (since 2017) and onco-pathology (since 2020), and m.d. radiotherapy (since 2013), with various oncology fellowships",,agent,"academic degree programmes, not a service statement"
+cathlab (catheterization laboratory),cath_lab,agent,
+chemotherapy and radiation therapy for cancer,chemo|radiotherapy,agent,
+bipap,ventilator,agent,BiPAP is non-invasive ventilation (v0.1 convention); not neonatal
+electa hdr brachytherapy machine with iridium-192 source.,radiotherapy,agent,HDR brachytherapy
+performs 3 tesla mri examinations using a magnetom spectra system,mri,agent,
+"specialized medical services include burns management, cardiology, general medicine, interventional neuroradiology, obstetrics and gynecology, ophthalmology, orthopaedics, otorhinolaryngology, paediatric medical management, plastic and reconstructive surgery, polytrauma care, and urology",emergency|trauma|burns,agent,burns management and polytrauma care named as services
+performs dental x-ray imaging including panoramic imaging (opg),other_clinical,agent,dental x-ray
+sakhi diagnostics centre provides women-only tests performed by women doctors,other_clinical,agent,
+bubble cpap systems (f&p) and variable flow cpap systems,neonatal_resp,agent,bubble CPAP systems
+minimally invasive cardiac surgery (mics),cardiac_surgery,agent,
+gynecology services are offered,other_clinical,agent,
+burn injury treatment and skin grafting,burns,agent,
+doppler ultrasound imaging system,other_clinical,agent,"ultrasound, not CT or MRI"
+ante-natal checkups with ante-natal and parentcraft classes,other_clinical,agent,"antenatal care, not deliveries"
+trauma care and emergency services,emergency|trauma,agent,
+iccu listed in nerul (intensive cardiac care unit) on justdial for surya hospital,icu|ccu,agent,ICCU from a JustDial listing
+endoscopic spine surgery offered,neurosurgery,agent,spine surgery
+has two back-to-back 1.5 tesla mri machines.,mri,agent,
+aarogya super speciality modern homoeopathy,other_clinical,agent,
+"offers clinical services across orthopaedics, general and laparoscopic surgery, gynaecology, interventional cardiology, neurology, neurosurgery, ent, ophthalmology, oral health, paediatric, nephrology and dialysis, cardiology, internal medicine, endocrinology and diabetes, anaesthesia and critical care, physiotherapy, dental, and plastic surgery",anesthesia|dialysis,agent,specialty list: dialysis is a service name; neurosurgery and interventional cardiology as names only; critical care as a department
+primary surgical facility for mahesh orthopaedic and trauma centre,emergency|trauma,agent,trauma only from the centre name (v0.1 convention for names)
+performs 128-slice mdct ct scans,ct,agent,
+advanced trauma center,emergency|trauma,agent,
+endoscopic spine surgery setup,neurosurgery,agent,spine surgery setup
+offers complete dentures treatment,other_clinical,agent,
+burns intensive care unit (burns icu),icu|burns,agent,burns ICU is an intensive care unit
+has a burn unit that provides specialized care,burns,agent,
+carotid angiography and angioplasty,other_clinical,agent,carotid angiography and angioplasty are not cardiac catheterisation
+"state-of-the-art radiation oncology department with true beam linear accelerator and ct simulator offering 3d-crt, imrt, and igrt",radiotherapy,agent,"CT simulator is for radiotherapy planning, not a diagnostic CT service"
+"offers general surgery, ent surgery, orthopedic surgery and procedures, genito-urinary surgeries, neurosurgery, plastic surgery, polytrauma care, critical care, general medicine, infectious diseases, and neurology",emergency|trauma,agent,specialty roster: neurosurgery and critical care as names only; polytrauma care is a care service
+"departments include ent, orthopedics, general surgery, obstetrics and gynecology, pediatrics, neurology, pulmonology, dermatology & venerology, endocrinology, ophthalmology, cardiology, dentistry, general practitioner, physiotherapy, homeopathy",other_clinical,agent,department roster only
+two linac machines in radiation oncology: one truebeam capable of stereotactic radiotherapy and one tomotherapy machine,radiotherapy,agent,
+operates as a regional cancer centre,other_clinical,agent,cancer centre named; no chemotherapy or radiotherapy stated
+"offers general surgery, gynecology and obstetrics, orthopedics, pediatrics, plastic surgery, maxillofacial surgery, internal medicine, urology, and burn management",burns,agent,roster item 'burn management' is worded as a care service; plastic surgery is not burns
+offers vitreoretinal services,other_clinical,agent,
+offers urgent pick-up and emergency transports,emergency,agent,emergency transport counts as emergency (ambulance)
+performs complicated tooth extraction,other_clinical,agent,
+coronary care unit (ccu).,icu|ccu,agent,
+ct scans using 32-slice and 128-slice scanners.,ct,agent,
+cpap,other_clinical,agent,bare CPAP with no neonatal context; CPAP alone is not ventilator
+philips azurion 7 m20 cath lab,cath_lab,agent,
+no specific equipment details listed for maeer's vishwaraj hospital - loni in the provided content,web_presence,agent,meta statement about missing content
+heart clinic with in-house cardiologist and cathlab,cath_lab,agent,
+provides cardiac consultations,other_clinical,agent,
+emergency trauma care center,emergency|trauma,agent,
+specialty departments include plastic surgery; neurosurgery & spine surgery; orthopaedics; pulmonology; cardiology; gastrology; paediatrics & paediatric surgery; urology; laparoscopic & general surgery; gynaecology & obstetrician; general medicine; dermatology; ent; physiotherapy; radiology; pathology; emergency & critical care; burn management; anaesthesia & critical care; oncology,anesthesia|emergency|burns,agent,department roster: neurosurgery and spine surgery and oncology as names only; burn management worded as care; critical care name is not icu
+"operates micu, sicu, picu, nicu, and iccu",nicu|icu|ccu,agent,ICCU
+coronary care unit (ccu) with 24/7 coverage,h24|icu|ccu,agent,
+high-end operating microscopes for spine surgery,neurosurgery,agent,equipment for spine surgery implies spine surgery is performed
+has department of emergency & trauma care,emergency|trauma,agent,
+pills hospital offers bariatric surgery program,other_clinical,agent,bariatric surgery is not cardiac surgery
+medical oncology and chemotherapy treatments,chemo,agent,
+specialization in burns management,burns,agent,
+multislice ct scanner,ct,agent,
+offers low-cost mri and ct scanning services,mri|ct,agent,
+"specialties offered: orthopaedics, general medicine, endocrinology, nephrology, obstetrics & gynecology, urology, pulmonology, general surgery, paediatrics, cardiology, ophthalmology, ent, psychiatry, dermatology, neurology, oncology, gastroenterology",other_clinical,agent,specialty roster only
+chemotherapy treatment at various levels of cancer,chemo,agent,
+mri knee left,mri,agent,test-menu item read as MRI offered; could be a report title
+apple hospital is listed among top cardiology hospitals in south tukoganj,reputation,agent,
+ayurveda and panchakarma chikitsalaya,other_clinical,agent,
+dr. s p garg is medical director at garg hospital,staff_name,agent,
+"led by dr. prerna mittal, who earned m.ch in plastic surgery from cmch ludhiana in 2012",staff_name,agent,
+icu/iccu and post surgical icu facilities,icu|ccu,agent,ICCU
+hyperthermic intraperitoneal chemotherapy (hipec) procedures performed,chemo,agent,HIPEC is chemotherapy given
+offers head ct scan,ct,agent,
+24/7 casualty and emergency/trauma care,h24|emergency|trauma,agent,
+provides advanced trauma care,emergency|trauma,agent,
+"departments include neurosurgery, neurophysician, urology, plastic surgery, oncosurgery, orthopedics, chest physicians, non-invasive cardiology, radiology and pathology",other_clinical,agent,department roster: neurosurgery as a name only
+"radiotherapy techniques listed in dr babita singh's profile include imrt, igrt, rapic arc, sbrt, srs, and image-guided brachytherapy.",staff_name,agent,techniques in a doctor's profile; not stated as offered at this facility
+joint initiative of ranchi cancer care foundation and tata cancer care foundation with support from tata trusts,,agent,affiliation or funding statement
+"offers cardiology, cardiothoracic surgery, neurosurgery, gastroenterology, nephrology, urology, and kidney transplant unit services.",other_clinical,agent,specialty roster: cardiothoracic surgery and neurosurgery as names only
+provides radiation therapy (radiotherapy),radiotherapy,agent,
+cath lab enabling interventional cardiology procedures,cath_lab,agent,
+affiliated with plastic surgeon dr. boobala arjunamurthy,staff_name,agent,
+radiation oncology for breast cancer,radiotherapy,agent,"radiation oncology stated as a treatment, not a roster name"
+"cardiac sciences program including cardiology, interventional cardiology, cardiac surgery, cardiac electrophysiology",other_clinical,agent,program roster of cardiac discipline names; no procedure or unit named
+contains squint eye clinic,other_clinical,agent,
+mri venogram brain scan,mri,agent,test-menu item read as MRI offered
+realigns and stabilizes fractures in children,other_clinical,agent,paediatric fracture care; trauma care not named
+brainlab ct airo navigation for computer-aided spine surgery,neurosurgery,agent,"intraoperative CT navigation, not a diagnostic CT service"
+performs coronary artery bypass grafting (cabg) surgeries,cardiac_surgery,agent,
+breast surgery treats benign and malignant breast conditions including lumps and cancer.,other_clinical,agent,
+provides regular newborn health check-ups,other_clinical,agent,
+offers centre of excellence in minimal access surgery,other_clinical,agent,
+"specialties include cardiology, dentistry, dermatology & venerology, pulmonology, general physician, homeopathy, general surgery, obgyn, ophthalmology, ent, endocrinology, neurology, pediatrics, orthopedics, radiology, dietetics, physiotherapy",other_clinical,agent,specialty roster only
+"offers ecg, eeg, and ncv diagnostic testing",other_clinical,agent,
+interventional cardiology services including tavi and cabg,cardiac_surgery|cath_lab,agent,TAVI is transcatheter (cath lab); CABG is heart surgery
+open and closed heart surgeries are performed by avanti institute of cardiology,cardiac_surgery,agent,
+"nicu features include invasive/non-invasive ventilation, cpap/hhfnc, laminar flow total parenteral nutrition, exchange transfusion, cardiac defibrillator, phototherapy, neonatal surgeries, portable x-ray/eeg/ecg/oae hearing screening, and rop screening",blood|nicu|ventilator|neonatal_resp,agent,exchange transfusion counted as transfusion
+"cardiac surgery is offered at metro hospital and heart institute, haridwar",cardiac_surgery,agent,
+specializes in minimally invasive spine surgery,neurosurgery,agent,
+"medical oncology services including day-care chemotherapy, indoor chemotherapy, target therapy, and immunotherapy",chemo,agent,
+neurology tests include eeg and enmg,other_clinical,agent,
+bubble cpap and high-flow nasal cannula therapy in nicu,nicu|neonatal_resp,agent,
+advanced neonatal ventilation equipment with conventional and non-conventional modes,ventilator|neonatal_resp,agent,no NICU named
+neonatal ambulance fully equipped with neonatal ventilator,ventilator|emergency|neonatal_resp,agent,neonatal ambulance counts as emergency (ambulance)
+"offers general, neurosurgical, orthopedic, plastic and reconstructive, gastrointestinal, and urological surgical procedures",other_clinical,agent,roster of surgical disciplines; neurosurgical named only as one of six
+"comprehensive critical care facilities with an 18-bed icu including micu, sicu and iccu",icu|ccu,agent,ICCU
+dual energy ct scanner for musculoskeletal imaging,ct,agent,
+equipped with an intra-oral scanner,other_clinical,agent,dental intra-oral scanner
+performs small incision cardiac surgery,cardiac_surgery,agent,
+"has performed over 15,000 angioplasties",cath_lab|reputation,agent,procedure-volume claim
+"state-of-the-art imaging facility with mri, ct, ecg/eeg, and endoscopy",mri|ct,agent,
+treats skin cancers,other_clinical,agent,
+fully equipped cath lab,cath_lab,agent,
+"provides comprehensive diagnostic services in radiology, pathology, cardiology, and neurology",other_clinical,agent,
+"ct scan, ultrasonography, and digital x-ray capabilities in advanced radiology",ct,agent,
+hi-tech infrastructure with a 3 tesla mri and a 16-slice ct scanner,mri|ct,agent,
+pet imaging services available,other_clinical,agent,PET with no CT or MRI named
+offers dm neonatology postgraduate program at chettinad hospital and research institute,,agent,"academic training program, not a service"
+chemotherapy is provided at the day care centre,chemo,agent,
+"listed among top clinics in sarat bose road, kolkata",reputation|location,agent,
+has 11 feedback entries on the hospital listing.,reputation,agent,listing feedback count
+burns care includes specialized treatment with an eight‑bed burns unit and use of early excision and grafting techniques,burns,agent,burns unit named
+includes akkineni fertility centre,other_clinical,agent,fertility centre
+pediatric cardiac surgery is offered at fortis memorial research institute,cardiac_surgery,agent,
+first to offer oct imaging in ulwe region,other_clinical,agent,OCT eye imaging
+cpap (continuous positive airway pressure) therapy equipment,other_clinical,agent,"CPAP therapy equipment with no neonatal context (likely sleep apnoea); not neonatal_resp, not mechanical ventilation"
+"provides 360-degree cancer care across medical oncology, radiation oncology, surgical oncology, radiology and supportive care",other_clinical,agent,radiation and medical oncology as specialty names in a list; no chemotherapy or radiotherapy stated
+robotic-assisted gynecologic oncology surgery,other_clinical,agent,"oncology surgery, not chemo or radiotherapy"
+neonatal and pediatric ventilators with cpap/hhhfnc,nicu|ventilator|neonatal_resp,agent,neonatal ventilators and CPAP/HHHFNC; nicu per v0.1 convention for neonatal ventilators
+"gynecology, pregnancy, fertility care, and neonatal care specialties",other_clinical,agent,specialty list; neonatal care is not intensive care; pregnancy care is not delivery
+uses digital x-ray imaging for diagnostic purposes,other_clinical,agent,x-ray only
+"emergency/trauma care is provided by the department of emergency medicine, available 24/7.",h24|emergency|trauma,agent,
+"departments include medicine, surgery, diagnostic, gynaecology & maternity, orthopaedics & burn injuries, and pathology.",ob_delivery|burns,agent,"maternity department (v0.1 convention); burn injuries department is a service word, not a specialty name"
+interventional cardiology services including coronary angiography and angioplasty,cath_lab,agent,
+ct & ultrasound scan,ct,agent,
+"offers chemotherapy, immunotherapy, and precision medicine",chemo,agent,
+angiography of coronary arteries,cath_lab,agent,coronary angiography (catheter procedure)
+cardiac care program including cabg,cardiac_surgery,agent,CABG
+"provides comprehensive cancer care under one roof including medical oncology, surgical oncology, radiation oncology and palliative care.",other_clinical,agent,radiation and medical oncology as specialty names in a list; no chemotherapy or radiotherapy stated
+"plastic surgery department provides burn care, trauma, onco-reconstruction, hand and microsurgery, and aesthetic and cosmetic surgery",emergency|burns,agent,"burn care by plastic surgery; 'trauma' here is reconstructive work in a plastic surgery list, not trauma care; emergency per v0.1 convention for any trauma word"
+world-class robotic surgical system available at gujarat hospital surat,other_clinical,agent,robotic surgical system; no operating theatre named
+has advanced imaging capabilities including a 3t mri scanner and ct scanner,mri|ct,agent,
+"offers bariatric and minimal access (laparoscopic) surgery at manipal hospital, delhi",other_clinical,agent,"bariatric surgery, not cardiac bypass"
+dr. ganesan vivek – ccu intensivist - critical care,icu|ccu|staff_name,agent,CCU intensivist implies a CCU (v0.1 convention: unit named via staff role; ICCU is an ICU)
+"orthopaedics program led by dr. prakash selvam with specialization in joint replacement, trauma surgery, and advanced fracture care",emergency|trauma|staff_name,agent,orthopaedic trauma surgery
+joint replacement & neurosurgery center,neurosurgery,agent,"named neurosurgery centre (unit), not a department list"
+ambe physio hospital is a hospital in jaipur,location,agent,
+operates burns center,burns,agent,
+trauma surgeries,emergency|trauma,agent,
+pediatric cardiac surgery is provided.,cardiac_surgery,agent,
+mri scanner available,mri,agent,
+"assam’s first transcatheter heart valve replacement (tavr) was performed at apollo hospitals, guwahati on a 73-year-old woman",cardiac_surgery|cath_lab,agent,"hard call: TAVR is a transcatheter valve replacement, so cath_lab; counted as heart valve replacement for cardiac_surgery"
+has coronary care unit (ccu) for inpatient care,icu|ccu,agent,CCU is a cardiac ICU (v0.1 convention)
+heart valve replacement,cardiac_surgery,agent,
+hrct chest,ct,agent,HRCT is a CT test
+iccu treatment available,icu|ccu,agent,ICCU
+specialised in cancer & non-cancer,other_clinical,agent,
+"paras nursing home in karnal has specialist doctors in orthopaedic surgery, gynaecology, and plastic surgery.",other_clinical,agent,"specialties named, no person named"
+"provides cashless and paperless treatment across diagnostic services, medications, surgeries, icu care, and hospitalization under pm-jay.",icu|scheme,agent,ICU care under PM-JAY
+specializes in burns management,burns,agent,burns management
+provides intensity-modulated radiation therapy (imrt),radiotherapy,agent,IMRT
+"on-site pathology, ultrasound, ct, mri and radiology services",mri|ct,agent,
+nicu equipped with a neonatal ventilator,nicu|ventilator|neonatal_resp,agent,
+complex congenital heart surgeries,cardiac_surgery,agent,congenital heart surgery
+cancer care center,other_clinical,agent,cancer care centre; no chemotherapy or radiotherapy named
+imaging center offering mri and x-ray services,mri,agent,
+specialised ct scans program including ct coronary angiography,ct,agent,"CT coronary angiography is non-invasive CT, not cath lab"
+"radiology tests offered include ct scan, mri scan, ultrasound, x-ray, pet ct, and open mri",mri|ct,agent,includes PET-CT and open MRI
+three icu/iccu beds,icu|ccu,agent,
+hrct chest scan,ct,agent,HRCT is a CT test
+"sibasis das is the superintendent of deben mahato sadar hospital, purulia, west bengal, india.",staff_name,agent,superintendent named
+dedicated burn unit,burns,agent,
+"departments include medicine, surgery, endoscopic surgery, orthopedic, cardiology, gastro-enterology, gynecology, neurosurgery, pediatrics, chest, plastic & cosmetic surgery, sport injury, industrial trauma unit, reconstructive surgery, physiotherapy unit, rheumatology unit",emergency|trauma,agent,"industrial trauma unit named; neurosurgery only as a department name in a list, so no neurosurgery tag"
+performs 3t mri scans (tim + dot),mri,agent,
+spinal fracture fixation,neurosurgery,agent,"spinal fracture fixation is spine surgery; no trauma word, so no trauma tag"
+vasan dental care does not list specific clinical procedures in the provided content.,web_presence,agent,about the source content; no evidence tag
+cardiology with cath lab facility,cath_lab,agent,cath lab facility named
+"provides cosmetic, plastic & burns surgery",burns,agent,burns surgery
+radiology imaging equipment (x-ray/fluoroscopy),other_clinical,agent,"x-ray/fluoroscopy, not CT"
+"cancer treatment using a combination of surgeries, radiotherapy and chemotherapy",chemo|radiotherapy,agent,
+accident and emergency department available,emergency|trauma,agent,accident and emergency department
+neonatal cpap ventilators,nicu|ventilator|neonatal_resp,agent,neonatal CPAP ventilators
+trauma care during the golden hour,emergency|trauma,agent,
+coronary care unit (ccu),icu|ccu,agent,
+oral cancer screening and prevention,other_clinical,agent,"screening, not treatment"
+"first dedicated centre in west bengal dealing with snoring and sleep apnea, voice & speech problems, complete ent solutions, and dental treatment",other_clinical,agent,sleep apnoea / ENT centre
+"multi-specialty care with departments including plastic surgery, neurosurgery & spine surgery, orthopaedics, pulmonology, cardiology, gastrology, paediatrics & paediatric surgery, urology, laparoscopic & general surgery, gynaecology & obstetrician, general medicine, dermatology, ent, physiotherapy, radiology, pathology, burn management, anaesthesia & critical care, and oncology",anesthesia|burns,agent,burn management is a service word in the list; neurosurgery & spine surgery and oncology only as department names; anaesthesia department per v0.1 convention; critical care department is not ICU
+ct scanner for detailed imaging,ct,agent,
+medical oncology program including chemotherapy,chemo,agent,
+"emergency cardiac care for acute myocardial infarction, cardiogenic shock, arrhythmias, and hypertensive emergencies",emergency,agent,emergency cardiac care; no CCU or cath lab named
+coronary angioplasty is performed,cath_lab,agent,
+"offers neurosurgery, orthopedics, neurology, pediatrics, ophthalmology, psychiatry, gynecology, and general surgery departments",other_clinical,agent,department list; neurosurgery as a department name only
+performs high-dose-rate brachytherapy using cobalt-60,radiotherapy,agent,HDR brachytherapy with cobalt-60
+fracture & trauma surgery,emergency|trauma,agent,
+provides chemotherapy,chemo,agent,
+neonatal ventilation equipment including conventional and high-frequency ventilation,nicu|ventilator|neonatal_resp,agent,
+on-site cath lab for emergency angioplasty and thrombolysis,emergency|cath_lab,agent,emergency angioplasty
+part of amm foundation amm group (philanthropic arm of murugappa group),,agent,affiliation statement only
+24x7 emergency care with a dedicated advanced coronary care unit (accu),h24|icu|emergency|ccu,agent,advanced coronary care unit
+angioplasty,cath_lab,agent,"bare angioplasty, read as coronary"
+specializes in neurosurgical care,neurosurgery,agent,"specializes in neurosurgical care (service statement, like 'specializes in polytrauma management')"
+"provides mri imaging services for brain, spine and joints",mri,agent,
+"offers cancer diagnosis, chemotherapy, cancer surgery, radiotherapy and hdr brachytherapy",chemo|radiotherapy,agent,
+first to offer pet-ct scanning in ranchi,ct,agent,hard call: PET-CT scanner includes CT
+"center of excellence in surgical oncology services, radiation oncology services, medical oncology services, pain, palliative care, preventive oncology services, radiology and interventional oncology services, interventional gastroenterology services, nuclear medicines services, pathology, immunotherapy, and anaesthesiology",anesthesia,agent,"radiation and medical oncology services as specialty names in a centre-of-excellence list, so no radiotherapy or chemo; anaesthesiology per v0.1 convention"
+proton density planning mri is used for cancer and brain tumour treatment planning,mri,agent,MRI used for radiotherapy planning; radiotherapy not stated
+offers cardiology treatment program,other_clinical,agent,cardiology programme; a specialty word is not cath_lab
+"treatments include angioplasty & stent, cabg, kidney transplant as listed in mumbai procedures",cardiac_surgery|cath_lab,agent,angioplasty and stent; CABG
+"regional cancer centre based in cuttack, odisha, india",location,agent,regional cancer centre in a place; radiotherapy and chemo not stated
+"general medicine and multiple specialty services including cardiology, orthopaedics, neurology, neurosurgery, ent, ophthalmology, dermatology, urology, nephrology, gastroenterology, and more",neurosurgery,agent,"neurosurgery listed as a service (specialty name is the surgery itself, as anaesthesiology gave anesthesia in v0.1); nephrology is not dialysis"
+"outpatient day-care chemotherapy and immunotherapy services with over 150 administrations daily, year-round",chemo,agent,day-care chemotherapy given
+"described as no.1 brain, spine and trauma centre",emergency|trauma|reputation,agent,trauma centre; 'no.1' is reputation; brain and spine centre does not name surgery
+burn centre with 15 functional beds,burns,agent,burn centre with beds
+iccu on-site,icu|ccu,agent,ICCU is cardiac intensive care and an intensive care unit (v0.1 precedent)
+spinal cord stimulation,other_clinical,agent,"spinal cord stimulation is a neuromodulation pain procedure, not stated as spine surgery"
+ultrasound imaging equipment (usg) on-site,other_clinical,agent,
+phase ii will include truebeam radiation therapy system,,agent,planned (phase ii will include); not yet on site
+"specialization: burns management, cardiology, general medicine, interventional neuroradiology, medical oncology, neo natal, neurosurgery, obstetrics & gynaecology, opthalmology, orthopaedics, otorhinolaryngology, paediatric cancer, paediatric medical management, plastic & reconstructive, polytrauma, surgical oncology, urology",emergency|trauma|neurosurgery|burns,agent,"burns management, polytrauma and neurosurgery listed; medical oncology is not chemo; plastic surgery is not burns"
+dr rajesh kumar singh is a neurosurgeon affiliated with asarfi hospital,staff_name,agent,neurosurgeon named; surgery at this facility not stated (v0.1: named obstetrician gave no ob_delivery)
+provides 3 tesla mri scanning,mri,agent,
+"has a team of physicians including dr. devendra singh batth (pediatrics), dr. sukhpreet singh (general medicine), dr. chandrakant dewangan (general medicine), dr. harkirat kaur (child specialist), dr. rishu gupta (consultant dental surgeon), dr. gurinder singh (physiotherapist), dr. niraj kumar (plastic surgeon), dr. bavneet kaur (audiologist), dr. taruna (dietitian), dr. sanjeev gupta (gynecologist)",staff_name,agent,plastic surgeon on the team is not burn care
+biosafety cabinet for chemotherapy preparation,chemo,agent,chemotherapy preparation cabinet implies chemo given on site
+truebeam with hyperarc radiotherapy system,radiotherapy,agent,
+"fortis hospital - mohali provides oncology services including cancer treatment, chemotherapy, brachytherapy, stem cell transplantation, cancer screening (preventive), and head and neck tumor/cancer surgery",chemo|radiotherapy,agent,chemotherapy and brachytherapy listed as services
+valproic acid was the most commonly used antiepileptic drug among patients in the study.,,agent,research statistic
+cath lab procedures,cath_lab,agent,
+ct scan (ct scanner),ct,agent,
+"performs spinal fusion, spinal disc surgery, spinal deformity correction, herniated disc treatment, spinal cord injury treatment, spinal diseases, and spinal injuries and related spine surgeries",neurosurgery,agent,spine surgeries performed; spinal injury treatment not read as trauma care
+provides obstetric and neonatal care focused on safe motherhood,other_clinical,agent,obstetric and neonatal care with no delivery word and no breathing support
+siemens somatom ct scanner,ct,agent,
+"provides cancer care including radiation therapy, chemotherapy, and surgery",chemo|radiotherapy,agent,
+has intensive care and critical care unit,icu,agent,intensive care and critical care unit
+"regional first in angioplasty performed at ujala cygnus brightstar hospital, moradabad",cath_lab|reputation,agent,angioplasty performed; 'regional first' is reputation
+2d echo test services,other_clinical,agent,2D echo is not cath lab
+"offers cardiology, medical oncology, nephrology including dialysis, neurosurgery, plastic surgery, paediatrics, radiation oncology, and urology",dialysis|neurosurgery|radiotherapy,agent,"dialysis, neurosurgery and radiation oncology offered; medical oncology is not chemo"
+ct scanner capable of contrast-enhanced thoracic imaging,ct,agent,
+infant cpap therapy,neonatal_resp,agent,infant CPAP; no unit named so no nicu
+whole-body multi-slice ct scanner,ct,agent,
+"specialties include adult and paediatric oncology, cardiologist, ent, dental surgeon, diabetes, hypertension, orthopedic & spine surgeon, paediatrician",other_clinical,agent,specialty list; oncology is not chemo; a spine surgeon in a list is a specialty word
+immunization services as per the national immunization schedule,other_clinical,agent,
+one doctor at the hospital is board-certified in cardiology,other_clinical,agent,qualification only; cardiology is not cath_lab
+cardiac catheterization procedures conducted in the cath lab,cath_lab,agent,
+coronary angioplasty is performed via the cardiac catheterization laboratory,cath_lab,agent,
+performs valve repair,cardiac_surgery,agent,valve repair read as heart valve surgery
+nasal cpap drivers (infant flow drivers),neonatal_resp,agent,infant nasal CPAP drivers; CPAP is not mechanical ventilation
+on-site 1.5 tesla mri,mri,agent,
+has on-site iccu (icu) facility,icu|ccu,agent,
+burn care unit in collaboration with burn care foundation,burns,agent,"burn care unit on site, run with a foundation; not a referral"
+"retinoblastoma treatment including highly-advanced chemotherapy, laser therapy, and surgical interventions",chemo,agent,
+intensive neonatal care unit with incubator and phototherapy facilities,nicu,agent,neonatal intensive care; incubators and phototherapy are not breathing support
+fully air-conditioned burn care facility,burns,agent,
+ct scans are used for epilepsy assessment,other_clinical,agent,reads as general information on epilepsy work-up; no CT on site stated
+ultra modern cath lab,cath_lab,agent,
+96-slice ct scanner,ct,agent,
+"diagnostic centre located in kolkata, west bengal, india",location,agent,diagnostic centre in a place; no MRI named
+ccu configured with 10 beds and ge multipara monitors and drager ventilators,icu|ventilator|ccu,agent,CCU with beds and ventilators; CCU counted as an intensive care unit as ICCU was in v0.1
+high-end monitoring systems and advanced cardiac surgical instruments for mis,cardiac_surgery,agent,cardiac surgical instruments for minimally invasive surgery
+patna medical college hospital has epbx numbers 0612-2300132 and 0612-2670132.,,agent,phone numbers only
+inpatient cardiac care within iccu,icu|ccu,agent,
+provides neonatal cpap ventilation in the nicu/scnu,nicu|neonatal_resp,agent,neonatal CPAP in NICU/SNCU; CPAP is not mechanical ventilation
+"specialties include endocrinology, thyroid, diabetes, growth disorders, bone health, reproductive endocrinology, metabolic disorders, and pediatric endocrinology",other_clinical,agent,
+"comprehensive cancer screening including hpv-based screening, pap smear, colposcopy, and vaccination",other_clinical,agent,cancer screening is not chemo or radiotherapy
+ultrasound imaging (sonography) as part of diagnostic services,other_clinical,agent,
+round-the-clock laboratory,h24,agent,round-the-clock lab (v0.1: 24x7 chemist gave h24)
+laparoscopy services available,other_clinical,agent,
+"cancer diagnostics including bronchoscopy, colonoscopy, upper gi endoscopy, ercp, ct 128-slice with 3d reconstruction, mri 1.5 tesla, mammogram, mri breast, usg/ct-guided biopsies, image-guided fnac, surgical biopsies, endometrial biopsies, laparoscopy, oncopathology, bone marrow aspiration and biopsy, ihc, molecular genetics, and ngs testing",mri|ct,agent,CT 128-slice and MRI 1.5 T listed among diagnostics
+burns care and trauma care for pediatric patients,emergency|trauma|burns,agent,
+provides neonatal ventilation support,nicu|ventilator|neonatal_resp,agent,neonatal ventilation (v0.1: neonatal ventilators gave nicu|ventilator)
+center of excellence includes accident & emergency; cardiac care center; kidney care & dialysis center; neuroscience; mother and baby care center; cancer center,dialysis|dialysis_unit|emergency|trauma,agent,accident & emergency read as trauma care; cancer centre does not name chemo; cardiac care centre is not ccu
+head injury and trauma care,emergency|trauma,agent,"head injury care, no surgery named so no neurosurgery"
+linear accelerator and brachytherapy equipment added to cancer hospital in 2016,radiotherapy,agent,
+cardiac emergency treatment,emergency,agent,cardiac emergency is not trauma
+neurosurgery and functional neurosurgery are offered,neurosurgery,agent,
+"renowned multi-speciality clinic offering reproductive health medicine, neuro physiotherapy, obstetrics & gynaecology",other_clinical,agent,neuro physiotherapy is not neurosurgery
+offers pediatric neurosurgery at kohinoor hospitals,neurosurgery,agent,
+magnetic resonance imaging (mri) service,mri,agent,
+"santosh hospital is listed among the best 12 hospitals for cardiac surgery in bangalore, india",cardiac_surgery|reputation,agent,third-party ranking for cardiac surgery; read as surgery performed (weak)
+ai-enabled mri for all kinds of mri,mri,agent,
+first time-of-flight pet-ct scan in chandigarh,ct|reputation,agent,PET-CT scanner includes CT; 'first in chandigarh' is reputation
+associated with plastic surgeon dr. viral patel,staff_name,agent,plastic surgeon is not burn care
+barium meal imaging equipment,other_clinical,agent,"barium imaging is X-ray, not CT"
+day care chemotherapy program,chemo,agent,
+"multispecialty hospital with departments including ophthalmology, orthopedics, neurosurgery, obstetrics and gynecology, ent, general medicine, and pulmonology",neurosurgery,agent,neurosurgery department (specialty name is the surgery); OBG department has no delivery word
+fracture & trauma care,emergency|trauma,agent,
+cardiac catheterization lab with angiography and angioplasty,cath_lab,agent,"cath lab, not cardiac surgery"
+holds nabh full-level accreditation; balco medical centre is the only cancer hospital in chhattisgarh to have received this accreditation,reputation,agent,accreditation; cancer hospital type does not name chemo
+neonatal ventilation in nicu,nicu|ventilator|neonatal_resp,agent,
+multi-speciality and trauma centre,emergency|trauma,agent,trauma centre (possibly from the facility type)
+"has icu, ccu, nicu, and cardiac icu units",nicu|icu|ccu,agent,
+dentistry including accident and trauma care,emergency,agent,dental trauma is not the trauma tag; emergency as in v0.1 dentofacial trauma
+performs coronary artery bypass surgery (cabg) using total arterial bypass,cardiac_surgery,agent,
+listed among hospitals in ausa; 24.0 km away,location,agent,
+shashwat hospital has dr rakesh neve as a consultant surgical oncologist.,staff_name,agent,surgical oncologist named; not chemo or radiotherapy

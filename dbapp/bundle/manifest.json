@@ -1,0 +1,303 @@
+{
+  "bundle_version": "wp12-bundle-v1",
+  "created_at_utc": "2026-11-22T04:04:15+00:00",
+  "git_commit": "3928247f2304842e0345f907fb16e2078d13f3d2",
+  "code_uncommitted": true,
+  "script": "scripts/wp12_bundle.py",
+  "data_dir": "vf.paths.data_dir()",
+  "pipeline_source": "csv",
+  "row_counts": {
+    "facilities": 9989,
+    "grades": 119868,
+    "flags": 3350,
+    "duplicates": 75,
+    "places": 182755,
+    "post_offices": 137748
+  },
+  "upstream_row_counts": {
+    "silver/facilities.parquet": 9989,
+    "silver/facts.parquet": 451105,
+    "silver/post_offices.parquet": 165627,
+    "silver/pin_crosswalk.parquet": 21162,
+    "silver/places.parquet": 182755,
+    "gold/fact_tags.parquet": 451105,
+    "gold/capability_grades.parquet": 119868,
+    "gold/facility_flags.parquet": 3350,
+    "gold/facility_duplicates.parquet": 75,
+    "gold/service_probability.parquet": null
+  },
+  "grade_counts": {
+    "burns": {
+      "0": 8261,
+      "1": 1583,
+      "2": 71,
+      "3": 74
+    },
+    "cardiac_surgery": {
+      "0": 9075,
+      "1": 360,
+      "2": 435,
+      "3": 119
+    },
+    "cath_lab": {
+      "0": 6834,
+      "1": 2464,
+      "2": 210,
+      "3": 481
+    },
+    "ct": {
+      "0": 6537,
+      "1": 2030,
+      "2": 446,
+      "3": 976
+    },
+    "dialysis": {
+      "0": 7631,
+      "1": 1322,
+      "2": 556,
+      "3": 480
+    },
+    "emoc": {
+      "0": 5325,
+      "1": 4232,
+      "2": 391,
+      "3": 41
+    },
+    "icu": {
+      "0": 7173,
+      "1": 543,
+      "2": 1850,
+      "3": 423
+    },
+    "mri": {
+      "0": 6663,
+      "1": 2392,
+      "2": 304,
+      "3": 630
+    },
+    "neurosurgery": {
+      "0": 7681,
+      "1": 1106,
+      "2": 805,
+      "3": 397
+    },
+    "nicu": {
+      "0": 8513,
+      "1": 770,
+      "2": 528,
+      "3": 178
+    },
+    "oncology": {
+      "0": 7982,
+      "1": 1565,
+      "2": 277,
+      "3": 165
+    },
+    "trauma": {
+      "0": 4952,
+      "1": 3905,
+      "2": 669,
+      "3": 463
+    }
+  },
+  "service_lines": [
+    "burns",
+    "cardiac_surgery",
+    "cath_lab",
+    "ct",
+    "dialysis",
+    "emoc",
+    "icu",
+    "mri",
+    "neurosurgery",
+    "nicu",
+    "oncology",
+    "trauma"
+  ],
+  "service_lines_missing": [],
+  "versions": {
+    "silver_facilities": "wp1-silver-v3",
+    "recipes": [
+      "v0.2"
+    ],
+    "grade_method": [
+      "student"
+    ],
+    "checks": [
+      "wp11_v2"
+    ],
+    "places": "places-v2",
+    "probability_model": null
+  },
+  "defaults": {
+    "source": "vf.services",
+    "weights": {
+      "evidence": 0.5,
+      "distance": 0.3,
+      "trust": 0.2
+    },
+    "radii_km": {
+      "emoc": 50,
+      "nicu": 75,
+      "dialysis": 50,
+      "icu": 75,
+      "cardiac_surgery": 250,
+      "cath_lab": 100,
+      "mri": 100,
+      "ct": 75,
+      "trauma": 50,
+      "burns": 200,
+      "neurosurgery": 150,
+      "oncology": 250
+    },
+    "penalties": {
+      "possible_merge": 0.15,
+      "location_conflict": 0.1
+    },
+    "grade_evidence": {
+      "2": 0.7,
+      "3": 1.0
+    },
+    "strength_adjust": {
+      "thin": -0.2,
+      "moderate": 0.0,
+      "strong": 0.1,
+      "none": 0.0
+    },
+    "reach_factor": 3.0,
+    "max_candidates": 50,
+    "location_precision_km": {
+      "ok": 1.0,
+      "ok_same_district": 2.0,
+      "kept_city_matches_coords": 2.0,
+      "no_pin_check": 2.0,
+      "kept_unresolved": 25.0,
+      "moved_to_pin": 10.0
+    },
+    "service_lines": [
+      "emoc",
+      "nicu",
+      "dialysis",
+      "icu",
+      "cardiac_surgery",
+      "cath_lab",
+      "mri",
+      "ct",
+      "trauma",
+      "burns",
+      "neurosurgery",
+      "oncology"
+    ]
+  },
+  "defaults_note": null,
+  "files": {
+    "facilities.parquet": {
+      "rows": 9989,
+      "from": "silver/facilities.parquet",
+      "input_created_at_utc": "2026-11-21T21:30:37Z",
+      "input_git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+      "stats": {
+        "with_location": 9671,
+        "without_location": 318,
+        "by_coord_check": {
+          "ok": 8167,
+          "moved_to_pin": 785,
+          "no_pin_check": 285,
+          "excluded_unresolved": 282,
+          "kept_city_matches_coords": 184,
+          "ok_same_district": 127,
+          "kept_unresolved": 123,
+          "missing": 36
+        },
+        "moved_to_pin_precision_from_places": 785,
+        "moved_to_pin_precision_default": 0,
+        "unknown_coord_check_values": []
+      },
+      "recipe_version": "wp1-silver-v3",
+      "bytes": 878770,
+      "sha256": "3d0db5db0ffc90554f6d44c6bf5093cb5f5732bec3ea742ab5a80766b1e65aca"
+    },
+    "grades.parquet": {
+      "rows": 119868,
+      "from": "gold/capability_grades.parquet",
+      "input_created_at_utc": "2026-11-22T03:06:11Z",
+      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "bytes": 1748546,
+      "sha256": "f46d0ce67abacc0e8cf8986c56b5e5be2a004d19c1b0741d955b45f511a0a571"
+    },
+    "flags.parquet": {
+      "rows": 3350,
+      "from": "gold/facility_flags.parquet",
+      "input_created_at_utc": "2026-11-22T03:40:57Z",
+      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "bytes": 113321,
+      "sha256": "8ca7ff602d109d533cc8ac40fec7e3380ac69625df8ff7f26588dda890d9338f"
+    },
+    "duplicates.parquet": {
+      "rows": 75,
+      "from": "gold/facility_duplicates.parquet",
+      "input_created_at_utc": "2026-11-22T03:40:57Z",
+      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "bytes": 9945,
+      "sha256": "a17f24b375e9d400828545104e33c65201864752872cb045dc21306213c00f7b"
+    },
+    "places.parquet": {
+      "rows": 182755,
+      "from": "silver/places.parquet",
+      "input_created_at_utc": null,
+      "input_git_commit": "8ff71cbc50f786935360164e3b2c6a98d616f892",
+      "bytes": 7151201,
+      "sha256": "1efe9f53c9b85a7841641e55d3427b78d7252376201606db081b54aa4939380f"
+    },
+    "post_offices.parquet": {
+      "rows": 137748,
+      "from": "silver/post_offices.parquet",
+      "input_created_at_utc": null,
+      "input_git_commit": "369e7afa0c9fe578d0f04a5cca78f2e416be0c2e",
+      "stats": {
+        "geocoded_offices": 151589,
+        "suspect_dropped": 4790,
+        "flags_from": "scripts/wp2_places.py load_offices (the gazetteer's own flags)",
+        "placeholder_offices": 9339,
+        "placeholder_points": 288,
+        "rows": 137748
+      },
+      "bytes": 2193995,
+      "sha256": "2dcb227e72b13f13534e82c0e313bccb0d74f13c522a6ecc621ed763cb98b013"
+    },
+    "keyword_index/": {
+      "files": [
+        "docs.parquet",
+        "matrix.part-000.npz",
+        "matrix.part-001.npz",
+        "matrix.part-002.npz",
+        "matrix.part-003.npz",
+        "meta.json",
+        "postings.parquet",
+        "vectorizer.pkl"
+      ],
+      "version": "kw_v1"
+    }
+  },
+  "missing": {
+    "service_probability.parquet": "gold/service_probability.parquet not found (WP13 has not written it yet); skipped"
+  },
+  "sizes": {
+    "total_bytes": 48064789,
+    "largest": [
+      "places.parquet",
+      7151201
+    ],
+    "app_file_limit_bytes": 10485760,
+    "over_app_file_limit": {}
+  },
+  "commit_decision": {
+    "committed": false,
+    "policy": "built at deploy time by scripts/wp12_bundle.py; only manifest.json is versioned",
+    "rule": "docs/07: commit only under about 50 MB and with no raw text dump beyond quoted evidence",
+    "rule_allows_commit_of_this_build": false,
+    "total_bytes": 48064789,
+    "keyword_index_present": true,
+    "why": "the final bundle holds the keyword index (all distinct fact texts, a text dump), it changes on every upstream rerun, and the facilities table's reuse terms are unchecked"
+  }
+}

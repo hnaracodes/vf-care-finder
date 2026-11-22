@@ -1,0 +1,1 @@
+Generated copy of src/vf by scripts/wp12_bundle.py. Do not edit here; edit src/vf and rerun.

@@ -1,0 +1,156 @@
+{
+ "status": "no_reliable_option",
+ "service": "dialysis",
+ "service_label": "Dialysis",
+ "radius_km": 50,
+ "method": "recipe",
+ "location": {
+  "status": "ok",
+  "label": "Fixturepur (fixture village), Darbhanga, Bihar",
+  "how": "Matched a post office name; the point is that post office.",
+  "lat": 25.95,
+  "lon": 86.2,
+  "precision_km": 4.0,
+  "kind": "post_office",
+  "place_id": "post_office:fixture",
+  "candidates": []
+ },
+ "results": [],
+ "beyond_radius": {
+  "facility_id": "FX-301",
+  "name": "Fixture District Kidney Centre",
+  "type": "hospital",
+  "operator": "private",
+  "city": "Darbhanga",
+  "state": "Bihar",
+  "lat": 26.37,
+  "lon": 85.65,
+  "distance_km": 72.07,
+  "location_precision_km": 2.0,
+  "location_note": null,
+  "grade": 2,
+  "grade_label": "supported",
+  "confidence": "medium",
+  "confidence_reason": "Dialysis is named, but no dialysis unit.",
+  "score": 0.549,
+  "parts": {
+   "evidence": 0.7,
+   "distance": 0.237,
+   "trust": 0.64,
+   "penalties": []
+  },
+  "evidence": [
+   {
+    "requirement": "dialysis",
+    "quote": "Fixture text: Haemodialysis available on all days.",
+    "field": "procedure",
+    "fact_id": "fx-f-0301"
+   }
+  ],
+  "missing": [
+   "no fact names a dialysis unit, dialysis machines or a nephrologist"
+  ],
+  "sources": {
+   "n_domains": 2,
+   "domains": [
+    "fixture-dkc.example",
+    "fixture-listing.example"
+   ],
+   "official_website": null
+  },
+  "why_here": "The nearest facility with reliable evidence, beyond the search radius.",
+  "could_be_wrong": "It is outside the radius; the trip is long.",
+  "also_listed_as": [],
+  "reason": null
+ },
+ "unverified_nearby": [
+  {
+   "facility_id": "FX-302",
+   "name": "Fixture Nursing Home",
+   "type": "nursing home",
+   "operator": "private",
+   "city": "Kusheshwar",
+   "state": "Bihar",
+   "lat": 25.99,
+   "lon": 86.13,
+   "distance_km": 8.29,
+   "location_precision_km": 2.0,
+   "location_note": null,
+   "grade": 1,
+   "grade_label": "claimed",
+   "confidence": null,
+   "confidence_reason": null,
+   "score": null,
+   "parts": null,
+   "evidence": [],
+   "missing": [
+    "no fact mentions dialysis"
+   ],
+   "sources": {
+    "n_domains": 1,
+    "domains": [
+     "fixture-listing.example"
+    ],
+    "official_website": null
+   },
+   "why_here": null,
+   "could_be_wrong": null,
+   "also_listed_as": [],
+   "reason": "Lists nephrology as a specialty, but no fact in its record mentions dialysis."
+  }
+ ],
+ "how_we_decided": {
+  "method": "recipe",
+  "recipe": [
+   "Lowest level: nephrology listed as a specialty. This alone is never recommended.",
+   "Supported: a fact names dialysis.",
+   "Corroborated: dialysis and a named dialysis unit, dialysis machines or a nephrologist."
+  ],
+  "gates": [
+   {
+    "name": "Location usable",
+    "description": "Facilities whose location could be used",
+    "count": 9656
+   },
+   {
+    "name": "Within reach",
+    "description": "Within 150 km straight line (at most 50 kept)",
+    "count": 14
+   },
+   {
+    "name": "Reliable evidence",
+    "description": "The record names the service, and no blocking warning",
+    "count": 1
+   },
+   {
+    "name": "Within the radius",
+    "description": "Reliable and within 50 km",
+    "count": 0
+   }
+  ],
+  "formula": "score = 0.5 x evidence + 0.3 x distance + 0.2 x source trust - penalties",
+  "weights": {
+   "evidence": 0.5,
+   "distance": 0.3,
+   "trust": 0.2
+  },
+  "parts_explained": {
+   "evidence": "How completely the record names the service: supported 0.7, corroborated 1.0; thin evidence -0.2, strong +0.1.",
+   "distance": "exp(-km / radius): 1.0 at the searched point, 0.37 at the radius.",
+   "trust": "Independent web domains behind the record, an official website, and how recent the pages are."
+  },
+  "radius_km": 50,
+  "radius_reason": "A straight-line product default for this service, not clinical guidance.",
+  "score_status": "provisional",
+  "score_status_note": "The weights are judgment calls, not fitted. They will be replaced by a calibrated probability when outside labels are linked.",
+  "limits": [
+   "Distances are straight-line kilometres, not travel time.",
+   "This dataset mostly covers private facilities with a web presence. Public hospitals are under-covered.",
+   "Evidence describes what web pages say, not what a facility can do today. Pages can be stale.",
+   "Quotes name the fact and its field, not the web page it came from: the data has no per-fact source.",
+   "The test set for the fact tagger was labeled by an AI agent, not a clinician.",
+   "Weights and radii are stated defaults, not fitted or clinically validated."
+  ]
+ },
+ "fixture": true
+}

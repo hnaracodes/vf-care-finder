@@ -3,47 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Care desert or data desert?</title>
+    <title>Find care you can trust</title>
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <div id="map"></div>
+    <a class="skip" href="#results">Skip to results</a>
+    <header class="top">
+      <div class="top-inner">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <div>
+            <div class="title">Find care you can trust</div>
+            <div class="subtitle">Health facilities in India, ranked by what their own records show</div>
+          </div>
+          
+        </div>
 
-    <header id="topbar">
-      <div class="brand">
-        <div class="title">Care desert or data desert?</div>
-        <span id="mock-badge" class="mock" hidden>MOCK DATA</span>
-      </div>
-      <nav id="line-tabs" class="seg" aria-label="Service line"></nav>
-      <nav id="view-tabs" class="seg" aria-label="View"></nav>
-      <div class="top-actions">
-        <button id="home-btn" title="Back to India">India</button>
-        <button id="story-btn" title="Story mode (space)" hidden>Story</button>
-        <button id="drawer-btn">How we know</button>
+        <form id="query" class="query" autocomplete="off">
+          <label class="field field-service">
+            <span class="field-label">What care is needed?</span>
+            <select id="service" required></select>
+          </label>
+          <label class="field field-other" id="other-wrap" hidden>
+            <span class="field-label">Describe the care</span>
+            <input id="other" type="text" placeholder="for example, cataract surgery" />
+          </label>
+          <label class="field field-place">
+            <span class="field-label">Where is the patient?</span>
+            <input id="place" type="text" required placeholder="PIN code, city, district, village, or coordinates" />
+          </label>
+          <button id="go" class="go" type="submit">Find facilities</button>
+        </form>
+        <div class="examples" id="examples" aria-label="Example searches"></div>
       </div>
     </header>
 
-    <aside id="left">
-      <section class="card">
-        <div class="card-h">Evidence required</div>
-        <input id="grade-slider" type="range" min="0" max="3" step="1" value="2" aria-label="Evidence required" />
-        <div id="grade-stops" class="stops"></div>
-        <div id="grade-note" class="muted"></div>
-      </section>
-      <section class="card">
-        <div class="card-h">Reach</div>
-        <div id="radius-seg" class="seg"></div>
-        <div id="counter" class="counter"></div>
-      </section>
-      <section id="legend" class="card legend"></section>
-    </aside>
-
-    <aside id="right" class="card" hidden></aside>
-    <div id="caption" hidden></div>
-    <div id="overlay" class="card" hidden></div>
-    <aside id="drawer" class="card"></aside>
-    <div id="status">Loading</div>
-    <div id="fps" hidden></div>
+    <main class="page">
+      <div id="loc" class="loc-wrap"></div>
+      <div class="layout">
+        <section id="results" class="results" aria-live="polite" tabindex="-1"></section>
+        <aside id="mapcol" class="mapcol" aria-label="Map of the results">
+          <div class="mapbox">
+            <div id="map"></div>
+            <div id="map-empty" class="map-empty">The map shows the searched place and the results.</div>
+            <div id="scale" class="scale" aria-hidden="true"></div>
+          </div>
+          <div id="map-controls" class="map-controls" hidden>
+            <button type="button" class="tog" id="tog-trips" aria-pressed="false">Show trips</button>
+            <button type="button" class="tog" id="tog-claims" aria-pressed="false">If we trusted claims alone</button>
+            <button type="button" class="tog" id="tog-sim" aria-pressed="false" hidden>Simulate arrivals</button>
+            <button type="button" class="tog tog-quiet" id="replay" hidden>Replay</button>
+          </div>
+          <div id="trip-counter" class="trip-counter" aria-live="polite"></div>
+          <div id="sim-panel" class="sim-panel" hidden></div>
+          <ul class="legend" id="legend">
+            <li><span class="lg lg-result">1</span>Recommended, numbered like the cards</li>
+            <li><span class="lg lg-unv"></span>Nearby, not verified</li>
+            <li><span class="lg lg-here"></span>Searched place, with how precise it is</li>
+            <li><span class="lg lg-ring"></span>Search radius</li>
+            <li><span class="lg lg-po"></span>Post office areas, for context</li>
+            <li><span class="lg lg-other"></span>Other facilities with evidence (trip view)</li>
+            <li><span class="lg lg-unv lg-small"></span>Facility that only claims it (trip view, claims alone)</li>
+          </ul>
+        </aside>
+      </div>
+    </main>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

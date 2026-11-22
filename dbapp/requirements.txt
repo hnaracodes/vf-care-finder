@@ -1,0 +1,15 @@
+# Pinned to the local .venv (Python 3.12) except where a version has no wheel for Python 3.11,
+# which Databricks Apps runs (system-env docs, Nov 21 2026). Checked with
+#   uv pip compile --python-version 3.11 --python-platform x86_64-manylinux_2_28 --only-binary :all:
+# numpy 2.5.5 and scipy 1.18.1 (local) have no 3.11 wheels; 2.4.6 and 1.17.1 are the newest that do.
+# Pins override the Apps runtime's preinstalled fastapi 0.115.0 and uvicorn 0.30.6.
+fastapi==0.165.0
+starlette==1.10.0
+pydantic==2.14.4
+uvicorn[standard]==0.54.0
+pandas==3.1.1
+pyarrow==26.0.1
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+rapidfuzz==3.14.6

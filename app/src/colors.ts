@@ -82,3 +82,23 @@ export const DIM_PO: RGBA = [42, 47, 56, 255];
 export function rgbaCss(c: RGBA, alpha?: number): string {
   return `rgba(${c[0]},${c[1]},${c[2]},${alpha ?? c[3] / 255})`;
 }
+
+// ---------------------------------------------------------------- v2 query screen
+// The small map sits on a dark panel; the cards on a light page. Confidence
+// colours reuse the validated palette above and are never the only signal:
+// every confidence chip also carries words and a 1 to 3 bar glyph.
+
+export const MAP = {
+  bg: '#10141c',
+  po: [150, 162, 178, 70] as RGBA,
+  precisionFill: [76, 201, 240, 40] as RGBA,
+  precisionLine: [76, 201, 240, 230] as RGBA,
+  radiusLine: [215, 221, 228, 70] as RGBA,
+  result: [245, 247, 250, 255] as RGBA,
+  resultText: [16, 20, 28, 255] as RGBA,
+  resultFocus: ACCENT,
+  unverified: [201, 133, 0, 255] as RGBA,
+  label: [215, 221, 228, 220] as RGBA,
+  tripLine: [215, 221, 228, 38] as RGBA,
+  tripDeadEnd: [201, 133, 0, 70] as RGBA,
+};
