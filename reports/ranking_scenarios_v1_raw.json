@@ -1,14 +1,14 @@
 {
  "meta": {
   "script": "scripts/wp5_scenarios.py",
-  "created_at_utc": "2026-11-22T06:07:02Z",
-  "git_commit": "f5a74270474ea67e448b3e8912987535d09e2e3a",
-  "code_uncommitted": true,
+  "created_at_utc": "2026-11-22T06:34:49Z",
+  "git_commit": "ab8d226e375fa160fdef924e4e5494e72c8c1772",
+  "code_uncommitted": false,
   "rows": 26,
   "scenarios_csv": "labels/scenarios.csv",
   "recipe_version": "v0.3",
   "grades_method": "student",
-  "flags_source": "wp11_v2",
+  "flags_source": "wp11_v3",
   "resolver": "vf.locate",
   "rank_version": "v1",
   "score_mode": "v1-final (D048): gates, drive-time windows, nearest first with the evidence allowance",
@@ -39,17 +39,17 @@
     "rows": 119868
    },
    "facility_flags": {
-    "created_at_utc": "2026-11-22T04:56:32Z",
+    "created_at_utc": "2026-11-22T06:29:38Z",
     "script": "scripts/wp11_trust_checks.py",
-    "check_version": "wp11_v2",
-    "recipe_version": "v0.2",
-    "rows": 3350
+    "check_version": "wp11_v3",
+    "recipe_version": "v0.3",
+    "rows": 3664
    },
    "facility_duplicates": {
-    "created_at_utc": "2026-11-22T04:56:32Z",
+    "created_at_utc": "2026-11-22T06:29:38Z",
     "script": "scripts/wp11_trust_checks.py",
-    "check_version": "wp11_v2",
-    "recipe_version": "v0.2",
+    "check_version": "wp11_v3",
+    "recipe_version": "v0.3",
     "rows": 75
    }
   },
@@ -58,22 +58,17 @@
  "summary": {
   "scenarios": 26,
   "status_counts": {
-   "ok": 17,
-   "no_reliable_option": 6,
+   "ok": 16,
+   "no_reliable_option": 7,
    "needs_location_choice": 2,
    "location_not_found": 1
   },
-  "status_as_expected": 22,
+  "status_as_expected": 23,
   "status_not_as_expected": [
    {
     "id": "brief_dialysis_rural_bihar",
     "expected": "ok",
     "got": "no_reliable_option"
-   },
-   {
-    "id": "remote_emoc_gadchiroli",
-    "expected": "no_reliable_option",
-    "got": "ok"
    },
    {
     "id": "fallback_antivenom_raipur",
@@ -87,38 +82,39 @@
    }
   ],
   "resolved": 23,
-  "abstentions": 6,
-  "abstention_rate": 0.261,
+  "abstentions": 7,
+  "abstention_rate": 0.304,
   "abstention_ids": [
    "brief_dialysis_rural_bihar",
    "remote_dialysis_leh",
    "remote_emoc_tawang",
    "remote_cardiac_portblair",
+   "remote_emoc_gadchiroli",
    "fallback_antivenom_raipur",
    "disambiguated_aurangabad_bihar"
   ],
   "recipe_resolved": 21,
-  "recipe_abstentions": 5,
-  "recipe_abstention_rate": 0.238,
-  "expected_abstentions_that_abstained": 3,
+  "recipe_abstentions": 6,
+  "recipe_abstention_rate": 0.286,
+  "expected_abstentions_that_abstained": 4,
   "expected_abstentions": 4,
-  "cards_shown": 49,
+  "cards_shown": 48,
   "cards_by_confidence": {
-   "null": 49
+   "null": 48
   },
   "cards_by_grade": {
-   "3": 24,
+   "3": 23,
    "2": 22,
    "null": 3
   },
   "cards_nearest_reserved": 6,
-  "cards_with_a_flag": 7,
+  "cards_with_a_flag": 5,
   "load_s": 0.8,
-  "keyword_index_build_s": 2.1,
-  "scenario_recipe_ms_median": 0.83,
-  "scenario_recipe_ms_max": 1.37,
-  "scenario_keyword_ms_median": 7.36,
-  "scenario_keyword_ms_max": 8.26,
+  "keyword_index_build_s": 2.3,
+  "scenario_recipe_ms_median": 0.94,
+  "scenario_recipe_ms_max": 1.79,
+  "scenario_keyword_ms_median": 8.3,
+  "scenario_keyword_ms_max": 9.65,
   "latency_check": {
    "n_queries": 276,
    "n_points": 23,
@@ -136,9 +132,9 @@
     "neurosurgery",
     "oncology"
    ],
-   "ms_median": 0.87,
-   "ms_p95": 0.98,
-   "ms_max": 1.19,
+   "ms_median": 0.91,
+   "ms_p95": 1.12,
+   "ms_max": 1.89,
    "limit_ms": 100.0,
    "passed": true
   }
@@ -843,7 +839,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -860,8 +856,8 @@
    },
    "fingerprint": "aebce9d0de",
    "ms": {
-    "resolve": 7.4,
-    "answer": 1.37
+    "resolve": 7.71,
+    "answer": 1.79
    }
   },
   {
@@ -1517,7 +1513,7 @@
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
       "n": 47,
       "n_distinct": 47,
-      "n_blocked": 23,
+      "n_blocked": 30,
       "n_scored": 47,
       "max_scored": 50
      },
@@ -1537,7 +1533,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -1551,8 +1547,8 @@
    },
    "fingerprint": "d1317ff0c8",
    "ms": {
-    "resolve": 6.82,
-    "answer": 0.96
+    "resolve": 7.27,
+    "answer": 1.09
    }
   },
   {
@@ -1568,7 +1564,7 @@
     "status": "ok",
     "lat": 26.152286,
     "lon": 87.648247,
-    "precision_km": 10.859818961524994,
+    "precision_km": 7.883637919676647,
     "kind": "post_office",
     "label": "Jokihat (post office area, PIN 854329), Araria district, Bihar",
     "how": "Matched the post office name 'Jokihat' exactly in Bihar.",
@@ -1597,7 +1593,7 @@
     "lon": 88.13694763183594,
     "distance_km": 76.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 11 km. Beyond the 60-minute window for this service.",
+    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 8 km. Beyond the 60-minute window for this service.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": null,
@@ -1677,7 +1673,7 @@
      "lon": 88.13694763183594,
      "distance_km": 76.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 11 km. Beyond the 60-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 8 km. Beyond the 60-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -1756,7 +1752,7 @@
      "lon": 88.1339111328125,
      "distance_km": 77.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 11 km. Beyond the 60-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 8 km. Beyond the 60-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -1827,7 +1823,7 @@
      "lon": 88.3139167,
      "distance_km": 90.0,
      "location_precision_km": 2.031552103599512,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 2 km. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 11 km. Beyond the 60-minute window for this service. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 2 km. Straight-line distance. Measured from the centre of Jokihat (post office area, PIN 854329), Araria district, Bihar, which is itself known only to within about 8 km. Beyond the 60-minute window for this service. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -1911,7 +1907,7 @@
     "sea_travel_not_modelled": false,
     "origin_loose": false,
     "origin_too_loose": false,
-    "origin_precision_km": 10.9,
+    "origin_precision_km": 7.9,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
@@ -1938,7 +1934,7 @@
      "sea_travel_not_modelled": false,
      "origin_loose": false,
      "origin_too_loose": false,
-     "origin_precision_km": 10.9,
+     "origin_precision_km": 7.9,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -2084,7 +2080,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -2098,8 +2094,8 @@
    },
    "fingerprint": "dc8a192260",
    "ms": {
-    "resolve": 20.2,
-    "answer": 0.62
+    "resolve": 22.51,
+    "answer": 0.72
    }
   },
   {
@@ -2750,7 +2746,7 @@
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
       "n": 89,
       "n_distinct": 88,
-      "n_blocked": 24,
+      "n_blocked": 43,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -2770,7 +2766,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -2784,8 +2780,8 @@
    },
    "fingerprint": "5951cf9155",
    "ms": {
-    "resolve": 6.35,
-    "answer": 0.86
+    "resolve": 6.65,
+    "answer": 1.11
    }
   },
   {
@@ -2801,7 +2797,7 @@
     "status": "ok",
     "lat": 27.703,
     "lon": 76.1994444,
-    "precision_km": 163.41779600765156,
+    "precision_km": 11.503252909146772,
     "kind": "post_office",
     "label": "Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan",
     "how": "Matched the post office name 'Kotputli' exactly in Rajasthan.",
@@ -2817,7 +2813,7 @@
    "service": "trauma",
    "service_label": "Trauma and accident care",
    "radius_km": 98.9,
-   "headline": "Uncertain: Kotputli spans about 327 km, more than the 120-minute window reaches (about 99 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. 3 of 18 recommendable facilities within about 2 hours' estimated drive (free-flow) of Kotputli, nearest first (a corroborated record may move up to 15 minutes).",
+   "headline": "3 of 18 recommendable facilities within about 2 hours' estimated drive (free-flow) of Kotputli, nearest first (a corroborated record may move up to 15 minutes).",
    "cards": [
     {
      "facility_id": "bbe21556-3364-4fdf-9784-f8e1ba11152b",
@@ -2830,7 +2826,7 @@
      "lon": 76.19398498535156,
      "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -2894,21 +2890,21 @@
       "official_website": "shyamhospitals.com",
       "also_listed_as": []
      },
-     "why_here": "Listed above Sachkhand Hospital: closer from the point Kotputli resolved to (about 1 km against about 36 km, straight-line).",
+     "why_here": "Listed above Sachkhand Hospital: nearer (about 2 min against 50 min estimated drive).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 1.6,
-     "minutes_low": 0.0,
-     "minutes_high": 309.0,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 0.9,
+     "minutes_high": 2.7,
+     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 1 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": true,
-     "window_uncertain": true
+     "window_uncertain": false
     },
     {
      "facility_id": "47477a2d-7bfc-49c6-8d55-caf1e5a3ae19",
@@ -2921,7 +2917,7 @@
      "lon": 76.39138793945312,
      "distance_km": 36.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -2983,21 +2979,21 @@
       "official_website": "sachkhandhospital.in",
       "also_listed_as": []
      },
-     "why_here": "Listed above Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: closer from the point Kotputli resolved to (about 36 km against about 40 km, straight-line).",
+     "why_here": "Listed above Rainbow Multispeciality Hospital And Trauma Centre, Moti Nagar, Narnaul: nearer (about 50 min against 55 min estimated drive).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 50.9,
-     "minutes_low": 0.0,
-     "minutes_high": 363.8,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 30.2,
+     "minutes_high": 85.6,
+     "minutes_label": "about 50 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 36 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": false,
-     "window_uncertain": true
+     "window_uncertain": false
     },
     {
      "facility_id": "6bc16b01-1e1d-44c2-9e8b-463ab894cd66",
@@ -3010,7 +3006,7 @@
      "lon": 76.10513305664062,
      "distance_km": 40.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -3076,21 +3072,21 @@
       "official_website": "rainbownarnaul.com",
       "also_listed_as": []
      },
-     "why_here": "Listed above Metro Umkal Hospital & Heart Institute: corroborated, and within the 15-minute evidence allowance measured from the point Kotputli resolved to (about 40 km against an approximate position, straight-line).",
+     "why_here": "Listed above Metro Umkal Hospital & Heart Institute: corroborated, and only slightly further (both about 55 min), within the 15-minute evidence allowance.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 56.1,
-     "minutes_low": 0.0,
-     "minutes_high": 370.5,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 33.3,
+     "minutes_high": 94.3,
+     "minutes_label": "about 55 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 40 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": false,
-     "window_uncertain": true
+     "window_uncertain": false
     }
    ],
    "beyond_radius": null,
@@ -3107,9 +3103,9 @@
     "factor_text": "terrain factor 1.09 (Rajasthan)",
     "state": "RAJASTHAN",
     "sea_travel_not_modelled": false,
-    "origin_loose": true,
-    "origin_too_loose": true,
-    "origin_precision_km": 163.4,
+    "origin_loose": false,
+    "origin_too_loose": false,
+    "origin_precision_km": 11.5,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
@@ -3125,7 +3121,7 @@
      "lon": 76.27877807617188,
      "distance_km": 23.0,
      "location_precision_km": 2.0,
-     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, in the same district as its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -3184,16 +3180,16 @@
       }
      ],
      "minutes": 35.2,
-     "minutes_low": 0.0,
-     "minutes_high": 344.2,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 20.9,
+     "minutes_high": 59.2,
+     "minutes_label": "about 35 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 23 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": null,
-     "window_uncertain": true
+     "window_uncertain": false
     },
     {
      "facility_id": "bc9a5e50-a166-427a-9eaf-7b82d692cdc8",
@@ -3206,7 +3202,7 @@
      "lon": 76.12044525146484,
      "distance_km": 40.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -3248,16 +3244,16 @@
       }
      ],
      "minutes": 55.9,
-     "minutes_low": 0.0,
-     "minutes_high": 370.3,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 33.3,
+     "minutes_high": 94.1,
+     "minutes_label": "about 55 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 40 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": null,
-     "window_uncertain": true
+     "window_uncertain": false
     },
     {
      "facility_id": "399b94f0-85a5-4be8-a852-8d7e3d4205f6",
@@ -3270,7 +3266,7 @@
      "lon": 76.09808349609375,
      "distance_km": 41.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 163 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Kotputli (post office area, PIN 303108), Jaipur district, Rajasthan, which is itself known only to within about 12 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -3312,16 +3308,16 @@
      "evidence_strength": "thin",
      "flags": [],
      "minutes": 57.3,
-     "minutes_low": 0.0,
-     "minutes_high": 372.0,
-     "minutes_label": "drive time unclear: Kotputli spans about 327 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 34.0,
+     "minutes_high": 96.3,
+     "minutes_label": "about 55 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 41 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
      "nearest_in_window": null,
-     "window_uncertain": true
+     "window_uncertain": false
     }
    ],
    "how_we_decided": {
@@ -3344,9 +3340,9 @@
      "factor_text": "terrain factor 1.09 (Rajasthan)",
      "state": "RAJASTHAN",
      "sea_travel_not_modelled": false,
-     "origin_loose": true,
-     "origin_too_loose": true,
-     "origin_precision_km": 163.4,
+     "origin_loose": false,
+     "origin_too_loose": false,
+     "origin_precision_km": 11.5,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -3469,9 +3465,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 227,
-      "n_distinct": 226,
-      "n_blocked": 32,
+      "n": 223,
+      "n_distinct": 222,
+      "n_blocked": 44,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -3491,7 +3487,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -3500,15 +3496,13 @@
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
      "Nothing here is a probability."
     ],
-    "notes": [
-     "Uncertain: Kotputli spans about 327 km, more than the 120-minute window reaches (about 99 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer."
-    ],
-    "headline": "Uncertain: Kotputli spans about 327 km, more than the 120-minute window reaches (about 99 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. 3 of 18 recommendable facilities within about 2 hours' estimated drive (free-flow) of Kotputli, nearest first (a corroborated record may move up to 15 minutes)."
+    "notes": [],
+    "headline": "3 of 18 recommendable facilities within about 2 hours' estimated drive (free-flow) of Kotputli, nearest first (a corroborated record may move up to 15 minutes)."
    },
    "fingerprint": "d1046c385b",
    "ms": {
-    "resolve": 19.37,
-    "answer": 0.97
+    "resolve": 21.23,
+    "answer": 1.0
    }
   },
   {
@@ -3540,99 +3534,8 @@
    "service": "nicu",
    "service_label": "Newborn intensive care (NICU)",
    "radius_km": 115.0,
-   "headline": "3 of 36 recommendable facilities within about 2 hours' estimated drive (free-flow) of Pune, nearest first (a corroborated record may move up to 15 minutes).",
+   "headline": "3 of 35 recommendable facilities within about 2 hours' estimated drive (free-flow) of Pune, nearest first (a corroborated record may move up to 15 minutes).",
    "cards": [
-    {
-     "facility_id": "8364c81e-4bde-4991-b443-f818ac474136",
-     "name": "Dhanwantari Hospital",
-     "type": "hospital",
-     "operator": "private",
-     "city": "Pune",
-     "state": "Maharashtra",
-     "lat": 18.519519805908203,
-     "lon": 73.86589813232422,
-     "distance_km": 2.0,
-     "location_precision_km": 2.0,
-     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance. Measured from the centre of Pune city (centre at the head post office, PIN 411001), Pune district, Maharashtra, about 25 km across, which is itself known only to within about 12 km.",
-     "grade": 2,
-     "grade_label": "supported (a fact in the record names the service)",
-     "confidence": null,
-     "confidence_reason": "The record carries warnings that may affect this answer.",
-     "score": null,
-     "parts": {
-      "combine": "v1",
-      "penalties": [],
-      "allowance_denied_by": [],
-      "minutes": 3.24,
-      "order_minutes": 3.24,
-      "allowance_min": 15.0,
-      "allowance_applies": false,
-      "km": 1.58,
-      "labels": {
-       "minutes": "estimated drive time, free-flow",
-       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
-      }
-     },
-     "evidence": [
-      {
-       "requirement": "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)",
-       "quote": "NICU and PICU units",
-       "field": "capability",
-       "fact_id": "7776c417870ea761",
-       "requirements": [
-        "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)"
-       ]
-      }
-     ],
-     "missing": [
-      "no fact in the record mentions newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a self-declared level III NICU (FBNC 2025)"
-     ],
-     "sources": {
-      "n_domains": 15,
-      "domains": [
-       "ambitionbox.com",
-       "practo.com",
-       "justdial.com",
-       "onefivenine.com",
-       "ratnagiriivf.com",
-       "medicineindia.org",
-       "proptiger.com",
-       "lybrate.com",
-       "indiamart.com",
-       "dhanwantarihospitalent.com",
-       "instagram.com",
-       "docmitra.com",
-       "99acres.com",
-       "indiaonapage.com",
-       "in.indeed.com"
-      ],
-      "official_website": "dhanwantarihospitalent.com",
-      "also_listed_as": []
-     },
-     "why_here": "Same estimated drive time as KEM Hospital Pune (about 3 min); listed first because it is closer in straight-line km.",
-     "could_be_wrong": "The record's own text places it in Thane, Maharashtra, but its PIN code and city put it in Jalgaon, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere. The record does not mention newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a self-declared level III NICU (FBNC 2025).",
-     "evidence_strength": "moderate",
-     "flags": [
-      {
-       "flag": "possible_merge",
-       "severity": "minor",
-       "signal": "text_other_address",
-       "reason": "The record's own text places it in Thane, Maharashtra, but its PIN code and city put it in Jalgaon, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
-       "quote": "Located in Saravali, Thane"
-      }
-     ],
-     "minutes": 3.2,
-     "minutes_low": 1.9,
-     "minutes_high": 5.4,
-     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
-     "distance_label": "about 2 km straight-line",
-     "position_approximate": false,
-     "window_min": 120.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": true,
-     "window_uncertain": false
-    },
     {
      "facility_id": "7ab574db-80af-40d5-8b20-2b0a7dfafba1",
      "name": "KEM Hospital Pune",
@@ -3728,7 +3631,7 @@
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
-     "nearest_in_window": false,
+     "nearest_in_window": true,
      "window_uncertain": false
     },
     {
@@ -3807,6 +3710,90 @@
      "minutes_high": 8.2,
      "minutes_label": "about 5 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 3 km straight-line",
+     "position_approximate": false,
+     "window_min": 120.0,
+     "inside_window": true,
+     "level_note": null,
+     "nearest_in_window": false,
+     "window_uncertain": false
+    },
+    {
+     "facility_id": "14327a60-299d-47b9-a7e1-ea015de67dea",
+     "name": "Deenanath Mangeshkar Hospital and Research Center",
+     "type": "hospital",
+     "operator": "private",
+     "city": "Pune",
+     "state": "Maharashtra",
+     "lat": 18.50706672668457,
+     "lon": 73.83261108398438,
+     "distance_km": 5.0,
+     "location_precision_km": 1.0,
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Pune city (centre at the head post office, PIN 411001), Pune district, Maharashtra, about 25 km across, which is itself known only to within about 12 km.",
+     "grade": 2,
+     "grade_label": "supported (a fact in the record names the service)",
+     "confidence": null,
+     "confidence_reason": "Thin support: one fact, or a record with one web source and no official website.",
+     "score": null,
+     "parts": {
+      "combine": "v1",
+      "penalties": [],
+      "allowance_denied_by": [],
+      "minutes": 8.33,
+      "order_minutes": 8.33,
+      "allowance_min": 15.0,
+      "allowance_applies": false,
+      "km": 4.84,
+      "labels": {
+       "minutes": "estimated drive time, free-flow",
+       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
+      }
+     },
+     "evidence": [
+      {
+       "requirement": "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)",
+       "quote": "Deenanath Mangeshkar Hospital has received neonatal equipment and staff training as part of PALAV Neonatal Intensive Care and Equipment Support program",
+       "field": "equipment",
+       "fact_id": "157ad56fb20e40ed",
+       "requirements": [
+        "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)"
+       ]
+      }
+     ],
+     "missing": [
+      "no fact in the record mentions newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a self-declared level III NICU (FBNC 2025)"
+     ],
+     "sources": {
+      "n_domains": 16,
+      "domains": [
+       "pmc.ncbi.nlm.nih.gov",
+       "ijmrhs.com",
+       "guidestar.org",
+       "jnmc.edu",
+       "pubmed.ncbi.nlm.nih.gov",
+       "dheerajbojwani.com",
+       "pmnrf.gov.in",
+       "ilishaorthoclinic.com",
+       "contouravision.myalcon.com",
+       "journals.lww.com",
+       "mithaahara.com",
+       "docindia.org",
+       "vaidam.com",
+       "en.wikipedia.org",
+       "dmhospital.org",
+       "acee-india.org"
+      ],
+      "official_website": "dmhospital.org",
+      "also_listed_as": []
+     },
+     "why_here": "Listed above Sahyadri Hospitals: nearer (about 8 min against 10 min estimated drive).",
+     "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a self-declared level III NICU (FBNC 2025).",
+     "evidence_strength": "thin",
+     "flags": [],
+     "minutes": 8.3,
+     "minutes_low": 5.0,
+     "minutes_high": 14.0,
+     "minutes_label": "about 8 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 5 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
@@ -3912,6 +3899,91 @@
      "window_uncertain": false
     },
     {
+     "facility_id": "8364c81e-4bde-4991-b443-f818ac474136",
+     "name": "Dhanwantari Hospital",
+     "type": "hospital",
+     "operator": "private",
+     "city": "Pune",
+     "state": "Maharashtra",
+     "lat": 18.519519805908203,
+     "lon": 73.86589813232422,
+     "distance_km": 2.0,
+     "location_precision_km": 2.0,
+     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance. Measured from the centre of Pune city (centre at the head post office, PIN 411001), Pune district, Maharashtra, about 25 km across, which is itself known only to within about 12 km.",
+     "grade": 2,
+     "grade_label": "supported (a fact in the record names the service)",
+     "confidence": null,
+     "confidence_reason": "Not recommended: The record's evidence for newborn intensive care sits among facts about Thane, not this facility, and the record already mixes in other places' facts, so it may come from that place.",
+     "score": null,
+     "parts": {},
+     "evidence": [
+      {
+       "requirement": "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)",
+       "quote": "NICU and PICU units",
+       "field": "capability",
+       "fact_id": "7776c417870ea761",
+       "requirements": [
+        "NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)"
+       ]
+      }
+     ],
+     "missing": [
+      "no fact in the record mentions newborn mechanical ventilation (not CPAP alone), a ventilator in a newborn fact, or a self-declared level III NICU (FBNC 2025)"
+     ],
+     "sources": {
+      "n_domains": 15,
+      "domains": [
+       "ambitionbox.com",
+       "practo.com",
+       "justdial.com",
+       "onefivenine.com",
+       "ratnagiriivf.com",
+       "medicineindia.org",
+       "proptiger.com",
+       "lybrate.com",
+       "indiamart.com",
+       "dhanwantarihospitalent.com",
+       "instagram.com",
+       "docmitra.com",
+       "99acres.com",
+       "indiaonapage.com",
+       "in.indeed.com"
+      ],
+      "official_website": "dhanwantarihospitalent.com",
+      "also_listed_as": []
+     },
+     "why_here": "",
+     "could_be_wrong": "The record's evidence for newborn intensive care sits among facts about Thane, not this facility, and the record already mixes in other places' facts, so it may come from that place. The record's own text places it in Thane, Maharashtra, but its PIN code and city put it in Jalgaon, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
+     "evidence_strength": "moderate",
+     "flags": [
+      {
+       "flag": "possible_merge",
+       "severity": "major",
+       "signal": "evidence_beside_other",
+       "reason": "The record's evidence for newborn intensive care sits among facts about Thane, not this facility, and the record already mixes in other places' facts, so it may come from that place.",
+       "quote": "NICU and PICU units"
+      },
+      {
+       "flag": "possible_merge",
+       "severity": "minor",
+       "signal": "text_other_address",
+       "reason": "The record's own text places it in Thane, Maharashtra, but its PIN code and city put it in Jalgaon, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
+       "quote": "Located in Saravali, Thane"
+      }
+     ],
+     "minutes": 3.2,
+     "minutes_low": 1.9,
+     "minutes_high": 5.4,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 2 km straight-line",
+     "position_approximate": false,
+     "window_min": 120.0,
+     "inside_window": true,
+     "level_note": null,
+     "nearest_in_window": null,
+     "window_uncertain": false
+    },
+    {
      "facility_id": "2d16d221-b3e8-4517-bab4-28fe6805e99e",
      "name": "Command Hospital (Southern Command), Pune, Maharashtra, India",
      "type": "hospital",
@@ -3978,70 +4050,6 @@
      "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 2 km straight-line",
      "position_approximate": false,
-     "window_min": 120.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": null,
-     "window_uncertain": false
-    },
-    {
-     "facility_id": "44d40c36-5789-44e7-8308-49d3d79dcdb1",
-     "name": "Modern Hospital",
-     "type": "hospital",
-     "operator": "private",
-     "city": "Pune",
-     "state": "Maharashtra",
-     "lat": 18.515017,
-     "lon": 73.8567778,
-     "distance_km": 2.0,
-     "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Pune city (centre at the head post office, PIN 411001), Pune district, Maharashtra, about 25 km across, which is itself known only to within about 12 km. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
-     "grade": 1,
-     "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
-     "confidence": null,
-     "confidence_reason": "Claim not supported by the record: no fact names NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II).",
-     "score": null,
-     "parts": {},
-     "evidence": [],
-     "missing": [
-      "no fact in the record mentions NICU or neonatal intensive care named (FBNC 2025: NICU is level III, SNCU is level II)"
-     ],
-     "sources": {
-      "n_domains": 11,
-      "domains": [
-       "practo.com",
-       "justdial.com",
-       "facebook.com",
-       "mediyaar.com",
-       "policyx.com",
-       "diagnosticcentres.in",
-       "indiasite.com",
-       "bajajfinservhealth.in",
-       "dwello.in",
-       "mappls.com",
-       "medindia.net"
-      ],
-      "official_website": null,
-      "also_listed_as": []
-     },
-     "why_here": "",
-     "could_be_wrong": "The record's scraped map point was 166 km from its PIN code's area; it is shown at the PIN code's centre, so its position is approximate.",
-     "evidence_strength": "thin",
-     "flags": [
-      {
-       "flag": "location_conflict",
-       "severity": "minor",
-       "signal": "moved_to_pin",
-       "reason": "The record's scraped map point was 166 km from its PIN code's area; it is shown at the PIN code's centre, so its position is approximate.",
-       "quote": "Pune"
-      }
-     ],
-     "minutes": 4.4,
-     "minutes_low": 2.6,
-     "minutes_high": 7.5,
-     "minutes_label": "about 4 min estimated drive, free-flow; real trips take longer (the facility's position is approximate)",
-     "distance_label": "position approximate",
-     "position_approximate": true,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
@@ -4195,9 +4203,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 102,
-      "n_distinct": 101,
-      "n_blocked": 25,
+      "n": 99,
+      "n_distinct": 98,
+      "n_blocked": 29,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -4205,8 +4213,8 @@
       "gate": "within radius",
       "id": "G3",
       "rule": "estimated drive time within the 120-minute window (design choice; about 115 km straight-line from here at terrain factor 0.96 (Maharashtra))",
-      "n": 36,
-      "n_distinct": 36,
+      "n": 35,
+      "n_distinct": 35,
       "window_min": 120.0,
       "km_equivalent": 115.0
      }
@@ -4217,7 +4225,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -4227,12 +4235,12 @@
      "Nothing here is a probability."
     ],
     "notes": [],
-    "headline": "3 of 36 recommendable facilities within about 2 hours' estimated drive (free-flow) of Pune, nearest first (a corroborated record may move up to 15 minutes)."
+    "headline": "3 of 35 recommendable facilities within about 2 hours' estimated drive (free-flow) of Pune, nearest first (a corroborated record may move up to 15 minutes)."
    },
-   "fingerprint": "5cf8370060",
+   "fingerprint": "c86b71f3e0",
    "ms": {
-    "resolve": 6.1,
-    "answer": 0.83
+    "resolve": 6.49,
+    "answer": 0.94
    }
   },
   {
@@ -4847,9 +4855,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 187,
-      "n_distinct": 187,
-      "n_blocked": 14,
+      "n": 186,
+      "n_distinct": 186,
+      "n_blocked": 15,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -4869,7 +4877,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -4885,8 +4893,8 @@
    },
    "fingerprint": "8066f3e87a",
    "ms": {
-    "resolve": 6.03,
-    "answer": 0.86
+    "resolve": 7.07,
+    "answer": 0.97
    }
   },
   {
@@ -5550,7 +5558,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -5564,8 +5572,8 @@
    },
    "fingerprint": "63c48e645a",
    "ms": {
-    "resolve": 21.86,
-    "answer": 0.81
+    "resolve": 24.3,
+    "answer": 0.96
    }
   },
   {
@@ -5579,9 +5587,9 @@
    },
    "resolution": {
     "status": "ok",
-    "lat": 22.7137361,
-    "lon": 75.8761389,
-    "precision_km": 6.905259837160006,
+    "lat": 22.718,
+    "lon": 75.8791667,
+    "precision_km": 7.209131371075471,
     "kind": "district",
     "label": "Indore city (centre at the head post office, PIN 452001), Indore district, Madhya Pradesh, about 14 km across",
     "how": "Matched the district name 'INDORE' exactly in Madhya Pradesh. The district is named after its town, so the point is the town's head post office (Indore, PIN 452001), not the district centre; type \"Indore district\" for the district centre.",
@@ -5620,11 +5628,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 2.34,
-      "order_minutes": 2.34,
+      "minutes": 1.52,
+      "order_minutes": 1.52,
       "allowance_min": 15.0,
       "allowance_applies": false,
-      "km": 0.89,
+      "km": 0.53,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -5662,13 +5670,13 @@
       "official_website": "vonehospital.com",
       "also_listed_as": []
      },
-     "why_here": "Same estimated drive time as Indira Memorial Hospital (about 2 min); listed first because it is closer in straight-line km.",
+     "why_here": "Listed above Indira Memorial Hospital: nearer (about 2 min against 3 min estimated drive).",
      "could_be_wrong": "The record does not mention cardiac care unit (CCU or ICCU; PM-JAY advanced criteria), or ventilator support, not a newborn, ambulance, theatre or Covid ventilator (PM-JAY Cardiology/CTVS criteria item 3).",
      "evidence_strength": "moderate",
      "flags": [],
-     "minutes": 2.3,
-     "minutes_low": 1.4,
-     "minutes_high": 3.9,
+     "minutes": 1.5,
+     "minutes_low": 0.9,
+     "minutes_high": 2.6,
      "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 1 km straight-line",
      "position_approximate": false,
@@ -5699,11 +5707,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 2.34,
-      "order_minutes": 2.34,
+      "minutes": 2.86,
+      "order_minutes": 2.86,
       "allowance_min": 15.0,
       "allowance_applies": false,
-      "km": 0.89,
+      "km": 1.13,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -5738,14 +5746,14 @@
       "official_website": "indiramemorialhospital.in",
       "also_listed_as": []
      },
-     "why_here": "Listed above Medanta Indore: nearer (about 2 min against 9 min estimated drive).",
+     "why_here": "Listed above Medanta Indore: nearer (about 3 min against 8 min estimated drive).",
      "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention cardiac care unit (CCU or ICCU; PM-JAY advanced criteria), or ventilator support, not a newborn, ambulance, theatre or Covid ventilator (PM-JAY Cardiology/CTVS criteria item 3).",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 2.3,
-     "minutes_low": 1.4,
-     "minutes_high": 3.9,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
+     "minutes": 2.9,
+     "minutes_low": 1.7,
+     "minutes_high": 4.8,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 1 km straight-line",
      "position_approximate": false,
      "window_min": 90.0,
@@ -5775,11 +5783,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 8.97,
-      "order_minutes": 8.97,
+      "minutes": 8.0,
+      "order_minutes": 8.0,
       "allowance_min": 15.0,
       "allowance_applies": false,
-      "km": 4.4,
+      "km": 3.84,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -5807,14 +5815,14 @@
       "official_website": "medanta.org",
       "also_listed_as": []
      },
-     "why_here": "Listed above Shri Aurobindo Institute of Medical Sciences: nearer (about 9 min against 20 min estimated drive).",
+     "why_here": "Listed above Shri Aurobindo Institute of Medical Sciences: nearer (about 8 min against 15 min estimated drive).",
      "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention cardiac care unit (CCU or ICCU; PM-JAY advanced criteria).",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 9.0,
-     "minutes_low": 5.3,
-     "minutes_high": 15.1,
-     "minutes_label": "about 9 min estimated drive, free-flow; real trips take longer",
+     "minutes": 8.0,
+     "minutes_low": 4.8,
+     "minutes_high": 13.5,
+     "minutes_label": "about 8 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 4 km straight-line",
      "position_approximate": false,
      "window_min": 90.0,
@@ -5840,7 +5848,7 @@
     "sea_travel_not_modelled": false,
     "origin_loose": false,
     "origin_too_loose": false,
-    "origin_precision_km": 6.9,
+    "origin_precision_km": 7.2,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
@@ -5894,9 +5902,9 @@
      "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 1.0,
+     "minutes": 1.1,
      "minutes_low": 0.6,
-     "minutes_high": 1.6,
+     "minutes_high": 1.8,
      "minutes_label": "about 1 min estimated drive, free-flow; real trips take longer",
      "distance_label": "under 1 km straight-line",
      "position_approximate": false,
@@ -5954,9 +5962,9 @@
      "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 1.1,
-     "minutes_low": 0.6,
-     "minutes_high": 1.8,
+     "minutes": 1.2,
+     "minutes_low": 0.7,
+     "minutes_high": 2.1,
      "minutes_label": "about 1 min estimated drive, free-flow; real trips take longer",
      "distance_label": "under 1 km straight-line",
      "position_approximate": false,
@@ -5975,7 +5983,7 @@
      "state": "Madhya Pradesh",
      "lat": 22.713428497314453,
      "lon": 75.88034057617188,
-     "distance_km": 0.0,
+     "distance_km": 1.0,
      "location_precision_km": 1.0,
      "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Indore city (centre at the head post office, PIN 452001), Indore district, Madhya Pradesh, about 14 km across, which is itself known only to within about 7 km.",
      "grade": 1,
@@ -6037,11 +6045,11 @@
        "quote": "Ujjain"
       }
      ],
-     "minutes": 1.3,
-     "minutes_low": 0.8,
-     "minutes_high": 2.1,
+     "minutes": 1.5,
+     "minutes_low": 0.9,
+     "minutes_high": 2.5,
      "minutes_label": "about 1 min estimated drive, free-flow; real trips take longer",
-     "distance_label": "under 1 km straight-line",
+     "distance_label": "about 1 km straight-line",
      "position_approximate": false,
      "window_min": 90.0,
      "inside_window": true,
@@ -6072,7 +6080,7 @@
      "sea_travel_not_modelled": false,
      "origin_loose": false,
      "origin_too_loose": false,
-     "origin_precision_km": 6.9,
+     "origin_precision_km": 7.2,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -6218,7 +6226,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -6232,8 +6240,8 @@
    },
    "fingerprint": "845b5205c3",
    "ms": {
-    "resolve": 6.07,
-    "answer": 0.78
+    "resolve": 6.97,
+    "answer": 0.9
    }
   },
   {
@@ -6265,7 +6273,7 @@
    "service": "mri",
    "service_label": "MRI scan",
    "radius_km": 215.1,
-   "headline": "3 of 71 recommendable facilities within about 3 hours' estimated drive (free-flow) of Coimbatore, nearest first (a corroborated record may move up to 30 minutes). The last card is the nearest one, always shown.",
+   "headline": "3 of 69 recommendable facilities within about 3 hours' estimated drive (free-flow) of Coimbatore, nearest first (a corroborated record may move up to 30 minutes). The last card is the nearest one, always shown.",
    "cards": [
     {
      "facility_id": "bfe9ab42-2261-442b-b8b3-4c6fc47ad86b",
@@ -6886,9 +6894,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 263,
-      "n_distinct": 259,
-      "n_blocked": 22,
+      "n": 260,
+      "n_distinct": 256,
+      "n_blocked": 25,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -6896,8 +6904,8 @@
       "gate": "within radius",
       "id": "G3",
       "rule": "estimated drive time within the 180-minute window (design choice; about 215 km straight-line from here at terrain factor 0.85 (Tamil Nadu))",
-      "n": 72,
-      "n_distinct": 71,
+      "n": 70,
+      "n_distinct": 69,
       "window_min": 180.0,
       "km_equivalent": 215.1
      }
@@ -6908,7 +6916,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -6920,12 +6928,12 @@
     "notes": [
      "The nearest recommendable facility is always shown: the evidence allowance listed corroborated records ahead of it, so it takes the last place."
     ],
-    "headline": "3 of 71 recommendable facilities within about 3 hours' estimated drive (free-flow) of Coimbatore, nearest first (a corroborated record may move up to 30 minutes). The last card is the nearest one, always shown."
+    "headline": "3 of 69 recommendable facilities within about 3 hours' estimated drive (free-flow) of Coimbatore, nearest first (a corroborated record may move up to 30 minutes). The last card is the nearest one, always shown."
    },
    "fingerprint": "7777c1af65",
    "ms": {
-    "resolve": 6.16,
-    "answer": 0.88
+    "resolve": 6.52,
+    "answer": 0.96
    }
   },
   {
@@ -7574,7 +7582,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -7590,8 +7598,8 @@
    },
    "fingerprint": "dd597aa72c",
    "ms": {
-    "resolve": 6.42,
-    "answer": 0.87
+    "resolve": 7.03,
+    "answer": 0.89
    }
   },
   {
@@ -7605,11 +7613,11 @@
    },
    "resolution": {
     "status": "ok",
-    "lat": 21.140144445,
-    "lon": 79.06988611,
-    "precision_km": 6.367929487073306,
+    "lat": 21.1524,
+    "lon": 79.0693,
+    "precision_km": 6.874796382796967,
     "kind": "district",
-    "label": "Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across",
+    "label": "Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across",
     "how": "Matched the district name 'NAGPUR' exactly in Maharashtra. The district is named after its town, so the point is the town's head post office (Nagpur, PIN 440001), not the district centre; type \"Nagpur district\" for the district centre.",
     "candidates": [],
     "state": "MAHARASHTRA",
@@ -7623,96 +7631,8 @@
    "service": "burns",
    "service_label": "Burn care",
    "radius_km": 262.0,
-   "headline": "3 of 8 recommendable facilities within about 4 hours' estimated drive (free-flow) of Nagpur, nearest first (a corroborated record may move up to 15 minutes).",
+   "headline": "3 of 7 recommendable facilities within about 4 hours' estimated drive (free-flow) of Nagpur, nearest first (a corroborated record may move up to 15 minutes).",
    "cards": [
-    {
-     "facility_id": "1589ba2e-ae31-4fe0-8931-725339adb118",
-     "name": "Vedanta Super Speciality Hospital",
-     "type": "hospital",
-     "operator": "private",
-     "city": "Nagpur",
-     "state": "Maharashtra",
-     "lat": 21.134727478027344,
-     "lon": 79.07746124267578,
-     "distance_km": 1.0,
-     "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km.",
-     "grade": 3,
-     "grade_label": "corroborated (the service and the things it needs are named in the record)",
-     "confidence": null,
-     "confidence_reason": "Corroborated by 6 facts, strong evidence, no warnings, precise location.",
-     "score": null,
-     "parts": {
-      "combine": "v1",
-      "penalties": [],
-      "allowance_denied_by": [],
-      "minutes": 2.19,
-      "order_minutes": -12.81,
-      "allowance_min": 15.0,
-      "allowance_applies": true,
-      "km": 0.99,
-      "labels": {
-       "minutes": "estimated drive time, free-flow",
-       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
-      }
-     },
-     "evidence": [
-      {
-       "requirement": "burn care",
-       "quote": "Provides burns treatment",
-       "field": "procedure",
-       "fact_id": "c95761b96ab8adb5",
-       "requirements": [
-        "burn care"
-       ]
-      },
-      {
-       "requirement": "intensive care unit",
-       "quote": "Fully equipped ICU with central oxygen",
-       "field": "capability",
-       "fact_id": "efa7ab1c113b84cb",
-       "requirements": [
-        "intensive care unit"
-       ]
-      },
-      {
-       "requirement": "operating theatre",
-       "quote": "Modular operation theatre with laminar air flow",
-       "field": "equipment",
-       "fact_id": "cf2ec738091b83b9",
-       "requirements": [
-        "operating theatre"
-       ]
-      }
-     ],
-     "missing": [],
-     "sources": {
-      "n_domains": 4,
-      "domains": [
-       "vedantahospitalnagpur.com",
-       "myhospitalnow.com",
-       "facebook.com",
-       "in.linkedin.com"
-      ],
-      "official_website": "vedantahospitalnagpur.com",
-      "also_listed_as": []
-     },
-     "why_here": "Same estimated drive time as Mure Memorial Hospital (about 2 min); listed first because it is closer in straight-line km.",
-     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
-     "evidence_strength": "strong",
-     "flags": [],
-     "minutes": 2.2,
-     "minutes_low": 1.3,
-     "minutes_high": 3.7,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
-     "distance_label": "about 1 km straight-line",
-     "position_approximate": false,
-     "window_min": 240.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": true,
-     "window_uncertain": false
-    },
     {
      "facility_id": "8ea11904-1089-41d7-8be1-6a4517a10908",
      "name": "Mure Memorial Hospital",
@@ -7724,7 +7644,7 @@
      "lon": 79.07806396484375,
      "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -7734,11 +7654,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 2.2,
-      "order_minutes": -12.8,
+      "minutes": 2.64,
+      "order_minutes": -12.36,
       "allowance_min": 15.0,
       "allowance_applies": true,
-      "km": 1.0,
+      "km": 1.24,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -7796,15 +7716,103 @@
       "official_website": "murememorialhospital.org",
       "also_listed_as": []
      },
-     "why_here": "Listed above Maya Hospital & Research Institute: nearer (about 2 min against 7 min estimated drive).",
+     "why_here": "Listed above Vedanta Super Speciality Hospital: nearer (about 3 min against 4 min estimated drive).",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
-     "minutes": 2.2,
-     "minutes_low": 1.3,
-     "minutes_high": 3.7,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
+     "minutes": 2.6,
+     "minutes_low": 1.6,
+     "minutes_high": 4.4,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 1 km straight-line",
+     "position_approximate": false,
+     "window_min": 240.0,
+     "inside_window": true,
+     "level_note": null,
+     "nearest_in_window": true,
+     "window_uncertain": false
+    },
+    {
+     "facility_id": "1589ba2e-ae31-4fe0-8931-725339adb118",
+     "name": "Vedanta Super Speciality Hospital",
+     "type": "hospital",
+     "operator": "private",
+     "city": "Nagpur",
+     "state": "Maharashtra",
+     "lat": 21.134727478027344,
+     "lon": 79.07746124267578,
+     "distance_km": 2.0,
+     "location_precision_km": 1.0,
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
+     "grade": 3,
+     "grade_label": "corroborated (the service and the things it needs are named in the record)",
+     "confidence": null,
+     "confidence_reason": "Corroborated by 6 facts, strong evidence, no warnings, precise location.",
+     "score": null,
+     "parts": {
+      "combine": "v1",
+      "penalties": [],
+      "allowance_denied_by": [],
+      "minutes": 4.19,
+      "order_minutes": -10.81,
+      "allowance_min": 15.0,
+      "allowance_applies": true,
+      "km": 2.14,
+      "labels": {
+       "minutes": "estimated drive time, free-flow",
+       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
+      }
+     },
+     "evidence": [
+      {
+       "requirement": "burn care",
+       "quote": "Provides burns treatment",
+       "field": "procedure",
+       "fact_id": "c95761b96ab8adb5",
+       "requirements": [
+        "burn care"
+       ]
+      },
+      {
+       "requirement": "intensive care unit",
+       "quote": "Fully equipped ICU with central oxygen",
+       "field": "capability",
+       "fact_id": "efa7ab1c113b84cb",
+       "requirements": [
+        "intensive care unit"
+       ]
+      },
+      {
+       "requirement": "operating theatre",
+       "quote": "Modular operation theatre with laminar air flow",
+       "field": "equipment",
+       "fact_id": "cf2ec738091b83b9",
+       "requirements": [
+        "operating theatre"
+       ]
+      }
+     ],
+     "missing": [],
+     "sources": {
+      "n_domains": 4,
+      "domains": [
+       "vedantahospitalnagpur.com",
+       "myhospitalnow.com",
+       "facebook.com",
+       "in.linkedin.com"
+      ],
+      "official_website": "vedantahospitalnagpur.com",
+      "also_listed_as": []
+     },
+     "why_here": "Listed above Maya Hospital & Research Institute: nearer (about 4 min against 9 min estimated drive).",
+     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
+     "evidence_strength": "strong",
+     "flags": [],
+     "minutes": 4.2,
+     "minutes_low": 2.5,
+     "minutes_high": 7.0,
+     "minutes_label": "about 4 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 2 km straight-line",
      "position_approximate": false,
      "window_min": 240.0,
      "inside_window": true,
@@ -7821,9 +7829,9 @@
      "state": "Maharashtra",
      "lat": 21.108901977539062,
      "lon": 79.08406066894531,
-     "distance_km": 4.0,
+     "distance_km": 5.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -7833,11 +7841,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 6.75,
-      "order_minutes": -8.25,
+      "minutes": 8.67,
+      "order_minutes": -6.33,
       "allowance_min": 15.0,
       "allowance_applies": true,
-      "km": 3.77,
+      "km": 5.07,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -7887,15 +7895,15 @@
       "official_website": "mayahospital.in",
       "also_listed_as": []
      },
-     "why_here": "Listed above Centre Point Hospital: corroborated, and only about 1 min further (about 7 min against 6 min), within the 15-minute evidence allowance.",
+     "why_here": "Listed above Centre Point Hospital: corroborated, and only about 2 min further (about 9 min against 7 min), within the 15-minute evidence allowance.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
-     "minutes": 6.8,
-     "minutes_low": 4.0,
-     "minutes_high": 11.4,
-     "minutes_label": "about 7 min estimated drive, free-flow; real trips take longer",
-     "distance_label": "about 4 km straight-line",
+     "minutes": 8.7,
+     "minutes_low": 5.2,
+     "minutes_high": 14.6,
+     "minutes_label": "about 9 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 5 km straight-line",
      "position_approximate": false,
      "window_min": 240.0,
      "inside_window": true,
@@ -7920,23 +7928,23 @@
     "sea_travel_not_modelled": false,
     "origin_loose": false,
     "origin_too_loose": false,
-    "origin_precision_km": 6.4,
+    "origin_precision_km": 6.9,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
    "unverified_nearby": [
     {
-     "facility_id": "fc3b3e51-2401-4e33-a2ea-5f7b80b2b321",
-     "name": "Midas Multispeciality Hospital Pvt. Ltd, Nagpur, Maharashtra, India",
+     "facility_id": "9c225e4d-93a6-4230-aa6f-d4671affd32d",
+     "name": "Shanti Mohan Hospital",
      "type": "hospital",
      "operator": "private",
      "city": "Nagpur",
      "state": "Maharashtra",
-     "lat": 21.134016036987305,
-     "lon": 79.07559204101562,
+     "lat": 21.159692764282227,
+     "lon": 79.07789611816406,
      "distance_km": 1.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -7948,29 +7956,27 @@
       "no fact in the record mentions burn care"
      ],
      "sources": {
-      "n_domains": 9,
+      "n_domains": 7,
       "domains": [
-       "pmc.ncbi.nlm.nih.gov",
-       "pubmed.ncbi.nlm.nih.gov",
-       "practo.com",
+       "mappls.com",
+       "proptiger.com",
        "justdial.com",
-       "datagemba.com",
-       "hexahealth.com",
-       "midashospital.com",
-       "in.linkedin.com",
-       "sehat.com"
+       "justdoctors.in",
+       "lybrate.com",
+       "facebook.com",
+       "medindia.net"
       ],
-      "official_website": "midashospital.com",
+      "official_website": "shantimohanhospital.com",
       "also_listed_as": []
      },
      "why_here": "",
      "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 2.0,
-     "minutes_low": 1.2,
-     "minutes_high": 3.4,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
+     "minutes": 2.6,
+     "minutes_low": 1.5,
+     "minutes_high": 4.3,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 1 km straight-line",
      "position_approximate": false,
      "window_min": 240.0,
@@ -7980,84 +7986,17 @@
      "window_uncertain": false
     },
     {
-     "facility_id": "0b096e9f-0388-4dc5-8019-459e431573da",
-     "name": "Care Hospital",
+     "facility_id": "4121dc4f-038e-474b-a792-fd6ca63531e5",
+     "name": "Chandak Nursing Home",
      "type": "hospital",
      "operator": "private",
      "city": "Nagpur",
      "state": "Maharashtra",
-     "lat": 21.138484954833984,
-     "lon": 79.07914733886719,
-     "distance_km": 1.0,
+     "lat": 21.144832611083984,
+     "lon": 79.08232116699219,
+     "distance_km": 2.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km.",
-     "grade": 1,
-     "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
-     "confidence": null,
-     "confidence_reason": "Not recommended: The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere. Its website (carehospitals.com) is also given by 3 record(s) in other districts (Hyderabad, Raipur, Surat); some details may describe another branch.",
-     "score": null,
-     "parts": {},
-     "evidence": [],
-     "missing": [
-      "no fact in the record mentions burn care"
-     ],
-     "sources": {
-      "n_domains": 14,
-      "domains": [
-       "justdial.com",
-       "onefivenine.com",
-       "practo.com",
-       "docindia.org",
-       "ciigmagroup.org",
-       "chhsambhajinagarmc.org",
-       "insurance.phonepe.com",
-       "drvaibhavagrawal.com",
-       "impactguru.com",
-       "careinsurance.com",
-       "policyx.com",
-       "proptiger.com",
-       "cardiologistindia.com",
-       "facebook.com"
-      ],
-      "official_website": "carehospitals.com",
-      "also_listed_as": []
-     },
-     "why_here": "",
-     "could_be_wrong": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere. Its website (carehospitals.com) is also given by 3 record(s) in other districts (Hyderabad, Raipur, Surat); some details may describe another branch.",
-     "evidence_strength": "thin",
-     "flags": [
-      {
-       "flag": "possible_merge",
-       "severity": "major",
-       "signal": "text_other_address+shared_website",
-       "reason": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere. Its website (carehospitals.com) is also given by 3 record(s) in other districts (Hyderabad, Raipur, Surat); some details may describe another branch.",
-       "quote": "Located in Malad West, Mumbai, Maharashtra"
-      }
-     ],
-     "minutes": 2.2,
-     "minutes_low": 1.3,
-     "minutes_high": 3.6,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer",
-     "distance_label": "about 1 km straight-line",
-     "position_approximate": false,
-     "window_min": 240.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": null,
-     "window_uncertain": false
-    },
-    {
-     "facility_id": "f6dd0266-27ae-4af0-9b00-0180eae2bc45",
-     "name": "Kalamkar Multispeciality Hospital AND Research Institute",
-     "type": "hospital",
-     "operator": "private",
-     "city": "Nagpur",
-     "state": "Maharashtra",
-     "lat": 21.137333335,
-     "lon": 79.05986111,
-     "distance_km": 1.0,
-     "location_precision_km": 2.0,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 13 km across, which is itself known only to within about 6 km. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -8069,35 +8008,95 @@
       "no fact in the record mentions burn care"
      ],
      "sources": {
-      "n_domains": 5,
+      "n_domains": 10,
       "domains": [
-       "economictimes.indiatimes.com",
+       "chandaknursinghome.com",
+       "justdial.com",
+       "policyx.com",
        "facebook.com",
-       "kalamkarhospitalngp.com",
-       "zaubacorp.com",
-       "iffcotokio.co.in"
+       "indiamart.com",
+       "latlong.net",
+       "cnh1.com",
+       "iffcotokio.co.in",
+       "proptiger.com",
+       "starhealth.in"
       ],
-      "official_website": "kalamkarhospitalngp.com",
+      "official_website": null,
       "also_listed_as": []
      },
      "why_here": "",
-     "could_be_wrong": "The record's scraped map point was 428 km from its PIN code's area; it is shown at the PIN code's centre, so its position is approximate.",
+     "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
      "evidence_strength": "thin",
-     "flags": [
-      {
-       "flag": "location_conflict",
-       "severity": "minor",
-       "signal": "moved_to_pin",
-       "reason": "The record's scraped map point was 428 km from its PIN code's area; it is shown at the PIN code's centre, so its position is approximate.",
-       "quote": "Nagpur"
-      }
+     "flags": [],
+     "minutes": 3.3,
+     "minutes_low": 1.9,
+     "minutes_high": 5.5,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 2 km straight-line",
+     "position_approximate": false,
+     "window_min": 240.0,
+     "inside_window": true,
+     "level_note": null,
+     "nearest_in_window": null,
+     "window_uncertain": false
+    },
+    {
+     "facility_id": "b9d3d6e4-4a16-4078-95a4-94005c02922a",
+     "name": "Kims - Kingsway Hospitals",
+     "type": "hospital",
+     "operator": "private",
+     "city": "Nagpur",
+     "state": "Maharashtra",
+     "lat": 21.154624938964844,
+     "lon": 79.08485412597656,
+     "distance_km": 2.0,
+     "location_precision_km": 1.0,
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Nagpur city (centre at the head post office, PIN 440001), Nagpur district, Maharashtra, about 14 km across, which is itself known only to within about 7 km.",
+     "grade": 1,
+     "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
+     "confidence": null,
+     "confidence_reason": "Claim not supported by the record: no fact names burn care.",
+     "score": null,
+     "parts": {},
+     "evidence": [],
+     "missing": [
+      "no fact in the record mentions burn care"
      ],
-     "minutes": 2.4,
-     "minutes_low": 1.4,
-     "minutes_high": 4.0,
-     "minutes_label": "about 2 min estimated drive, free-flow; real trips take longer (the facility's position is approximate)",
-     "distance_label": "position approximate",
-     "position_approximate": true,
+     "sources": {
+      "n_domains": 18,
+      "domains": [
+       "justdial.com",
+       "kimshospitals.com",
+       "hexahealth.com",
+       "skilltyro.com",
+       "drritabang.spineandgyneccare.com",
+       "insurance.phonepe.com",
+       "drpaayalagrawaal.com",
+       "policybazaar.com",
+       "gynecologistnagpur.com",
+       "in.linkedin.com",
+       "impactguru.com",
+       "drartipatil.com",
+       "gynecologistnearme.in",
+       "linkedin.com",
+       "facebook.com",
+       "bajajfinservhealth.in",
+       "cancerhospital.co.in",
+       "eka.care"
+      ],
+      "official_website": "kimskingsway.com",
+      "also_listed_as": []
+     },
+     "why_here": "",
+     "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
+     "evidence_strength": "thin",
+     "flags": [],
+     "minutes": 3.3,
+     "minutes_low": 2.0,
+     "minutes_high": 5.6,
+     "minutes_label": "about 3 min estimated drive, free-flow; real trips take longer",
+     "distance_label": "about 2 km straight-line",
+     "position_approximate": false,
      "window_min": 240.0,
      "inside_window": true,
      "level_note": null,
@@ -8127,7 +8126,7 @@
      "sea_travel_not_modelled": false,
      "origin_loose": false,
      "origin_too_loose": false,
-     "origin_precision_km": 6.4,
+     "origin_precision_km": 6.9,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -8244,15 +8243,15 @@
      {
       "gate": "within reach",
       "rule": "claims the service and is within about 12 h estimated drive (3 x the window), the search limit for the further-away line",
-      "n": 1268
+      "n": 1269
      },
      {
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 95,
-      "n_distinct": 95,
-      "n_blocked": 137,
+      "n": 93,
+      "n_distinct": 93,
+      "n_blocked": 139,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -8260,8 +8259,8 @@
       "gate": "within radius",
       "id": "G3",
       "rule": "estimated drive time within the 240-minute window (design choice; about 262 km straight-line from here at terrain factor 0.96 (Maharashtra))",
-      "n": 8,
-      "n_distinct": 8,
+      "n": 7,
+      "n_distinct": 7,
       "window_min": 240.0,
       "km_equivalent": 262.0
      }
@@ -8272,7 +8271,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -8282,12 +8281,12 @@
      "Nothing here is a probability."
     ],
     "notes": [],
-    "headline": "3 of 8 recommendable facilities within about 4 hours' estimated drive (free-flow) of Nagpur, nearest first (a corroborated record may move up to 15 minutes)."
+    "headline": "3 of 7 recommendable facilities within about 4 hours' estimated drive (free-flow) of Nagpur, nearest first (a corroborated record may move up to 15 minutes)."
    },
-   "fingerprint": "34b3b69e1b",
+   "fingerprint": "9e1082c922",
    "ms": {
-    "resolve": 5.97,
-    "answer": 0.83
+    "resolve": 6.3,
+    "answer": 1.06
    }
   },
   {
@@ -8319,7 +8318,7 @@
    "service": "neurosurgery",
    "service_label": "Head injury and brain surgery",
    "radius_km": 186.2,
-   "headline": "3 of 75 recommendable facilities within about 2.5 hours' estimated drive (free-flow) of Chandigarh, nearest first (a corroborated record may move up to 15 minutes).",
+   "headline": "3 of 74 recommendable facilities within about 2.5 hours' estimated drive (free-flow) of Chandigarh, nearest first (a corroborated record may move up to 15 minutes).",
    "cards": [
     {
      "facility_id": "46cc0e3b-f699-4faf-ac99-2f06b014b106",
@@ -8947,9 +8946,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 289,
-      "n_distinct": 287,
-      "n_blocked": 72,
+      "n": 287,
+      "n_distinct": 285,
+      "n_blocked": 74,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -8957,8 +8956,8 @@
       "gate": "within radius",
       "id": "G3",
       "rule": "estimated drive time within the 150-minute window (design choice; about 186 km straight-line from here at terrain factor 0.80 (Chandigarh))",
-      "n": 75,
-      "n_distinct": 75,
+      "n": 74,
+      "n_distinct": 74,
       "window_min": 150.0,
       "km_equivalent": 186.2
      }
@@ -8969,7 +8968,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -8979,12 +8978,12 @@
      "Nothing here is a probability."
     ],
     "notes": [],
-    "headline": "3 of 75 recommendable facilities within about 2.5 hours' estimated drive (free-flow) of Chandigarh, nearest first (a corroborated record may move up to 15 minutes)."
+    "headline": "3 of 74 recommendable facilities within about 2.5 hours' estimated drive (free-flow) of Chandigarh, nearest first (a corroborated record may move up to 15 minutes)."
    },
    "fingerprint": "583e7e17f8",
    "ms": {
-    "resolve": 6.11,
-    "answer": 0.91
+    "resolve": 6.6,
+    "answer": 1.33
    }
   },
   {
@@ -9653,9 +9652,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 211,
-      "n_distinct": 210,
-      "n_blocked": 34,
+      "n": 209,
+      "n_distinct": 208,
+      "n_blocked": 36,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -9675,7 +9674,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -9689,8 +9688,8 @@
    },
    "fingerprint": "85ef3a24cd",
    "ms": {
-    "resolve": 22.2,
-    "answer": 0.91
+    "resolve": 23.65,
+    "answer": 1.03
    }
   },
   {
@@ -9706,7 +9705,7 @@
     "status": "ok",
     "lat": 34.152838,
     "lon": 77.565924,
-    "precision_km": 89.17612694090886,
+    "precision_km": 6.328295299561264,
     "kind": "post_office",
     "label": "Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh",
     "how": "Matched the post office name 'Leh' exactly in Ladakh. Note: point from several offices: PIN location for offices with unusable points.",
@@ -9722,7 +9721,7 @@
    "service": "dialysis",
    "service_label": "Dialysis",
    "radius_km": 32.5,
-   "headline": "Uncertain: Leh spans about 178 km, more than the 60-minute window reaches (about 33 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of dialysis within about 1 hour's estimated drive (free-flow) of Leh. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Life Line Care Hospital & Dialysis Centre, about 248 km straight-line.",
+   "headline": "No reliable option nearby. No facility in this dataset shows clear evidence of dialysis within about 1 hour's estimated drive (free-flow) of Leh. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Life Line Care Hospital & Dialysis Centre, about 5 h 30 min estimated drive, free-flow.",
    "cards": [],
    "beyond_radius": {
     "facility_id": "e48a8f48-d155-4bf6-9584-0a487401f89a",
@@ -9735,7 +9734,7 @@
     "lon": 77.11253356933594,
     "distance_km": 248.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 89 km. Beyond the 60-minute window for this service.",
+    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 6 km. Beyond the 60-minute window for this service.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": null,
@@ -9779,14 +9778,14 @@
      "official_website": null,
      "also_listed_as": []
     },
-    "why_here": "Further away: about 248 km straight-line, beyond the 60-minute window.",
+    "why_here": "Further away: about 5 h 30 min estimated drive, free-flow, beyond the 60-minute window.",
     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
     "evidence_strength": "strong",
     "flags": [],
     "minutes": 331.7,
-    "minutes_low": 135.5,
-    "minutes_high": 722.6,
-    "minutes_label": "drive time unclear: Leh spans about 178 km, so it depends on where you start; search a PIN code or town for an estimate",
+    "minutes_low": 197.2,
+    "minutes_high": 557.9,
+    "minutes_label": "about 5 h 30 min estimated drive, free-flow; real trips take longer",
     "distance_label": "about 248 km straight-line",
     "position_approximate": false,
     "window_min": 60.0,
@@ -9807,7 +9806,7 @@
      "lon": 77.11253356933594,
      "distance_km": 248.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 89 km. Beyond the 60-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 6 km. Beyond the 60-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -9851,14 +9850,14 @@
       "official_website": null,
       "also_listed_as": []
      },
-     "why_here": "Further away: about 248 km straight-line, beyond the 60-minute window.",
+     "why_here": "Further away: about 5 h 30 min estimated drive, free-flow, beyond the 60-minute window.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 331.7,
-     "minutes_low": 135.5,
-     "minutes_high": 722.6,
-     "minutes_label": "drive time unclear: Leh spans about 178 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 197.2,
+     "minutes_high": 557.9,
+     "minutes_label": "about 5 h 30 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 248 km straight-line",
      "position_approximate": false,
      "window_min": 60.0,
@@ -9878,7 +9877,7 @@
      "lon": 76.53021240234375,
      "distance_km": 248.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 89 km. Beyond the 60-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 6 km. Beyond the 60-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -9924,14 +9923,14 @@
       "official_website": "https://linkkpro.com/karanhospital/",
       "also_listed_as": []
      },
-     "why_here": "Further away: about 248 km straight-line, beyond the 60-minute window.",
+     "why_here": "Further away: about 5 h 30 min estimated drive, free-flow, beyond the 60-minute window.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 332.1,
-     "minutes_low": 135.7,
-     "minutes_high": 723.3,
-     "minutes_label": "drive time unclear: Leh spans about 178 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 197.4,
+     "minutes_high": 558.5,
+     "minutes_label": "about 5 h 30 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 248 km straight-line",
      "position_approximate": false,
      "window_min": 60.0,
@@ -9951,7 +9950,7 @@
      "lon": 74.829833984375,
      "distance_km": 252.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 89 km. Beyond the 60-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Leh (post office area, PIN 194101), Leh Ladakh district, Ladakh, which is itself known only to within about 6 km. Beyond the 60-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -9993,14 +9992,14 @@
       "official_website": "parashospitals.com",
       "also_listed_as": []
      },
-     "why_here": "Further away: about 252 km straight-line, beyond the 60-minute window.",
+     "why_here": "Further away: about 5 h 35 min estimated drive, free-flow, beyond the 60-minute window.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
      "minutes": 336.3,
-     "minutes_low": 138.4,
-     "minutes_high": 730.1,
-     "minutes_label": "drive time unclear: Leh spans about 178 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "minutes_low": 199.9,
+     "minutes_high": 565.7,
+     "minutes_label": "about 5 h 35 min estimated drive, free-flow; real trips take longer",
      "distance_label": "about 252 km straight-line",
      "position_approximate": false,
      "window_min": 60.0,
@@ -10022,9 +10021,9 @@
     "factor_text": "terrain factor 1.39 (Ladakh)",
     "state": "LADAKH",
     "sea_travel_not_modelled": false,
-    "origin_loose": true,
-    "origin_too_loose": true,
-    "origin_precision_km": 89.2,
+    "origin_loose": false,
+    "origin_too_loose": false,
+    "origin_precision_km": 6.3,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
@@ -10049,9 +10048,9 @@
      "factor_text": "terrain factor 1.39 (Ladakh)",
      "state": "LADAKH",
      "sea_travel_not_modelled": false,
-     "origin_loose": true,
-     "origin_too_loose": true,
-     "origin_precision_km": 89.2,
+     "origin_loose": false,
+     "origin_too_loose": false,
+     "origin_precision_km": 6.3,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -10197,7 +10196,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -10206,15 +10205,13 @@
      "Citations name the fact and its field, not the web page it came from: the data has no per-fact source.",
      "Nothing here is a probability."
     ],
-    "notes": [
-     "Uncertain: Leh spans about 178 km, more than the 60-minute window reaches (about 33 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer."
-    ],
-    "headline": "Uncertain: Leh spans about 178 km, more than the 60-minute window reaches (about 33 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of dialysis within about 1 hour's estimated drive (free-flow) of Leh. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Life Line Care Hospital & Dialysis Centre, about 248 km straight-line."
+    "notes": [],
+    "headline": "No reliable option nearby. No facility in this dataset shows clear evidence of dialysis within about 1 hour's estimated drive (free-flow) of Leh. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Life Line Care Hospital & Dialysis Centre, about 5 h 30 min estimated drive, free-flow."
    },
    "fingerprint": "00936af7f0",
    "ms": {
-    "resolve": 19.78,
-    "answer": 0.71
+    "resolve": 20.56,
+    "answer": 0.69
    }
   },
   {
@@ -10228,12 +10225,12 @@
    },
    "resolution": {
     "status": "ok",
-    "lat": 27.5894212,
-    "lon": 91.85829855,
-    "precision_km": 14.971627928064066,
+    "lat": 27.631776,
+    "lon": 92.103496,
+    "precision_km": 29.275917605063547,
     "kind": "district",
-    "label": "Tawang city (centre at the head post office, PIN 790104), Tawang district, Arunachal Pradesh, about 30 km across",
-    "how": "Matched the district name 'TAWANG' exactly in Arunachal Pradesh. The district is named after its town, so the point is the town's head post office (Tawang, PIN 790104), not the district centre; type \"Tawang district\" for the district centre.",
+    "label": "Centre of Tawang district, Arunachal Pradesh, about 59 km across",
+    "how": "Matched the district name 'TAWANG' exactly in Arunachal Pradesh. This is the district centre, not an exact location.",
     "candidates": [],
     "state": "ARUNACHAL PRADESH",
     "district": "TAWANG",
@@ -10246,7 +10243,7 @@
    "service": "emoc",
    "service_label": "Emergency C-section and high-risk delivery",
    "radius_km": 28.8,
-   "headline": "Uncertain: Tawang spans about 30 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Tawang. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Nalbari Maternity Hospital, about 135 km straight-line.",
+   "headline": "Uncertain: Tawang spans about 59 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Tawang. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Nalbari Maternity Hospital, about 148 km straight-line.",
    "cards": [],
    "beyond_radius": {
     "facility_id": "0ea44f72-4b2d-4b7c-8ecf-0ff2c1df924f",
@@ -10257,9 +10254,9 @@
     "state": "Assam",
     "lat": 26.43756866455078,
     "lon": 91.43749237060547,
-    "distance_km": 135.0,
+    "distance_km": 148.0,
     "location_precision_km": 1.0,
-    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang city (centre at the head post office, PIN 790104), Tawang district, Arunachal Pradesh, about 30 km across, which is itself known only to within about 15 km. Beyond the 120-minute window for this service.",
+    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang district, Arunachal Pradesh, about 59 km across, which is itself known only to within about 29 km. Beyond the 120-minute window for this service.",
     "grade": 3,
     "grade_label": "corroborated (the service and the things it needs are named in the record)",
     "confidence": null,
@@ -10269,11 +10266,11 @@
      "combine": "v1",
      "penalties": [],
      "allowance_denied_by": [],
-     "minutes": 439.73,
-     "order_minutes": 424.73,
+     "minutes": 476.77,
+     "order_minutes": 461.77,
      "allowance_min": 15.0,
      "allowance_applies": true,
-     "km": 134.69,
+     "km": 148.27,
      "labels": {
       "minutes": "estimated drive time, free-flow",
       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -10315,15 +10312,15 @@
      "official_website": "nalbarimaternityhospital.com",
      "also_listed_as": []
     },
-    "why_here": "Further away: about 135 km straight-line, beyond the 120-minute window.",
+    "why_here": "Further away: about 148 km straight-line, beyond the 120-minute window.",
     "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
     "evidence_strength": "strong",
     "flags": [],
-    "minutes": 439.7,
-    "minutes_low": 236.7,
-    "minutes_high": 808.3,
-    "minutes_label": "drive time unclear: Tawang spans about 30 km, so it depends on where you start; search a PIN code or town for an estimate",
-    "distance_label": "about 135 km straight-line",
+    "minutes": 476.8,
+    "minutes_low": 235.5,
+    "minutes_high": 933.3,
+    "minutes_label": "drive time unclear: Tawang spans about 59 km, so it depends on where you start; search a PIN code or town for an estimate",
+    "distance_label": "about 148 km straight-line",
     "position_approximate": false,
     "window_min": 120.0,
     "inside_window": false,
@@ -10341,9 +10338,9 @@
      "state": "Assam",
      "lat": 26.43756866455078,
      "lon": 91.43749237060547,
-     "distance_km": 135.0,
+     "distance_km": 148.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang city (centre at the head post office, PIN 790104), Tawang district, Arunachal Pradesh, about 30 km across, which is itself known only to within about 15 km. Beyond the 120-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang district, Arunachal Pradesh, about 59 km across, which is itself known only to within about 29 km. Beyond the 120-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -10353,11 +10350,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 439.73,
-      "order_minutes": 424.73,
+      "minutes": 476.77,
+      "order_minutes": 461.77,
       "allowance_min": 15.0,
       "allowance_applies": true,
-      "km": 134.69,
+      "km": 148.27,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -10399,15 +10396,15 @@
       "official_website": "nalbarimaternityhospital.com",
       "also_listed_as": []
      },
-     "why_here": "Further away: about 135 km straight-line, beyond the 120-minute window.",
+     "why_here": "Further away: about 148 km straight-line, beyond the 120-minute window.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
-     "minutes": 439.7,
-     "minutes_low": 236.7,
-     "minutes_high": 808.3,
-     "minutes_label": "drive time unclear: Tawang spans about 30 km, so it depends on where you start; search a PIN code or town for an estimate",
-     "distance_label": "about 135 km straight-line",
+     "minutes": 476.8,
+     "minutes_low": 235.5,
+     "minutes_high": 933.3,
+     "minutes_label": "drive time unclear: Tawang spans about 59 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "distance_label": "about 148 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": false,
@@ -10424,9 +10421,9 @@
      "state": "Assam",
      "lat": 26.17293357849121,
      "lon": 91.78421020507812,
-     "distance_km": 158.0,
+     "distance_km": 165.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang city (centre at the head post office, PIN 790104), Tawang district, Arunachal Pradesh, about 30 km across, which is itself known only to within about 15 km. Beyond the 120-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang district, Arunachal Pradesh, about 59 km across, which is itself known only to within about 29 km. Beyond the 120-minute window for this service.",
      "grade": 2,
      "grade_label": "supported (a fact in the record names the service)",
      "confidence": null,
@@ -10436,11 +10433,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 502.11,
-      "order_minutes": 502.11,
+      "minutes": 522.41,
+      "order_minutes": 522.41,
       "allowance_min": 15.0,
       "allowance_applies": false,
-      "km": 157.68,
+      "km": 165.28,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -10473,15 +10470,15 @@
       "official_website": "matrikasivf.com",
       "also_listed_as": []
      },
-     "why_here": "Further away: about 158 km straight-line, beyond the 120-minute window.",
+     "why_here": "Further away: about 165 km straight-line, beyond the 120-minute window.",
      "could_be_wrong": "The support rests on very little: a single fact, or a record with one web source and no official website. The record does not mention blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9).",
      "evidence_strength": "thin",
      "flags": [],
-     "minutes": 502.1,
-     "minutes_low": 274.5,
-     "minutes_high": 911.6,
-     "minutes_label": "drive time unclear: Tawang spans about 30 km, so it depends on where you start; search a PIN code or town for an estimate",
-     "distance_label": "about 158 km straight-line",
+     "minutes": 522.4,
+     "minutes_low": 263.6,
+     "minutes_high": 1008.0,
+     "minutes_label": "drive time unclear: Tawang spans about 59 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "distance_label": "about 165 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": false,
@@ -10498,9 +10495,9 @@
      "state": "Assam",
      "lat": 26.171850204467773,
      "lon": 91.74017333984375,
-     "distance_km": 158.0,
+     "distance_km": 166.0,
      "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang city (centre at the head post office, PIN 790104), Tawang district, Arunachal Pradesh, about 30 km across, which is itself known only to within about 15 km. Beyond the 120-minute window for this service.",
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Tawang district, Arunachal Pradesh, about 59 km across, which is itself known only to within about 29 km. Beyond the 120-minute window for this service.",
      "grade": 3,
      "grade_label": "corroborated (the service and the things it needs are named in the record)",
      "confidence": null,
@@ -10510,11 +10507,11 @@
       "combine": "v1",
       "penalties": [],
       "allowance_denied_by": [],
-      "minutes": 503.14,
-      "order_minutes": 488.14,
+      "minutes": 525.1,
+      "order_minutes": 510.1,
       "allowance_min": 15.0,
       "allowance_applies": true,
-      "km": 158.06,
+      "km": 166.29,
       "labels": {
        "minutes": "estimated drive time, free-flow",
        "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
@@ -10551,15 +10548,15 @@
       "official_website": "marwarihospitals.com",
       "also_listed_as": []
      },
-     "why_here": "Further away: about 158 km straight-line, beyond the 120-minute window.",
+     "why_here": "Further away: about 166 km straight-line, beyond the 120-minute window.",
      "could_be_wrong": "Web pages can be stale: the record says what pages claimed, not what is available today.",
      "evidence_strength": "strong",
      "flags": [],
-     "minutes": 503.1,
-     "minutes_low": 275.1,
-     "minutes_high": 913.3,
-     "minutes_label": "drive time unclear: Tawang spans about 30 km, so it depends on where you start; search a PIN code or town for an estimate",
-     "distance_label": "about 158 km straight-line",
+     "minutes": 525.1,
+     "minutes_low": 265.2,
+     "minutes_high": 1012.4,
+     "minutes_label": "drive time unclear: Tawang spans about 59 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "distance_label": "about 166 km straight-line",
      "position_approximate": false,
      "window_min": 120.0,
      "inside_window": false,
@@ -10582,7 +10579,7 @@
     "sea_travel_not_modelled": false,
     "origin_loose": true,
     "origin_too_loose": true,
-    "origin_precision_km": 15.0,
+    "origin_precision_km": 29.3,
     "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
    },
    "rank_version": "v1",
@@ -10609,7 +10606,7 @@
      "sea_travel_not_modelled": false,
      "origin_loose": true,
      "origin_too_loose": true,
-     "origin_precision_km": 15.0,
+     "origin_precision_km": 29.3,
      "note": "Windows are planning thresholds for estimated free-flow drive time, not clinical deadlines: a facility just outside a window may still be the right place to go."
     },
     "windows": {
@@ -10728,7 +10725,7 @@
      {
       "gate": "within reach",
       "rule": "claims the service and is within about 6 h estimated drive (3 x the window), the search limit for the further-away line",
-      "n": 1
+      "n": 2
      },
      {
       "gate": "recommendable",
@@ -10756,7 +10753,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -10766,14 +10763,14 @@
      "Nothing here is a probability."
     ],
     "notes": [
-     "Uncertain: Tawang spans about 30 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer."
+     "Uncertain: Tawang spans about 59 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer."
     ],
-    "headline": "Uncertain: Tawang spans about 30 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Tawang. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Nalbari Maternity Hospital, about 135 km straight-line."
+    "headline": "Uncertain: Tawang spans about 59 km, more than the 120-minute window reaches (about 29 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Tawang. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Nalbari Maternity Hospital, about 148 km straight-line."
    },
    "fingerprint": "463a1f6577",
    "ms": {
-    "resolve": 6.24,
-    "answer": 0.54
+    "resolve": 7.1,
+    "answer": 0.61
    }
   },
   {
@@ -11328,7 +11325,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -11342,8 +11339,8 @@
    },
    "fingerprint": "23085e7410",
    "ms": {
-    "resolve": 19.49,
-    "answer": 0.46
+    "resolve": 21.91,
+    "answer": 0.51
    }
   },
   {
@@ -11369,108 +11366,84 @@
     "place_id": "district:MAHARASHTRA|GADCHIROLI",
     "query": "Gadchiroli"
    },
-   "status": "ok",
-   "status_as_expected": false,
+   "status": "no_reliable_option",
+   "status_as_expected": true,
    "method": "recipe",
    "service": "emoc",
    "service_label": "Emergency C-section and high-risk delivery",
    "radius_km": 115.0,
-   "headline": "Uncertain: Gadchiroli spans about 195 km, more than the 120-minute window reaches (about 115 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. 1 of 1 recommendable facility within about 2 hours' estimated drive (free-flow) of Gadchiroli, nearest first (a corroborated record may move up to 15 minutes). 2 more with evidence are further away.",
-   "cards": [
-    {
-     "facility_id": "4616c935-ae1b-4d40-ae5a-3d6c31a90206",
-     "name": "Government Medical College And Hospital Chandrapur",
-     "type": "hospital",
-     "operator": "public",
-     "city": "Chandrapur",
-     "state": "Maharashtra",
-     "lat": 19.95384979248047,
-     "lon": 79.29673767089844,
-     "distance_km": 73.0,
-     "location_precision_km": 2.0,
-     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km.",
-     "grade": 3,
-     "grade_label": "corroborated (the service and the things it needs are named in the record)",
-     "confidence": null,
-     "confidence_reason": "Corroborated, but the record carries one warning.",
-     "score": null,
-     "parts": {
-      "combine": "v1",
-      "penalties": [],
-      "allowance_denied_by": [
-       "possible merge"
-      ],
-      "minutes": 81.44,
-      "order_minutes": 81.44,
-      "allowance_min": 15.0,
-      "allowance_applies": false,
-      "km": 72.59,
-      "labels": {
-       "minutes": "estimated drive time, free-flow",
-       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
-      }
-     },
-     "evidence": [
-      {
-       "requirement": "caesarean section (WHO 2009 Table 4, signal function 8)",
-       "quote": "Cesarean delivery: the newborn is placed at the edge of the table and UCM is performed by a second team member for four milking maneuvers",
-       "field": "procedure",
-       "fact_id": "db4b8989d59f5ca2",
-       "requirements": [
-        "caesarean section (WHO 2009 Table 4, signal function 8)"
-       ]
-      },
-      {
-       "requirement": "blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)",
-       "quote": "FDA-approved Blood Bank with facilities for component separation",
-       "field": "equipment",
-       "fact_id": "f8c4ead96dd17c19",
-       "requirements": [
-        "blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)"
-       ]
-      }
+   "headline": "Uncertain: Gadchiroli spans about 195 km, more than the 120-minute window reaches (about 115 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Gadchiroli. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Mogre Children Hospital, about 164 km straight-line.",
+   "cards": [],
+   "beyond_radius": {
+    "facility_id": "ceb60af1-93a5-44db-a44f-403a8a014c2e",
+    "name": "Mogre Children Hospital",
+    "type": "hospital",
+    "operator": "private",
+    "city": "Nagpur",
+    "state": "Maharashtra",
+    "lat": 21.128101348876953,
+    "lon": 79.1141128540039,
+    "distance_km": 164.0,
+    "location_precision_km": 1.0,
+    "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km. Beyond the 120-minute window for this service.",
+    "grade": 2,
+    "grade_label": "supported (a fact in the record names the service)",
+    "confidence": null,
+    "confidence_reason": "The record names the service, but not everything it needs.",
+    "score": null,
+    "parts": {
+     "combine": "v1",
+     "penalties": [],
+     "allowance_denied_by": [],
+     "minutes": 161.42,
+     "order_minutes": 161.42,
+     "allowance_min": 15.0,
+     "allowance_applies": false,
+     "km": 163.58,
+     "labels": {
+      "minutes": "estimated drive time, free-flow",
+      "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
+     }
+    },
+    "evidence": [
+     {
+      "requirement": "caesarean section (WHO 2009 Table 4, signal function 8)",
+      "quote": "Obstetric services include normal delivery and cesarean section",
+      "field": "capability",
+      "fact_id": "fdb6dd9171931c53",
+      "requirements": [
+       "caesarean section (WHO 2009 Table 4, signal function 8)"
+      ]
+     }
+    ],
+    "missing": [
+     "no fact in the record mentions blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)"
+    ],
+    "sources": {
+     "n_domains": 2,
+     "domains": [
+      "facebook.com",
+      "mogrehospital.in"
      ],
-     "missing": [],
-     "sources": {
-      "n_domains": 7,
-      "domains": [
-       "cag.gov.in",
-       "en.wikipedia.org",
-       "dmer.maharashtra.gov.in",
-       "mbmc.gov.in",
-       "timesofindia.indiatimes.com",
-       "pmc.ncbi.nlm.nih.gov",
-       "pubmed.ncbi.nlm.nih.gov"
-      ],
-      "official_website": "ggmcjjh.com",
-      "also_listed_as": []
-     },
-     "why_here": "The only recommendable facility within the 120-minute window.",
-     "could_be_wrong": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
-     "evidence_strength": "strong",
-     "flags": [
-      {
-       "flag": "possible_merge",
-       "severity": "minor",
-       "signal": "text_other_address",
-       "reason": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
-       "quote": "Located in Mumbai, Maharashtra, India"
-      }
-     ],
-     "minutes": 81.4,
-     "minutes_low": 0.0,
-     "minutes_high": 280.5,
-     "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate",
-     "distance_label": "about 73 km straight-line",
-     "position_approximate": false,
-     "window_min": 120.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": true,
-     "window_uncertain": true
-    }
-   ],
-   "beyond_radius": null,
+     "official_website": "mogrehospital.in",
+     "also_listed_as": []
+    },
+    "why_here": "Further away: about 164 km straight-line, beyond the 120-minute window.",
+    "could_be_wrong": "The record does not mention blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9).",
+    "evidence_strength": "moderate",
+    "flags": [],
+    "minutes": 161.4,
+    "minutes_low": 44.8,
+    "minutes_high": 402.4,
+    "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate",
+    "distance_label": "about 164 km straight-line",
+    "position_approximate": false,
+    "window_min": 120.0,
+    "inside_window": false,
+    "level_note": null,
+    "nearest_in_window": null,
+    "window_uncertain": true
+   },
    "further_away": [
     {
      "facility_id": "ceb60af1-93a5-44db-a44f-403a8a014c2e",
@@ -11630,6 +11603,78 @@
      "level_note": null,
      "nearest_in_window": null,
      "window_uncertain": true
+    },
+    {
+     "facility_id": "b6cb8f49-4d5b-4cdf-bd06-08fac063a5b2",
+     "name": "Nelson Hospital",
+     "type": "hospital",
+     "operator": "private",
+     "city": "Nagpur",
+     "state": "Maharashtra",
+     "lat": 21.132530212402344,
+     "lon": 79.07829284667969,
+     "distance_km": 166.0,
+     "location_precision_km": 1.0,
+     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km. Beyond the 120-minute window for this service.",
+     "grade": 2,
+     "grade_label": "supported (a fact in the record names the service)",
+     "confidence": null,
+     "confidence_reason": "The record names the service, but not everything it needs.",
+     "score": null,
+     "parts": {
+      "combine": "v1",
+      "penalties": [],
+      "allowance_denied_by": [],
+      "minutes": 163.5,
+      "order_minutes": 163.5,
+      "allowance_min": 15.0,
+      "allowance_applies": false,
+      "km": 166.09,
+      "labels": {
+       "minutes": "estimated drive time, free-flow",
+       "order_minutes": "minutes used for the order (minus the allowance for a corroborated record)"
+      }
+     },
+     "evidence": [
+      {
+       "requirement": "caesarean section (WHO 2009 Table 4, signal function 8)",
+       "quote": "Gynaecology and obstetrics services including caesarean section delivery, normal/instrumental delivery, hysteroscopy, colposcopy, and gynecologic endoscopy",
+       "field": "capability",
+       "fact_id": "d028e0abaaae3977",
+       "requirements": [
+        "caesarean section (WHO 2009 Table 4, signal function 8)"
+       ]
+      }
+     ],
+     "missing": [
+      "no fact in the record mentions blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)"
+     ],
+     "sources": {
+      "n_domains": 4,
+      "domains": [
+       "nelsonhospitals.com",
+       "insurance.phonepe.com",
+       "justdial.com",
+       "facebook.com"
+      ],
+      "official_website": "nelsonhospitals.com",
+      "also_listed_as": []
+     },
+     "why_here": "Further away: about 166 km straight-line, beyond the 120-minute window.",
+     "could_be_wrong": "The record does not mention blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9).",
+     "evidence_strength": "moderate",
+     "flags": [],
+     "minutes": 163.5,
+     "minutes_low": 46.2,
+     "minutes_high": 405.7,
+     "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "distance_label": "about 166 km straight-line",
+     "position_approximate": false,
+     "window_min": 120.0,
+     "inside_window": false,
+     "level_note": null,
+     "nearest_in_window": null,
+     "window_uncertain": true
     }
    ],
    "window": {
@@ -11651,6 +11696,90 @@
    },
    "rank_version": "v1",
    "unverified_nearby": [
+    {
+     "facility_id": "4616c935-ae1b-4d40-ae5a-3d6c31a90206",
+     "name": "Government Medical College And Hospital Chandrapur",
+     "type": "hospital",
+     "operator": "public",
+     "city": "Chandrapur",
+     "state": "Maharashtra",
+     "lat": 19.95384979248047,
+     "lon": 79.29673767089844,
+     "distance_km": 73.0,
+     "location_precision_km": 2.0,
+     "location_note": "Location from the record; it disagrees with the PIN code but matches the city named. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km.",
+     "grade": 3,
+     "grade_label": "corroborated (the service and the things it needs are named in the record)",
+     "confidence": null,
+     "confidence_reason": "Not recommended: The record's evidence for C-section and high-risk delivery sits among facts about Mumbai, not this facility, and the record already mixes in other places' facts, so it may come from that place.",
+     "score": null,
+     "parts": {},
+     "evidence": [
+      {
+       "requirement": "caesarean section (WHO 2009 Table 4, signal function 8)",
+       "quote": "Cesarean delivery: the newborn is placed at the edge of the table and UCM is performed by a second team member for four milking maneuvers",
+       "field": "procedure",
+       "fact_id": "db4b8989d59f5ca2",
+       "requirements": [
+        "caesarean section (WHO 2009 Table 4, signal function 8)"
+       ]
+      },
+      {
+       "requirement": "blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)",
+       "quote": "FDA-approved Blood Bank with facilities for component separation",
+       "field": "equipment",
+       "fact_id": "f8c4ead96dd17c19",
+       "requirements": [
+        "blood bank or transfusion, not necessarily for obstetric patients (WHO 2009 Table 4, signal function 9)"
+       ]
+      }
+     ],
+     "missing": [],
+     "sources": {
+      "n_domains": 7,
+      "domains": [
+       "cag.gov.in",
+       "en.wikipedia.org",
+       "dmer.maharashtra.gov.in",
+       "mbmc.gov.in",
+       "timesofindia.indiatimes.com",
+       "pmc.ncbi.nlm.nih.gov",
+       "pubmed.ncbi.nlm.nih.gov"
+      ],
+      "official_website": "ggmcjjh.com",
+      "also_listed_as": []
+     },
+     "why_here": "",
+     "could_be_wrong": "The record's evidence for C-section and high-risk delivery sits among facts about Mumbai, not this facility, and the record already mixes in other places' facts, so it may come from that place. The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
+     "evidence_strength": "strong",
+     "flags": [
+      {
+       "flag": "possible_merge",
+       "severity": "major",
+       "signal": "evidence_beside_other",
+       "reason": "The record's evidence for C-section and high-risk delivery sits among facts about Mumbai, not this facility, and the record already mixes in other places' facts, so it may come from that place.",
+       "quote": "Cesarean delivery: the newborn is placed at the edge of the table and UCM is performed by a second team member for four milking maneuvers"
+      },
+      {
+       "flag": "possible_merge",
+       "severity": "minor",
+       "signal": "text_other_address",
+       "reason": "The record's own text places it in Mumbai, Maharashtra, but its PIN code and city put it in Nagpur, Maharashtra: it may mix facts from a facility of the same or a similar name elsewhere.",
+       "quote": "Located in Mumbai, Maharashtra, India"
+      }
+     ],
+     "minutes": 81.4,
+     "minutes_low": 0.0,
+     "minutes_high": 280.5,
+     "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate",
+     "distance_label": "about 73 km straight-line",
+     "position_approximate": false,
+     "window_min": 120.0,
+     "inside_window": true,
+     "level_note": null,
+     "nearest_in_window": null,
+     "window_uncertain": true
+    },
     {
      "facility_id": "1f4a73fe-3442-4f03-8255-d27abcd967fd",
      "name": "Manwatkar Multispeciality Hospital",
@@ -11718,8 +11847,8 @@
      "lat": 19.6986389,
      "lon": 79.2953889,
      "distance_km": 76.0,
-     "location_precision_km": 30.190959824215202,
-     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 30 km. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
+     "location_precision_km": 13.928539849710143,
+     "location_note": "Placed at the centre of its PIN code area: the scraped location was far from it. Position good to about 14 km. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km. Its map point is shared with other records or is its PIN code's centre, so the distance is approximate.",
      "grade": 1,
      "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
      "confidence": null,
@@ -11793,55 +11922,6 @@
      "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate (the facility's position is approximate)",
      "distance_label": "position approximate",
      "position_approximate": true,
-     "window_min": 120.0,
-     "inside_window": true,
-     "level_note": null,
-     "nearest_in_window": null,
-     "window_uncertain": true
-    },
-    {
-     "facility_id": "86958611-d2c1-49e5-aee3-e1bc074fef97",
-     "name": "Christanand Hospital",
-     "type": "hospital",
-     "operator": "private",
-     "city": "Brahmapuri",
-     "state": "Maharashtra",
-     "lat": 20.607830047607422,
-     "lon": 79.85587310791016,
-     "distance_km": 79.0,
-     "location_precision_km": 1.0,
-     "location_note": "Location from the record, consistent with its PIN code. Straight-line distance. Measured from the centre of Gadchiroli district, Maharashtra, about 195 km across, which is itself known only to within about 97 km.",
-     "grade": 1,
-     "grade_label": "claimed only (a specialty or a general statement, no fact names the service)",
-     "confidence": null,
-     "confidence_reason": "Claim not supported by the record: no fact names caesarean section (WHO 2009 Table 4, signal function 8).",
-     "score": null,
-     "parts": {},
-     "evidence": [],
-     "missing": [
-      "no fact in the record mentions caesarean section (WHO 2009 Table 4, signal function 8)"
-     ],
-     "sources": {
-      "n_domains": 4,
-      "domains": [
-       "chotu.com",
-       "onefivenine.com",
-       "justdial.com",
-       "mappls.com"
-      ],
-      "official_website": "https://christanandhospital.godaddysites.com/",
-      "also_listed_as": []
-     },
-     "why_here": "",
-     "could_be_wrong": "Only a claim: nothing in the record shows the service is offered.",
-     "evidence_strength": "thin",
-     "flags": [],
-     "minutes": 87.7,
-     "minutes_low": 0.0,
-     "minutes_high": 289.7,
-     "minutes_label": "drive time unclear: Gadchiroli spans about 195 km, so it depends on where you start; search a PIN code or town for an estimate",
-     "distance_label": "about 79 km straight-line",
-     "position_approximate": false,
      "window_min": 120.0,
      "inside_window": true,
      "level_note": null,
@@ -11996,18 +12076,18 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 45,
-      "n_distinct": 45,
-      "n_blocked": 10,
-      "n_scored": 45,
+      "n": 44,
+      "n_distinct": 44,
+      "n_blocked": 17,
+      "n_scored": 0,
       "max_scored": 50
      },
      {
       "gate": "within radius",
       "id": "G3",
       "rule": "estimated drive time within the 120-minute window (cited; about 115 km straight-line from here at terrain factor 0.96 (Maharashtra))",
-      "n": 1,
-      "n_distinct": 1,
+      "n": 0,
+      "n_distinct": 0,
       "window_min": 120.0,
       "km_equivalent": 115.0
      }
@@ -12018,7 +12098,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -12030,12 +12110,12 @@
     "notes": [
      "Uncertain: Gadchiroli spans about 195 km, more than the 120-minute window reaches (about 115 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer."
     ],
-    "headline": "Uncertain: Gadchiroli spans about 195 km, more than the 120-minute window reaches (about 115 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. 1 of 1 recommendable facility within about 2 hours' estimated drive (free-flow) of Gadchiroli, nearest first (a corroborated record may move up to 15 minutes). 2 more with evidence are further away."
+    "headline": "Uncertain: Gadchiroli spans about 195 km, more than the 120-minute window reaches (about 115 km straight-line), so which facilities are inside the window depends on where you start. Search a PIN code, post office or town for a firm answer. No reliable option nearby. No facility in this dataset shows clear evidence of emergency C-section and high-risk delivery within about 2 hours' estimated drive (free-flow) of Gadchiroli. This is a gap in our data, not proof that no care exists. The nearest one with evidence is further away: Mogre Children Hospital, about 164 km straight-line."
    },
-   "fingerprint": "beabb5b602",
+   "fingerprint": "74799620d2",
    "ms": {
-    "resolve": 6.48,
-    "answer": 0.74
+    "resolve": 7.2,
+    "answer": 0.86
    }
   },
   {
@@ -12333,7 +12413,7 @@
       "n_distinct": 17
      }
     ],
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Distances are straight-line km from the point the place name resolved to; keyword search gives no drive time.",
      "A keyword match is not a recipe check: no rule checked that the service is offered.",
@@ -12347,8 +12427,8 @@
    },
    "fingerprint": "cc6d0c7c00",
    "ms": {
-    "resolve": 6.22,
-    "answer": 8.26
+    "resolve": 6.7,
+    "answer": 9.65
    }
   },
   {
@@ -12485,7 +12565,7 @@
       "n_distinct": 0
      }
     ],
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Distances are straight-line km from the point the place name resolved to; keyword search gives no drive time.",
      "A keyword match is not a recipe check: no rule checked that the service is offered.",
@@ -12499,8 +12579,8 @@
    },
    "fingerprint": "5a34ce75ed",
    "ms": {
-    "resolve": 6.61,
-    "answer": 6.47
+    "resolve": 7.51,
+    "answer": 6.96
    }
   },
   {
@@ -12572,7 +12652,7 @@
    },
    "fingerprint": "92aad042fb",
    "ms": {
-    "resolve": 0.15,
+    "resolve": 0.16,
     "answer": 0.01
    }
   },
@@ -12645,7 +12725,7 @@
    },
    "fingerprint": "92aad042fb",
    "ms": {
-    "resolve": 0.12,
+    "resolve": 0.13,
     "answer": 0.01
    }
   },
@@ -13337,7 +13417,7 @@
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
       "n": 30,
       "n_distinct": 30,
-      "n_blocked": 8,
+      "n_blocked": 14,
       "n_scored": 0,
       "max_scored": 50
      },
@@ -13357,7 +13437,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -13373,8 +13453,8 @@
    },
    "fingerprint": "0b2266373f",
    "ms": {
-    "resolve": 6.36,
-    "answer": 0.75
+    "resolve": 7.5,
+    "answer": 0.8
    }
   },
   {
@@ -14076,7 +14156,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -14092,8 +14172,8 @@
    },
    "fingerprint": "aebce9d0de",
    "ms": {
-    "resolve": 0.93,
-    "answer": 0.68
+    "resolve": 0.94,
+    "answer": 0.7
    }
   },
   {
@@ -14726,9 +14806,9 @@
       "gate": "recommendable",
       "id": "G2",
       "rule": "grade 2 or 3 under recipe v0.3 (a fact in the record names the service) and no major warning for this service",
-      "n": 215,
-      "n_distinct": 214,
-      "n_blocked": 26,
+      "n": 213,
+      "n_distinct": 212,
+      "n_blocked": 28,
       "n_scored": 50,
       "max_scored": 50
      },
@@ -14748,7 +14828,7 @@
     "weights": null,
     "penalties": null,
     "probability": "Nothing here is a probability. Grades say what the facility's own web record names, the drive times are estimates from straight-line distance, and the windows and the allowance are declared thresholds.",
-    "flags_source": "wp11_v2",
+    "flags_source": "wp11_v3",
     "limits": [
      "Drive times are estimates from straight-line distance, free-flow (no traffic, no waiting). Real trips take longer.",
      "Windows are planning thresholds, not clinical deadlines.",
@@ -14764,8 +14844,8 @@
    },
    "fingerprint": "ee8a312d1a",
    "ms": {
-    "resolve": 1.61,
-    "answer": 0.71
+    "resolve": 1.73,
+    "answer": 0.82
    }
   },
   {
@@ -14809,7 +14889,7 @@
    },
    "fingerprint": "dbbe9bb869",
    "ms": {
-    "resolve": 6.9,
+    "resolve": 7.46,
     "answer": 0.02
    }
   }

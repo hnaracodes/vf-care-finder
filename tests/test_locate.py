@@ -405,3 +405,56 @@ def test_city_point_only_when_tight(real):
     b = real.resolve("Barmer")
     assert b.status == "ok" and " city " not in b.label
     assert all(c["precision_km"] < locate.CITY_MAX_PRECISION_KM for c in real._city_points.values())
+
+
+# ---------------------------------------------------------------------------
+# PIN outlier offices (places-v3, scripts/wp2_places.py)
+# ---------------------------------------------------------------------------
+
+def _wp2_places():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "wp2_places", Path(__file__).resolve().parents[1] / "scripts" / "wp2_places.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_trim_outliers_drops_a_far_office_keeps_a_near_one():
+    w = _wp2_places()
+    # ten offices within about 12 km of Kotputli, one at 15 km, one about 250 km away (Pawana BO)
+    lat = pd.Series([27.703, 27.669, 27.680, 27.702, 27.735, 27.689, 27.659, 27.801, 27.799, 27.809,
+                     27.83, 25.407])
+    lon = pd.Series([76.199, 76.207, 76.160, 76.244, 76.229, 76.137, 76.115, 76.199, 76.242, 76.262,
+                     76.10, 76.628])
+    keep, cut = w.trim_outliers(lat, lon)
+    assert keep.tolist() == [True] * 11 + [False]
+    assert w.PIN_TRIM_FLOOR_KM <= cut < 50
+    # a tight cluster with one office inside the floor is left alone
+    keep, _ = w.trim_outliers(lat.iloc[:11], lon.iloc[:11])
+    assert keep.all()
+    # two offices: no majority to judge by, both kept
+    keep, cut = w.trim_outliers(lat.iloc[[0, 11]], lon.iloc[[0, 11]])
+    assert keep.all() and cut == float("inf")
+
+
+def test_trim_outliers_keeps_at_least_half():
+    w = _wp2_places()
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        n = int(rng.integers(3, 30))
+        lat = pd.Series(22 + rng.normal(0, rng.choice([0.05, 0.5, 2.0]), n))
+        lon = pd.Series(80 + rng.normal(0, rng.choice([0.05, 0.5, 2.0]), n))
+        keep, cut = w.trim_outliers(lat, lon)
+        assert keep.sum() >= math.ceil(n / 2) and cut >= w.PIN_TRIM_FLOOR_KM
+
+
+@needs_data
+def test_kotputli_pin_is_not_spread_by_one_office(real):
+    """PIN 303108 (Kotputli, the brief's highway trauma scenario) was 163.4 km across in places-v2
+    because of a few wrong branch office points; it should sit on the town with a town-sized spread."""
+    r = real.resolve("303108")
+    assert r.status == "ok" and r.kind == "pin"
+    assert r.precision_km < 25
+    assert geo.haversine_km(r.lat, r.lon, 27.703, 76.199) < 5   # Kotputli SO

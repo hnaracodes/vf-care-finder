@@ -17,6 +17,11 @@ Checks and their signals (``signal`` column):
   ``shared_website``, ``specialty_breadth``. Minor; major when two independent
   signals fire. After the hand review (``reports/trust_checks.md``) some
   signals only count as corroboration: see ``MERGE_SIGNALS_ALONE``.
+  Per line (``service_line`` set, major, blocking that line), on a record that
+  already has a merge flag: ``evidence_names_other`` (a supporting fact for the
+  line names another institution or a place over ``EVIDENCE_PLACE_KM`` away)
+  and ``evidence_beside_other`` (a supporting fact that names nothing sits
+  next to a fact naming such a place). See ``evidence_other_place``.
 * ``implausible_claim`` (per service line): ``type_cannot_offer`` and
   ``few_beds``. Major (blocking for that line).
 * duplicates: pairs within 1 km with matching distinctive names, or the same
@@ -32,10 +37,11 @@ from typing import Iterable, Mapping, Optional, Sequence
 import numpy as np
 import pandas as pd
 from rapidfuzz import fuzz
+from rapidfuzz.distance import Levenshtein
 
 from . import geo
 
-CHECK_VERSION = "wp11_v2"
+CHECK_VERSION = "wp11_v3"
 
 FLAG_COLUMNS = ["facility_id", "flag", "service_line", "severity", "signal", "reason", "quote", "check_version"]
 DUP_COLUMNS = ["facility_id_a", "facility_id_b", "distance_km", "name_score", "signal", "keep"]
@@ -442,6 +448,274 @@ def specialty_breadth_limits(facility_type: Sequence[Optional[str]], n_specialti
     sizes = df.groupby("t").size()
     lim = df.groupby("t")["n"].quantile(q)
     return {t: float(v) for t, v in lim.items() if sizes[t] >= min_records}
+
+
+# ---------------------------------------------------------------------------
+# 2b. Possible merge, per line: the line's own evidence is about somewhere else
+# ---------------------------------------------------------------------------
+
+#: A named place counts as another city when every point it can mean is
+#: farther than this from the record's own location (its point and its PIN's).
+#: The same 40 km WP1 uses to compare a point with its PIN.
+EVIDENCE_PLACE_KM = 40.0
+#: Facts on each side of a supporting fact, in the same field, read for the
+#: "comes from" reading (``evidence_beside_other``).
+EVIDENCE_CONTEXT = 2
+
+#: Place names in the gazetteer that are also brand, deity or person names in
+#: facility text ("Manipal Hospitals", "Krishna Hospital", "Sagar Hospitals"),
+#: or common words ("District", "Central", "Park"). Never read as a city.
+EVIDENCE_PLACE_STOP = frozenset({
+    "DISTRICT", "CENTRAL", "PARK", "CITY", "KRISHNA", "MANIPAL", "ANAND", "SAGAR", "KALYAN", "NIRMAL", "BASTI",
+    "DHAR", "GUNA", "MANSA", "GANGA", "AMRITA", "YASHODA", "SURYA", "LIFELINE", "UNITY", "NOBLE", "SUNRISE",
+    "GLOBAL", "MEDICAL", "MISSION", "GENERAL", "CIVIL", "RURAL", "MODEL", "SAINT", "MOTHER", "BALAJI",
+})
+
+#: Facility nouns that end an institution's name in running text.
+_INSTITUTION_NOUN = (r"(?:Hospitals?|Medical College|Medical Sciences|Institute|Nursing Home|Medical Cent(?:re|er)|"
+                     r"Clinics?|Health Cent(?:re|er)|Infirmary|Sanatorium|Medicity|Health City)")
+#: An institution's name: up to seven capitalised words (or "of", "and", "&")
+#: before a facility noun ("Indira Gandhi Government Medical College",
+#: "Sir J.J. Group of Hospitals", "Fortis Escorts Hospital").
+_INSTITUTION = re.compile(rf"(?:(?:[A-Z][\w.'’&-]*|of|and|&|for|the)\s+){{1,7}}{_INSTITUTION_NOUN}\b")
+#: Words that do not tell one institution from another, on top of
+#: ``GENERIC_NAME_WORDS``: public-system words ("District Hospital", "Civil
+#: Hospital"), listing words ("Top Neurosurgery Hospitals"), and department or
+#: clinic names inside a hospital ("Filter Clinic", "Breast Clinic").
+_INSTITUTION_GENERIC = frozenset("""
+top best leading listed among describes award awards times government govt district sub civil general rural
+community primary divisional referral state regional zonal esi esic railway area base military army cantonment
+command corporation municipal taluk taluka upgraded teaching tertiary attached group sir tb filter breast liver
+stoma picc line one stop tpa ge first german modular pvt chest diabetes palliative memory asthma geriatric
+satellite camp mobile day night opd ipd its this that their our all other new old
+oncology oncologic oncological radiation chemotherapy neurosurgery neurosciences neuroscience cardiothoracic
+paediatric pediatric gynaecology gynecology obstetrics obstetric orthopaedics orthopedics nephrology rheumatology
+dermatology psychiatric gastroenterology pulmonology pulmonary respiratory endocrinology neonatal fetal hepatology
+spirometry pft telemedicine tele sleep stroke epilepsy headache migraine wound foot vein varicose hernia bariatric
+obesity cataract dialysis
+""".split())
+#: A listing, not an institution: "Listed among Top Neurosurgery Hospitals In Jaipur".
+_LISTING = re.compile(r"(top|best|leading|listed|ranked|award\w*|directory|network hospitals?)", re.I)
+#: The fact describes a unit inside the record or run with it, not another site.
+_CO_LOCATED = re.compile(r"\b(on[- ]?site|in[- ]house|within|inside|unit of|operated by|managed by|run by|"
+                         r"powered by|partner\w*|tie[- ]?up|in association|collaborat\w*|franchise|empanel\w*)\b",
+                         re.I)
+#: A doctor's past posts: "formerly at AIIMS", "ex-Fortis", "trained at".
+_PAST_POST = re.compile(r"\b(formerly|previously|former|ex[- ]|trained|worked|earlier|alumn\w*|studied|fellowship|"
+                        r"residency|degree|graduat\w*|qualified|mbbs|md|ms|dnb|mch|dm)\b", re.I)
+
+
+def _compact(s: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
+
+
+def _institution_words(phrase: str) -> list[str]:
+    """Distinctive words of an institution name ("J.J." -> "j", "j" dropped as
+    one letter, so "Sir J.J. Group of Hospitals" keeps "jj" via ``_compact``)."""
+    p = re.sub(r"(?<=\b[A-Za-z])\.(?=[A-Za-z]\b)", "", phrase)  # J.J. -> JJ
+    return [w for w in _name_words(p.replace(".", " "))
+            if len(w) > 1 and w not in GENERIC_NAME_WORDS and w not in _HONORIFIC and w not in _INSTITUTION_GENERIC]
+
+
+class OwnPlace:
+    """What a record is: its name's distinctive words, initials and website
+    host, and where it is (points, and the place names of its city, PIN and
+    point). Built once per record by the WP11 script."""
+
+    def __init__(self, name: Optional[str], website_host: Optional[str] = None,
+                 points: Sequence[tuple[float, float]] = (), place_names: Iterable[str] = ()):
+        name = name if isinstance(name, str) else ""
+        self.name = name
+        self.words = set(_institution_words(name))
+        self.compact = _compact(name)
+        self.initials = "".join(w[0] for w in re.findall(r"[A-Za-z]+", name)
+                                if w.lower() not in ("of", "and", "the", "for")).upper()
+        self.host = _compact(website_host or "")
+        self.points = [(float(a), float(b)) for a, b in points if not (pd.isna(a) or pd.isna(b))]
+        self.place_names = {p for p in place_names if p}
+
+    def is_own_institution(self, words: Sequence[str]) -> bool:
+        """True when an institution name (its distinctive words) is the record's own."""
+        if not words:
+            return True  # no distinctive words: cannot tell, so not "another" institution
+        if set(words) & self.words:
+            return True
+        for w in words:
+            if len(w) >= 5 and any(len(o) >= 5 and Levenshtein.distance(w, o) <= 1 for o in self.words):
+                return True  # one letter apart in a long name: "Kelkar" and "Ketkar", a spelling slip
+            if len(w) >= 4 and (w in self.compact or (self.host and w in self.host)):
+                return True
+            if len(w) >= 3 and len(self.initials) >= 3 and self.initials.startswith(w.upper()):
+                return True  # "KIMS" for "Krishna Institute of Medical Sciences"
+        joined = "".join(words)
+        if len(joined) >= 5 and (joined in self.compact or (self.host and joined in self.host)):
+            return True
+        return bool(self.words) and max(fuzz.ratio(" ".join(words), w) for w in self.words) >= 85
+
+
+def institution_mentions(text: str) -> list[tuple[str, list[str]]]:
+    """(phrase, distinctive words) for each institution named in ``text``."""
+    if not isinstance(text, str):
+        return []
+    out = []
+    for m in _INSTITUTION.finditer(text):
+        phrase = re.sub(r"^(?:(?:of|and|&|for|the)\s+)+", "", m.group(0), flags=re.I).strip()
+        out.append((phrase, _institution_words(phrase)))
+    return out
+
+
+def place_mentions(text: str, gazetteer: Mapping[str, Sequence[tuple[float, float]]]) -> list[tuple[str, str]]:
+    """(text as written, gazetteer key) for each place named in ``text``.
+
+    Places are runs of up to three capitalised words whose ``geo.place_key``
+    is a gazetteer key of 4+ letters outside ``EVIDENCE_PLACE_STOP``; the
+    longest match wins ("Navi Mumbai" before "Mumbai").
+    """
+    if not isinstance(text, str):
+        return []
+    out = []
+    for m in re.finditer(r"\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){0,3}\b", text):
+        ws = m.group(0).split()
+        i = 0
+        while i < len(ws):
+            hit = None
+            for j in range(min(len(ws), i + 3), i, -1):
+                k = geo.place_key(" ".join(ws[i:j]))
+                if len(k) >= 4 and k in gazetteer and k not in EVIDENCE_PLACE_STOP:
+                    hit = (" ".join(ws[i:j]), k, j)
+                    break
+            if hit:
+                out.append(hit[:2])
+                i = hit[2]
+            else:
+                i += 1
+    return out
+
+
+def _place_is_own(key: str, own: OwnPlace, gazetteer, km: float) -> tuple[bool, Optional[float]]:
+    """(own?, distance in km to the nearest point the name can mean)."""
+    if own.place_names and geo.names_match({key}, own.place_names):
+        return True, 0.0
+    pts = gazetteer.get(key, ())
+    if not own.points or not pts:
+        return (not own.points), None  # no location to compare: never "another city"
+    d = min(float(geo.haversine_km(a, b, p[0], p[1])) for a, b in own.points for p in pts)
+    return d <= km, d
+
+
+def evidence_names_elsewhere(text: str, own: OwnPlace, gazetteer: Mapping[str, Sequence[tuple[float, float]]],
+                             km: float = EVIDENCE_PLACE_KM) -> Optional[dict]:
+    """Whether one supporting fact names another institution or another city.
+
+    Returns ``{"kind": "institution" | "city", "named": str, "km": float|None}``
+    or None. Another *institution*: a named institution whose distinctive
+    words are not the record's (``OwnPlace.is_own_institution``), in a fact
+    that does not also name the record's own institution and does not say the
+    other one is a unit inside it or run with it (``_CO_LOCATED``) or a
+    doctor's past post (``_PAST_POST``). Another *city*: a named place every
+    reading of which is over ``km`` from the record, in a fact that names no
+    place of the record's own (a list of a chain's cities that includes the
+    record's own is not borrowed evidence).
+    """
+    if not isinstance(text, str) or not text.strip() or _PAST_POST.search(text):
+        return None
+    places = place_mentions(text, gazetteer)
+    far, own_place_named = None, False
+    for written, key in places:
+        is_own, d = _place_is_own(key, own, gazetteer, km)
+        if is_own:
+            own_place_named = True
+        elif far is None:
+            far = (written, d)
+    if far is not None and not own_place_named:
+        return {"kind": "city", "named": far[0], "km": far[1]}
+    if _LISTING.search(text):
+        return None
+    place_keys = {k for _, k in places}
+    other, own_named = None, False
+    for phrase, words in institution_mentions(text):
+        if words and own.is_own_institution(words):  # "Hubli Super-Speciality Hospital" for its own record
+            own_named = True
+            continue
+        words = [w for w in words if geo.place_key(w) not in place_keys]  # "Fortis Hospital Mohali" -> fortis
+        if words and not own.is_own_institution(words) and other is None:
+            other = phrase
+    if other and not own_named and not _CO_LOCATED.search(text):
+        return {"kind": "institution", "named": other, "km": None}
+    return None
+
+
+def evidence_other_place(line: str, items: Sequence[Mapping], own: OwnPlace,
+                         gazetteer: Mapping[str, Sequence[tuple[float, float]]],
+                         context: Optional[Mapping[str, Sequence[str]]] = None,
+                         km: float = EVIDENCE_PLACE_KM) -> Optional[dict]:
+    """The per-line ``possible_merge`` flag (major) for one graded line, or None.
+
+    ``items``: the line's ``evidence_items`` (``text``, ``fact_id``,
+    ``requirement``). Fires when a supporting fact names another institution or
+    city (``evidence_names_elsewhere``), signal ``evidence_names_other``.
+    ``context`` (fact_id -> texts of the facts next to it in the same field)
+    is for the narrower "comes from" reading: a supporting fact that names no
+    place or institution at all, next to facts that name another one and none
+    of the record's own, signal ``evidence_beside_other``. The script passes
+    ``context`` only for records that already carry a record-level merge flag.
+    """
+    label = LINE_LABEL.get(line, line)
+    hits = [evidence_names_elsewhere(it.get("text"), own, gazetteer, km) for it in items]
+    if any(h is None and _names_own(it.get("text"), own, gazetteer, km) for it, h in zip(items, hits)):
+        return None  # another supporting fact names the record itself (its name or its own place)
+    for it in items:
+        t = it.get("text")
+        hit = evidence_names_elsewhere(t, own, gazetteer, km)
+        if hit:
+            where = (f"another facility, {hit['named']}" if hit["kind"] == "institution"
+                     else f"{hit['named']}" + (f", about {hit['km']:.0f} km from this record's location"
+                                               if hit.get("km") is not None else ", another city"))
+            return {"flag": "possible_merge", "service_line": line, "severity": "major",
+                    "signal": "evidence_names_other",
+                    "reason": (f"The record's evidence for {label} names {where}, so it may describe that "
+                               "place and not this one."),
+                    "quote": t}
+    if context and not any(_names_own(c, own, gazetteer, km, places_only=True)
+                           for it in items for c in context.get(it.get("fact_id"), ())):
+        # (a supporting fact that sits among facts about the record's own place keeps the line)
+        for it in items:
+            t = it.get("text")
+            if not isinstance(t, str) or place_mentions(t, gazetteer) or any(w for _, w in institution_mentions(t)):
+                continue
+            near = list(context.get(it.get("fact_id"), ()))
+            hits = [evidence_names_elsewhere(c, own, gazetteer, km) for c in near]
+            hit = next((h for h in hits if h and h["kind"] == "city"), None)
+            if hit:
+                return {"flag": "possible_merge", "service_line": line, "severity": "major",
+                        "signal": "evidence_beside_other",
+                        "reason": (f"The record's evidence for {label} sits among facts about {hit['named']}, "
+                                   "not this facility, and the record already mixes in other places' facts, so "
+                                   "it may come from that place."),
+                        "quote": t}
+    return None
+
+
+def _names_own(text: str, own: OwnPlace, gazetteer, km: float, places_only: bool = False) -> bool:
+    """True when a fact names a place of the record's own, or (unless
+    ``places_only``) the record's own institution."""
+    if not isinstance(text, str):
+        return False
+    for _, key in place_mentions(text, gazetteer):
+        if _place_is_own(key, own, gazetteer, km)[0] and own.points:
+            return True
+    if places_only:
+        return False
+    return any(words and own.is_own_institution(words) for _, words in institution_mentions(text))
+
+
+#: Plain names of the lines for reasons ("emergency C-section and high-risk delivery").
+LINE_LABEL = {
+    "emoc": "C-section and high-risk delivery", "nicu": "newborn intensive care", "dialysis": "dialysis",
+    "icu": "intensive care", "cardiac_surgery": "heart surgery", "cath_lab": "heart attack care (cath lab)",
+    "mri": "MRI", "ct": "CT", "trauma": "trauma care", "burns": "burn care",
+    "neurosurgery": "brain or spine surgery", "oncology": "cancer treatment",
+}
 
 
 #: Merge signals that fire a flag on their own (hand-review precision 70% or more).

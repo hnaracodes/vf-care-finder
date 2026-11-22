@@ -191,6 +191,76 @@ def test_specialty_breadth_limits():
     assert "doctor" not in lim and 97 <= lim["hospital"] <= 99
 
 
+# --- possible merge, per line ------------------------------------------------------
+
+GAZ = {"NAGPUR": [(21.15, 79.09)], "MUMBAI": [(19.07, 72.88)], "CHANDRAPUR": [(19.96, 79.30)],
+       "MOHALI": [(30.70, 76.72)], "LUDHIANA": [(30.90, 75.85)], "PATIALA": [(30.34, 76.39)],
+       "PUNE": [(18.52, 73.86)], "SOLAPUR": [(17.66, 75.91)], "COIMBATORE": [(11.02, 76.96)],
+       "ERODE": [(11.34, 77.72)], "MANIPAL": [(13.35, 74.79)]}
+CHANDRAPUR = trust.OwnPlace("Government Medical College And Hospital Chandrapur", "ggmcjjh.com",
+                            [(19.96, 79.30)], {"CHANDRAPUR"})
+
+
+def test_institution_mentions_and_own_names():
+    got = trust.institution_mentions("Has a burn ward at Indira Gandhi Government Medical College.")
+    assert got and got[0][1] == ["indira", "gandhi"]
+    assert not CHANDRAPUR.is_own_institution(["indira", "gandhi"])
+    hubli = trust.OwnPlace("Hubli Super Speciality Hospital", "hublisuperspecialityhospital.com")
+    assert hubli.is_own_institution(["shivaleela", "hubli"])
+    kims = trust.OwnPlace("Krishna Institute of Medical Sciences")
+    assert kims.is_own_institution(["kims"])                       # its initials
+    sriram = trust.OwnPlace("Sri Ram Hospital")
+    assert sriram.is_own_institution(["sriram"])                   # spacing
+    ketkar = trust.OwnPlace("Ketkar Nursing Home")
+    assert ketkar.is_own_institution(["kelkar"])                   # one letter apart, 5+ letters
+    assert not trust.OwnPlace("Maa Hospital").is_own_institution(["max"])  # short names need an exact match
+
+
+def test_place_mentions_longest_and_stoplist():
+    assert trust.place_mentions("Fortis Hospital - Mohali provides oncology", GAZ) == [("Mohali", "MOHALI")]
+    assert trust.place_mentions("Manipal Hospitals offers MRI", GAZ) == []   # a brand, not the town
+
+
+def test_evidence_names_elsewhere():
+    f = trust.evidence_names_elsewhere("Has a burn ward at Indira Gandhi Government Medical College.", CHANDRAPUR, GAZ)
+    assert f["kind"] == "institution" and "Indira Gandhi" in f["named"]
+    f = trust.evidence_names_elsewhere("Hemodialysis at the Nephrology centre, Nagpur", CHANDRAPUR, GAZ)
+    assert f["kind"] == "city" and f["named"] == "Nagpur" and f["km"] > 100
+    assert trust.evidence_names_elsewhere("Dialysis unit in Chandrapur", CHANDRAPUR, GAZ) is None
+    # a chain's list of cities that includes the record's own is not borrowed evidence
+    sivaa = trust.OwnPlace("Shree Sivaa Hospital", None, [(11.02, 76.96)], {"COIMBATORE"})
+    assert trust.evidence_names_elsewhere("Operates dialysis centers in Coimbatore, Erode", sivaa, GAZ) is None
+    # listings, units inside the record, and doctors' past posts are not other institutions
+    assert trust.evidence_names_elsewhere("Listed among Top Neurosurgery Hospitals In Jaipur", CHANDRAPUR, GAZ) is None
+    assert trust.evidence_names_elsewhere("On-site NephroPlus Dialysis Clinic", CHANDRAPUR, GAZ) is None
+    assert trust.evidence_names_elsewhere("Dr X completed a fellowship at MGM Mumbai", CHANDRAPUR, GAZ) is None
+    assert trust.evidence_names_elsewhere("Cancer & Chemotherapy Clinic", CHANDRAPUR, GAZ) is None
+
+
+def test_evidence_other_place_direct_and_beside():
+    items = [{"text": "Has a burn ward at Indira Gandhi Government Medical College.", "fact_id": "a"}]
+    f = trust.evidence_other_place("burns", items, CHANDRAPUR, GAZ)
+    assert (f["flag"], f["service_line"], f["severity"], f["signal"]) == (
+        "possible_merge", "burns", "major", "evidence_names_other")
+    assert f["quote"] == items[0]["text"] and "may" in f["reason"] and "—" not in f["reason"]
+    # another supporting fact that names the record itself keeps the line
+    park = trust.OwnPlace("Park Hospital", None, [(30.90, 75.85)], {"LUDHIANA"})
+    two = [{"text": "Park Hospital Ludhiana provides MRI", "fact_id": "a"},
+           {"text": "Park Hospital Patiala provides MRI", "fact_id": "b"}]
+    assert trust.evidence_other_place("mri", two, park, GAZ) is None
+    assert trust.evidence_other_place("mri", two[1:], park, GAZ)["signal"] == "evidence_names_other"
+    # a fact that names nothing, next to a fact about another city: only with context (a merge record)
+    cs = [{"text": "Cesarean delivery: UCM is performed by a second team member", "fact_id": "c"}]
+    near = {"c": ["In the trial, cord milking is performed", "A study at Sir J.J. Group of Hospitals, Mumbai"]}
+    assert trust.evidence_other_place("emoc", cs, CHANDRAPUR, GAZ) is None
+    f = trust.evidence_other_place("emoc", cs, CHANDRAPUR, GAZ, near)
+    assert f["signal"] == "evidence_beside_other" and "Mumbai" in f["reason"]
+    # ... unless a neighbour names the record's own place
+    assert trust.evidence_other_place("emoc", cs, CHANDRAPUR, GAZ, {"c": near["c"] + ["Located in Chandrapur"]}) is None
+    # ... and only a city counts beside: a neighbouring department name does not
+    assert trust.evidence_other_place("emoc", cs, CHANDRAPUR, GAZ, {"c": ["Telemedicine Clinic is available"]}) is None
+
+
 # --- implausible claim ------------------------------------------------------------
 
 def test_implausible_claims():
@@ -305,9 +375,27 @@ def test_written_flags_follow_contract():
     assert set(fl["severity"]) <= {"minor", "major"}
     assert fl["reason"].notna().all() and (fl["reason"].str.len() > 20).all()
     assert fl.loc[fl["flag"] == "implausible_claim", "service_line"].notna().all()
-    assert fl.loc[fl["flag"] != "implausible_claim", "service_line"].isna().all()
+    per_line = fl["signal"].isin(["evidence_names_other", "evidence_beside_other"])
+    assert (fl.loc[per_line, "flag"] == "possible_merge").all() and (fl.loc[per_line, "severity"] == "major").all()
+    assert fl.loc[per_line, "service_line"].notna().all() and fl.loc[per_line, "quote"].notna().all()
+    assert fl.loc[(fl["flag"] != "implausible_claim") & ~per_line, "service_line"].isna().all()
+    # the per-line rule only runs on records that already carry a record-level merge flag
+    rec_merge = set(fl.loc[(fl["flag"] == "possible_merge") & fl["service_line"].isna(), "facility_id"])
+    assert set(fl.loc[per_line, "facility_id"]) <= rec_merge
     # text-triggered signals carry their quote
     text_sig = fl["signal"].str.contains("name_joins_two|text_other_address|city_mismatch|state_mismatch")
     assert fl.loc[text_sig, "quote"].notna().all()
     assert not fl.duplicated(["facility_id", "flag", "service_line"]).any()
     assert not fl["reason"].str.contains("—").any()  # no em-dashes in card text
+
+
+@pytest.mark.skipif(not FLAGS.exists(), reason="gold/facility_flags.parquet not built")
+def test_real_gadchiroli_merged_record_blocked_for_emoc():
+    """GMC Chandrapur's record borrows its caesarean fact from a trial report beside Mumbai facts (D058)."""
+    fl = pd.read_parquet(FLAGS)
+    fid = "4616c935-ae1b-4d40-ae5a-3d6c31a90206"
+    if fid not in set(fl["facility_id"]):
+        pytest.skip("record not in this build")
+    row = fl[(fl["facility_id"] == fid) & (fl["service_line"] == "emoc") & (fl["flag"] == "possible_merge")]
+    assert len(row) == 1 and row["severity"].iloc[0] == "major"
+    assert "Cesarean" in row["quote"].iloc[0]

@@ -7,7 +7,11 @@ Writes silver/places.parquet (+ .meta.json), one row per place:
   are not also suspect (precision at least the district's), else the centre of the
   PIN's main district.
   precision_km = 90th percentile office distance from the point, at least 2 km.
-* district: vf.geo.group_centres (head and sub offices when 3 or more), precision
+  Outlier offices (places-v3): with 3 or more offices behind the point, an office
+  farther from the median point than max(25 km, median distance + 3 scaled MADs)
+  is left out, then the point and precision are recomputed from the rest (said in
+  `note`). One wrong office point put Kotputli's PIN 303108 at 163 km.
+* district (not trimmed): vf.geo.group_centres (head and sub offices when 3 or more), precision
   = 75th percentile distance of its non-suspect geocoded offices from the centre.
 * post_office: one row per (vf.geo.place_key(office name), state, district).
   Each office contributes its own point when clean, its placeholder point with
@@ -50,7 +54,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from vf import geo, locate, paths  # noqa: E402
 
 SCRIPT = "scripts/wp2_places.py"
-VERSION = "places-v2"
+VERSION = "places-v3"
 SUSPECT_KM = 200.0          # same rule as WP5 coord_suspect
 ISLAND_STATES = ("LAKSHADWEEP", "ANDAMAN AND NICOBAR ISLANDS")   # exempt from the SUSPECT_KM rule
 MIN_PRECISION_KM = 2.0
@@ -58,6 +62,13 @@ PIN_PRECISION_Q = 0.90
 DISTRICT_PRECISION_Q = 0.75
 CITY_MIN_FACILITIES = 3
 CITY_PRECISION_Q = 0.90
+#: Outlier offices of a PIN (places-v3): with PIN_TRIM_MIN_N or more offices behind its point, an
+#: office farther from the median point than max(PIN_TRIM_FLOOR_KM, median distance + PIN_TRIM_K
+#: scaled MADs) is left out, and the point and precision are recomputed from the rest.
+PIN_TRIM_MIN_N = 3
+PIN_TRIM_K = 3.0
+PIN_TRIM_FLOOR_KM = 25.0
+MAD_SCALE = 1.4826          # MAD to standard deviation under a normal
 NA_VOTE_K = 5               # nearest offices that give a district to a PIN whose offices all say 'NA'
 
 
@@ -111,6 +122,20 @@ def write_places(df: pd.DataFrame, extra: dict) -> Path:
 def _q(x: pd.Series, q: float) -> float:
     x = x.dropna()
     return float(np.quantile(x, q)) if len(x) else float("nan")
+
+
+def trim_outliers(lat: pd.Series, lon: pd.Series) -> tuple[np.ndarray, float]:
+    """``(keep, cut_km)``: which offices place a PIN. Distances are from the median point of all
+    of them; an office beyond max(PIN_TRIM_FLOOR_KM, median + PIN_TRIM_K * MAD_SCALE * MAD) is
+    an outlier. The median distance is never beyond the cut, so at least half are kept."""
+    n = len(lat)
+    if n < PIN_TRIM_MIN_N:
+        return np.ones(n, dtype=bool), float("inf")
+    d = np.asarray(geo.haversine_km(lat, lon, float(lat.median()), float(lon.median())), dtype=float)
+    med = float(np.median(d))
+    mad = float(np.median(np.abs(d - med)))
+    cut = max(PIN_TRIM_FLOOR_KM, med + PIN_TRIM_K * MAD_SCALE * mad)
+    return d <= cut, cut
 
 
 def load_offices() -> tuple[pd.DataFrame, dict]:
@@ -231,10 +256,9 @@ def build_pins(po: pd.DataFrame, districts: pd.DataFrame) -> pd.DataFrame:
         phd = (sub["coord_placeholder"] & ~sub["coord_suspect"]).to_numpy() & near
         dprec = float(dist.loc[g, "precision_km"]) if g in dist.index else MIN_PRECISION_KM
         if len(clean):
-            src, lat, lon, floor = clean, clean["lat"].median(), clean["lon"].median(), MIN_PRECISION_KM
+            src, floor = clean, MIN_PRECISION_KM
         elif phd.any():
-            src = sub[phd]
-            lat, lon, floor = src["lat"].median(), src["lon"].median(), dprec
+            src, floor = sub[phd], dprec
             notes.append("point from placeholder offices only (a shared district-town point); "
                          "precision is the district's")
         elif g in dist.index:
@@ -245,7 +269,18 @@ def build_pins(po: pd.DataFrame, districts: pd.DataFrame) -> pd.DataFrame:
             notes.append(f"centre of {district} district: {why}")
         else:
             continue
+        n_trimmed, before = 0, (float(lat), float(lon), float(floor)) if src is None else None
         if src is not None:
+            lat0, lon0 = src["lat"].median(), src["lon"].median()
+            d0 = geo.haversine_km(src["lat"], src["lon"], lat0, lon0)
+            before = (float(lat0), float(lon0), max(floor, float(np.quantile(d0, PIN_PRECISION_Q))))
+            keep, cut = trim_outliers(src["lat"], src["lon"])
+            n_trimmed = int((~keep).sum())
+            if n_trimmed:
+                notes.append(f"{n_trimmed} of its {len(src)} offices are more than {cut:.0f} km from the "
+                             "others' median point and were left out")
+                src = src[keep]
+            lat, lon = src["lat"].median(), src["lon"].median()
             d = geo.haversine_km(src["lat"], src["lon"], lat, lon)
             prec = max(floor, float(np.quantile(d, PIN_PRECISION_Q)))
         else:
@@ -254,9 +289,56 @@ def build_pins(po: pd.DataFrame, districts: pd.DataFrame) -> pd.DataFrame:
             "place_id": f"pin:{pin}", "kind": "pin", "name": pin, "name_norm": pin,
             "state": state, "district": district, "pin": pin, "lat": float(lat), "lon": float(lon),
             "precision_km": float(prec), "n_offices": int(len(sub) if src is None else len(src)),
-            "note": "; ".join(notes) or None,
+            "note": "; ".join(notes) or None, "_n_trimmed": n_trimmed,
+            "_lat_untrimmed": before[0], "_lon_untrimmed": before[1], "_prec_untrimmed": before[2],
         })
     return pd.DataFrame(rows)
+
+
+#: PINs checked by name in the outlier-trim stats: the brief's highway trauma scenario (Kotputli)
+#: and the two remote districts in the brief.
+WATCH_PINS = {"Kotputli": ["303108"]}
+WATCH_DISTRICTS = ("SHEOPUR", "PAKUR")
+
+
+def pin_trim_stats(pins: pd.DataFrame) -> dict:
+    """What the outlier trim changed, against the same build without it."""
+    moved = pd.Series(np.asarray(geo.haversine_km(pins["lat"], pins["lon"], pins["_lat_untrimmed"],
+                                                  pins["_lon_untrimmed"]), dtype=float), index=pins.index)
+    dprec = pins["_prec_untrimmed"] - pins["precision_km"]
+    t = pins["_n_trimmed"] > 0
+    q = lambda x: {k: round(float(x.quantile(v)), 1) for k, v in (("median", .5), ("p90", .9), ("p99", .99), ("max", 1))}
+
+    def row(r) -> dict:
+        return {"pin": r["pin"], "district": r["district"], "offices_left_out": int(r["_n_trimmed"]),
+                "precision_km_before": round(float(r["_prec_untrimmed"]), 1),
+                "precision_km_after": round(float(r["precision_km"]), 1),
+                "point_moved_km": round(float(geo.haversine_km(r["lat"], r["lon"], r["_lat_untrimmed"],
+                                                               r["_lon_untrimmed"])), 2)}
+    watch = {name: [row(r) for _, r in pins[pins["pin"].isin(ps)].iterrows()] for name, ps in WATCH_PINS.items()}
+    for dname in WATCH_DISTRICTS:
+        watch[dname.title()] = [row(r) for _, r in pins[pins["district"].str.upper() == dname].iterrows()]
+    return {
+        "rule": {"min_offices": PIN_TRIM_MIN_N, "k_scaled_mad": PIN_TRIM_K, "floor_km": PIN_TRIM_FLOOR_KM,
+                 "mad_scale": MAD_SCALE},
+        "pins": int(len(pins)),
+        "pins_with_offices_left_out": int(t.sum()),
+        "offices_left_out": int(pins["_n_trimmed"].sum()),
+        "pins_precision_changed_over_0_1km": int((dprec.abs() > 0.1).sum()),
+        "pins_precision_tighter_by_over_10km": int((dprec > 10).sum()),
+        "pins_point_moved_over_1km": int((moved > 1).sum()),
+        "pins_point_moved_over_5km": int((moved > 5).sum()),
+        "pins_precision_over_50km_before": int((pins["_prec_untrimmed"] > 50).sum()),
+        "pins_precision_over_50km_after": int((pins["precision_km"] > 50).sum()),
+        "pins_precision_over_100km_before": int((pins["_prec_untrimmed"] > 100).sum()),
+        "pins_precision_over_100km_after": int((pins["precision_km"] > 100).sum()),
+        "precision_km_before": q(pins["_prec_untrimmed"]),
+        "precision_km_after": q(pins["precision_km"]),
+        "trimmed_pins_precision_km_before": q(pins.loc[t, "_prec_untrimmed"]),
+        "trimmed_pins_precision_km_after": q(pins.loc[t, "precision_km"]),
+        "point_moved_km_trimmed_pins": q(moved[t]),
+        "watch": watch,
+    }
 
 
 def build_offices(po: pd.DataFrame, pins: pd.DataFrame, districts: pd.DataFrame) -> pd.DataFrame:
@@ -392,6 +474,8 @@ def main() -> int:
     po, aux = load_offices()
     districts = build_districts(po, aux["centres"])
     pins = build_pins(po, districts)
+    trim_stats = pin_trim_stats(pins)
+    pins = pins.drop(columns=[c for c in pins.columns if c.startswith("_")])
     offices = build_offices(po, pins, districts)
     relabelled = int(offices.attrs.get("offices_relabelled_by_pin", 0))
     cities, city_stats = build_cities(pins, districts, offices)
@@ -445,6 +529,7 @@ def main() -> int:
         },
         "pins_spanning_districts": int(pins["note"].fillna("").str.contains("mostly in").sum()),
         "near_own_district": near_checks,
+        "pin_outlier_trim": trim_stats,
         "offices_relabelled_by_pin": relabelled,
         "rows_moved_inside_india_outline": n_snapped,
         "rows_outside_india_outline_by_kind": outline_out,
@@ -478,6 +563,15 @@ def main() -> int:
           f"{len(stats['pins_with_a_geocoded_office_missing_from_places'])}; PINs dropped for no district: "
           f"{len(s['pins_dropped_no_district'])}")
     print(f"  cities: {city_stats}")
+    ts = trim_stats
+    print(f"  PIN outlier trim: {ts['offices_left_out']:,} offices left out of {ts['pins_with_offices_left_out']:,} "
+          f"PINs; precision changed (>0.1 km) for {ts['pins_precision_changed_over_0_1km']:,}, point moved >1 km "
+          f"for {ts['pins_point_moved_over_1km']:,}; PINs over 50 km {ts['pins_precision_over_50km_before']:,} -> "
+          f"{ts['pins_precision_over_50km_after']:,}, over 100 km {ts['pins_precision_over_100km_before']:,} -> "
+          f"{ts['pins_precision_over_100km_after']:,}")
+    for name, rs in ts["watch"].items():
+        print(f"    {name}: " + "; ".join(f"{r['pin']} {r['precision_km_before']:.1f}->{r['precision_km_after']:.1f} km"
+                                         for r in rs))
     print(f"  near own district: {near_checks}; offices relabelled with their PIN's district: {relabelled}")
     return 0
 
@@ -543,6 +637,47 @@ FIX_ROUND = (
     "and the 50 km distance-from-any-office rule for typed points now applies only north of 32.5 degrees, where "
     "the outline includes land India does not administer (it rejected Kavaratti and Minicoy).\n"
 )
+
+
+def _trim_section(st: dict, n_hit: int, n: int) -> str:
+    """The places-v3 round: PIN points and precision robust to outlier offices."""
+    t = st.get("pin_outlier_trim")
+    if not t:
+        return ""
+    r = t["rule"]
+    b, a = t["precision_km_before"], t["precision_km_after"]
+    tb, ta = t["trimmed_pins_precision_km_before"], t["trimmed_pins_precision_km_after"]
+    L = [
+        f"PIN outlier round (places-v3, Nov 22). The cases file was not edited; the frozen score after it is "
+        f"{n_hit} of {n} (54 of 55 before). PIN 303108 (Kotputli, the brief's highway trauma scenario) was "
+        "163.4 km across because 4 of its 14 clean offices had points 107 to 258 km from the town (for example "
+        "Pawana BO at 25.41, 76.63 and Gopalpura BO at 27.76, 74.39); the 90th percentile distance landed on them. "
+        "Rule: when 3 or more offices place a PIN, an office farther from their median point than "
+        f"max({r['floor_km']:.0f} km, median distance + {r['k_scaled_mad']:.0f} x {r['mad_scale']} x MAD) is left "
+        "out, and the point and precision are recomputed from the rest (said in `note`). The median distance is "
+        "never beyond the cut, so at least half the offices are kept. The floor keeps tight town PINs from "
+        "losing a real office 10 to 20 km out. The left-out offices keep their own post office rows, whose "
+        "precision stays at least their distance from the PIN's point.\n",
+        f"- {t['offices_left_out']:,} offices left out of {t['pins_with_offices_left_out']:,} of "
+        f"{t['pins']:,} PINs. Precision changed by more than 0.1 km for {t['pins_precision_changed_over_0_1km']:,} "
+        f"PINs ({t['pins_precision_tighter_by_over_10km']:,} tighter by more than 10 km); the point moved more "
+        f"than 1 km for {t['pins_point_moved_over_1km']:,} and more than 5 km for {t['pins_point_moved_over_5km']:,}.",
+        f"- All PINs, precision km before and after: median {b['median']} to {a['median']}, p90 {b['p90']} to "
+        f"{a['p90']}, p99 {b['p99']} to {a['p99']}, max {b['max']} to {a['max']}. PINs over 50 km: "
+        f"{t['pins_precision_over_50km_before']:,} to {t['pins_precision_over_50km_after']:,}; over 100 km: "
+        f"{t['pins_precision_over_100km_before']:,} to {t['pins_precision_over_100km_after']:,}.",
+        f"- The trimmed PINs only: median {tb['median']} to {ta['median']} km, p90 {tb['p90']} to {ta['p90']} km.",
+        "- Checked by name (offices left out; precision km before to after):",
+    ]
+    for name, rows in t["watch"].items():
+        L.append(f"  - {name}: " + "; ".join(
+            f"{x['pin']} ({x['offices_left_out']}) {x['precision_km_before']:.1f} to {x['precision_km_after']:.1f}"
+            for x in rows) + ".")
+    L.append("- The sensitivity of the count to the rule, measured on the 13,687 PINs with 3 or more clean offices "
+             "before the rebuild: with a 25 km floor, 4,650 PINs are trimmed with the scaled MAD and 4,883 with "
+             "the raw MAD; with the scaled MAD, a 15 km floor trims 5,526 and a 40 km floor 3,527. The rule is a "
+             "design choice: no office has a known true position to test it against.")
+    return "\n".join(L) + "\n"
 
 
 def evaluate() -> Path:
@@ -616,6 +751,8 @@ def evaluate() -> Path:
     L.append("## First run and what changed\n")
     L.append(FIRST_RUN)
     L.append(FIX_ROUND)
+    _meta = json.loads((paths.silver_dir() / "places.parquet.meta.json").read_text())
+    L.append(_trim_section(_meta["stats"], int(df["hit"].sum()), len(df)))
     L.append("## Misses\n")
     miss = df[~df["hit"]]
     if miss.empty:
@@ -770,8 +907,25 @@ def evaluate() -> Path:
     L.append("- A district answer is the district's centre, not the user's location; the label says \"centre of X "
              "district, about N km across\" (N is twice the 75th percentile office distance).")
     L.append("- Precision is a spread of post office points, not a measured error. Branch office coordinates in the "
-             "directory are often wrong; suspect, placeholder and outside-India points are kept out of PIN centres "
-             "but a row may still rest on a single office's point (said in `note`).")
+             "directory are often wrong; suspect, placeholder, outside-India and outlier points are kept out of PIN "
+             "centres but a row may still rest on a single office's point (said in `note`). A PIN placed by "
+             "only two offices far apart keeps both, so its point is between them and its precision is wide.")
+    # district centres are not trimmed: head and sub office points, some of which sit in another town
+    pr = places[places["kind"] == "pin"].groupby("group")[["lat", "lon"]].median()
+    dr = places[places["kind"] == "district"].set_index("group")
+    pm = pr.reindex(dr.index)
+    off_km = pd.Series(np.asarray(geo.haversine_km(dr["lat"], dr["lon"], pm["lat"].to_numpy(),
+                                                   pm["lon"].to_numpy()), dtype=float), index=dr.index)
+    ex = ", ".join(f"{locate.nice(g.split('|', 1)[1])} {off_km[g]:.0f} km" for g in
+                   off_km.sort_values(ascending=False).index[:4])
+    watch = "; ".join(f"{locate.nice(g.split('|', 1)[1])} {off_km[g]:.0f} km from them, precision "
+                      f"{dr.loc[g, 'precision_km']:.0f} km" for g in ("MADHYA PRADESH|SHEOPUR", "JHARKHAND|PAKUR")
+                      if g in off_km.index)
+    L.append(f"- District centres are not trimmed. {int((off_km > 30).sum())} of {len(dr)} district centres are "
+             f"more than 30 km from the median of their own PIN points and {int((off_km > 50).sum())} more than "
+             f"50 km ({ex}). The brief's remote districts: {watch}. The centre comes from head and sub office "
+             "points (vf.geo.group_centres), and the same centres drive the 200 km `coord_suspect` rule, so "
+             "changing them is a separate round.")
     L.append(f"- The outside-India check uses Natural Earth's 1:10m India outline (India's own view of its borders, "
              f"public domain), simplified to about 0.5 km, with {locate.BORDER_SLACK_KM:.0f} km of slack for coasts "
              "and border towns. A foreign point within 3 km of the border is accepted. The outline includes "

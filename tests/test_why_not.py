@@ -94,17 +94,29 @@ def _prob():
                               top_factors=[], model_version="synthetic", n_labels_line=100) for f, v in p.items()])
 
 
-@pytest.fixture(params=["v0", "probability"])
+@pytest.fixture(params=["v1", "probability", "v0"])
 def idx(request):
+    """The shipped ranker (score spec v1-final), probability mode, and the legacy v0 score behind its flag."""
     fac, grades, facts, flags, dups = _frames()
     sp = _prob() if request.param == "probability" else None
-    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups, service_probability=sp)
+    ver = "v0" if request.param == "v0" else None
+    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups, service_probability=sp,
+                            rank_version=ver)
 
 
 @pytest.fixture
 def v0():
+    """Recipe grades without probabilities, on the index's default ranker (v1-final since D048). The name
+    predates v1: it means "not probability mode"."""
     fac, grades, facts, flags, dups = _frames()
     return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups)
+
+
+@pytest.fixture
+def legacy():
+    """The legacy v0 score ranker, behind its flag."""
+    fac, grades, facts, flags, dups = _frames()
+    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups, rank_version="v0")
 
 
 def _answer(i, k=1, origin=ORIGIN):
@@ -543,19 +555,20 @@ def test_mask_names_hides_every_non_card_name(idx):
     assert [x["facility_id"] for x in plain["items"]] == [x["facility_id"] for x in s["items"]]
 
 
-def _dup_index(extra_rows, pairs):
+def _dup_index(extra_rows, pairs, rank_version=None):
     fac, grades, facts, flags, _ = _frames(FAC + extra_rows)
     dups = pd.DataFrame([dict(facility_id_a=a, facility_id_b=b, distance_km=0.1, name_score=95.0,
                               signal="near_same_name", keep=k) for a, b, k in pairs])
-    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups)
+    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups, rank_version=rank_version)
 
 
 T2 = ("T2", 2.6, 2, "thin", "private", "hospital", "ok", ["nephrology"], [])
 
 
-def test_duplicate_label_only_when_another_listing_is_a_candidate():
+@pytest.mark.parametrize("ver", ["v1", "v0"])
+def test_duplicate_label_only_when_another_listing_is_a_candidate(ver):
     # T's group prefers B, which is claim-only: T is the group's candidate, so it ranked lower
-    i = _dup_index([], [("A", "H", "A"), ("T", "B", "B")])
+    i = _dup_index([], [("A", "H", "A"), ("T", "B", "B")], ver)
     ans = _answer(i, k=1)
     t = _by_id(why_not.why_not_nearer(i, LINE, ORIGIN, ans, k=50))["T"]
     assert t["reason_code"] == "ranked_lower", t
@@ -564,18 +577,20 @@ def test_duplicate_label_only_when_another_listing_is_a_candidate():
     assert _drop_ids(st["shown"], "duplicate_listing") == {"H"}
 
     # T2's group prefers T, which is scored: T2 is the other listing
-    i = _dup_index([T2], [("A", "H", "A"), ("T", "T2", "T")])
+    i = _dup_index([T2], [("A", "H", "A"), ("T", "T2", "T")], ver)
     items = _by_id(why_not.why_not_nearer(i, LINE, ORIGIN, _answer(i, k=1), k=50))
     assert items["T2"]["reason_code"] == "duplicate_listing"
-    assert items["T2"]["reason_plain"] == ("Likely another listing of Hospital T; the ranker keeps one record per "
-                                           "facility.")
+    assert items["T2"]["reason_plain"] == (
+        "Likely another listing of Hospital T; the ranker keeps one record per facility." if ver == "v0" else
+        "Our duplicate check pairs it with Hospital T, and the ranker keeps that listing: one record per facility.")
     assert items["T"]["reason_code"] == "ranked_lower"
 
     # the group prefers claim-only B; T and T2 compete and neither is a card
-    i = _dup_index([T2], [("A", "H", "A"), ("B", "T", "B"), ("B", "T2", "B")])
+    i = _dup_index([T2], [("A", "H", "A"), ("B", "T", "B"), ("B", "T2", "B")], ver)
     items = _by_id(why_not.why_not_nearer(i, LINE, ORIGIN, _answer(i, k=1), k=50))
     assert items["T"]["reason_code"] == items["T2"]["reason_code"] == "duplicate_listing"
-    assert "neither listing scored high enough to be shown" in items["T"]["reason_plain"]
+    assert ("neither listing scored high enough to be shown" if ver == "v0" else
+            "neither listing comes early enough in the order to be shown") in items["T"]["reason_plain"]
 
 
 def test_consistency_is_not_true_by_default(v0):
@@ -606,13 +621,15 @@ def test_real_records_named_in_the_review(real, query, name, code, quote):
     res = resolver.resolve(query)
     ans = rank.rank(idx, "emoc", res).to_dict()
     items = [it for it in why_not.why_not_nearer(idx, "emoc", res, ans, k=100) if it["name"] == name]
-    assert items, name
-    it = items[0]
+    f = why_not.funnel(idx, "emoc", res, answer_dict=ans, max_ids=None)
+    rows = [x for s in f["steps"] for g in s["dropped"] for x in g.get("items", []) if x["name"] == name]
+    # under score spec v1-final (nearest first) the first card can be nearer than the record, so the
+    # strip need not list it; the funnel always does, with the same reason
+    it = items[0] if items else (rows[0] if rows else None)
+    assert it is not None, name
     assert it["reason_code"] == code
     assert quote in it["reason_plain"]
     assert "silent" not in it["reason_plain"] and "none of its" not in it["reason_plain"]
-    f = why_not.funnel(idx, "emoc", res, answer_dict=ans, max_ids=None)
-    rows = [x for s in f["steps"] for g in s["dropped"] for x in g.get("items", []) if x["name"] == name]
     assert rows and rows[0]["reason_plain"] == it["reason_plain"]
 
 
@@ -626,3 +643,146 @@ def test_real_lucknow_strip_counts_approximate_apart(real):
     assert sum(approx) == min(s["n_approx_nearer"], 10 - min(s["n_nearer"], 10))
     assert "list or claim" in s["heading"] and "mention" not in s["heading"]
     assert "Indira" not in json.dumps(s)
+
+
+# ---------------------------------------------------------------------------
+# score spec v1-final (D048): the reasons follow the order rule, never a score
+# ---------------------------------------------------------------------------
+
+#: Words that belong to the legacy score and must not appear in v1 reasons (D048 (6)).
+V1_BANNED = re.compile(r"(?i)\bscor|\bconfiden|\blikely\b|\bprobab")
+
+
+def _reason_texts(strip, fun):
+    """The sentences the strip and the funnel write themselves (not quoted facts or names)."""
+    out = [strip["heading"]] + [it["reason_plain"] for it in strip["items"]]
+    out += [a["reason_plain"] for it in strip["items"] for a in it["also"]]
+    for st in fun["steps"]:
+        out.append(st["label"])
+        for g in st["dropped"] + st.get("added", []):
+            out.append(g["reason_plain"])
+            out += [x["reason_plain"] for x in g.get("items", []) if x.get("reason_plain")]
+    return out
+
+
+def test_v1_reasons_say_nothing_of_a_score(v0):
+    assert v0.rank_version == "v1"
+    for k in (1, 3):
+        ans = _answer(v0, k=k)
+        s = why_not.why_not_strip(v0, LINE, ORIGIN, ans, k=50)
+        f = why_not.funnel(v0, LINE, ORIGIN, answer_dict=ans)
+        for t in _reason_texts(s, f):
+            assert not V1_BANNED.search(t), t
+
+
+def test_v1_ranked_lower_names_the_card_and_the_allowance(v0):
+    t = _by_id(why_not.why_not_nearer(v0, LINE, ORIGIN, _answer(v0, k=1), k=50))["T"]
+    assert t["reason_code"] == "ranked_lower"
+    assert t["reason_plain"].startswith("Recommendable and inside the 60-minute window, and nearer than Hospital A "
+                                        "(about 5 min estimated drive, against about 10 min), but that card is "
+                                        "listed first: "), t
+    assert "at most 15 minutes further (the evidence allowance)" in t["reason_plain"]
+    assert "This record is not corroborated. Missing for that: dialysis unit, machines or nephrologist." \
+        in t["reason_plain"]
+    assert t["quote_or_absence"]["text"] == "T: haemodialysis available"
+
+
+def test_v0_wording_stays_behind_the_flag(legacy):
+    assert legacy.rank_version == "v0"
+    ans = _answer(legacy, k=1)
+    t = _by_id(why_not.why_not_nearer(legacy, LINE, ORIGIN, ans, k=50))["T"]
+    assert t["reason_plain"].startswith("Recommendable, but it scored below the cards shown: ")
+    st = {s["step"]: s for s in why_not.funnel(legacy, LINE, ORIGIN, answer_dict=ans)["steps"]}
+    g = [g for g in st["shown"]["dropped"] if g["reason_code"] == "ranked_lower"][0]
+    assert g["reason_plain"] == "Recommendable and within the radius, but scored below the cards shown."
+
+
+# The nearest recommendable record (N1, grade 2) is pushed past three corroborated records by the
+# evidence allowance, so it takes the last card; M (grade 2) and D (grade 3, but a possible-merge
+# warning denies it the allowance) sit between N1 and the first card.
+NEAR_ROWS = [
+    ("C1", 6.0, 3, "strong", "private", "hospital", "ok", ["nephrology"], []),
+    ("C2", 6.5, 3, "strong", "private", "hospital", "ok", ["nephrology"], []),
+    ("C3", 7.0, 3, "strong", "private", "hospital", "ok", ["nephrology"], []),
+    ("N1", 2.0, 2, "moderate", "private", "hospital", "ok", ["nephrology"], []),
+    ("D", 3.0, 3, "strong", "private", "hospital", "ok", ["nephrology"], []),
+    ("M", 4.0, 2, "moderate", "private", "hospital", "ok", ["nephrology"], []),
+]
+
+
+def _near_index(rank_version=None):
+    fac, grades, facts, _, dups = _frames(NEAR_ROWS)
+    flags = pd.DataFrame([dict(facility_id="D", flag="possible_merge", service_line=None, severity="minor",
+                               signal="shared_website", reason="The record shares its website with another branch.",
+                               quote="d0.in", check_version="t")])
+    return rank.build_index(fac, grades, facts=facts, flags=flags, duplicates=dups.iloc[0:0],
+                            rank_version=rank_version)
+
+
+def test_v1_nearest_on_the_last_card():
+    i = _near_index()
+    ans = _answer(i, k=3)
+    assert [c["facility_id"] for c in ans["results"]] == ["C1", "C2", "N1"]
+    assert [c["nearest_in_window"] for c in ans["results"]] == [False, False, True]
+    s = why_not.why_not_strip(i, LINE, ORIGIN, ans, k=50)
+    items = _by_id(s["items"])
+    assert set(items) == {"D", "M"}  # nearer than the first card, not shown; N1 is a card
+    for fid in ("D", "M"):
+        r = items[fid]["reason_plain"]
+        assert items[fid]["reason_code"] == "ranked_lower"
+        assert "nearer than Hospital C1 and Hospital C2" in r, r
+        assert "those cards are listed first: a corroborated record may come first if it is at most 15 minutes " \
+               "further (the evidence allowance)." in r, r
+    assert "This record is not corroborated" in items["M"]["reason_plain"]
+    assert "The allowance does not apply to this record, which carries a possible merge warning." \
+        in items["D"]["reason_plain"]
+    f = why_not.funnel(i, LINE, ORIGIN, answer_dict=ans)
+    assert f["consistency"]["matches_ranker"] is True, f["consistency"]
+    st = {x["step"]: x for x in f["steps"]}
+    assert _drop_ids(st["shown"], "ranked_lower") == {"C3", "D", "M"}
+    g = [g for g in st["shown"]["dropped"] if g["reason_code"] == "ranked_lower"][0]
+    rows = {x["facility_id"]: x["reason_plain"] for x in g["items"]}
+    # C3 would have been the third card; the nearest takes that place
+    assert rows["C3"].endswith("It would have taken the last card, but that place goes to Hospital N1, the nearest "
+                               "recommendable facility, which is always shown."), rows["C3"]
+    assert "always shown" not in rows["M"] and "always shown" not in rows["D"]
+    assert rows["M"] == items["M"]["reason_plain"]
+    assert "the nearest is always shown" in g["reason_plain"]
+    for t in _reason_texts(s, f):
+        assert not V1_BANNED.search(t), t
+        assert not BANNED.search(t), t
+
+
+def test_v1_reasons_without_the_answer_state_the_rule():
+    i = _near_index()
+    pos = i.id_to_pos["M"]
+    r = why_not.record_reasons(i, LINE, pos)
+    assert r and r[0]["reason_code"] == "ranked_lower"
+    assert r[0]["reason_plain"].startswith("Recommendable, but other facilities come first. The order is nearest "
+                                           "first by estimated drive time")
+    assert not V1_BANNED.search(r[0]["reason_plain"])
+    legacy = _near_index("v0")
+    assert "scored below" in why_not.record_reasons(legacy, LINE, legacy.id_to_pos["M"])[0]["reason_plain"]
+
+
+def test_v1_candidate_cap_says_put_in_order(v0, monkeypatch):
+    monkeypatch.setattr(S, "MAX_CANDIDATES", 1)
+    ans = _answer(v0, k=3)
+    f = why_not.funnel(v0, LINE, ORIGIN, answer_dict=ans)
+    st = {s["step"]: s for s in f["steps"]}
+    g = [g for g in st["shown"]["dropped"] if g["reason_code"] == "not_scored"][0]
+    assert g["reason_plain"] == "Not put in order: the ranker orders only the 1 nearest recommendable records."
+    assert not V1_BANNED.search(g["reason_plain"])
+
+
+def test_real_v1_reasons_say_nothing_of_a_score(real):
+    idx, resolver = real
+    if idx.rank_version != "v1":
+        pytest.skip("bundle index is not v1")
+    for line, query in [("emoc", "226001"), ("dialysis", "Jaipur"), ("icu", "Patna"), ("nicu", "Pune")]:
+        res = resolver.resolve(query)
+        ans = rank.rank(idx, line, res).to_dict()
+        s = why_not.why_not_strip(idx, line, res, ans, k=20)
+        f = why_not.funnel(idx, line, res, answer_dict=ans)
+        for t in _reason_texts(s, f):
+            assert not V1_BANNED.search(t), (line, query, t)

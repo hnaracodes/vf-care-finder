@@ -31,6 +31,18 @@ template filled from the record, a quoted fact, or a WP11 flag (D030); no LLM
 text. ``mask_names=True`` (demo mode) replaces the name of every record that is
 not a card with its type and city.
 
+Under score spec v1-final (D048, the shipped ranker) there is no score, so the
+lines for recommendable records that are not cards follow the v1 order rule:
+nearest first by estimated drive minutes, with the declared evidence allowance
+(a corroborated record may come first if at most 15 minutes further, 30 for
+planned care), and the nearest recommendable facility always shown, on the
+last card if the allowance pushed it out (D058). They name the cards that came
+first and the minutes compared, and say why the record got no allowance (not
+corroborated, or a possible-merge or location-conflict warning). No v1 line
+says "score", "confidence" or "likely". The legacy v0 wording stays for an
+index built with ``rank_version="v0"`` and for probability mode. Reason codes
+are the same under both, since the app keys on them.
+
 Typical use::
 
     from vf import rank, locate, why_not
@@ -51,9 +63,11 @@ import numpy as np
 from . import rank as _rank
 from . import recipes
 from . import services as S
+from . import travel as T
 from .geo import haversine_km
 
-WHY_NOT_VERSION = "why_not_v2"
+#: v3: reasons for recommendable records follow the v1-final order rule (D048, D058); v0 wording behind the flag.
+WHY_NOT_VERSION = "why_not_v3"
 
 #: Label for a record whose map point is shared or approximate (D046).
 APPROX_LABEL = "position approximate"
@@ -487,6 +501,113 @@ def _gates(idx, line: str, d: np.ndarray, resolution=None) -> dict:
             "in_reach": in_reach, "rec": rec, "rec_all": rec_all, "in_R": in_R, "scored": scored}
 
 
+def _is_v1(idx, gt: Optional[Mapping] = None) -> bool:
+    """True when the gates (or, without them, the index) follow score spec
+    v1-final (D048): no score, nearest first with the evidence allowance."""
+    if gt is not None and gt.get("version") is not None:
+        return gt.get("version") == "v1"
+    return getattr(idx, "rank_version", "v0") == "v1"
+
+
+def _v1_view(idx, line: str, d: np.ndarray, resolution, gt: Mapping, answer_dict: Optional[Mapping]) -> Optional[dict]:
+    """What the v1 reasons need to say why a recommendable record inside the
+    window is not on the cards, rebuilt with the ranker's own order
+    (``rank.order_v1``): ``{ctx, rank_of, cards, near, reserved}``. ``cards``
+    are the result cards' positions in card order; ``near`` the card marked
+    ``nearest_in_window``; ``reserved`` True when the evidence allowance pushed
+    that nearest record past the cards and it took the last place. None under v0."""
+    if not _is_v1(idx, gt) or not hasattr(_rank, "_v1_context"):
+        return None
+    loc = _rank._location_dict(resolution) if resolution is not None else {}
+    ctx = _rank._v1_context(idx, line, loc, d=d)
+    order = _rank.order_v1(idx, ctx, gt)
+    rank_of = {int(p): i for i, p in enumerate(order)}
+    results = [c for c in ((answer_dict or {}).get("results") or []) if isinstance(c, Mapping)]
+    cards = [int(idx.id_to_pos[c["facility_id"]]) for c in results if c.get("facility_id") in idx.id_to_pos]
+    near = next((int(idx.id_to_pos[c["facility_id"]]) for c in results
+                 if c.get("nearest_in_window") and c.get("facility_id") in idx.id_to_pos), None)
+    reserved = bool(near is not None and cards and cards[-1] == near and len(cards) >= 2
+                    and rank_of.get(near, -1) >= len(cards))
+    return {"ctx": ctx, "rank_of": rank_of, "cards": cards, "near": near, "reserved": reserved}
+
+
+def _v1_lead(ctx) -> str:
+    if ctx.sea:
+        return f"Recommendable and within the {ctx.R:.0f} km radius used where sea travel is not modelled"
+    return f"Recommendable and inside the {ctx.W:.0f}-minute window"
+
+
+def _v1_measure(ctx, p: int) -> float:
+    """What the v1 order compares: estimated minutes, or km where sea travel is not modelled."""
+    return float(ctx.d[p]) if ctx.sea or ctx.t is None else float(ctx.t[p])
+
+
+def _v1_disp(ctx, p: int) -> str:
+    """One record's distance as the cards show it: "about 25 min estimated drive",
+    or straight-line km where minutes are not shown (sea, or a place too loose)."""
+    km = float(ctx.d[p])
+    if ctx.sea or ctx.t is None or ctx.too_loose:
+        return ("under 1 km" if km < 1 else f"about {km:.0f} km") + " straight-line"
+    return f"about {T.fmt_minutes(float(ctx.t[p]))} estimated drive"
+
+
+def _v1_same(ctx, a: int, b: int) -> bool:
+    return _v1_disp(ctx, a) == _v1_disp(ctx, b)
+
+
+def _v1_allowance_clause(ctx) -> str:
+    return f"a corroborated record may come first if it is at most {ctx.A:.0f} minutes further (the evidence allowance)"
+
+
+def _v1_order_reason(idx, line: str, pos: int, v1: Mapping, name_of, req: str) -> str:
+    """Why a recommendable record inside the window is not on the cards, in the
+    terms of the v1 order rule (nearest first by estimated minutes, with the
+    declared evidence allowance; the nearest is always shown)."""
+    ctx, cards, near = v1["ctx"], list(v1["cards"]), v1.get("near")
+    lead = _v1_lead(ctx)
+    if not cards:
+        return f"{lead}, but not on the cards."
+    ld = idx.lines[line]
+    g = int(ld.grade[pos])
+    m = _v1_measure(ctx, pos)
+    allow = not ctx.sea and ctx.A > 0
+    further = [c for c in cards if c != near and _v1_measure(ctx, c) > m] if allow else []
+    if further:
+        names = _join([name_of(c) for c in further])
+        theirs = [_v1_disp(ctx, c).replace(" estimated drive", "").replace(" straight-line", "") for c in further]
+        n_word = "both" if len(further) == 2 else "all" if len(further) > 2 else ""
+        if all(_v1_same(ctx, pos, c) for c in further):  # same as the cards show them
+            cmp_ = f"slightly nearer than {names} ({'both' if len(further) == 1 else 'all'} {_v1_disp(ctx, pos)})"
+        elif len(set(theirs)) == 1:
+            cmp_ = f"nearer than {names} ({_v1_disp(ctx, pos)}, against {theirs[0]}" + (
+                f" for {n_word})" if n_word else ")")
+        else:
+            cmp_ = f"nearer than {names} ({_v1_disp(ctx, pos)}, against {_join(theirs)})"
+        s = (f"{lead}, and {cmp_}, but {'that card is' if len(further) == 1 else 'those cards are'} listed first: "
+             f"{_v1_allowance_clause(ctx)}.")
+        if g == 2:
+            miss = ld.missing[pos]
+            s += " This record is not corroborated." + (f" Missing for that: {miss[0].rstrip('.')}." if miss else "")
+        elif g >= 3:
+            denied = _rank._allowance_denied_by(idx, line, pos) if hasattr(_rank, "_allowance_denied_by") else []
+            if denied:
+                s += (" The allowance does not apply to this record, which carries "
+                      + (f"a {denied[0]} warning." if len(denied) == 1 else f"{_join(denied)} warnings."))
+    else:
+        last = max(cards, key=lambda c: _v1_measure(ctx, c))
+        if _v1_same(ctx, pos, last):
+            s = (f"{lead}, but listed after the cards shown, at about the same distance ({_v1_disp(ctx, pos)}). "
+                 "The order is nearest first" + (f"; {_v1_allowance_clause(ctx)}." if allow else "."))
+        else:
+            s = (f"{lead}, but further than the cards shown ({_v1_disp(ctx, pos)}, against "
+                 f"{_v1_disp(ctx, last).replace(' estimated drive', '')} for {name_of(last)}, the furthest card). "
+                 "The order is nearest first" + (f"; {_v1_allowance_clause(ctx)}." if allow else "."))
+    if v1.get("reserved") and near is not None and v1["rank_of"].get(int(pos)) == len(cards) - 1:
+        s += (f" It would have taken the last card, but that place goes to {name_of(near)}, the nearest "
+              "recommendable facility, which is always shown.")
+    return s
+
+
 def _dup_reason(idx, pos: int, shown_ids: frozenset, scored: Optional[Mapping[int, int]]) -> Optional[tuple]:
     """Why a recommendable record is not its duplicate group's card, as
     ``(kind, other_pos)``: ``"shown"`` (another listing is a card), ``"kept"``
@@ -603,17 +724,58 @@ def _absence_reason(idx, line: str, pos: int, g: int, public: bool, major: list)
             "quote_or_absence": qa, "claim_quote": None, "tone": "neutral"}
 
 
+def _v1_rec_reason(idx, line: str, pos: int, dup: Optional[tuple], scored: Optional[Mapping[int, int]],
+                   v1: Optional[Mapping], name_of, req: str, q: Optional[dict]) -> dict:
+    """The line for a recommendable record that is not a card, under v1-final.
+    Same reason codes as v0 (the app keys on them); the words follow the v1
+    order rule and never mention a score."""
+    ctx = (v1 or {}).get("ctx")
+    rule = ("nearest first by estimated drive time, with the evidence allowance for corroborated records"
+            if ctx is None else
+            "nearest first by straight-line km, since sea travel is not modelled" if ctx.sea else
+            f"nearest first by estimated drive time; {_v1_allowance_clause(ctx)}")
+    if dup is not None and dup[0] == "kept":
+        code, plain = "duplicate_listing", (f"Our duplicate check pairs it with {name_of(dup[1])}, and the ranker "
+                                            "keeps that listing: one record per facility.")
+    elif dup is not None:
+        code, plain = "duplicate_listing", (f"Our duplicate check pairs it with {name_of(dup[1])}, which is listed "
+                                            "too. The ranker keeps one record per facility, and neither listing "
+                                            f"comes early enough in the order to be shown. The order is {rule}.")
+    elif ctx is not None and not bool(ctx.within[pos]):
+        code = "beyond_radius"
+        plain = (f"Recommendable, but beyond the {ctx.R:.0f} km radius used where sea travel is not modelled."
+                 if ctx.sea else f"Recommendable, but beyond the {ctx.W:.0f}-minute window "
+                                 f"({_v1_disp(ctx, pos)}).")
+    elif scored is not None and pos not in scored:
+        code, plain = "not_scored", (f"Recommendable, but not among the {S.MAX_CANDIDATES} nearest recommendable "
+                                     "records, the only ones the ranker puts in order.")
+    elif ctx is not None and int(pos) in v1["rank_of"]:
+        code, plain = "ranked_lower", _v1_order_reason(idx, line, pos, v1, name_of, req)
+    else:
+        code, plain = "ranked_lower", f"Recommendable, but other facilities come first. The order is {rule}."
+    return {"reason_code": code, "reason_plain": plain, "quote_or_absence": q, "tone": "grey"}
+
+
 def record_reasons(idx, line: str, pos: int, *, shown_ids: frozenset = frozenset(),
                    shown_names: Optional[Mapping[int, str]] = None,
-                   scored: Optional[Mapping[int, int]] = None, mask_names: bool = False) -> list:
+                   scored: Optional[Mapping[int, int]] = None, mask_names: bool = False,
+                   v1: Optional[Mapping] = None) -> list:
     """Every reason this record is not among the cards, most basic first:
     ``[{reason_code, reason_plain, quote_or_absence, tone}]``. ``tone`` is
     ``"neutral"`` for a public hospital's absence line, else ``"grey"``. Empty
     when the record was shown or does not concern the line. ``scored`` (pos ->
     tier, from ``_gates``) lets duplicate listings and unscored records be told
     apart from records that ranked lower; without it the group's preferred
-    record is taken as its candidate."""
+    record is taken as its candidate.
+
+    Under score spec v1-final (an index with ``rank_version == "v1"``, or a
+    ``v1`` view from ``_v1_view``) the lines for recommendable records follow
+    the v1 order rule: nearest first by estimated minutes, with the declared
+    evidence allowance, and the nearest always shown. No line speaks of a
+    score. With the view, the line names the cards and the minutes compared;
+    without it, the rule is stated alone. The legacy wording stays for v0."""
     ld = idx.lines[line]
+    v1_rule = v1 is not None or _is_v1(idx)
     g = int(ld.grade[pos])
     fid = idx.fac["facility_id"].iat[pos]
     if fid in shown_ids:
@@ -671,6 +833,8 @@ def record_reasons(idx, line: str, pos: int, *, shown_ids: frozenset = frozenset
             out.append({"reason_code": "duplicate_listing",
                         "reason_plain": f"Another listing of {name_of(dup[1])}, which is shown once, as its card.",
                         "quote_or_absence": q, "tone": "grey"})
+        elif v1_rule:  # score spec v1-final: no score, nearest first with the evidence allowance
+            out.append(_v1_rec_reason(idx, line, pos, dup, scored, v1, name_of, req, q))
         elif dup is not None and dup[0] == "kept":
             out.append({"reason_code": "duplicate_listing",
                         "reason_plain": f"Likely another listing of {name_of(dup[1])}; the ranker keeps one record "
@@ -775,6 +939,7 @@ def why_not_strip(index, service_line: str, resolution, answer_dict: Optional[Ma
         return empty
     d = haversine_km(lat, lon, index.lat, index.lon)
     gt = _gates(index, service_line, d, resolution)
+    v1v = _v1_view(index, service_line, d, resolution, gt, answer_dict)
     lk = _lookups(index)
     cards, first = _shown(answer_dict)
     shown_ids = frozenset(str(c.get("facility_id")) for c in cards if c.get("facility_id"))
@@ -802,7 +967,7 @@ def why_not_strip(index, service_line: str, resolution, answer_dict: Optional[Ma
         if not _concerns(index, service_line, p):
             continue
         reasons = record_reasons(index, service_line, p, shown_ids=shown_ids, shown_names=shown_names,
-                                 scored=gt["scored"], mask_names=mask_names)
+                                 scored=gt["scored"], mask_names=mask_names, v1=v1v)
         if reasons:
             (approx if lk.approx[p] else precise).append((p, reasons))
     items = []
@@ -916,6 +1081,7 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
     ld = index.lines[service_line]
     d = haversine_km(lat, lon, index.lat, index.lon)
     gt = _gates(index, service_line, d, resolution)
+    v1v = _v1_view(index, service_line, d, resolution, gt, answer_dict)
     R, reach = float(gt["R"]), float(gt["reach"])
     out.update(radius_km=R, reach_km=reach)
     lab = gt.get("labels") or {}
@@ -933,7 +1099,7 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
 
     def reasons_of(p: int) -> list:
         return record_reasons(index, service_line, p, shown_ids=shown_set, shown_names=shown_names, scored=scored,
-                              mask_names=mask_names)
+                              mask_names=mask_names, v1=v1v)
 
     def items_for(pos: np.ndarray, step: str, override: Optional[tuple] = None) -> Optional[list]:
         if step not in detail_steps:
@@ -1024,19 +1190,32 @@ def funnel(index, service_line: str, resolution, *, answer_dict: Optional[Mappin
         (dup if rs and rs[0]["reason_code"] == "duplicate_listing" else lower).append(p)
     added = np.array([p for p in shown_pos if int(p) not in in_R_set], dtype=np.int64)
     arr = lambda v: np.array(v, dtype=np.int64)  # noqa: E731
+    if v1v is not None:  # score spec v1-final: the order rule, no score
+        ctx = v1v["ctx"]
+        lower_plain = (f"Recommendable and within the {R:.0f} km radius (sea travel is not modelled), but not on "
+                       "the cards: the order is nearest first by straight-line km." if ctx.sea else
+                       f"Recommendable and inside the {ctx.W:.0f}-minute window, but not on the cards. The order "
+                       f"is nearest first by estimated drive time; {_v1_allowance_clause(ctx)}, and the "
+                       "nearest is always shown.")
+        unscored_plain = (f"Not put in order: the ranker orders only the {S.MAX_CANDIDATES} nearest recommendable "
+                          "records.")
+        added_plain = (f"Shown on the further-away line: recommendable, but beyond the {R:.0f} km radius." if ctx.sea
+                       else f"Shown on the further-away line: recommendable, but beyond the {ctx.W:.0f}-minute "
+                            "window.")
+    else:
+        lower_plain = "Recommendable and within the radius, but scored below the cards shown."
+        unscored_plain = f"Not scored: the ranker scores only the {S.MAX_CANDIDATES} nearest recommendable records."
+        added_plain = f"Shown on the further-away line: recommendable, but beyond {R:.0f} km."
     shown_step = {"step": "shown", "label": "Shown as cards", "n": int(len(results)),
                   "n_dropped": int(len(not_shown)),
                   "dropped": [x for x in [
                       group("duplicate_listing", "Another listing of a facility already shown or ranked; one card "
                                                  "per facility.", arr(dup), "shown"),
-                      group("ranked_lower", "Recommendable and within the radius, but scored below the cards shown.",
-                            arr(lower), "shown"),
-                      group("not_scored", f"Not scored: the ranker scores only the {S.MAX_CANDIDATES} nearest "
-                                          "recommendable records.", arr(unscored), "shown")] if x],
+                      group("ranked_lower", lower_plain, arr(lower), "shown"),
+                      group("not_scored", unscored_plain, arr(unscored), "shown")] if x],
                   "ids": shown_ids}
     if len(added):
-        shown_step["added"] = [{"reason_code": "shown_beyond_radius",
-                                "reason_plain": f"Shown on the further-away line: recommendable, but beyond {R:.0f} km.",
+        shown_step["added"] = [{"reason_code": "shown_beyond_radius", "reason_plain": added_plain,
                                 **_id_list(index, d, added, oprec, max_ids)}]
     shown_step["n_within_radius_shown"] = len(shown_in_R)
     steps.append(shown_step)

@@ -1,7 +1,7 @@
 """WP11: trust checks. Flags records that should not be trusted at face value.
 
 Reads ``silver/facilities.parquet``, ``silver/facts.parquet``,
-``gold/capability_grades.parquet``, ``silver/pin_crosswalk.parquet`` and the raw
+``gold/capability_grades_v03.parquet`` (the grades the ranker reads; v0.2 if absent), ``silver/pin_crosswalk.parquet`` and the raw
 PIN directory (through ``vf.geo.PinReference``, as WP1 does). Writes, each with a
 ``.meta.json`` sidecar:
 
@@ -47,6 +47,8 @@ SEED = 11
 REVIEW_PER_SIGNAL = 15      # flagged records drawn per signal (fewer if it fires less)
 REVIEW_UNFLAGGED = 20
 REVIEW_STRENGTH_PER_LEVEL = 10
+GRADES_V03 = "capability_grades_v03.parquet"
+GRADES_V02 = "capability_grades.parquet"
 
 FLAG_SCHEMA = pa.schema([
     ("facility_id", pa.string()), ("flag", pa.string()), ("service_line", pa.string()),
@@ -131,7 +133,7 @@ def _s(v):
 class Places:
     """Name and district lookups built once from ``geo.PinReference``."""
 
-    def __init__(self, ref: geo.PinReference, crosswalk: pd.DataFrame):
+    def __init__(self, ref: geo.PinReference, crosswalk: pd.DataFrame, raw: pd.DataFrame | None = None):
         self.ref = ref
         po = ref.offices
         cw = crosswalk.copy()
@@ -164,6 +166,22 @@ class Places:
                                for w in geo.place_key(n).split() if len(w) >= 4}
         self.dup_place_words = (self.district_words | words(po["division"].dropna().unique())
                                 | words(self.states))
+        # gazetteer for the per-line evidence check: district names at their centres, head offices (the main
+        # post office of a town) at their own point, and the city spellings in geo.CITY_ALIASES
+        gz: dict[str, set] = defaultdict(set)
+        for grp, c in ref.centres.iterrows():
+            if isinstance(grp, str) and not pd.isna(c["lat"]):
+                gz[geo.place_key(grp.split("|")[1])].add((float(c["lat"]), float(c["lon"])))
+        if raw is not None:
+            ho = raw["officetype"].astype(str).str.strip().eq("HO").to_numpy() & po["placed"].to_numpy()
+            for o, la, lo in zip(po["office"][ho], po["lat"][ho], po["lon"][ho]):
+                if o and not pd.isna(la):
+                    gz[o].add((float(la), float(lo)))
+        for k, al in geo.CITY_ALIASES.items():
+            for a in al:
+                if a in gz:
+                    gz[k] |= gz[a]
+        self.gazetteer = {k: sorted(v) for k, v in gz.items() if len(k) >= 4}
 
     def pin_loc(self, pin):
         if pin is None or pin not in self.ref.pins.index:
@@ -194,6 +212,16 @@ def run_checks(fac: pd.DataFrame, facts: pd.DataFrame, grades: pd.DataFrame, pl:
             texts[fid].append(("description", d))
 
     gp = grades.pivot(index="facility_id", columns="service_line", values="grade").fillna(0).astype(int)
+    # supporting facts per graded line (grade 1+), and each fact's neighbours in the same field
+    ev_items: dict[str, dict[str, list]] = defaultdict(dict)
+    for fid, line, gr, items in zip(grades["facility_id"], grades["service_line"], grades["grade"],
+                                    grades["evidence_items"]):
+        if int(gr) >= 1:
+            its = [dict(it) for it in _list(items) if isinstance(it.get("text"), str)]
+            if its:
+                ev_items[fid][line] = its
+    needed = {it.get("fact_id") for d in ev_items.values() for its in d.values() for it in its}
+    neighbours = fact_neighbours(facts, needed, trust.EVIDENCE_CONTEXT)
     limits = trust.specialty_breadth_limits(fac["facility_type"], fac["specialties"].map(len))
 
     # district of each record, for the shared website check: its PIN's, else its point's
@@ -210,7 +238,7 @@ def run_checks(fac: pd.DataFrame, facts: pd.DataFrame, grades: pd.DataFrame, pl:
     name_of = dict(zip(fac["facility_id"], fac["name"]))
     city_of = dict(zip(fac["facility_id"], fac["city_raw"]))
 
-    rows, sig_rows = [], []
+    rows, sig_rows, not_applied = [], [], []
     for r, site in zip(fac.itertuples(index=False), sites):
         fid = r.facility_id
         pin = r.pin if isinstance(r.pin, str) else None
@@ -276,8 +304,25 @@ def run_checks(fac: pd.DataFrame, facts: pd.DataFrame, grades: pd.DataFrame, pl:
             rows.append(dict(mf, facility_id=fid))
 
         g = gp.loc[fid].to_dict() if fid in gp.index else {}
-        for ic in trust.implausible_claims(r.facility_type, r.name, r.n_beds, g, r.description):
+        implausible = trust.implausible_claims(r.facility_type, r.name, r.n_beds, g, r.description)
+        for ic in implausible:
             rows.append(dict(ic, facility_id=fid))
+
+        # per line: the line's own evidence names or comes from another institution or city (major)
+        # where the record is shown (WP1's location, not a scraped point it set aside) and its PIN's place
+        own = trust.OwnPlace(r.name, site or trust.website_key(r.official_website),
+                             [(r.lat, r.lon)] + ([loc] if loc else []), set(keys) | pin_names)
+        # Only on a possible merge (a record-level merge flag): there the line becomes major. On other records
+        # the same test is computed for the report and not applied (hand review round 5b: 1 of 7 right there).
+        has_merge = mf is not None
+        for line, items in ev_items.get(fid, {}).items():
+            ctx_texts = ({it.get("fact_id"): neighbours.get(it.get("fact_id"), ()) for it in items}
+                         if has_merge else None)
+            ef = trust.evidence_other_place(line, items, own, pl.gazetteer, ctx_texts)
+            if ef and has_merge:
+                rows.append(dict(ef, facility_id=fid))
+            elif ef:
+                not_applied.append(dict(ef, facility_id=fid))
 
         sig_rows.append({"facility_id": fid, "merge_signals": sorted(msig), "merge_detail": msig,
                          "city_agrees_pin": city_agrees, "text_state": text_state, "pin_district": pin_district})
@@ -290,8 +335,27 @@ def run_checks(fac: pd.DataFrame, facts: pd.DataFrame, grades: pd.DataFrame, pl:
     else:
         flags = pd.DataFrame(columns=trust.FLAG_COLUMNS)
     ctx = {"limits": limits, "shared": shared, "sites": sites, "gp": gp,
+           "evidence_not_applied": pd.DataFrame(not_applied, columns=[c for c in trust.FLAG_COLUMNS
+                                                                       if c != "check_version"]),
            "signals": pd.DataFrame(sig_rows).set_index("facility_id")}
     return flags, ctx
+
+
+def fact_neighbours(facts: pd.DataFrame, fact_ids: set, k: int) -> dict:
+    """fact_id -> texts of the ``k`` facts before and after it in the same facility and field (the facts
+    table keeps each field's list order, so neighbours usually come from the same source page)."""
+    if "fact_id" not in facts.columns:
+        return {}
+    out = {}
+    for (_fid, _field), g in facts.groupby(["facility_id", "field"], sort=False):
+        ids = g["fact_id"].tolist()
+        if not any(i in fact_ids for i in ids):
+            continue
+        texts = g["text"].tolist()
+        for i, f in enumerate(ids):
+            if f in fact_ids:
+                out[f] = [t for t in texts[max(0, i - k): i] + texts[i + 1: i + 1 + k] if isinstance(t, str)]
+    return out
 
 
 def build_duplicates(fac: pd.DataFrame, grades: pd.DataFrame, sites: pd.Series, pl: Places,
@@ -420,6 +484,30 @@ def touched_grade2(flags: pd.DataFrame, grades: pd.DataFrame, dups: pd.DataFrame
     return out
 
 
+def evidence_line_blocks(flags: pd.DataFrame, grades: pd.DataFrame, not_applied: pd.DataFrame) -> pd.DataFrame:
+    """Per service line: facility-lines graded 2+ that the per-line merge rule blocks, how many of them no
+    other major flag already blocks, and how many the same test would catch on records without a merge flag
+    (computed, not applied)."""
+    g2 = grades[grades["grade"] >= 2][["facility_id", "service_line"]]
+    ev = flags[flags["signal"].isin(["evidence_names_other", "evidence_beside_other"])]
+    other = flags[(flags["severity"] == "major") & ~flags.index.isin(ev.index)]
+    rec = set(other[other["service_line"].isna()]["facility_id"])
+    ln = set(zip(other["facility_id"], other["service_line"]))
+    hit = g2.merge(ev[["facility_id", "service_line", "signal"]], on=["facility_id", "service_line"])
+    hit["already"] = [(a in rec) or ((a, b) in ln) for a, b in zip(hit["facility_id"], hit["service_line"])]
+    na = g2.merge(not_applied[["facility_id", "service_line"]], on=["facility_id", "service_line"])
+    out = pd.DataFrame({
+        "blocked": hit.groupby("service_line").size(),
+        "names_other": hit[hit["signal"] == "evidence_names_other"].groupby("service_line").size(),
+        "beside_other": hit[hit["signal"] == "evidence_beside_other"].groupby("service_line").size(),
+        "newly_blocked": hit[~hit["already"]].groupby("service_line").size(),
+        "not_applied_no_merge_flag": na.groupby("service_line").size(),
+    }).fillna(0).astype(int)
+    out = out.reindex(sorted(set(g2["service_line"])), fill_value=0)
+    out.loc["all"] = out.sum()
+    return out
+
+
 def scenario_impact(flags: pd.DataFrame, dups: pd.DataFrame) -> dict | None:
     """Run the scenario suite with no flags, then each check alone, then all; count result changes."""
     from vf import rank
@@ -428,7 +516,7 @@ def scenario_impact(flags: pd.DataFrame, dups: pd.DataFrame) -> dict | None:
     spec.loader.exec_module(mod)
     silver, gold = paths.silver_dir(), paths.gold_dir()
     fac = pd.read_parquet(silver / "facilities.parquet")
-    grades = pd.read_parquet(gold / "capability_grades.parquet")
+    grades = pd.read_parquet(gold / (GRADES_V03 if (gold / GRADES_V03).exists() else GRADES_V02))
     places = pd.read_parquet(silver / "places.parquet") if (silver / "places.parquet").exists() else None
     resolve, rname = mod.get_resolver()
     sc = pd.read_csv(paths.labels_dir() / "scenarios.csv", dtype=str, keep_default_na=False)
@@ -586,13 +674,15 @@ def main(argv=None) -> int:
     t0 = time.time()
     silver, gold, labels = paths.silver_dir(), paths.gold_dir(), paths.labels_dir()
     fac = pd.read_parquet(silver / "facilities.parquet")
-    facts = pd.read_parquet(silver / "facts.parquet", columns=["facility_id", "field", "text"])
-    grades = pd.read_parquet(gold / "capability_grades.parquet")
+    facts = pd.read_parquet(silver / "facts.parquet", columns=["fact_id", "facility_id", "field", "text"])
+    # the grades the shipped ranker reads (D048): recipe v0.3 when present, else v0.2
+    grades_name = GRADES_V03 if (gold / GRADES_V03).exists() else GRADES_V02
+    grades = pd.read_parquet(gold / grades_name)
     cw = pd.read_parquet(silver / "pin_crosswalk.parquet")
     raw = io.read_pincodes_raw()
     coords, _ = geo.post_office_coords(raw)
     ref = geo.PinReference(raw, coords)
-    pl = Places(ref, cw)
+    pl = Places(ref, cw, raw)
     log(f"loaded {len(fac):,} facilities, {len(facts):,} facts, {len(grades):,} grade rows "
         f"({grades['recipe_version'].iloc[0]}) in {time.time() - t0:.0f}s")
 
@@ -617,7 +707,7 @@ def main(argv=None) -> int:
             "created_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), **git_info(),
             "recipe_version": str(grades["recipe_version"].iloc[0]),
             "inputs": {p: {"sha256": sha256(paths.data_dir() / p)} for p in
-                       ["silver/facilities.parquet", "silver/facts.parquet", "gold/capability_grades.parquet",
+                       ["silver/facilities.parquet", "silver/facts.parquet", f"gold/{grades_name}",
                         "silver/pin_crosswalk.parquet"]}}
     write_table(flags, FLAG_SCHEMA, gold / "facility_flags.parquet", dict(
         meta, output="gold/facility_flags.parquet",
@@ -629,6 +719,11 @@ def main(argv=None) -> int:
         merge_signals_corroborate=sorted(trust.MERGE_SIGNALS_CORROBORATE),
         merge_signals_unused=["specialty_breadth"],
         few_beds_enabled=trust.USE_BEDS,
+        evidence_rule=(f"possible_merge per line (major) on records with a record-level merge flag: a supporting "
+                       f"fact names another institution or a place over {trust.EVIDENCE_PLACE_KM:.0f} km away "
+                       f"(evidence_names_other), or names nothing and sits within {trust.EVIDENCE_CONTEXT} facts "
+                       "of one naming such a place (evidence_beside_other); see vf.trust.evidence_other_place"),
+        evidence_rule_not_applied_rows=int(len(ctx["evidence_not_applied"])),
         specialty_breadth_limits=ctx["limits"],
         rules="vf.trust; review and precision in reports/trust_checks.md"))
     write_table(dups, DUP_SCHEMA, gold / "facility_duplicates.parquet", dict(
@@ -670,6 +765,9 @@ def main(argv=None) -> int:
     touched = touched_grade2(flags, grades, dups)
     log("\ngraded 2+ touched per check:")
     log(json.dumps(touched))
+    ev_lines = evidence_line_blocks(flags, grades, ctx["evidence_not_applied"])
+    log("\nper-line merge rule, facility-lines graded 2+ (newly = no other major flag blocked them):")
+    log(ev_lines.to_string())
     impact = None
     if not args.no_scenarios:
         t1 = time.time()
@@ -681,6 +779,7 @@ def main(argv=None) -> int:
              "signals": flags.groupby(["flag", "signal"]).size().reset_index(name="n").to_dict("records"),
              "merge_signals_fired": merge_sig_counts, "dups": dups["signal"].value_counts().to_dict(),
              "n_dups": len(dups), "touched": touched, "impact": impact,
+             "evidence_line_blocks": ev_lines.to_dict("index"),
              "precision": prec.to_dict("records"), "limits": ctx["limits"],
              "dup_review_final": dup_final.to_dict("records"), "n_dups_loose": len(dups_loose),
              "strength": grades[grades.grade >= 2].groupby(["service_line", "evidence_strength"]).size()

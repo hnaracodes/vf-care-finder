@@ -1,12 +1,14 @@
 # WP11 trust checks
 
-Check version `wp11_v2` (fix round), on the current `gold/capability_grades.parquet`: recipe v0.2, with WP4's student model tagging `ob_delivery`, `h24`, `icu` and `ventilator` and regex v0.2 for the rest (rebuilt by WP4 at 03:06 UTC on Nov 22, between the review and this rerun). Script: `scripts/wp11_trust_checks.py`; rules: `src/vf/trust.py`; hand review: `data/labels/flag_review.csv` (322 rows read by an agent, not by Hruday or a clinician: 321 marked correct or wrong, 1 marked unsure).
+Check version `wp11_v3` (per-line merge rule, Nov 22), on `gold/capability_grades_v03.parquet`, the recipe v0.3 grades the shipped v1 ranker reads (D048, D052). The script now reads v0.3 when it exists. Grade 1+ is identical under v0.2 and v0.3, so the location, record-level merge and implausible-claim flags and the duplicate pairs are unchanged from `wp11_v2`. Script: `scripts/wp11_trust_checks.py`; rules: `src/vf/trust.py`; hand review: `data/labels/flag_review.csv` (452 rows read by an agent, not by Hruday or a clinician; rounds 1 to 4 are the v2 review, round 5 is the per-line rule).
 
 ## Findings first
 
-- 2,471 of 9,989 records (25%) get at least one flag. 3,350 flag rows in all.
-- The checks block 905 of the 10,969 facility-line pairs graded 2 or 3 (441 facilities). Blocked pairs drop to the "also nearby, not verified" list.
-- On the 24 recipe scenarios, all checks together replace 6 shown results, in 6 scenarios. No scenario changes status (no new abstentions). Implausible claims change none of them; duplicates change one (ICU near Lucknow shows Charak Hospital And Research Centre in place of its second record, Charak Hospital).
+- **New rule: a possible merge is now major for a line when that line's own supporting evidence names, or sits among facts about, another facility or city.** It blocks 107 more facility-lines graded 2+ (79 facilities) that no other check blocked, and 170 in all (63 were already blocked by another major flag). On a fresh hand-read sample of 30 newly blocked lines, 26 were right, 1 wrong and 3 unsure (87%; 95% interval 70% to 95%). The first version of the rule scored 18 of 30 (60%) and the second 22 of 30 (73%), so it was narrowed twice (see "Per-line merge rule").
+- It fixes the Gadchiroli error from the blind v0 against v1 comparison (D058): the merged "Government Medical College And Hospital Chandrapur" record is now blocked for C-section, and the v1 ranker abstains there, as v0 did. It also drops Dhanwantari Hospital, the merged 12-bed record that the judges flagged, from the top of NICU near Pune.
+- 2,471 of 9,989 records (25%) get at least one flag (unchanged: the per-line rule only adds lines to records that already have a merge flag). 3,664 flag rows in all.
+- The checks block 1,010 of the 10,957 facility-line pairs graded 2 or 3 under recipe v0.3 (520 facilities); 903 (441 facilities) before the per-line rule. Blocked pairs drop to the "also nearby, not verified" list.
+- On the 24 recipe scenarios (v1 ranker, v0.3 grades), all checks together replace 6 shown results, in 7 scenarios, and change one status: Gadchiroli C-section now abstains. Against the `wp11_v2` flags, the per-line rule changes exactly two scenarios: Gadchiroli, and NICU near Pune (Dhanwantari Hospital leaves; KEM, Inamdar and Deenanath Mangeshkar are shown).
 - Fix round: the duplicate rule was too loose for names that only nearly match. Of the 19 `near_same_name` pairs that scored under 100, 9 were different facilities. The tightened rule keeps the 8 that were right and drops all 9 wrong ones, at the cost of 1 true pair (see "Fix round" below).
 - Precision on the hand review ranges from 100% for the location checks and for text naming another address (15 of 15 each) down to 0% for specialty breadth (0 of 15). Four signals scored under 70% in round 1 and were dropped or weakened (table below).
 - Caveat: three of the revised rules (`name_joins_two`, the duplicate kind match, the description check for implausible claims) were changed after reading round 1. Their round-2 numbers on fresh rows are the honest ones. `name_joins_two` had no fresh rows to test.
@@ -25,6 +27,8 @@ Check version `wp11_v2` (fix round), on the current `gold/capability_grades.parq
 | | `shared_website` | Official website (platforms, directories and `gov.in`/`nic.in` excluded) also given by a record in another district | corroborates only |
 | | `specialty_breadth` | Specialty count above the 99th percentile for the facility type | computed, not used |
 | | two counted signals | | major (blocking) |
+| | `evidence_names_other` | Per line, on a record that already has a merge flag: a supporting fact for the line names another institution (a capitalised name ending in Hospital, Medical College, Institute, Nursing Home, Clinic and similar, whose distinctive words are not the record's own name, initials or website) or a place whose every reading is over 40 km from where the record is shown. Skipped when the fact also names the record's own place or institution, describes a unit inside it or run with it ("on-site", "unit of", "partnership"), a listing ("Top ... Hospitals", "listed among"), or a doctor's past post or training; and skipped when another supporting fact of the line names the record itself | major, that line only |
+| | `evidence_beside_other` | Per line, same records: a supporting fact that names no place or institution sits within 2 facts (same field, list order) of a fact that names a place over 40 km away, and no supporting fact of the line sits next to a fact naming the record's own place | major, that line only |
 | `implausible_claim` | `type_cannot_offer` | `cardiac_surgery`, `neurosurgery`, `icu`, `burns`, `cath_lab` or `nicu` graded 1 or more on a `clinic`, `dentist`, `doctor` or `pharmacy` record, unless the name or the description calls it a hospital or nursing home | major, that line only |
 | | `few_beds` | `n_beds` under 10 with `icu`, `cardiac_surgery` or `neurosurgery` graded 1+ | dropped |
 | duplicates | `near_same_name` | Within 1 km, distinctive-name score 90 or more (generic words, honorifics, and district, division and state names removed), and the same facility kinds (dental, eye, IVF, diagnostic...) unless the website is the same. Under 95, the two records must not give different websites, and "one name's words inside the other's" counts only when they give the same website | not a flag |
@@ -38,7 +42,7 @@ Every flag row has a `reason` sentence for the card. Reasons describe the record
 | --- | --- | --- | --- |
 | `location_conflict` | major | 405 | 405 |
 | `location_conflict` | minor | 970 | 970 |
-| `possible_merge` | major | 81 | 81 |
+| `possible_merge` | major | 395 | 287 |
 | `possible_merge` | minor | 855 | 855 |
 | `implausible_claim` | major | 1,039 | 783 |
 
@@ -52,6 +56,8 @@ Every flag row has a `reason` sentence for the card. Reasons describe the record
 | `name_joins_two` | 5 |
 | `text_other_address` | 850 |
 | `text_other_address+shared_website` | 81 |
+| `evidence_names_other` (per line) | 53 |
+| `evidence_beside_other` (per line) | 261 |
 | `type_cannot_offer` | 1,039 |
 
 `state_mismatch` never fires alone: every state mismatch that is not explained by an alias, a state split, NCR, or a city that names the PIN's place also has a city mismatch. Before combining, merge signals fired on: `text_other_address` 931 records, `shared_website` 424, `specialty_breadth` 94, `name_joins_two` 5.
@@ -86,6 +92,9 @@ Only `implausible_claim` changed with the new grades (1,032 rows on 780 faciliti
 | 2 | possible_merge, major | `text_other_address+shared_website` | 15 / 15 | 100% | keep |
 | 3 | possible_merge | `text_other_address`, hits added by the state-name fix | 10 / 10 (all) | 100% | keep |
 | 4 | duplicate | `near_same_name` scoring under 100, not read before (census) | 4 / 10, 1 unsure | 40% | tightened (below) |
+| 5a | possible_merge, per line | first rule, any record, newly blocked lines graded 2+ | 18 / 30, 1 unsure | 60% | narrowed |
+| 5b | possible_merge, per line | second rule, any record, fresh lines | 22 / 30, 2 unsure | 73% | narrowed to merge-flagged records |
+| 5c | possible_merge, per line | final rule, fresh lines | 26 / 30, 3 unsure | 87% | keep |
 
 What went wrong, and what changed:
 
@@ -118,62 +127,109 @@ Place words: duplicate names now drop district, division and state names (before
 
 Unflagged sample: 17 of 20 records had no problem the checks should have caught. The 3 misses: a Kolkata record whose facts say "Located in Siliguri, West Bengal, India", a Delhi dental record named "City Dental Centre- Middle East" with a `.ae` website, and St. John's Hospital Bangalore with the website of M S Ramaiah (`msrmh.com`). A website that belongs to another organisation is not detected: no check compares the website's owner with the record's name. The Siliguri miss was a bug: `vf.geo.place_key` drops direction words, so "West Bengal" became "BENGAL", was not seen as a state, and matched the record's own place names. States are now recognised before `place_key`. That added 10 West Bengal records (round 3: 10 of 10 correct, the Siliguri record among them) and removed 1 wrong flag ("Located in Chapra, West Bengal" had been read as Chapra in Bihar).
 
+### Per-line merge rule (round 5)
+
+Why: in the blind v0 against v1 comparison (D058, `reports/ranking_v0_vs_v1.md`), v1's one wrong answer was Gadchiroli C-section. It recommended "Government Medical College And Hospital Chandrapur", a merged record whose caesarean quote ("Cesarean delivery: the newborn is placed at the edge of the table and UCM is performed by a second team member...") is from a cord-milking trial report, and whose other facts describe IGGMC Nagpur and Sir J.J. Hospital, Mumbai. Its merge flag was only minor, so it passed the gate.
+
+The rule reads each graded line's `evidence_items` in `gold/capability_grades_v03.parquet` and the facts next to each one in `silver/facts.parquet`. On a record with a record-level merge flag, the line gets its own `possible_merge` row (major, `service_line` set), so the ranker blocks that line and no other. The reason is a plain sentence naming the other place, and `quote` is the supporting fact verbatim:
+
+- "The record's evidence for burn care names another facility, Indira Gandhi Government Medical College, so it may describe that place and not this one."
+- "The record's evidence for C-section and high-risk delivery sits among facts about Mumbai, not this facility, and the record already mixes in other places' facts, so it may come from that place."
+
+The Chandrapur caesarean quote names no place itself. The rule catches it because the fact two places after it is "METs were measured ... in a study at Sir J.J. Group of Hospitals, Mumbai". It does not trace the trial to Nagpur. That is how `evidence_beside_other` works in general: facts keep their source page's order inside a field, so a fact with no names of its own is read with its neighbours.
+
+How it was narrowed. I read 30 newly blocked lines graded 2+ and 20 graded 2+ lines on merge-flagged records that the rule left alone, three times, each time on lines not read before:
+
+| Round | Rule | Newly blocked: right / wrong / unsure | What went wrong, and the change |
+| --- | --- | --- | --- |
+| 5a | any record; institution or city in the fact, or any institution or city in the neighbours | 18 / 11 / 1 (60%) | Department and listing names read as other institutions ("Cancer & Chemotherapy Clinic", "Top Neurosurgery Hospitals", "Radiation Oncology Hospital", "Telemedicine Clinic"); the record's own name with a place inside it ("Shivaleela Foundation's Hubli Super-Speciality Hospital"); a spelling of its own name ("Eve" for Eva); a doctor's fellowship city named as the source. Also, though marked right because the quoted fact really is Panipat's, one Park Hospital Panipat fact blocked a Karnal line whose other supporting fact names Park Hospital Karnal itself. Changes: listings and specialty words do not count, the record's own name is checked before place words are removed, past posts and training are skipped, a line keeps its grade when another supporting fact names the record, and neighbours count only when they name a city |
+| 5b | same, narrowed | 22 / 6 / 2 (73%) | On records without a merge flag, the fact-level test was right only 1 time in 7 (a paper title, "between Chennai and Kolkata", a college's own attached hospital, two department names). On merge-flagged records it was 21 of 23. Change: the rule runs only on records that already carry a merge flag, which is the brief's own condition ("a possible merge must be major when...") |
+| 5c | final | 26 / 1 / 3 (87%) | The one wrong line: Life Care Hospital, whose city text is Urmar Tanda in Hoshiarpur district, but whose PIN cannot be located and whose map point is about 100 km away; its "trauma center in Hoshiarpur" fact is its own, and the problem is the point. Unsure: two facts sitting between a fact about the record's own town and one about another, and one directory line ("top urology hospital in Navi Mumbai") on a Pune record |
+
+Rounds 5a and 5b were used to design the rule, so only 5c is a fresh measure. 26 of 30 is above the 80% bar; its 95% Wilson interval is 70% to 95%, so the true rate could be below 80%.
+
+Lines the rule leaves alone (round 5b sample, valid for the final rule because the last change did not touch merge-flagged records): 17 of the 20 show no sign of borrowed evidence. 3 are misses: two supporting facts sit beside facts that name another hospital, not a city (Saifee Hospital Mumbai on "Sai Hospital" Nashik, "Pawade Hospital ... Arvi" on Padale Hospital), and one sits beside "Navjivan Hospital operates in Gandhidham", a town the gazetteer lacks. In round 5a's unblocked sample, the final rule now blocks the two clear misses (Chirayu Hospital, Osmanabad facts on a Ratnagiri record; Shubham Hospital, Khandwa facts on a Bhopal record).
+
+Facility-lines graded 2+ (recipe v0.3) that the rule blocks, per service. "Newly blocked" means no other major flag already blocked the line. "Not applied" is what the fact-level test would add on records without a merge flag (computed, not used):
+
+| Service | Blocked | Fact names another place | Fact sits beside one | Newly blocked | Not applied |
+| --- | --- | --- | --- | --- | --- |
+| emoc | 7 | 1 | 6 | 4 | 2 |
+| nicu | 12 | 1 | 11 | 8 | 0 |
+| dialysis | 12 | 8 | 4 | 7 | 3 |
+| icu | 47 | 3 | 44 | 29 | 5 |
+| cardiac_surgery | 6 | 1 | 5 | 3 | 2 |
+| cath_lab | 7 | 1 | 6 | 4 | 0 |
+| mri | 11 | 2 | 9 | 8 | 3 |
+| ct | 16 | 5 | 11 | 11 | 6 |
+| trauma | 33 | 6 | 27 | 21 | 6 |
+| burns | 3 | 1 | 2 | 3 | 0 |
+| neurosurgery | 13 | 3 | 10 | 6 | 6 |
+| oncology | 3 | 2 | 1 | 3 | 1 |
+| all | 170 | 34 | 136 | 107 | 34 |
+
+ICU and trauma carry most of the new blocks because their supporting facts are often short ("ICU facility", "24/7 emergency care") and sit in lists copied from directory pages about a same-name hospital elsewhere.
+
 ## Effect on results
 
-Facility-line pairs graded 2 or 3 that each check touches (record-level flags touch every line of the record):
+Facility-line pairs graded 2 or 3 under recipe v0.3 that each check touches (record-level flags touch every line of the record):
 
 | Check | Facilities | Facility-lines graded 2+ |
 | --- | --- | --- |
-| `location_conflict` major (blocking; 282 already have no location) | 199 | 513 |
-| `location_conflict` minor (penalty 0.10) | 432 | 1,272 |
-| `possible_merge` major (blocking) | 51 | 181 |
-| `possible_merge` minor (penalty 0.15) | 457 | 1,230 |
+| `location_conflict` major (blocking; 282 already have no location) | 199 | 511 |
+| `location_conflict` minor (warning; no evidence allowance) | 431 | 1,268 |
+| `possible_merge` major (blocking; record-level, or that line for the per-line rule) | 164 | 332 |
+| `possible_merge` minor (warning; no evidence allowance) | 456 | 1,227 |
 | `implausible_claim` (blocking, that line) | 205 | 255 |
 | duplicates: the record not kept | 39 | 126 |
 
-Scenario suite (`data/labels/scenarios.csv`, the 24 recipe scenarios, resolver `vf.locate`), each check alone against no flags at all:
+`possible_merge` major was 51 facilities and 181 facility-lines before the per-line rule. All checks together block 1,010 facility-lines graded 2+ (520 facilities), up from 903 (441).
+
+Scenario suite (`data/labels/scenarios.csv`, the 24 recipe scenarios, resolver `vf.locate`, the v1 ranker on v0.3 grades), each check alone against no flags at all. These differ from the `wp11_v2` report, which ran the v0 ranker on v0.2 grades:
 
 | Check | Results replaced | Scenarios changed | Status changed |
 | --- | --- | --- | --- |
-| `location_conflict` | 3 | 5 | 0 |
-| `possible_merge` | 4 | 4 | 0 |
-| `implausible_claim` | 0 | 0 | 0 |
-| duplicates | 1 | 1 | 0 |
-| all | 6 | 6 | 0 |
+| `location_conflict` | 3 | 4 | 0 |
+| `possible_merge` | 3 | 4 | 1 |
+| `implausible_claim` | 1 | 1 | 0 |
+| duplicates | 0 | 0 | 0 |
+| all | 6 | 7 | 1 |
 
 The facilities that leave a top 3 with all checks on, and why:
 
-- C-section near Lucknow: Nova Hospital (its point was moved to the PIN, and a fact says "Nova Hospital is located in Rampur") and St. Joseph Hospital Lucknow ("Located in Nehru Nagar, Ghaziabad").
-- ICU near Lucknow: Charak Hospital, a duplicate of Charak Hospital And Research Centre (same website and PIN), which is shown in its place.
-- High-risk delivery near Nashik: Om Hospital ("Om Hospital operates two locations in Pune: Bhosari (411039) and Gokhale Nagar Road (411016)").
-- NICU near Pune: Siddhivinayak Hospital (unresolved location, and "Located in Amravati, Maharashtra, India").
+- C-section near Gadchiroli: Government Medical College And Hospital Chandrapur (per-line merge rule: its caesarean fact sits among Sir J.J. Mumbai facts). Nothing else is recommendable inside the 2-hour window, so the answer is now an abstention.
+- NICU near Pune: Dhanwantari Hospital (per-line merge rule: "NICU and PICU units" sits among facts about Saravali, Thane, on a record whose PIN is in Jalgaon). KEM, Inamdar and Deenanath Mangeshkar are shown.
+- C-section near Lucknow: Nova Hospital (point moved to its PIN, and "Nova Hospital is located in Rampur"; both minor, so it loses the evidence allowance).
 - Cath lab near Indore: Citi Hospital (unresolved location, and "City Hospital is located in Jabalpur").
+- Brain surgery near Chandigarh: Alchemist Hospital (city text Gurgaon, PIN and point near Chandigarh; minor, so it loses the evidence allowance).
+- ICU near Lucknow: Osteon Bone & Spine Clinic (a clinic record; implausible claim for ICU).
+- Heart surgery near Bhubaneswar: the same three facilities, in a different order.
 
-The 6 changed scenarios carry WP5 hand checks whose fingerprints no longer match, so `scripts/wp5_scenarios.py` will show them as stale. Two records WP5 noted as missed by its stub flags are now flagged: Sushma Hospital (city Moradabad, PIN and point in Lucknow) and Alchemist Hospital (city Gurgaon, PIN and point near Chandigarh), both `city_mismatch`, minor.
+Against the `wp11_v2` flags, only the first two change: the per-line rule changes no other scenario. The changed scenarios carry WP5 hand checks whose fingerprints may no longer match, so `scripts/wp5_scenarios.py` may show them as stale.
 
 ## Thin evidence (WP3's `evidence_strength`, not a flag)
 
-Grade 2+ rows by strength, per line:
+Grade 2+ rows by strength, per line, under recipe v0.3:
 
 | Line | thin | moderate | strong |
 | --- | --- | --- | --- |
-| emoc | 259 | 132 | 41 |
-| nicu | 316 | 255 | 135 |
-| dialysis | 388 | 389 | 259 |
+| emoc | 254 | 140 | 38 |
+| nicu | 363 | 276 | 55 |
+| dialysis | 402 | 395 | 239 |
 | icu | 887 | 1,071 | 315 |
 | cardiac_surgery | 202 | 233 | 119 |
-| cath_lab | 89 | 122 | 480 |
+| cath_lab | 203 | 309 | 179 |
 | mri | 306 | 261 | 367 |
 | ct | 451 | 375 | 596 |
 | trauma | 387 | 282 | 463 |
 | burns | 57 | 15 | 73 |
 | neurosurgery | 388 | 417 | 397 |
 | oncology | 149 | 161 | 132 |
-| all | 3,879 | 3,713 | 3,377 |
+| all | 4,049 | 3,935 | 2,973 |
 
-35% of grade-2+ rows are thin; for `emoc` it is 60% (259 of 432), so most C-section evidence rests on a single fact or a single-source record.
+37% of grade-2+ rows are thin; for `emoc` it is 59% (254 of 432), so most C-section evidence rests on a single fact or a single-source record.
 
-Hand read, 10 per level: thin 10 of 10 and moderate 10 of 10 matched the facts shown. Strong 8 of 10: one was a merged record ("The Liver Unit and Monarch Liver Lab, ... Ernakulam Medical Centre") whose strong trauma evidence belongs to the parent hospital, and one was "Heart Transplant" at a Panipat hospital with a 6-bed ICU, where strong overstates a likely scraped claim. One thin MRI grade rests on a photo caption ("resembles a medical imaging scanner (MRI/CT)"); thin is right, but the grade itself should not be 2.
+Hand read, 10 per level (on the v0.2 grades, before WP4's rebuild): thin 10 of 10 and moderate 10 of 10 matched the facts shown. Strong 8 of 10: one was a merged record ("The Liver Unit and Monarch Liver Lab, ... Ernakulam Medical Centre") whose strong trauma evidence belongs to the parent hospital, and one was "Heart Transplant" at a Panipat hospital with a 6-bed ICU, where strong overstates a likely scraped claim. One thin MRI grade rests on a photo caption ("resembles a medical imaging scanner (MRI/CT)"); thin is right, but the grade itself should not be 2.
 
 ## Known limits and follow-ups
 
@@ -183,6 +239,8 @@ Hand read, 10 per level: thin 10 of 10 and moderate 10 of 10 matched the facts s
 - Major merge flags block chain branches whose own record mixes in another branch (Sankara Eye Bangalore, Rainbow Vijayawada). The record is mixed, which is what the flag says, but the hospital likely offers the service. If that is too strict for the product, `possible_merge` major could become a minor flag with a larger penalty; that is a WP5 call.
 - For WP1: the PIN directory places PIN 799001 (Agartala) in Telangana, so all 6 Agartala records with that PIN are `excluded_unresolved`. And `vf.geo.CITY_ALIASES` maps TUTICORIN to THOOTHUKUDI but not back, so Government Medical College Thoothukudi is excluded although its city names its PIN's place.
 - A website owned by another organisation (St. John's with `msrmh.com`) is not detected.
+- Per-line merge rule: it runs only on records that already have a merge flag, so a record whose only sign of mixing is a borrowed supporting fact is not caught (the same test finds 34 such grade-2+ lines; on a fresh read it was right 1 time in 7, so it is not applied). Neighbours count only when they name a city, so a fact beside "Saifee Hospital Mumbai" without the city, or beside a town missing from the gazetteer (district names, head post offices and `geo.CITY_ALIASES`; Gandhidham and Arvi are absent), is missed: 3 of 20 unblocked merge-flagged lines. It blocks the whole line when one supporting fact is borrowed, even if the others are the record's own, unless one of them names the record. It also blocks for a borrowed fact that only supports a minor requirement (Lokmanya Hospital Nigdi's "Open 24 hours" next to a Dhule fact), which can hide a large real hospital for that line. Where a record's map point is far from its own city (Life Care Hospital, Urmar Tanda), the rule reads its own city as another place.
+- The per-line rows add `possible_merge` with a `service_line` to `gold/facility_flags.parquet`. `docs/07_data_contracts.md` says `service_line` is set for `implausible_claim`; it needs a line saying it is also set for per-line `possible_merge` rows (not edited here). The ranker already treats any row with a `service_line` as that line only. The app bundle (`scripts/wp12_bundle.py`) has to be rebuilt to pick the new rows up.
 
 ## Rerun
 
@@ -190,6 +248,7 @@ Hand read, 10 per level: thin 10 of 10 and moderate 10 of 10 matched the facts s
 python scripts/wp11_trust_checks.py                  # flags, duplicates, review precision, scenario impact
 python scripts/wp11_trust_checks.py --no-scenarios   # skip the scenario run
 python scripts/wp11_trust_checks.py --round4         # append unread near_same_name pairs scoring under 100
+python scripts/wp11_trust_checks.py --stats out.json # also write the numbers behind this report
 pytest -q tests/test_trust.py
 ```
 
