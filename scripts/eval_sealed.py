@@ -39,6 +39,7 @@ Commands (all print a short summary)::
     python scripts/eval_sealed.py human  --split dev   # 40 blind items for Hruday
     python scripts/eval_sealed.py agreement --split dev  # after the CSV is filled in
     python scripts/eval_sealed.py estimate --split dev
+    python scripts/eval_sealed.py rejudge --split dev --prompt-q1 j2 --units-file ids.txt  # dev only
 
 The sealed half runs only with ``--split sealed --unseal``, only while the
 protocol and the point list match their hashes, only while the protocol's seal
@@ -113,7 +114,10 @@ WALK_CAP = 10
 #: Pool entries stored per query (nearest first).
 POOL_STORE = 60
 
-PROMPT_VERSION = "j1"
+PROMPT_VERSION = "j1"  # the prompt set the protocol's "Judge prompt sha256" names
+#: Prompt version per question. Cache keys and cache folders use these, so a new
+#: Q1 rubric does not invalidate cached Q2 answers (and the j1 cache keeps its keys).
+KIND_PROMPT_VERSION = {"q1": "j1", "q2": "j1"}
 DEFAULT_CAP_USD = 12.0  # this evaluation in total (ledger is cumulative)
 DRYRUN_MAX_CALLS = 30
 
@@ -916,7 +920,7 @@ def major_flags_for(ctx: Ctx, line: str, pos: int) -> list[str]:
 # Step 3: judges
 # =============================================================================
 
-SYSTEM_Q1 = """You are reading one health facility's record for a research study in India. The record was compiled automatically from web pages, so it can be incomplete, repetitive, out of date, or mix in text about other places.
+SYSTEM_Q1_J1 = """You are reading one health facility's record for a research study in India. The record was compiled automatically from web pages, so it can be incomplete, repetitive, out of date, or mix in text about other places.
 
 You will be told one service a patient needs. Decide whether the record CLEARLY SHOWS that THIS facility offers that service.
 
@@ -925,6 +929,22 @@ You will be told one service a patient needs. Decide whether the record CLEARLY 
 - Judge the text only. Do not use anything you may know about the facility from elsewhere.
 - quote: copy, character for character, the one line from the record that best shows the service. Use an empty string if nothing in the record comes close.
 - reason: one short plain sentence."""
+
+#: Candidate rubric j2 (D051 item 2): j1 plus one rule against yes votes that
+#: rest on a specialty or department name alone. NOT adopted: on the full dev
+#: half 8 of 107 final yes verdicts (7.5%) were listing-only, under the 10% line
+#: fixed beforehand (reports/eval_dev_rubric_check.md). Active only through a
+#: sealed amendment (KIND_PROMPT_VERSION); usable on the dev half by `rejudge`.
+SYSTEM_Q1_J2 = SYSTEM_Q1_J1.replace(
+    "- Judge the text only.",
+    "- A specialty, department or doctor's qualification alone (for example a listed specialty, \"Department of "
+    "Nephrology\" or \"MD (Obstetrics and Gynaecology)\") does not show that the service is offered: "
+    "clearly_offers = true needs text that names the service itself, or a unit or equipment that provides it, at "
+    "this facility.\n- Judge the text only.", 1)
+assert SYSTEM_Q1_J2 != SYSTEM_Q1_J1
+
+Q1_PROMPTS = {"j1": SYSTEM_Q1_J1, "j2": SYSTEM_Q1_J2}
+SYSTEM_Q1 = Q1_PROMPTS[KIND_PROMPT_VERSION["q1"]]
 
 SYSTEM_Q2 = """You are checking, for a research study in India, whether a facility that a search tool returned is a sensible place to send a patient. You get the patient's place (a post office area), the service needed, the straight-line distance from that place to where the facility is mapped, and the facility's record. The record was compiled automatically from web pages, so it can be incomplete or mix in text about other places.
 
@@ -953,9 +973,15 @@ def user_q2(service: str, place_label: str, distance_km: float, record: str) -> 
             f"The facility's record:\n{record}")
 
 
-PROMPT_SHA = sha256_bytes((PROMPT_VERSION + SYSTEM_Q1 + SYSTEM_Q2 + json.dumps(SCHEMA_Q1, sort_keys=True)
-                           + json.dumps(SCHEMA_Q2, sort_keys=True) + json.dumps(SERVICE_NEED, sort_keys=True)
-                           ).encode("utf-8"))
+def prompt_sha(version: str, system_q1: str) -> str:
+    """sha256 of a prompt set: its version label, both system prompts, both
+    schemas and the service needs (the protocol's "Judge prompt sha256")."""
+    return sha256_bytes((version + system_q1 + SYSTEM_Q2 + json.dumps(SCHEMA_Q1, sort_keys=True)
+                         + json.dumps(SCHEMA_Q2, sort_keys=True) + json.dumps(SERVICE_NEED, sort_keys=True)
+                         ).encode("utf-8"))
+
+
+PROMPT_SHA = prompt_sha(PROMPT_VERSION, SYSTEM_Q1)
 
 
 class StopJudging(Exception):
@@ -1060,25 +1086,27 @@ class JudgeRunner:
     """Calls judges with a disk cache, the budget check and a ledger."""
 
     def __init__(self, specs: dict[str, JudgeSpec], budget: Optional[Budget], client=None,
-                 call_fn: Callable = anthropic_call, cache_dir: Optional[Path] = None, purpose: str = "eval"):
+                 call_fn: Callable = anthropic_call, cache_dir: Optional[Path] = None, purpose: str = "eval",
+                 versions: Optional[dict] = None):
         self.specs = specs
+        self.versions = dict(versions or KIND_PROMPT_VERSION)
         self.budget = budget
         self.client = client
         self.call_fn = call_fn
-        self.cache_dir = cache_dir or (out_dir() / "judge_cache" / PROMPT_VERSION)
+        self.cache_root = cache_dir or (out_dir() / "judge_cache")  # then <version>/<judge>/<key>.json
         self.purpose = purpose
         self.n_cached = 0
         self.n_api = 0
         self.lock = threading.Lock()
 
     def _key(self, spec: JudgeSpec, kind: str, system: str, user: str) -> str:
-        return sha256_bytes(json.dumps([PROMPT_VERSION, kind, spec.model, spec.effort, spec.thinking,
+        return sha256_bytes(json.dumps([self.versions[kind], kind, spec.model, spec.effort, spec.thinking,
                                         sha256_bytes(system.encode()), user], ensure_ascii=False).encode("utf-8"))
 
     def ask(self, judge: str, kind: str, system: str, user: str, unit_id: str) -> dict:
         spec = self.specs[judge]
         key = self._key(spec, kind, system, user)
-        cp = self.cache_dir / spec.name / f"{key}.json"
+        cp = self.cache_root / self.versions[kind] / spec.name / f"{key}.json"
         if cp.exists():
             with self.lock:
                 self.n_cached += 1
@@ -1095,7 +1123,7 @@ class JudgeRunner:
             return {"answer": None, "error": repr(e)[:300], "judge": judge, "model": spec.model}
         c = cost_usd(spec.model, res["usage"])
         row = {"at": now_utc(), "purpose": self.purpose, "judge": judge, "model": spec.model, "kind": kind,
-               "unit_id": unit_id, "prompt_version": PROMPT_VERSION, "stop_reason": res.get("stop_reason"),
+               "unit_id": unit_id, "prompt_version": self.versions[kind], "stop_reason": res.get("stop_reason"),
                "request_id": res.get("request_id"), "usage": res["usage"], "cost_usd": round(c, 8),
                "seconds": round(time.time() - t0, 2)}
         self.budget.settle(need, c, row)
@@ -1783,6 +1811,72 @@ def cmd_judge(args) -> None:
           f"{time.time() - t0:.0f}s" + (f"; stopped: {doc_out['stopped']}" if doc_out["stopped"] else ""))
 
 
+def rejudge_units(units: Units, ids: list[str], records: dict, system_q1: str, workers: int = 6) -> dict:
+    """Q1 on the listed unit ids (``facility_id|service``) with ``system_q1``.
+    Returns unit id -> judged unit; stops quietly when the budget does."""
+    out: dict = {}
+    stopped = {"why": None}
+
+    def one(uid):
+        fid, svc = uid.rsplit("|", 1)
+        try:
+            out[uid] = units.judge("q1", uid, system_q1, user_q1(svc, records[fid]),
+                                   {"facility_id": fid, "service": svc})
+        except StopJudging as e:
+            stopped["why"] = str(e)
+
+    with ThreadPoolExecutor(max(1, workers)) as ex:
+        list(ex.map(one, ids))
+    return {"units": out, "stopped": stopped["why"]}
+
+
+def cmd_rejudge(args) -> None:
+    """Dev half only: judge listed Q1 units again with another Q1 rubric (for
+    example a candidate j2) and compare with the judged file's verdicts. Writes
+    ``rejudge_dev_<version>.json`` and ``.csv``; the judged file is not changed."""
+    if args.split != "dev":
+        raise SystemExit("rejudge is for the dev half only (protocol rule 1)")
+    check_sealed_inputs("dev", False, stage="rejudge")
+    if args.prompt_q1 not in Q1_PROMPTS:
+        raise SystemExit(f"unknown Q1 prompt {args.prompt_q1}; known: {sorted(Q1_PROMPTS)}")
+    if not args.units_file:
+        raise SystemExit("--units-file is required (one Q1 unit id, facility_id|service, per line)")
+    ids = [l.strip() for l in Path(args.units_file).read_text().splitlines() if l.strip()]
+    _, records = _load_picks("dev")
+    jd = json.loads(judged_path("dev").read_text())
+    before = {u["unit_id"]: u for u in jd["units"] if u["kind"] == "q1"}
+    missing = [i for i in ids if i.rsplit("|", 1)[0] not in records]
+    if missing:
+        raise SystemExit(f"{len(missing)} unit ids have no stored record, e.g. {missing[:3]}")
+    runner, budget, models = make_runner(args, f"rejudge_dev_{args.prompt_q1}")
+    runner.versions = {**runner.versions, "q1": args.prompt_q1}
+    res = rejudge_units(Units(runner), ids, records, Q1_PROMPTS[args.prompt_q1], args.workers)
+    rows = []
+    for uid in ids:
+        u = res["units"].get(uid)
+        b = before.get(uid) or {}
+        a = (u or {}).get("answers") or {}
+        rows.append({"unit_id": uid, "final_before": b.get("final"), "final_after": (u or {}).get("final"),
+                     **{f"vote_{j}": (u or {}).get("votes", {}).get(j) for j in ("A", "B", "C")},
+                     **{f"quote_{j}": (a.get(j) or {}).get("quote") for j in ("A", "B", "C")},
+                     **{f"reason_{j}": (a.get(j) or {}).get("reason") for j in ("A", "B", "C")}})
+    stem = out_dir() / f"rejudge_dev_{args.prompt_q1}"
+    doc = {"split": "dev", "created_at_utc": now_utc(), "prompt_q1": args.prompt_q1,
+           "prompt_sha256": prompt_sha(args.prompt_q1, Q1_PROMPTS[args.prompt_q1]), "judges": models,
+           "units_file": str(args.units_file), "n_units": len(ids), "n_judged": len(res["units"]),
+           "stopped": res["stopped"] or budget.stopped, "api_calls_this_run": runner.n_api,
+           "cache_hits_this_run": runner.n_cached, "spend_eval_ledger_usd": round(budget.spent, 6),
+           "ledger": ledger_summary(out_dir() / "spend.jsonl", f"rejudge_dev_{args.prompt_q1}"),
+           "units": list(res["units"].values())}
+    write_json_atomic(stem.with_suffix(".json"), doc)
+    write_meta(stem.with_suffix(".json"), {"rows": len(res["units"]), "split": "dev", "prompt_q1": args.prompt_q1})
+    write_csv_atomic(stem.with_suffix(".csv"), pd.DataFrame(rows))
+    flips = sum(1 for r in rows if r["final_before"] is True and r["final_after"] is False)
+    print(f"[rejudge dev {args.prompt_q1}] {len(res['units'])} of {len(ids)} units judged; yes to no {flips}; "
+          f"{runner.n_api} API calls, {runner.n_cached} cached; eval spend so far ${budget.spent:.4f}"
+          + (f"; stopped: {doc['stopped']}" if doc["stopped"] else ""))
+
+
 def judged_prefix(jd: dict) -> list[str]:
     """Query ids scored: the longest run of the fixed seeded order in which every
     query was fully judged (protocol rule 5). A capped run would otherwise favour
@@ -2079,14 +2173,17 @@ def main(argv=None) -> None:
         p.add_argument("--limit-queries", type=int, default=None)
         p.add_argument("--n", type=int, default=40, help="human label items")
         p.add_argument("--force", action="store_true")
+        p.add_argument("--prompt-q1", default=KIND_PROMPT_VERSION["q1"], help="rejudge: Q1 rubric version")
+        p.add_argument("--units-file", default=None, help="rejudge: file of Q1 unit ids, one per line")
 
     for name in ("draw", "seal"):
         common(sub.add_parser(name), split=False)
-    for name in ("picks", "judge", "score", "human", "agreement", "estimate", "dryrun"):
+    for name in ("picks", "judge", "score", "human", "agreement", "estimate", "dryrun", "rejudge"):
         common(sub.add_parser(name))
     args = ap.parse_args(argv)
     {"draw": cmd_draw, "seal": cmd_seal, "picks": cmd_picks, "judge": cmd_judge, "score": cmd_score,
-     "human": cmd_human, "agreement": cmd_agreement, "estimate": cmd_estimate, "dryrun": cmd_dryrun}[args.cmd](args)
+     "human": cmd_human, "agreement": cmd_agreement, "estimate": cmd_estimate, "dryrun": cmd_dryrun,
+     "rejudge": cmd_rejudge}[args.cmd](args)
 
 
 if __name__ == "__main__":

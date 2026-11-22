@@ -572,3 +572,49 @@ def test_listing_any_catches_one_judge_quoting_the_listing():
                      "B": {"quote": "Departments including Neurology, Neurosurgery and Dentistry"}}}
     assert not E.listing_only_yes(u, rec) and E.listing_only_yes(u, rec, "any")
     assert E._lo_level(True) == "all" and E._lo_level("any") == "any" and E._lo_level(None) is None
+
+
+# ---------------------------------------------------------------------------- rubric versions (D051 item 2)
+
+def test_j1_prompt_sha_and_cache_keys_are_unchanged_by_versioning(tmp_path):
+    # the sealed protocol names this sha for j1; per-question versions must not move it
+    assert E.prompt_sha("j1", E.SYSTEM_Q1_J1) == "7fba0ba0095d9c0696050f1aa45c80b002da7c8717116f9a5a7d6ea9c03de19a"
+    r = E.JudgeRunner(_specs(), None, cache_dir=tmp_path, versions={"q1": "j1", "q2": "j1"})
+    spec = _specs()["A"]
+    old = E.sha256_bytes(json.dumps(["j1", "q1", spec.model, spec.effort, spec.thinking,
+                                     E.sha256_bytes(E.SYSTEM_Q1_J1.encode()), "u"], ensure_ascii=False).encode())
+    assert r._key(spec, "q1", E.SYSTEM_Q1_J1, "u") == old
+
+
+def test_j2_adds_only_the_listing_rule_and_stays_blind():
+    j1, j2 = E.SYSTEM_Q1_J1, E.SYSTEM_Q1_J2
+    assert [l for l in j1.splitlines() if l not in j2.splitlines()] == []  # nothing of j1 removed
+    added = [l for l in j2.splitlines() if l not in j1.splitlines()]
+    assert len(added) == 1 and "specialty, department or doctor's qualification alone" in added[0]
+    low = j2.lower()
+    assert "ranker" not in low and "grade" not in low and chr(0x2014) not in j2
+    assert E.prompt_sha("j2", j2) != E.prompt_sha("j1", j1)
+
+
+def test_new_q1_version_keeps_the_q2_cache(tmp_path):
+    fn, calls = _fake_call({})
+    b = E.Budget(tmp_path / "spend.jsonl", cap_usd=1.0, project_budget=None, max_calls=None)
+    b.others = 0.0
+    r1 = E.JudgeRunner(_specs(), b, call_fn=fn, cache_dir=tmp_path / "c", versions={"q1": "j1", "q2": "j1"})
+    E.Units(r1).judge("q1", "f|emoc", E.SYSTEM_Q1_J1, "REC", {})
+    E.Units(r1).judge("q2", "q|f", E.SYSTEM_Q2, "REC2", {})
+    n = len(calls)
+    r2 = E.JudgeRunner(_specs(), b, call_fn=fn, cache_dir=tmp_path / "c", versions={"q1": "j2", "q2": "j1"})
+    E.Units(r2).judge("q2", "q|f", E.SYSTEM_Q2, "REC2", {})
+    assert len(calls) == n and r2.n_cached == 2  # Q2 answers reused
+    E.Units(r2).judge("q1", "f|emoc", E.SYSTEM_Q1_J2, "REC", {})
+    assert len(calls) == n + 2  # Q1 asked again under j2
+    assert (tmp_path / "c" / "j2" / "A").exists() and (tmp_path / "c" / "j1" / "A").exists()
+    rows = [json.loads(l) for l in (tmp_path / "spend.jsonl").read_text().splitlines()]
+    assert rows[-1]["prompt_version"] == "j2"
+
+
+def test_rejudge_refuses_the_sealed_half():
+    args = SimpleNamespace(split="sealed", unseal=True, prompt_q1="j2", units_file="x")
+    with pytest.raises(SystemExit, match="dev half only"):
+        E.cmd_rejudge(args)
