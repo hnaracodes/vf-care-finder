@@ -1,6 +1,6 @@
 # WP4: Fact tagger (Model A)
 
-Unchanged in purpose by the re-scope (D023), widened to recipe v0.2's 24 evidence tags. **Conditional: runs only if WP3 Part 3 produced teacher labels** (blocked on an API key, D036). Without them, WP4 does not run, and regex v0.2 ships as the tagger.
+Unchanged in purpose by the re-scope (D023), widened to recipe v0.2's 24 evidence tags. **Conditional: runs only if WP3 Part 3 produced teacher labels.** The API key is in place (D037). Without them, WP4 does not run, and regex v0.2 ships as the tagger.
 
 Size: large (about 3 hours). Depends on WP3. Feeds WP5, WP11.
 

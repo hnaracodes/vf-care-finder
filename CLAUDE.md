@@ -21,7 +21,7 @@ As of Nov 21, 20:15 ET (branch `rescope`; pre-pivot work committed as `7609dbb`)
 
 - Done: WP0 (py3.12 venv at `.venv`), WP1 (silver facilities and facts, with the coordinate-vs-PIN check), WP2 Part A (post offices, PIN crosswalk), WP2b (OSM, LaQshya), WP3 v0.1 (13 tags, 3 lines, regex macro F1 0.90 on a 429-fact agent-labeled gold set).
 - Retired, do not read or extend (D024): NFHS tables, post office and district access tables, district quadrants (WP6), the India-wide map app's data.
-- To do: WP2 Part B resolver, WP3 v0.2 (12 lines), WP11 trust checks, WP5 ranking engine, WP8 Databricks App, WP12 Databricks port, WP9 demo. WP4 is blocked: `ANTHROPIC_API_KEY` in `.env` is empty (D036). Live status: `tasks/README.md`.
+- To do: WP2 Part B resolver, WP3 v0.2 (12 lines), WP11 trust checks, WP5 ranking engine, WP8 Databricks App, WP12 Databricks port, WP9 demo. `ANTHROPIC_API_KEY` is set and valid (D037), so WP3 Part 3 and WP4 can run; the Databricks CLI is installed. Live status: `tasks/README.md`.
 
 ## Read in this order
 

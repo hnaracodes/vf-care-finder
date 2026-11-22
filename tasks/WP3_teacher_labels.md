@@ -44,7 +44,7 @@ Every one of the 12 service lines graded 0 to 3 from tagged facts, each grade ca
 7. Label them carefully, one by one, `labeled_by = agent`. Label against the tag definitions, not the regex.
 8. Score v0.2 on the whole gold set. Report every tag, the macro F1, and the three weakest tags with their failure modes, in the existing report format.
 
-### Part 3: teacher labels (blocked until a key arrives, D036)
+### Part 3: teacher labels (unblocked, D037)
 
 9. As in v0.1: batched JSON, temperature 0, disk cache keyed by text and recipe version, 50 spot checks before scaling, stop at `VF_LLM_BUDGET_USD`. Label 20,000 to 30,000 distinct facts covering all 24 tags.
 

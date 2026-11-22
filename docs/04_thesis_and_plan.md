@@ -125,7 +125,7 @@ Each check is precision-tested by hand on a sample (WP11) and its numbers are re
 The ML is Model A, the fact tagger (WP3 teacher, WP4 student). It turns 460,000 noisy facts into evidence tags, and it is what grades rest on. Grades stay rules over tags (D010) so every grade can be explained by quoting facts.
 
 - Baseline: regex recipe v0.1, macro F1 0.90 on a 429-fact gold set (13 tags, agent-labeled, hard cases over-sampled). v0.2 adds 11 tags for the new lines; the gold set is extended to cover them.
-- Teacher and student: blocked until an API key is provided (D036). If they run, they ship only if they beat regex on gold F1, per tag. If not, regex ships and the report says so.
+- Teacher and student: unblocked (D037). If they run, they ship only if they beat regex on gold F1, per tag. If not, regex ships and the report says so.
 
 Model B (district outcomes) is dropped. The ranking is deliberately not learned: there are no labels for "best facility", and a learned ranker could not explain itself.
 

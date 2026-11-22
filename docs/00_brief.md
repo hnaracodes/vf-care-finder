@@ -52,7 +52,7 @@ Agents: do not block on these. Use the stated default, and log it in `08_decisio
 | What is submitted (video, app link, repo) and length limits | The official doc does not say. Prepare the app URL, the repo, and a 3-minute video with a 90-second cut |
 | Judging rubric | Not in the official doc. Assume the five "must" requirements are pass or fail, and the WHY and HOW explanation decides the rest |
 | Are external datasets allowed | **Answered Nov 21 (D015): yes, organizers encourage outside data and scraping.** Flag each one used |
-| Are paid LLM APIs allowed, and what is the budget | Assume yes for offline labeling only, with a hard cap of 30 USD total. `ANTHROPIC_API_KEY` in `.env` is empty as of Nov 21 20:15 (D036) |
+| Are paid LLM APIs allowed, and what is the budget | Assume yes for offline labeling only, with a hard cap of 30 USD total. `ANTHROPIC_API_KEY` is set and valid (D037) |
 | Teammates | Assume solo |
 | Databricks workspace and Marketplace catalog name | Needed for WP12. Hruday sets up Free Edition, adds the listing, and runs `databricks auth login` |
 

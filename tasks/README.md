@@ -48,8 +48,8 @@ Update your row when you start, when you finish, and when you are blocked. One l
 | 1 | Silver facilities | done | | rescope | 9,989 facilities, about 460k facts, `coord_check` against PIN |
 | 2 | Geography and location resolver | doing | | | Part A done (post offices, PIN crosswalk). Part B resolver todo. NFHS dropped |
 | 2b | External data | done, optional | | rescope | OSM, LaQshya. Only for the WP10 B cross-check |
-| 3 | Recipes, gold set, teacher labels | doing | | | v0.1 done: 13 tags, regex macro F1 0.90 on 429 gold facts. v0.2 (12 lines) todo. Part 3 blocked: no API key (D036) |
-| 4 | Fact tagger (Model A) | blocked | | | Needs teacher labels |
+| 3 | Recipes, gold set, teacher labels | doing | | | v0.1 done: 13 tags, regex macro F1 0.90 on 429 gold facts. v0.2 (12 lines) todo. Part 3 unblocked: key valid (D037) |
+| 4 | Fact tagger (Model A) | todo | | | Unblocked (D037); starts once WP3 Part 3 has teacher labels |
 | 5 | Ranking engine | todo | | | Old access tables done and retired; `haversine_km` carries over |
 | 6 | Outcome model and quadrants | dropped | | | D023. Rule quadrants were done; kept as history |
 | 7 | Simulator | dropped | | | D023 |
@@ -57,7 +57,7 @@ Update your row when you start, when you finish, and when you are blocked. One l
 | 9 | Demo, video, submission | todo | | | |
 | 10 | Stretch | todo | | | |
 | 11 | Trust checks | todo | | | New |
-| 12 | Databricks port and bundle | todo | | | Needs Hruday: workspace, Marketplace catalog name, `databricks auth login` |
+| 12 | Databricks port and bundle | todo | | | CLI installed. Needs Hruday: workspace, Marketplace catalog name, `databricks auth login` |
 
 Status values: `todo`, `doing`, `blocked`, `done`, `dropped`.
 
