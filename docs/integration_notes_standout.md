@@ -185,3 +185,9 @@ Open issues:
 - Per card: `outside_lines`: list of `{source_id, source_name, publisher, list_date, what, status, citation, text}`. `status` is `current`, `lapsed` or `undated`. `text` is the full display sentence and always ends with "Outside data, not from this record." Show it under the card's evidence, styled as outside data (different from quotes).
 - Per answer: `outside_nearby`: up to 3 `{source_id, source_name, name, district, state, pin, lat, lon, position_precision_km, position_note, minutes_label, km, what, citation, text}`. These are facilities on an outside list for this service, within the service window, that are NOT in our dataset. Render them as a separate, clearly labeled lane: "Also on government or registry lists nearby (not in this dataset)". Show it on results and, prominently, on the abstention screen as a next step. Never mix these with recommended cards, never number them like results, and show "position approximate (PIN area)" when `position_note` says so.
 - Only links whose agent-checked precision has a one-sided 95% lower bound of at least 0.90 produce `outside_lines`. A blood bank listing appears only as a card fact (for emoc, cardiac_surgery, trauma), never in the nearby lane.
+
+### Terms rule for public_list v2 (D057, binding)
+
+- `outside_nearby` (the "not in this dataset" lane) may include entries only from sources whose recorded terms allow reuse with acknowledgement (for example AERB: "may be freely used elsewhere provided acknowledgement of the source is made"; CGHS; DGEHS). Sources with "all rights reserved" or permission-required terms (for example NABI, NABH, MCC, PM-JAY) produce `outside_lines` on our own records only, never lane entries.
+- Every `text` names the source and its date; the app never shows a source's table.
+- Wayback snapshots of official pages are allowed (cite the snapshot date); unofficial third-party re-hosts are not used.
