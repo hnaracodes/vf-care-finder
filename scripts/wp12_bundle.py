@@ -5,14 +5,29 @@ Reads silver and gold under vf.paths.data_dir() and writes dbapp/bundle/
 (docs/07_data_contracts.md, "The app bundle"):
 
   facilities.parquet           facility index: location with precision and a plain note, sources, trust
-  grades.parquet               gold/capability_grades.parquet, all columns
+  grades.parquet               gold/capability_grades_v03.parquet (recipe v0.3, D048), all columns;
+                               gold/capability_grades.parquet (v0.2) only when v0.3 is missing (said in the manifest)
   flags.parquet                gold/facility_flags.parquet (WP11)            optional
   duplicates.parquet           gold/facility_duplicates.parquet (WP11)       optional
   places.parquet               silver/places.parquet (WP2 B)                 optional
   post_offices.parquet         lat, lon, pin of non-suspect geocoded offices, one row per placeholder point
   service_probability.parquet  gold/service_probability.parquet (WP13)       optional
   keyword_index/               vf.rank.build_keyword_index, when vf.rank has it (WP5)   optional
+  terrain_multiplier.csv       reference/terrain_multiplier.csv, the drive-time state factors (vf.travel)
+  record_info.parquet          vf.questions record info (tags, h24 and scheme quotes, phone sharing counts) plus
+                               the call numbers (vf.questions.PHONE_COLUMNS, from the raw facilities through vf.io)
+                               that the server serves only through call_info, masked unless revealed
+  laqshya_links.parquet        silver/laqshya_links.parquet (WP13), for vf.public_list            optional
+  outside_card_facts.parquet   vf.public_list.write_bundle: outside-list card facts (D055, D057 terms gates)
+  outside_lane.parquet         vf.public_list.write_bundle: the "also on lists nearby" lane (reuse-permitted lists)
+  outside_meta.json            vf.public_list.write_bundle: sources, what was withheld and why
   manifest.json                row counts, grade counts, versions, git commit, defaults, file sizes
+
+Phone numbers: the only shipped copy is the record_info.parquet phone columns. Every
+other quote the bundle carries (grade evidence, flag quotes, keyword index texts,
+outside-list texts) has digit runs of 8 or more replaced by "[phone number]"
+(vf.questions.mask_numbers, as the server already does on display). --check scans
+every file under dbapp/ for any call number in clear outside those columns.
 
 It also copies src/vf to dbapp/vf so the app runs the tested code.
 
@@ -32,7 +47,8 @@ counts separately (apply_student, below).
   .venv/bin/python scripts/wp12_bundle.py
   .venv/bin/python scripts/wp12_bundle.py --out /tmp/vf_bundle --no-copy-vf
   .venv/bin/python scripts/wp12_bundle.py --stage /tmp/vf_app       # build, then a deployable copy of dbapp/
-  .venv/bin/python scripts/wp12_bundle.py --check                   # before a deploy: dbapp/vf == src/vf?
+  .venv/bin/python scripts/wp12_bundle.py --check                   # before a deploy: dbapp/vf == src/vf, bundle
+                                                                    # complete, current, under 10 MB a file, no phones
   .venv/bin/python scripts/wp12_bundle.py --apply-student data/models/wp4_student/student_1b.pkl --apply-out /tmp/g
 """
 from __future__ import annotations
@@ -168,14 +184,28 @@ def services_defaults() -> tuple[dict, Optional[str]]:
     if svc is None:
         return {"source": None, "weights": None, "radii_km": None}, err
     out = {"source": "vf.services"}
-    for key, attr in (("weights", "WEIGHTS"), ("radii_km", "RADII_KM"), ("penalties", "PENALTIES"),
+    for key, attr in (("radii_km", "RADII_KM"), ("weights_v0_legacy", "WEIGHTS"), ("penalties", "PENALTIES"),
                       ("grade_evidence", "GRADE_EVIDENCE"), ("strength_adjust", "STRENGTH_ADJUST"),
                       ("reach_factor", "REACH_FACTOR"), ("max_candidates", "MAX_CANDIDATES"),
                       ("location_precision_km", "LOCATION_PRECISION_KM")):
         v = getattr(svc, attr, None)
         out[key] = ({str(k): v2 for k, v2 in v.items()} if isinstance(v, dict) else v)
     out["service_lines"] = list(getattr(svc, "SERVICE_LINES", ()) or ())
+    win = getattr(svc, "WINDOWS", None)
+    out["windows"] = {k: v.as_dict() for k, v in win.items()} if isinstance(win, dict) else None
+    out["reach_factor_v1"] = getattr(svc, "REACH_FACTOR_V1", None)
+    rank, _ = _try_import("vf.rank")
+    out["rank_version"] = getattr(rank, "DEFAULT_RANK_VERSION", None) if rank is not None else None
     return out, None
+
+
+def grades_path(gold: Path) -> tuple[Path, str]:
+    """The grades the shipped ranker gates on: recipe v0.3 (D048) when written, else v0.2."""
+    v03 = gold / "capability_grades_v03.parquet"
+    if v03.exists():
+        return v03, "recipe v0.3 (gold/capability_grades_v03.parquet, D048)"
+    return gold / "capability_grades.parquet", ("recipe v0.2 (gold/capability_grades.parquet): the v0.3 file is "
+                                                "missing, so the v1-final ranker gates on the older rules")
 
 
 def pin_precision(places: Optional[pd.DataFrame]) -> dict:
@@ -364,8 +394,8 @@ def build_keyword_index(dest: Path, facts: Callable[[], pd.DataFrame],
 UPSTREAM_TABLES = (
     "silver/facilities.parquet", "silver/facts.parquet", "silver/post_offices.parquet",
     "silver/pin_crosswalk.parquet", "silver/places.parquet", "gold/fact_tags.parquet",
-    "gold/capability_grades.parquet", "gold/facility_flags.parquet", "gold/facility_duplicates.parquet",
-    "gold/service_probability.parquet",
+    "gold/capability_grades.parquet", "gold/capability_grades_v03.parquet", "gold/facility_flags.parquet",
+    "gold/facility_duplicates.parquet", "gold/service_probability.parquet", "silver/laqshya_links.parquet",
 )
 
 
@@ -383,13 +413,68 @@ def upstream_row_counts(data: Path) -> dict:
 # the bundle
 # --------------------------------------------------------------------------
 
+#: Text columns whose digit runs of 8+ are masked before shipping (vf.questions.mask_numbers): quotes and
+#: list texts. Ids, PINs and names of columns not listed here are never touched.
+GRADE_TEXT_COLUMNS = ("evidence", "evidence_items", "level_note_items", "level_note")
+FLAG_TEXT_COLUMNS = ("quote", "reason")
+OUTSIDE_TEXT_COLUMNS = ("what", "citation", "locator", "position_note", "name")
+
+
+def _mask_value(v, mask):
+    """Mask strings inside v (a str, list, array or dict; dict values under 'text' and 'quote' only)."""
+    if isinstance(v, str):
+        return mask(v)
+    if isinstance(v, dict):
+        return {k: (_mask_value(x, mask) if k in ("text", "quote") else x) for k, x in v.items()}
+    if isinstance(v, (list, tuple, np.ndarray)):
+        return [_mask_value(x, mask) for x in v]
+    return v
+
+
+def mask_frame(df: pd.DataFrame, columns) -> tuple[pd.DataFrame, int]:
+    """df with phone-like digit runs masked in `columns` (those present); only changed cells are replaced.
+    Returns (df, number of cells changed)."""
+    q, _ = _try_import("vf.questions")
+    if q is None or not len(df):
+        return df, 0
+    mask = q.mask_numbers
+    n = 0
+    df = df.copy()
+    for c in columns:
+        if c not in df.columns:
+            continue
+        col = df[c].astype(object)
+        new = col.map(lambda v: _mask_value(v, mask))
+        changed = [i for i, (a, b) in enumerate(zip(col, new)) if json.dumps(_plain(a), default=str)
+                   != json.dumps(_plain(b), default=str)]
+        if changed:
+            vals = col.tolist()
+            nv = new.tolist()
+            for i in changed:
+                vals[i] = nv[i]
+            df[c] = pd.Series(vals, index=df.index, dtype=object)
+            n += len(changed)
+    return df, n
+
+
+def _plain(v):
+    if isinstance(v, np.ndarray):
+        return [_plain(x) for x in v]
+    if isinstance(v, (list, tuple)):
+        return [_plain(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _plain(x) for k, x in v.items()}
+    return v
+
+
 def _write_parquet(df: pd.DataFrame, path: Path) -> None:
     # zstd: about 20% smaller than the default snappy on places.parquet, which sits near the 10 MB app limit
     df.to_parquet(path, index=False, compression="zstd")
 
 
 def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional[Path] = None,
-                 with_keyword_index: bool = True, log: Callable[[str], None] = print) -> dict:
+                 with_keyword_index: bool = True, log: Callable[[str], None] = print,
+                 with_phones: bool = True) -> dict:
     """Write the bundle to `out` (swapped in whole) and return the manifest."""
     data = Path(data_dir) if data_dir else paths.data_dir()
     root = Path(code_root) if code_root else paths.code_root()
@@ -414,8 +499,9 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
 
     try:
         # required: facilities and grades
-        fac_path, grades_path = silver / "facilities.parquet", gold / "capability_grades.parquet"
-        for p in (fac_path, grades_path):
+        fac_path = silver / "facilities.parquet"
+        gpath, grades_status = grades_path(gold)
+        for p in (fac_path, gpath):
             if not p.exists():
                 raise FileNotFoundError(f"{p} is required for the bundle and is missing. Run WP1 and WP3 first.")
         places_path = silver / "places.parquet"
@@ -423,11 +509,36 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
 
         fac_silver = pd.read_parquet(fac_path)
         fac, fac_stats = build_facilities(fac_silver, places)
+        fac, n_fac_masked = mask_frame(fac, ("name", "location_note"))
+        # the call numbers, from the raw facilities through vf.io (record info below ships them, masked on serve)
+        q, why_q = _try_import("vf.questions")
+        book, why_book = None, None
+        if q is not None and with_phones:
+            with _DataDirEnv(data):
+                try:
+                    book = q.load_phone_book()  # raw facilities, duplicates from gold
+                except Exception as e:  # no raw file: no call numbers, said in the manifest
+                    why_book = f"{type(e).__name__}: {e}"
+        if book is not None and "official_website" in fac:
+            # a "website" that is a WhatsApp link or carries one of the call numbers is a phone number
+            nat = {n[-10:] for n in book.phone.values()}
+
+            def is_phone_link(v) -> bool:
+                if not isinstance(v, str):
+                    return False
+                d = "".join(ch if ch.isdigit() else " " for ch in v).split()
+                return "wa.me/" in v.lower() or any(x[i:i + 10] in nat for x in d for i in range(len(x) - 9))
+            phone_site = fac["official_website"].map(is_phone_link)
+            fac.loc[phone_site, "official_website"] = None
+            fac_stats["official_website_phone_links_dropped"] = int(phone_site.sum())
+        fac_stats["cells_number_masked"] = n_fac_masked
         add("facilities.parquet", fac, fac_path, stats=fac_stats,
             recipe_version=read_meta(fac_path).get("recipe_version"))
 
-        grades = pd.read_parquet(grades_path)
-        add("grades.parquet", grades, grades_path)
+        grades = pd.read_parquet(gpath)
+        grades, n_masked = mask_frame(grades, GRADE_TEXT_COLUMNS)
+        add("grades.parquet", grades, gpath, status=grades_status, cells_number_masked=n_masked)
+        log(f"  grades: {grades_status}")
         lines = sorted(grades["service_line"].unique())
         grade_counts = {
             line: {str(k): int(v) for k, v in g["grade"].value_counts().sort_index().items()}
@@ -449,6 +560,10 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
         ):
             if src.exists():
                 df = places if name == "places.parquet" else pd.read_parquet(src)
+                if name == "flags.parquet":
+                    df, n_masked = mask_frame(df, FLAG_TEXT_COLUMNS)
+                    add(name, df, src, cells_number_masked=n_masked)
+                    continue
                 add(name, df, src)
             else:
                 missing[name] = f"{src.relative_to(data)} not found ({owner} has not written it yet); skipped"
@@ -466,6 +581,71 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
             missing["post_offices.parquet"] = "silver/post_offices.parquet not found (WP2); skipped"
             log(f"  skip post_offices.parquet     {missing['post_offices.parquet']}")
 
+        # drive-time state factors (vf.travel reads them from the bundle when reference/ is absent)
+        terrain = root / "reference" / "terrain_multiplier.csv"
+        if terrain.exists():
+            shutil.copy2(terrain, tmp / "terrain_multiplier.csv")
+            files["terrain_multiplier.csv"] = {"from": "reference/terrain_multiplier.csv",
+                                               "rows": int(len(pd.read_csv(terrain)))}
+            log(f"  terrain_multiplier.csv       {files['terrain_multiplier.csv']['rows']:>9,} rows")
+        else:
+            missing["terrain_multiplier.csv"] = "reference/terrain_multiplier.csv not found; vf.travel uses its built-in copy"
+
+        # record info for vf.questions ("Before you go, ask"), and LaQshya links for vf.public_list
+        if q is not None and (gold / "fact_tags.parquet").exists() and (silver / "facts.parquet").exists():
+            with _DataDirEnv(data):
+                ft = pd.read_parquet(gold / "fact_tags.parquet", columns=["fact_id", "facility_id", "tags"])
+                facts_txt = pd.read_parquet(silver / "facts.parquet", columns=["fact_id", "text"])
+                infos = q.build_record_info(ft, facts_txt, book, facility_ids=fac_silver["facility_id"])
+                del ft, facts_txt
+            q.save_record_info(infos, tmp / "record_info.parquet", meta={"script": SCRIPT}, phone_book=book)
+            side = json.loads((tmp / "record_info.parquet.meta.json").read_text())
+            (tmp / "record_info.parquet.meta.json").unlink(missing_ok=True)  # sidecar facts go in the manifest
+            files["record_info.parquet"] = {
+                "rows": len(infos), "from": "gold/fact_tags.parquet + silver/facts.parquet"
+                + (" + raw facilities (vf.io) phones" if book is not None else ""),
+                "questions_version": getattr(q, "QUESTIONS_VERSION", None),
+                "contains_phone_numbers": bool(side.get("contains_phone_numbers")),
+                "phone_columns": side.get("phone_columns"), "phone_numbers": side.get("phone_numbers"),
+                "served_by": "vf.questions.call_info via the server's /api answers: masked unless reveal=1 "
+                             "and demo mode off" if book is not None else None,
+                "phones_skipped": why_book}
+            counts["record_info"] = len(infos)
+            log(f"  record_info.parquet          {len(infos):>9,} rows; "
+                + (f"{side.get('phone_numbers'):,} call numbers (served masked)" if book is not None
+                   else f"no call numbers ({why_book or 'disabled'})"))
+        else:
+            missing["record_info.parquet"] = why_q or "gold/fact_tags.parquet or silver/facts.parquet missing; skipped"
+        lq = silver / "laqshya_links.parquet"
+        if lq.exists():
+            add("laqshya_links.parquet", pd.read_parquet(lq), lq)
+        else:
+            missing["laqshya_links.parquet"] = "silver/laqshya_links.parquet not found (WP13); skipped"
+
+        # outside lists (D055, D060): card facts and the lane, through the D057 terms gates
+        pl, why_pl = _try_import("vf.public_list")
+        if pl is not None and hasattr(pl, "write_bundle"):
+            o = pl.publishable(pl.build_outside(data))
+            o = type(o)(mask_frame(o.card_facts, OUTSIDE_TEXT_COLUMNS)[0], mask_frame(o.lane, OUTSIDE_TEXT_COLUMNS)[0],
+                        o.laqshya, o.meta)
+            pl.write_bundle(tmp, o)
+            for name in (pl.CARD_FACTS_FILE, pl.LANE_FILE):
+                df = pd.read_parquet(tmp / name)
+                _write_parquet(df, tmp / name)
+                by_src = ({str(k): int(v) for k, v in df["source_id"].value_counts().sort_index().items()}
+                          if len(df) else {})
+                files[name] = {"rows": int(len(df)), "from": "vf.public_list.build_outside(silver/ext_*, laqshya)",
+                               "by_source": by_src, "outside_version": o.meta.get("version")}
+                counts[name.removesuffix(".parquet")] = int(len(df))
+                log(f"  {name:<28} {len(df):>9,} rows {by_src}")
+            files[pl.OUTSIDE_META_FILE] = {"from": "vf.public_list.write_bundle",
+                                           "card_sources_shown": o.meta.get("card_sources_shown"),
+                                           "lane_sources_shown": o.meta.get("lane_sources_shown"),
+                                           "withheld_terms": o.meta.get("withheld_terms")}
+        else:
+            for name in ("outside_card_facts.parquet", "outside_lane.parquet", "outside_meta.json"):
+                missing[name] = why_pl or "vf.public_list has no write_bundle; skipped"
+
         if with_keyword_index:
             facts_path = silver / "facts.parquet"
             info, why = build_keyword_index(
@@ -480,6 +660,11 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
             missing["keyword_index/"] = f"{why}; skipped (the app's search fallback needs it)"
             log(f"  skip keyword_index/          {missing['keyword_index/']}")
         else:
+            docs_p = tmp / "keyword_index" / "docs.parquet"
+            if docs_p.exists():  # display texts only: the matrix and vectorizer are already built
+                docs, n_masked = mask_frame(pd.read_parquet(docs_p), ("text",))
+                _write_parquet(docs, docs_p)
+                info["docs_cells_number_masked"] = n_masked
             files["keyword_index/"] = info
             log(f"  keyword_index/               {len(info['files'])} files")
 
@@ -520,6 +705,7 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
             "row_counts": counts,
             "upstream_row_counts": upstream_row_counts(data),
             "grade_counts": grade_counts,
+            "grades_status": grades_status,
             "grade_source": grade_source(data),
             "service_lines": lines,
             "service_lines_missing": lines_missing,
@@ -530,6 +716,11 @@ def build_bundle(out: Path, data_dir: Optional[Path] = None, code_root: Optional
                 "checks": (sorted(pd.read_parquet(tmp / "flags.parquet")["check_version"].astype(str).unique())
                            if (tmp / "flags.parquet").exists() else None),
                 "places": read_meta(places_path).get("recipe_version") if places is not None else None,
+                "fact_tags_model": read_meta(gold / "fact_tags.parquet").get("model_version"),
+                "fact_tags_sha256": (sha256(gold / "fact_tags.parquet") if (gold / "fact_tags.parquet").exists()
+                                     else None),
+                "outside_lists": (json.loads((tmp / "outside_meta.json").read_text()).get("version")
+                                  if (tmp / "outside_meta.json").exists() else None),
                 "probability_model": (sorted(pd.read_parquet(tmp / "service_probability.parquet")["model_version"]
                                              .astype(str).unique())
                                       if (tmp / "service_probability.parquet").exists() else None),
@@ -842,27 +1033,133 @@ def main(argv: Optional[list[str]] = None) -> int:
     return 0
 
 
+#: What the UI server needs from a final bundle (D063 final assembly): file -> what it is for.
+REQUIRED_FILES = {
+    "manifest.json": "versions and defaults",
+    "facilities.parquet": "facility index", "grades.parquet": "recipe v0.3 grades",
+    "flags.parquet": "WP11 trust checks", "duplicates.parquet": "WP11 duplicate pairs",
+    "places.parquet": "location resolver gazetteer", "post_offices.parquet": "village points for the simulator",
+    "terrain_multiplier.csv": "drive-time state factors", "record_info.parquet": "'Before you go, ask' and call_info",
+    "laqshya_links.parquet": "LaQshya card lines", "outside_card_facts.parquet": "outside-list card facts",
+    "outside_lane.parquet": "outside-list lane", "outside_meta.json": "outside-list sources and terms",
+    "keyword_index/docs.parquet": "keyword search", "keyword_index/meta.json": "keyword search",
+}
+#: Versions the final bundle must carry (D052 recipe v0.3, D061 wp11_v3 and places-v3).
+REQUIRED_VERSIONS = {"recipes": ["v0.3"], "checks": ["wp11_v3"], "places": "places-v3"}
+
+
+def phone_scan(root: Path, book_numbers: set, skip_columns: dict) -> dict:
+    """{relative path: n numbers found in clear} for every file under root. Parquet files are read and
+    every cell rendered to text (except skip_columns[file name]); other files are read as bytes. A number
+    counts in its 10-digit national form, with spaces, dashes, dots and brackets between digits ignored."""
+    import re
+    import pyarrow.parquet as pq
+
+    nat = {n[-10:] for n in book_numbers}
+    rx = re.compile(r"\d[\d \-.()]{8,}\d")
+
+    def hits(text: str) -> set:
+        found = set()
+        for m in rx.findall(text):
+            d = re.sub(r"\D", "", m)
+            found |= {d[i:i + 10] for i in range(len(d) - 9)} & nat
+        return found
+
+    out = {}
+    for p in sorted(root.rglob("*")):
+        if not p.is_file() or "__pycache__" in p.parts:
+            continue
+        found: set = set()
+        if p.suffix == ".parquet":
+            t = pq.read_table(p)
+            for c in t.column_names:
+                if c in skip_columns.get(p.name, ()):
+                    continue
+                for v in t[c].to_pylist():
+                    if v is None or isinstance(v, (bool, int, float)):
+                        continue
+                    found |= hits(v if isinstance(v, str) else json.dumps(v, default=str))
+        elif p.suffix == ".npz":
+            continue  # numeric sparse matrices
+        else:
+            b = p.read_bytes()
+            found = hits(b.decode("utf-8", errors="replace"))
+        if found:
+            out[str(p.relative_to(root))] = len(found)
+    return out
+
+
 def check(root: Path) -> int:
-    """Deploy-time guard: dbapp/vf equals src/vf, and the bundle was built from the current gold grades."""
+    """Deploy-time guard: dbapp/vf equals src/vf; the bundle is complete, built from the current gold
+    grades, flags and fact tags, carries the required versions, has no file over the 10 MB app limit,
+    and has no call number in clear anywhere under dbapp/ except the record_info phone columns."""
     problems = vf_drift(root / "src" / "vf", root / "dbapp" / "vf")
     for p in problems:
         print(f"  vf: {p}")
-    mpath = root / "dbapp" / "bundle" / "manifest.json"
+    bdir = root / "dbapp" / "bundle"
+    mpath = bdir / "manifest.json"
     if not mpath.exists():
         problems.append("no bundle")
         print("  bundle: dbapp/bundle/manifest.json missing")
     else:
         m = json.loads(mpath.read_text())
+        gold = paths.gold_dir()
         built = m["files"].get("grades.parquet", {}).get("input_created_at_utc")
-        now_ = read_meta(paths.gold_dir() / "capability_grades.parquet").get("created_at_utc")
+        now_ = read_meta(grades_path(gold)[0]).get("created_at_utc")
         if now_ and built != now_:
             problems.append("bundle grades stale")
             print(f"  bundle: grades built from gold of {built}, gold is now {now_}")
-        if not (root / "dbapp" / "bundle" / "grades.parquet").exists():
-            problems.append("bundle files missing")
-            print("  bundle: manifest present but grades.parquet missing (rebuild)")
-    print("check: " + ("ok, dbapp/ matches src/vf and gold" if not problems
-                       else f"{len(problems)} problem(s): rerun scripts/wp12_bundle.py"))
+        fb = m["files"].get("flags.parquet", {}).get("input_created_at_utc")
+        fn = read_meta(gold / "facility_flags.parquet").get("created_at_utc")
+        if fn and fb != fn:
+            problems.append("bundle flags stale")
+            print(f"  bundle: flags built from gold of {fb}, gold is now {fn}")
+        tags_now = sha256(gold / "fact_tags.parquet") if (gold / "fact_tags.parquet").exists() else None
+        if tags_now and m.get("versions", {}).get("fact_tags_sha256") != tags_now:
+            problems.append("bundle fact tags stale")
+            print("  bundle: built from other fact tags than gold/fact_tags.parquet (record info may be stale)")
+        absent = [f for f in REQUIRED_FILES if not (bdir / f).exists()]
+        for f in absent:
+            print(f"  bundle: {f} missing ({REQUIRED_FILES[f]})")
+        if absent:
+            problems.append(f"{len(absent)} required bundle file(s) missing")
+        v = m.get("versions", {})
+        for k, want in REQUIRED_VERSIONS.items():
+            if v.get(k) != want:
+                problems.append(f"version {k}")
+                print(f"  bundle: {k} is {v.get(k)}, want {want}")
+        sizes = {str(p.relative_to(root / "dbapp")): p.stat().st_size
+                 for p in (root / "dbapp").rglob("*") if p.is_file() and "__pycache__" not in p.parts}
+        over = {k: s for k, s in sizes.items() if s > APP_FILE_LIMIT_BYTES}
+        for k, s_ in over.items():
+            print(f"  size: {k} is {mb(s_)}, over the 10 MB Databricks Apps limit")
+        if over:
+            problems.append(f"{len(over)} file(s) over 10 MB")
+        largest = max(sizes.items(), key=lambda kv: kv[1]) if sizes else None
+        ri = bdir / "record_info.parquet"
+        numbers: set = set()
+        if ri.exists():
+            q, _ = _try_import("vf.questions")
+            cols = set(getattr(q, "PHONE_COLUMNS", ())) if q is not None else set()
+            import pyarrow.parquet as pq
+            if cols and cols <= set(pq.ParquetFile(ri).schema_arrow.names):
+                numbers = set(q.load_phone_book(ri).phone.values())
+            else:
+                problems.append("record_info has no phone columns")
+                print("  bundle: record_info.parquet has no call numbers, so the deployed Call button has none")
+        if numbers:
+            found = phone_scan(root / "dbapp", numbers, {"record_info.parquet": ("call_phone",)})
+            for k, n in found.items():
+                print(f"  phones: {n} call number(s) in clear in dbapp/{k}")
+            if found:
+                problems.append(f"call numbers in clear in {len(found)} file(s)")
+            print(f"  phones: scanned every file under dbapp/ for {len(numbers):,} call numbers; "
+                  f"{'none in clear outside record_info.call_phone' if not found else 'FOUND, see above'}")
+        print(f"  bundle: {len(REQUIRED_FILES) - len(absent)} of {len(REQUIRED_FILES)} required files; versions "
+              f"{ {k: v.get(k) for k in REQUIRED_VERSIONS} }; largest file "
+              f"{largest[0] + ' ' + mb(largest[1]) if largest else 'none'}")
+    print("check: " + ("ok, dbapp/ matches src/vf and gold, bundle complete, no file over 10 MB, no phones in clear"
+                       if not problems else f"{len(problems)} problem(s): rerun scripts/wp12_bundle.py"))
     return 1 if problems else 0
 
 

@@ -428,6 +428,30 @@ def test_save_and_load_record_info(tmp_path):
     assert FAKE_PHONE not in df.to_json()
     back = Q.load_record_info(tmp_path)
     assert back["a"] == infos["a"]
+    # without phone columns, a bundle folder gives no phone book of its own (falls back to the raw file)
+    with pytest.raises(KeyError):
+        Q.phone_book_from_frame(df)
+
+
+def test_record_info_with_phone_columns_round_trips_and_is_served_masked(tmp_path, monkeypatch):
+    monkeypatch.delenv(Q.DEMO_ENV, raising=False)
+    ft, facts = _tables()
+    raw = pd.DataFrame({"unique_id": ["a", "b", "z"], "officialPhone": [FAKE_PHONE, FAKE_PHONE, "12"],
+                        "phone_numbers": ["null", "null", "null"]})
+    book = Q.build_phone_book(raw)
+    infos = Q.build_record_info(ft, facts, book, facility_ids=["a", "b", "z"])
+    p = Q.save_record_info(infos, tmp_path / "record_info.parquet", phone_book=book)
+    meta = json.loads((tmp_path / "record_info.parquet.meta.json").read_text())
+    assert meta["contains_phone_numbers"] is True and meta["phone_numbers"] == 2
+    assert set(Q.PHONE_COLUMNS) <= set(pd.read_parquet(p).columns)
+    back = Q.load_phone_book(tmp_path)
+    assert back.phone == book.phone and back.shared_with == book.shared_with
+    assert back.source == book.source and back.unusable == book.unusable == {"z"}
+    assert Q.load_record_info(tmp_path)["a"] == infos["a"]  # the extra columns do not disturb record info
+    masked = Q.call_info("a", back)
+    assert masked["masked"] and FAKE_PHONE not in json.dumps(masked) and masked["shared_with"] == 1
+    assert Q.call_info("a", back, reveal=True)["tel"] == "tel:" + FAKE_PHONE
+    assert not Q.call_info("z", back)["has_phone"]
 
 
 # ---------------------------------------------------------------------------
@@ -442,14 +466,22 @@ def _gold_ready() -> bool:
 
 @pytest.mark.skipif(not _gold_ready(), reason="gold tables absent")
 def test_real_grades_blood_gap_and_counts():
-    grades = pd.read_parquet(paths.gold_dir() / "capability_grades.parquet",
+    # the grades the ranker's index loads: recipe v0.3 when written (D048), else v0.2
+    v03 = paths.gold_dir() / "capability_grades_v03.parquet"
+    grades = pd.read_parquet(v03 if v03.exists() else paths.gold_dir() / "capability_grades.parquet",
                              columns=["facility_id", "service_line", "grade", "tags_present"])
     infos = Q.load_record_info(with_phones=False)
     m = Q.measure(infos=infos, grades=grades)
     b = m["blood"]
     assert b["emoc_grade2plus"] > 0 and 0 < b["no_blood_fact"] <= b["emoc_grade2plus"]
-    # every record with no blood fact gets the blood question, and no other does
-    assert b["asked_blood_question"] == b["no_blood_fact"]
+    if v03.exists():
+        # v0.3 counts only maternal blood (D052): every supported-only record is asked, including the few
+        # whose only blood fact is fetal, newborn or exchange transfusion; no corroborated record is
+        n_grade2 = int(((grades["service_line"] == "emoc") & (grades["grade"] == 2)).sum())
+        assert b["asked_blood_question"] == n_grade2 >= b["no_blood_fact"]
+    else:
+        # every record with no blood fact gets the blood question, and no other does
+        assert b["asked_blood_question"] == b["no_blood_fact"]
     for line, d in m["lines"].items():
         assert set(d["question_counts"]) <= {"2", "3", "4"}, line
         assert d["sources"]["service"] == d["records"], line

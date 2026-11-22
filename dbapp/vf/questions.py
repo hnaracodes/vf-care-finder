@@ -18,9 +18,12 @@ Two entry points for the app:
   for a Call button, masked unless ``reveal`` is set and demo mode is off.
 
 Phone numbers never enter ``RecordInfo`` (it holds only a sharing count, and
-any run of 8 or more digits in a stored quote is replaced by ``[phone number]``),
-so a record-info table can sit in the app bundle without carrying a single
-number. Every quote in a ``why`` is masked the same way. Call numbers are kept
+any run of 8 or more digits in a stored quote is replaced by ``[phone number]``).
+Every quote in a ``why`` is masked the same way. The one exception is opt-in:
+``save_record_info(..., phone_book=book)`` adds the call numbers as columns
+(``PHONE_COLUMNS``) so a deployed app, which has no raw file, can still offer
+``call_info``; ``load_phone_book(bundle_dir)`` reads them back, and
+``call_info`` masks them unless ``reveal`` is set and demo mode is off. Call numbers are kept
 only when they are Indian (+91 with 10 national digits, or a 1800/1860 toll-free
 number). ``python -m vf.questions`` prints the measurement on the real grades.
 """
@@ -696,11 +699,63 @@ def build_phone_book(raw, duplicates=None) -> PhoneBook:
 
 _DEFAULT_BOOK: Optional[PhoneBook] = None
 
+#: Columns ``save_record_info(..., phone_book=)`` adds: the call number (``+91...``, in clear, only
+#: ever served through ``call_info``, which masks it), its field, records the duplicate check pairs
+#: with this one on the same number, and whether the record lists only unusable numbers.
+PHONE_COLUMNS = ("call_phone", "call_phone_source", "phone_duplicate_shared", "phone_unusable")
 
-def load_phone_book() -> PhoneBook:
-    """The phone book from the raw facilities file (cached), with the duplicate
-    pairs from ``gold/facility_duplicates.parquet`` when it exists. Raw data
-    stays local: never write numbers into the repo or a published file."""
+
+def phone_columns(infos: Mapping[str, "RecordInfo"], book: PhoneBook) -> dict:
+    """The ``PHONE_COLUMNS`` values for ``infos``' ids, in ``infos`` order."""
+    ids = list(infos)
+    return {"call_phone": [book.phone.get(f) for f in ids],
+            "call_phone_source": [book.source.get(f) for f in ids],
+            "phone_duplicate_shared": [int(book.duplicate_shared.get(f, 0)) for f in ids],
+            "phone_unusable": [f in book.unusable for f in ids]}
+
+
+def phone_book_from_frame(df) -> PhoneBook:
+    """A ``PhoneBook`` from a record-info frame written with ``phone_book=`` (``PHONE_COLUMNS`` plus
+    ``phone_shared_with``)."""
+    missing = [c for c in PHONE_COLUMNS if c not in df.columns]
+    if missing:
+        raise KeyError(f"record info has no phone columns {missing} (written without phone_book=)")
+    book = PhoneBook()
+
+    def col(name):  # nullable strings as None, never "<NA>"
+        v = df[name].astype(object)
+        return v.where(v.notna(), None)
+
+    for fid, num, src, shared, dup, bad in zip(df["facility_id"], col("call_phone"), col("call_phone_source"),
+                                               df["phone_shared_with"], df["phone_duplicate_shared"],
+                                               df["phone_unusable"]):
+        fid = str(fid)
+        num = _str_or_none(num)
+        if num is not None:
+            book.phone[fid] = num
+            book.source[fid] = _str_or_none(src)
+            book.shared_with[fid] = int(shared or 0)
+            book.duplicate_shared[fid] = int(dup or 0)
+        elif bool(bad):
+            book.unusable.add(fid)
+    return book
+
+
+def load_phone_book(source=None) -> PhoneBook:
+    """The phone book. ``source``: a bundle folder (or its ``record_info.parquet``) written with
+    phone columns; read from there when it has them. Otherwise, or with no ``source``, the raw
+    facilities file (cached), with the duplicate pairs from ``gold/facility_duplicates.parquet``
+    when it exists. Raw data stays local: numbers go only into the app bundle's record-info table,
+    never into the repo or a published file."""
+    if source is not None:
+        import pandas as pd
+        sp = Path(source)
+        sp = sp / "record_info.parquet" if sp.is_dir() else sp
+        if sp.exists():
+            import pyarrow.parquet as pq
+            if set(PHONE_COLUMNS) <= set(pq.ParquetFile(sp).schema_arrow.names):
+                return phone_book_from_frame(pd.read_parquet(sp, columns=["facility_id", "phone_shared_with",
+                                                                          *PHONE_COLUMNS]))
     global _DEFAULT_BOOK
     if _DEFAULT_BOOK is None:
         import pandas as pd
@@ -830,8 +885,11 @@ def record_info_from_frame(df) -> dict[str, RecordInfo]:
     return {str(r["facility_id"]): _as_record(r) for r in df.to_dict("records")}
 
 
-def save_record_info(infos: Mapping[str, RecordInfo], path, meta: Optional[Mapping] = None) -> Path:
-    """Atomic parquet write plus a ``.meta.json`` sidecar. Holds no phone numbers."""
+def save_record_info(infos: Mapping[str, RecordInfo], path, meta: Optional[Mapping] = None, *,
+                     phone_book: Optional[PhoneBook] = None) -> Path:
+    """Atomic parquet write plus a ``.meta.json`` sidecar. Holds no phone numbers unless
+    ``phone_book`` is given: then the call numbers are added as ``PHONE_COLUMNS`` (for an app
+    bundle, read back with ``load_phone_book(bundle)`` and served only masked by ``call_info``)."""
     from datetime import datetime, timezone
 
     p = Path(path)
@@ -840,6 +898,11 @@ def save_record_info(infos: Mapping[str, RecordInfo], path, meta: Optional[Mappi
     for col in ("h24_quote", "scheme_quote"):
         if df[col].map(lambda v: isinstance(v, str) and mask_numbers(v) != v).any():
             raise ValueError(f"{col} still holds a digit run that looks like a phone number")
+    if phone_book is not None:
+        for col, vals in phone_columns(infos, phone_book).items():
+            df[col] = vals
+        df["call_phone"] = df["call_phone"].astype("string")
+        df["call_phone_source"] = df["call_phone_source"].astype("string")
     tmp = p.with_name(f".{p.name}.{os.getpid()}.tmp")
     try:
         df.to_parquet(tmp, index=False)
@@ -849,7 +912,11 @@ def save_record_info(infos: Mapping[str, RecordInfo], path, meta: Optional[Mappi
             tmp.unlink()
     side = {"output": p.name, "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "module": "vf.questions", "questions_version": QUESTIONS_VERSION, "rows": len(df),
-            "columns": list(df.columns), "contains_phone_numbers": False, **dict(meta or {})}
+            "columns": list(df.columns), "contains_phone_numbers": phone_book is not None,
+            **({"phone_columns": list(PHONE_COLUMNS), "phone_numbers": int(df["call_phone"].notna().sum()),
+                "phone_note": "call numbers for vf.questions.call_info, which masks them unless reveal is set "
+                              "and demo mode is off"} if phone_book is not None else {}),
+            **dict(meta or {})}
     mp = p.with_name(p.name + ".meta.json")
     tmpm = mp.with_name(f".{mp.name}.{os.getpid()}.tmp")
     try:

@@ -50,7 +50,7 @@ Update your row when you start, when you finish, and when you are blocked. One l
 | 2 | Geography and location resolver | doing | | | Part A done (post offices, PIN crosswalk). Part B resolver todo. NFHS dropped |
 | 2b | External data | done, optional | | rescope | OSM, LaQshya. Only for the WP10 B cross-check |
 | 3 | Recipes, gold set, teacher labels | doing | | | v0.1 done: 13 tags, regex macro F1 0.90 on 429 gold facts. v0.2 (12 lines) todo. Part 3 unblocked: key valid (D037) |
-| 4 | Fact tagger (Model A) | todo | | | Unblocked (D037); starts once WP3 Part 3 has teacher labels |
+| 4 | Fact tagger (Model A) | done | | rescope | WP4 student 1b ships h24, icu, ventilator; WP4b 2b_r2 ships ob_delivery, promoted in the final assembly (D059, D064) |
 | 5 | Ranking engine | todo | | | Old access tables done and retired; `haversine_km` carries over |
 | 6 | Outcome model and quadrants | dropped | | | D023. Rule quadrants were done; kept as history |
 | 7 | Simulator | dropped | | | D023 |
@@ -58,7 +58,7 @@ Update your row when you start, when you finish, and when you are blocked. One l
 | 9 | Demo, video, submission | todo | | | |
 | 10 | Stretch | todo | | | |
 | 11 | Trust checks | todo | | | New |
-| 12 | Databricks port and bundle | todo | | | CLI installed. Needs Hruday: workspace, Marketplace catalog name, `databricks auth login` |
+| 12 | Databricks port and bundle | doing | final assembly | rescope | Final bundle built and `--check` ok (D064): v0.3 grades, wp11_v3, places-v3, outside lists, masked phones; redeploy is the next stage |
 | 13 | Outside data and calibration model | doing | orchestrator (workflow) | rescope | Phase R research running; full track approved (D040) |
 
 Status values: `todo`, `doing`, `blocked`, `done`, `dropped`.

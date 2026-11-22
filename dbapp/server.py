@@ -207,8 +207,10 @@ class State:
         src = self.bundle if self.mode == "bundle" else None
         if Q is not None:
             self.infos = attempt("record_info", lambda: Q.load_record_info(src))
-            # Phone numbers come from the raw file only (never shipped in the bundle).
-            self.book = attempt("phone_book", Q.load_phone_book)
+            # Phone numbers: the bundle's record_info.parquet phone columns when it has them (the
+            # deployed case, no raw file there), else the raw file. call_info masks them; tel only on reveal.
+            self.book = attempt("phone_book", lambda: Q.load_phone_book(src) if src is not None
+                                else Q.load_phone_book())
         if PL is not None:
             self.public = attempt("public_list", lambda: PL.load(src))
             if hasattr(PL, "load_outside"):

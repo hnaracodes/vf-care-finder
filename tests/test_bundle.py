@@ -205,9 +205,17 @@ def test_bundle_from_synthetic_inputs(tmp_path, flags_from):
     assert not list(out.parent.glob(".bundle.*"))  # no temp or old folders left behind
     assert m["row_counts"]["facilities"] == 6 and m["row_counts"]["grades"] == 12
     assert m["grade_counts"]["emoc"] == {"0": 3, "1": 1, "2": 1, "3": 1}
+    # v1-final parts (D048): the terrain table comes from the code root; record info and LaQshya links
+    # need gold fact tags and WP13's links, which the synthetic data does not have
+    v1_parts = {"record_info.parquet", "laqshya_links.parquet"} | (
+        set() if (root / "reference" / "terrain_multiplier.csv").exists() else {"terrain_multiplier.csv"})
     assert set(m["missing"]) == {"flags.parquet", "duplicates.parquet", "places.parquet",
-                                 "service_probability.parquet", "keyword_index/"}
+                                 "service_probability.parquet", "keyword_index/"} | v1_parts
     assert m["versions"]["silver_facilities"] == "wp1-test"
+    # outside lists are always written (empty here: the synthetic silver has no outside lists)
+    for f in ("outside_card_facts.parquet", "outside_lane.parquet", "outside_meta.json"):
+        assert (out / f).exists(), f
+    assert m["row_counts"]["outside_card_facts"] == 0 and m["row_counts"]["outside_lane"] == 0
     assert json.loads((out / "manifest.json").read_text())["row_counts"] == m["row_counts"]
     assert (out / ".gitignore").exists() and not m["commit_decision"]["committed"]
 
@@ -445,3 +453,32 @@ def test_apply_student_reproduces_local_gold(tmp_path):
         assert list(a.columns) == list(b.columns)
         for c in a.columns:
             assert a[c].astype(str).equals(b[c].astype(str)), c
+
+
+def test_mask_frame_masks_only_quote_texts():
+    wp12 = _load_bundle_script()
+    g = pd.DataFrame({
+        "facility_id": ["12345678-1234-1234-1234-123456789012", "b"],
+        "evidence": [["Call 0141 2345678 for appointments", "Has ICU"], ["Has ICU"]],
+        "evidence_items": [[{"text": "Call 0141 2345678", "fact_id": "99999999", "tag": "icu"}], []],
+        "level_note": [None, "Open 24x7"],
+    })
+    out, n = wp12.mask_frame(g, wp12.GRADE_TEXT_COLUMNS)
+    assert n == 2
+    assert out.loc[0, "facility_id"] == g.loc[0, "facility_id"]  # ids are never touched
+    assert out.loc[0, "evidence"][0] == "Call [phone number] for appointments" and out.loc[0, "evidence"][1] == "Has ICU"
+    assert out.loc[0, "evidence_items"][0]["text"] == "Call [phone number]"
+    assert out.loc[0, "evidence_items"][0]["fact_id"] == "99999999"  # only text and quote keys
+    assert list(out.loc[1, "evidence"]) == ["Has ICU"]
+
+
+def test_phone_scan_finds_numbers_outside_the_allowed_column(tmp_path):
+    wp12 = _load_bundle_script()
+    nums = {"+910000000042"}
+    pd.DataFrame({"facility_id": ["a"], "call_phone": ["+910000000042"]}).to_parquet(tmp_path / "record_info.parquet")
+    (tmp_path / "manifest.json").write_text('{"note": "no numbers"}')
+    assert wp12.phone_scan(tmp_path, nums, {"record_info.parquet": ("call_phone",)}) == {}
+    (tmp_path / "x.json").write_text('{"q": "ring 000-000-0042 now"}')
+    pd.DataFrame({"quote": ["Phone (00000) 00042"]}).to_parquet(tmp_path / "flags.parquet")
+    found = wp12.phone_scan(tmp_path, nums, {"record_info.parquet": ("call_phone",)})
+    assert found == {"x.json": 1, "flags.parquet": 1}

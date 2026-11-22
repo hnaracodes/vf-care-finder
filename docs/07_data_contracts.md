@@ -192,11 +192,17 @@ The gazetteer for the location resolver. One row per place.
 | --- | --- |
 | `manifest.json` | row counts, recipe and check versions, git commit, created time, default weights and radii |
 | `facilities.parquet` | `facility_id`, `name`, `facility_type`, `operator_type`, `lat`, `lon` (null when unusable), `location_precision_km`, `location_note`, `city_raw`, `state_raw`, `pin`, `official_website`, `source_domains`, `n_source_domains`, `source_confidence` |
-| `grades.parquet` | `capability_grades` columns for all 12 lines |
-| `flags.parquet`, `duplicates.parquet` | as above |
-| `places.parquet` | as above |
+| `grades.parquet` | `gold/capability_grades_v03.parquet` columns (recipe v0.3) for all 12 lines; quote digit runs of 8 or more masked as `[phone number]` |
+| `flags.parquet`, `duplicates.parquet` | as above (`check_version` wp11_v3); flag quote digit runs masked |
+| `places.parquet` | as above (places-v3) |
 | `post_offices.parquet` | `lat`, `lon`, `pin` for non-suspect geocoded offices, one per placeholder point; for the map context and the trip view |
-| `keyword_index/` | fitted TF-IDF vectoriser and matrix over distinct fact texts plus specialty names, and the fact id map, for the `search` fallback |
+| `keyword_index/` | fitted TF-IDF vectoriser and matrix over distinct fact texts plus specialty names, and the fact id map, for the `search` fallback; display texts masked like the quotes |
+| `terrain_multiplier.csv` | `reference/terrain_multiplier.csv`, the drive-time state factors (`vf.travel`) |
+| `record_info.parquet` | `vf.questions` record info (`facility_id`, `tags`, `h24_cotags`, `h24_quote`, `scheme_quote`, `has_phone`, `phone_shared_with`, `h24_quote_cotags`) plus `vf.questions.PHONE_COLUMNS` (`call_phone`, `call_phone_source`, `phone_duplicate_shared`, `phone_unusable`) from the raw facilities through `vf.io`. The only shipped copy of any phone number; the server reads it with `load_phone_book(bundle)` and serves it only through `call_info`, masked unless `reveal=1` and demo mode off (D064) |
+| `laqshya_links.parquet` | `silver/laqshya_links.parquet` (WP13), the hand-checked LaQshya links for card lines |
+| `outside_card_facts.parquet`, `outside_lane.parquet`, `outside_meta.json` | `vf.public_list.write_bundle` with the default D057 terms gates: card facts and the "also on lists nearby" lane (D055, D060) |
+
+`scripts/wp12_bundle.py --check` fails unless every file above exists, no file under `dbapp/` is over 10 MB, the versions are recipe v0.3, wp11_v3 and places-v3, the bundle was built from the current gold grades, flags and fact tags, and no call number appears in clear anywhere under `dbapp/` outside `record_info.parquet` `call_phone`.
 
 ### `gold/capability_grades_v03.parquet` (WP3, recipe v0.3, D048)
 
